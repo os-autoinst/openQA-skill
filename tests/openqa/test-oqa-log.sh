@@ -301,6 +301,32 @@ contains "--tail: window grows once when too small" "requests: 3" "$actual"
 check "--tail: all requested lines after growing" 200 "$(grep -c 'wide line' <<<"$actual")"
 actual=$(python3 "$src" --fixture-dir "$tmp" 77 --errors --max-bytes 1000 2>&1)
 contains "--max-bytes truncation is reported" "warning: only the first 1000 bytes were read" "$actual"
+cut=$(
+	python3 - "$tmp" <<'EOF'
+import sys
+head = "[2030-01-01T10:00:01.000000Z] [debug] [pid:1] before the clone\n+ git clone https://bob:"
+with open(sys.argv[1] + "/tests_83_file_autoinst-log.txt", "w") as out:
+    out.write(head + "Qz9dummypass@git.example.org/r.git\nafter the clone\n")
+# no space anywhere: cut 4 bytes into the password at 2516
+with open(sys.argv[1] + "/tests_84_file_autoinst-log.txt", "w") as out:
+    out.write("A" * 2500 + "https://bob:Qz9dummypass@git.example.org/r.git")
+link = '<a href="/tests/85/file/https://bob:'
+page = '<a href="/tests/85/file/autoinst-log.txt">a</a>\n'
+page += "x" * ((1 << 20) - len(page) - len(link) - 4) + link + 'Qz9dummypass@git.example.org/r.txt">b</a>'
+with open(sys.argv[1] + "/tests_85_downloads_ajax", "w") as out:
+    out.write(page)
+print(len(head) + 4)  # 4 bytes into the password
+EOF
+)
+actual=$(python3 "$src" --fixture-dir "$tmp" 83 --grep clone --max-bytes "$cut" 2>&1)
+check "--max-bytes cut inside a URL password: the cut word goes, the rest stays" "0 1 1 1" \
+	"$(grep -c Qz9 <<<"$actual") $(grep -c '^1: 10:00:01 before the clone$' <<<"$actual") $(grep -c '^2: + git clone $' <<<"$actual") $(grep -c "^warning: only the first $cut bytes were read" <<<"$actual")"
+actual=$(python3 "$src" --fixture-dir "$tmp" 84 --grep A --max-line-chars 0 --max-bytes 2516 2>&1)
+check "--max-bytes cut inside a line without a space: at most the margin goes, not the line" "0 1" \
+	"$(grep -c Qz9 <<<"$actual") $(grep -c '^1: A\{468\}$' <<<"$actual")"
+actual=$(python3 "$src" --fixture-dir "$tmp" 85 --list 2>&1)
+check "--list: a name the page cap cut inside a URL password is left out, the rest stays" "0 1" \
+	"$(grep -c Qz9 <<<"$actual") $(grep -c '^logs: autoinst-log.txt$' <<<"$actual")"
 actual=$(python3 "$src" --fixture-dir "$tmp" 77 --file blob.txt --tail 3 2>&1)
 check "binary content is refused" "2 error: the file looks binary, refusing to print it" "$? $actual"
 

@@ -74,7 +74,12 @@ def check_clean(name, value):
 
 
 def shown(value):
-    # Userinfo can hold a password no redaction rule recognises.
+    # Userinfo can hold a password no redaction rule recognises, a secret setting any value.
+    if any(
+        _secrets.is_secret_key(n)
+        for n in re.findall(r"\w+", value.partition("=")[0], re.ASCII)
+    ):
+        return "a credential setting (not echoed)"
     return "a value holding '@' (not echoed)" if "@" in value else ascii(value)
 
 
@@ -158,7 +163,7 @@ def check_schedule(value, settings):
         basename = filename.rsplit(".", 1)[0]
         if seen.setdefault(basename, directory) != directory:
             raise UsageError(
-                f"--schedule: basename '{basename}' used from two directories; os-autoinst dies on that"
+                f"--schedule: basename {shown(basename)} used from two directories; os-autoinst dies on that"
             )
         if not directory:
             bare.append(entry)

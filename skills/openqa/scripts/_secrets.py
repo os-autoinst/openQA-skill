@@ -197,14 +197,15 @@ RULES = (
         "url-userinfo",
         re.compile(
             r"([a-zA-Z][a-zA-Z0-9+.-]{0,30}://[^/\s:@\[]{0,64}:)"
-            r"(?!\d{1,5}(?:[/?#\s]|$))(?:(?!://)[^\s@\"]|@(?=[^\s/@\"]*@)){1,512}@"
+            r"(?!\d{1,5}(?:[/?#\s]|$))(?:(?!://)[^\s@'\"]|@(?=[^\s/@'\"]*@)){1,512}@"
         ),
         r"\1" + MARK.format("url-userinfo") + "@",
     ),
     (
         "auth-header",
         re.compile(
-            r"(?i)((?:Authorization|Proxy-Authorization)['\"]?\s*:\s*['\"]?(?:[A-Za-z][\w-]*\s+)?)[^\s'\"]{8,}"
+            r"(?i)((?:Authorization|Proxy-Authorization)['\"]?\s*:\s*['\"]?"
+            r"(?:[A-Za-z][\w-]*\s+(?=[^\s'\"]{8,})|(?=[^\s'\"]*[^A-Za-z\s'\"])))[^\s'\"]{8,}"
         ),
         r"\1" + MARK.format("auth-header"),
     ),
@@ -218,7 +219,7 @@ RULES = (
     (
         "password-flag",
         re.compile(
-            r"(?i)((?:ipmitool\b[^\n]{0,200}?\s-P|(?:mysql|sshpass|smbclient)\b[^\n]{0,200}?\s-p|smbclient\b[^\n]{0,200}?\s-U\s*[^\s%]{1,64}%|(?:helm|podman|docker|kubectl|skopeo)\b[^\n]{0,80}?\blogin\b[^\n]{0,200}?\s-p|[^\n]{0,200}?\s--password)[ =]?)\S{4,}"
+            r"(?i)((?:ipmitool\b[^\n]{0,200}?\s(?-i:-P)|(?:mysql|sshpass)\b[^\n]{0,200}?\s(?-i:-p)|smbclient\b[^\n]{0,200}?\s(?:-U\s*|--user[= ])[^\s%]{1,64}%|(?:helm|podman|docker|kubectl|skopeo)\b[^\n]{0,80}?\blogin\b[^\n]{0,200}?\s-p|\s--password(?=[ =]))[ =]?)\S{4,}"
         ),
         r"\1" + MARK.format("password-flag"),
     ),
@@ -250,7 +251,7 @@ RULES = (
         re.compile(
             r"(?i)([?&](?:key|api[-_]?key|sig|signature|x-amz-signature|x-amz-credential"
             r"|x-amz-security-token|auth)=)" + _SLOT + r"(?!=)"
-            r"(?!(?-i:[A-Z0-9]*[_*][A-Z0-9_*]*(?:[&#\s'\"]|$)))[^&\s#'\"]{6,}"
+            r"(?!(?-i:(?:[A-Z0-9]*[_*][A-Z0-9_*]*|[A-Z]+)(?:[&#\s'\"]|$)))[^&\s#'\"]{6,}"
         ),
         r"\1" + MARK.format("url-query"),
     ),
@@ -269,11 +270,11 @@ RULES = (
 # `sanitize()` sees "hunter2", never "PASSWORD=hunter2", so this is the only rule that
 # can know an SCC_REGCODE value is secret.
 # JSON, Python and Perl forms too, where a string value is quoted and anything else is
-# code. The short names count in upper case only: "pass=12|skip=0" and "TPASS:" are
-# test results.
+# code. The short names count in upper case only, and PASS before a colon only after
+# "_": "pass=12|skip=0" and "TPASS:" are test results, "ROOT_PASS:" is YAML.
 _KEYED = re.compile(
     r"(?i)(?<![A-Z0-9_])([A-Z0-9_]{0,40}(?:PASSWORD|PASSWD|SECRET|TOKEN|APIKEY|API_KEY|ACCESS_KEY|PRIVATE_KEY|CREDENTIAL|REGCODE"
-    r"|(?-i:PWD|(?<![A-Z])PW(?![A-Z])|PASS(?![A-Z0-9_]|\s*:)))[A-Z0-9_]{0,40})"
+    r"|(?-i:PWD|(?<![A-Z])PW(?![A-Z])|(?<=_)PASS(?![A-Z0-9_])|PASS(?![A-Z0-9_]|\s*:)))[A-Z0-9_]{0,40})"
     r"((?:['\"]\s*(?:=>|[:=])|\s*=>)\s*(?=['\"])|\s+[:=]\s*|:\s*|=)(['\"]?)([^\s'\"]+)"
 )
 
@@ -330,10 +331,12 @@ def redact(text):
                 in_pem = False
             out.append("")  # keep the line count: callers number lines
             continue
-        if _PEM_BEGIN.search(line):
+        opened = [begin.end() for begin in _PEM_BEGIN.finditer(line)]
+        if opened:
             # A key body is many lines of base64 that no line rule would match; swallow
             # to the END marker rather than emitting it one harmless-looking line at a time.
-            in_pem = True
+            # A key JSON-escaped onto one line ends on it.
+            in_pem = not _PEM_END.search(line, opened[-1])
             found["private-key"] += 1
             out.append(MARK.format("private-key"))
             continue

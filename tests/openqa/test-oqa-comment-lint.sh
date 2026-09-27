@@ -297,6 +297,11 @@ ln -s ../../nowhere/at/all "$work/broken.txt"
 actual=$(timeout 10 python3 "$src" "$work/broken.txt" 2>&1)
 check "FILE that is a broken link: refused, path quoted" "2 1" \
 	"$? $(grep -c '^error: "[^"]*broken.txt": No such file' <<<"$actual")"
+# 300 invisible characters inside a URL password: a cut before redaction showed its start.
+padded=$(python3 -c 'print("https://user:" + "\u200b" * 300 + "DummyPassw0rdXYZ@host.example.org/x", end="")')
+actual=$(timeout 10 python3 "$src" "$padded" 2>&1)
+check "a missing FILE holding a padded URL password: redacted, not cut open" "2 0 1" \
+	"$? $(grep -c DummyPa <<<"$actual") $(grep -c 'REDACTED:url-userinfo' <<<"$actual")"
 ln -s loop-b "$work/loop-a"
 ln -s loop-a "$work/loop-b"
 actual=$(timeout 10 python3 "$src" "$work/loop-a" 2>&1)

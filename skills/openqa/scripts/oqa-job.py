@@ -76,7 +76,9 @@ VERBOSE_SETTINGS = (
 )
 MAX_EXTRA_SETTINGS = 30
 DETAILS_MAX_BYTES = 32 * 1024 * 1024
-TEXT_KEPT = 4000  # characters of text_data kept per failing step while parsing
+TEXT_KEPT = 4000  # characters of text_data used per failing step
+TEXT_MARGIN = 2048  # longer than any credential a bounded redaction rule matches
+TEXT_READ = TEXT_KEPT + TEXT_MARGIN  # characters of text_data kept while parsing
 HEAD_LINES = 8
 HEAD_BYTES = 1200
 INLINE = 240  # longest text printed as text="..." instead of a fenced block
@@ -141,6 +143,8 @@ CARP_FRAME = re.compile(r"^\s+\S.* called at \S+ line \d+")
 DIED_COMMAND = re.compile(
     r"failed with code|command '.*?' (?:failed|timed out)|timed out", re.DOTALL
 )
+# Anchored, so one backtracking pass: "\S+\Z" would be quadratic.
+UP_TO_LAST_SPACE = re.compile(r".*\s", re.DOTALL)
 
 
 tok = _oqa.tok
@@ -174,7 +178,7 @@ def reduce_details(obj):
         keys = ("num", "result", "title", "screenshot", "text", "tags", "needles")
         step = {key: obj[key] for key in keys if key in obj}
         if isinstance(obj.get("text_data"), str):
-            step["text_data"] = obj["text_data"][:TEXT_KEPT]
+            step["text_data"] = obj["text_data"][:TEXT_READ]
         return step
     if "area" in obj and "name" in obj:
         areas = obj["area"] if isinstance(obj["area"], list) else []
@@ -407,9 +411,24 @@ def print_dependencies(client, job, verbose):
 
 
 def step_text(step):
-    """text_data, capped here too: a step without "num" is not reduced while parsing."""
+    """text_data, capped here too: a step without "num" is not reduced while parsing.
+
+    A longer text is sanitised past the cap before the cut, as a credential cut in
+    half matches no redaction rule; the cap still counts raw characters. When
+    stripping brings the parser's cut into view, its last word goes, or at most
+    TEXT_MARGIN characters of a text without a space there.
+    """
     text = step.get("text_data")
-    return text[:TEXT_KEPT] if isinstance(text, str) else ""
+    if not isinstance(text, str):
+        return ""
+    if len(text) <= TEXT_KEPT:
+        return text
+    kept = _oqa.sanitize(text[:TEXT_READ], max_line=0, max_bytes=0)
+    if len(text) >= TEXT_READ and len(kept) < TEXT_READ:
+        tail = max(len(kept) - TEXT_MARGIN, 0)
+        whole = UP_TO_LAST_SPACE.match(kept, tail)
+        kept = kept[: whole.end() if whole else tail]
+    return kept[: len(_oqa.sanitize(text[:TEXT_KEPT], max_line=0, max_bytes=0))]
 
 
 def step_link(client, job_id, module, number):
@@ -688,7 +707,7 @@ def print_comments(client, job_id, result, verbose):
     source = f"{client.host.partition('://')[2]}/tests/{job_id}"
     max_lines, max_bytes = COMMENT_CAPS[verbose]
     for comment, item in list(zip(comments, parsed))[-most:]:
-        created = str(comment.get("created"))[:16].replace(" ", "T")
+        created = _oqa.clean(str(comment.get("created")), 20)[:16].replace(" ", "T")
         line = (
             f"comment={tok(comment.get('id'), 20)} by={tok(comment.get('userName'), 40)} "
             f"class={item['author']} created={tok(created, 20)}"

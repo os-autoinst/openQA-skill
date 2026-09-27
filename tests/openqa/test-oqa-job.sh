@@ -263,10 +263,54 @@ step = {"num": 7, "result": "fail", "title": "Failed", "text_data": "x" * 100000
 ok = {"num": 8, "result": "ok", "text_data": "y" * 100000, "screenshot": "a.png", "frametime": [1, 2]}
 needle = {"name": "n", "json": "n.json", "error": 0.5, "area": [{"similarity": 80}, {"similarity": 12}, {"similarity": "bad"}]}
 kept = json.loads(json.dumps([step, ok, needle]), object_hook=mod.reduce_details)
-print(len(kept[0]["text_data"]), sorted(kept[1]), kept[2])
+print(len(kept[0]["text_data"]), len(mod.step_text(kept[0])), sorted(kept[1]), kept[2])
 ' 2>&1)
-check "reduce_details keeps a text head, of ok steps only number, result, title and screenshot, rates needles by worst area" \
-	"4000 ['num', 'result', 'screenshot', 'title'] {'name': 'n', 'worst': 12}" "$actual"
+check "reduce_details keeps a text head with a margin, of ok steps only number, result, title and screenshot, rates needles by worst area" \
+	"6048 4000 ['num', 'result', 'screenshot', 'title'] {'name': 'n', 'worst': 12}" "$actual"
+actual=$(cd "$scripts" && python3 -c '
+import importlib.util
+spec = importlib.util.spec_from_file_location("oqa_job", "oqa-job.py")
+mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+text = mod.step_text({"num": 1, "result": "fail", "text_data": "\x1b[1m" + "A" * 7000})
+print(repr(text[:3]), len(text))
+' 2>&1)
+check "step text without a space, shortened by stripping: capped, not emptied" "'AAA' 3996" "$actual"
+
+# --- a credential across a cut is redacted before the cut -------------------------
+tmp=$(mktemp -d)
+cp "$fixtures"/* "$tmp"
+python3 - "$tmp" <<'PY'
+import json, sys
+zw, url, rest = "​", "https://bob:", "Qz9dummypass@git.example.org/r.git\nsecond line of output"
+line = "+ curl -o /tmp/r " + url
+# stripped padding brings the cut at 4000 characters, 4 into the password, into view
+one = "before the curl\n" + line
+one = zw * (3996 - len(one)) + one + rest
+# a 500-character password from 3600 across that cut, and one across the parser's cut at 6048
+three = zw * 3586 + "x " + url + "Qz9" + "q" * 497 + "@git.example.org/a.git "
+three += zw * (6044 - len(three) - len(url)) + url + rest
+path = f"{sys.argv[1]}/api_v1_jobs_820_details.json"
+data = json.load(open(path))
+data["job"]["testresults"][0]["details"] = [
+    {"num": 1, "result": "fail", "title": "cmd", "text_data": one},
+    {"result": "fail", "title": "cmd", "text_data": "\n" * (3996 - len(line)) + line + rest},
+    {"num": 3, "result": "fail", "title": "cmd", "text_data": three},
+]
+json.dump(data, open(path, "w"))
+path = f"{sys.argv[1]}/api_v1_jobs_820_comments.json"
+json.dump([{"id": 1, "userName": "reviewer_a", "text": "plain note", "created": url + rest}], open(path, "w"))
+PY
+actual=$(python3 "$script" --host https://openqa.example.org --fixture-dir "$tmp" 820 --steps 3 2>&1)
+rm -rf "$tmp"
+check "no part of a URL password cut by a text cap is printed" 0 "$(grep -c Qz9 <<<"$actual")"
+check "step text padded with stripped characters: redacted, then cut, the rest intact" "1 1" \
+	"$(grep -c '^before the curl$' <<<"$actual") $(grep -c '^+ curl -o /tmp/r https://bob:\[RED$' <<<"$actual")"
+check "step text without num, not reduced while parsing: redacted, then cut" 1 \
+	"$(grep -c '^    text="+ curl -o /tmp/r https://bob:\[RED"$' <<<"$actual")"
+check "step text with passwords across both cuts: the first redacted, the second's cut word gone" 1 \
+	"$(grep -c '^    text="x https://bob:\[REDACTED:url-userinfo\]@git\.example\.org/a\.git"$' <<<"$actual")"
+check "comment date: redacted, then cut" "1 1" \
+	"$(grep -c '^comment=1 by=reviewer_a class=human created="https://bob:\[RED"$' <<<"$actual") $(grep -c '^  text="plain note"$' <<<"$actual")"
 
 actual=$(job 820)
 check "step text in the real format: Carp frames after the died message are cut without --verbose" "1 0" \

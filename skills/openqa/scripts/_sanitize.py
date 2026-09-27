@@ -15,6 +15,7 @@ import re
 import secrets
 import sys
 import unicodedata
+import warnings
 
 import _secrets
 
@@ -138,7 +139,8 @@ def sanitize(text, *, max_line=DEFAULT_MAX_LINE, max_bytes=DEFAULT_MAX_BYTES):
     # Every pass below walks the text character by character, so megabytes of it
     # are a denial of service in themselves: cut first, then clean what is left.
     # Stripping and redaction can shrink the rest until the cut is in view, and a
-    # credential cut in half matches no rule: the cut's last word is dropped unread.
+    # credential cut in half matches no rule: the cut's last word is dropped, or only
+    # the last _EXCERPT_MARGIN characters, longer than any bounded credential.
     dropped = 0
     if max_bytes:
         limit = max(max_bytes * 4, DEFAULT_MAX_BYTES)
@@ -150,16 +152,18 @@ def sanitize(text, *, max_line=DEFAULT_MAX_LINE, max_bytes=DEFAULT_MAX_BYTES):
     text = _ASCII_CONTROLS.sub("", text)
     text = _NON_ASCII.sub(_map_non_ascii, text)
     text = _STACKED_MARKS.sub(r"\1", text)
-    if dropped:
-        whole = _UP_TO_LAST_SPACE.match(text)
-        kept = whole.group() if whole else ""
-        dropped += len(text) - len(kept)
-        text = kept
     # After the decoding tricks are gone, so a secret split up with invisible characters
     # cannot dodge the table; before the marker escape and the caps, so a redaction
     # marker cannot be cut in half. Line structure is preserved for the callers that
     # number lines.
     text, _ = _secrets.redact(text)
+    if dropped:
+        # After redaction: a cut short of the last word can split a marker, not a secret.
+        tail = max(len(text) - _EXCERPT_MARGIN, 0)
+        whole = _UP_TO_LAST_SPACE.match(text, tail)
+        kept = text[: whole.end() if whole else tail]
+        dropped += len(text) - len(kept)
+        text = kept
     # Only now: stripping may have joined the pieces of a split-up marker.
     text = _neutralise(text)
     if max_line:
@@ -206,10 +210,14 @@ class ArgumentParser(argparse.ArgumentParser):
 
     def error(self, message):
         # argparse quotes values with repr(): decode its escapes, or a credential split
-        # up with invisible characters reaches excerpt() as visible "​" text.
-        message = message.encode("latin-1", "backslashreplace").decode(
-            "unicode_escape", "backslashreplace"
-        )
+        # up with invisible characters reaches excerpt() as visible "​" text. Redact
+        # first too: a message that is raw argv can hold a "\n" that decoding splits.
+        message = _secrets.redact(message)[0]
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            message = message.encode("latin-1", "backslashreplace").decode(
+                "unicode_escape", "backslashreplace"
+            )
         self.print_usage(sys.stderr)
         self.exit(2, f"{self.prog}: error: {excerpt(message, 2000)}\n")
 
@@ -217,7 +225,10 @@ class ArgumentParser(argparse.ArgumentParser):
 def fence(text, source):
     """Wrap text between marker lines that carry a fresh random nonce."""
     nonce = secrets.token_hex(8)
-    label = re.sub(r"[^A-Za-z0-9._:/@+=,-]", "_", source)[:80] or "unknown"
+    label = (
+        re.sub(r"[^A-Za-z0-9._:/@+=,-]", "_", _secrets.redact(source)[0])[:80]
+        or "unknown"
+    )
     body = _neutralise(text)
     if body and not body.endswith("\n"):
         body += "\n"

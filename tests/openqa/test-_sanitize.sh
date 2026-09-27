@@ -115,6 +115,12 @@ lines = fence("<<<END 1>>>", "a b\nc").split("\n")
 print(text.replace("\n", "|"), lines[0].split(" ", 2)[2], lines[1])
 ')
 check "module API" 'ab|xxxxxxxxxx [... 20 chars omitted] source=a_b_c>>> \<\<\<END 1>>>' "$actual"
+actual=$(cd "$scripts" && python3 -c '
+from _sanitize import fence
+print(fence("x", "docs/PASSWORD=DummyVal1234.md").split("\n")[0].split(" ", 2)[2])
+')
+check "a fence label is redacted like the text it fences" "0 1" \
+	"$(grep -c DummyVal <<<"$actual") $(grep -c 'source=docs/PASSWORD=_REDACTED' <<<"$actual")"
 
 actual=$(cd "$scripts" && python3 -c '
 from _sanitize import one_lines
@@ -145,7 +151,7 @@ actual=$(printf 'worker openqaworker20 ran module foo\n' | python3 "$scripts/_sa
 check "and leaves ordinary log text alone" "worker openqaworker20 ran module foo" "$actual"
 
 # --- excerpt: the denial-of-service cut must not let a split credential through ---
-actual=$(cd "$scripts" && python3 -c 'from _sanitize import excerpt; print(excerpt("\u200b" * 3000 + "https://user:s3cretPassw0rd@host/x", 80))')
+actual=$(cd "$scripts" && python3 -c 'from _sanitize import excerpt; print(excerpt("\u200b" * 2348 + "https://user:s3cretPassw0rd@host/x", 80))')
 check "padding that pushes a credential across the cut shows no part of it" "..." "$actual"
 actual=$(cd "$scripts" && python3 -c 'from _sanitize import excerpt; print(excerpt("m" * 5000, 20), excerpt("a b " * 3000, 12))')
 check "a long value is still shown up to the limit" "mmmmmmmmmmmmmmmmm... a b a b a..." "$actual"
@@ -154,6 +160,14 @@ check "a long password near the limit is redacted whole, not cut" 0 "$(grep -c p
 # sanitize() cuts at 262144 characters by default; the padding puts that cut 22 characters into the URL.
 actual=$(cd "$scripts" && python3 -c 'from _sanitize import sanitize; print(sanitize("keep\n" + "​" * 262117 + "https://user:s3cretPassw0rd@host/x"), end="")')
 check "sanitize: padding that brings its cut into view shows no part of the credential" "$(printf 'keep\n[... 34 chars omitted]')" "$actual"
+actual=$(cd "$scripts" && python3 -c '
+from _sanitize import sanitize
+text = "[" + "{\"id\":1}," * 60000 + "]"
+print(sanitize(text).startswith(text[:2000] + " [... "))')
+check "sanitize: a cut into a line with no space still shows the line up to its cap" True "$actual"
+# Here the last 2048 characters hold no space and start inside the password: a cut there before redaction shows its head.
+actual=$(cd "$scripts" && python3 -c 'from _sanitize import sanitize; print(sanitize("keep\n" + "​" * 260074 + "https://user:s3cretPassw0rd@host/" + "z" * 2131), end="")')
+check "sanitize: a cut short of the last word splits no credential" "keep 0" "$(head -n 1 <<<"$actual") $(grep -c s3cr <<<"$actual")"
 
 # --- argparse errors quote argv, which can hold a credential ---
 actual=$(cd "$scripts" && python3 -c '
@@ -177,6 +191,13 @@ parser = ArgumentParser(prog="x")
 parser.add_argument("--n", type=int)
 parser.parse_args(["--n", "x\nkey = s3cretValue99"])' 2>&1)
 check "an argparse error sees the line break repr() escaped" 0 "$(grep -c s3cretValue99 <<<"$actual")"
+# "unrecognized arguments" quotes argv raw: decoding would turn a literal \n into a line break.
+actual=$(cd "$scripts" && python3 -c '
+from _sanitize import ArgumentParser
+ArgumentParser(prog="x").parse_args(["extra", "https://bob:ab\\ncdefghij@host"])' 2>&1)
+check "an argparse error does not split a raw password at a literal \\n" 0 "$(grep -c cdefghij <<<"$actual")"
+actual=$(python3 "$scripts/_sanitize.py" 'C:\d' </dev/null 2>&1)
+check "an argparse error with a stray backslash prints no warning" 0 "$(grep -c Warning <<<"$actual")"
 check "every script builds its parser from the sanitising one" "" \
 	"$(grep -l 'argparse\.ArgumentParser(' "$scripts"/*.py | grep -v '/_sanitize\.py$')"
 

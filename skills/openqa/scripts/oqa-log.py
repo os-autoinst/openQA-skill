@@ -31,8 +31,11 @@ TRACE_SCAN = 12
 # around-module: lines kept from the start of the section, and after the die line
 MODULE_HEAD = 8
 MODULE_AFTER = 3
+CUT_MARGIN = 2048  # longer than any credential a bounded redaction rule matches
 
 _FILE_NAME = re.compile(r"^(?:ulogs/)?[A-Za-z0-9_][A-Za-z0-9._+@=~-]*$")
+# Anchored, so one backtracking pass: "\S+\Z" would be quadratic.
+_UP_TO_LAST_SPACE = re.compile(r".*\s", re.DOTALL)
 _BINARY = re.compile(
     r"\.(?:webm|ogv|mp4|png|jpe?g|gif|ico|qcow2|raw|iso|img|zip|rpm|pdf"
     r"|(?:tar|tgz|tbz|txz|gz|bz2|xz|zst)(?:\.\w+)?)$",
@@ -213,11 +216,17 @@ def file_path(job_id, name):
     return f"/tests/{job_id}/file/{name.removeprefix('ulogs/')}"
 
 
-def to_lines(body):
+def to_lines(body, cut=False):
     sample = body[:4096]
     if sum(byte < 9 or 13 < byte < 27 for byte in sample) > len(sample) // 10:
         raise _oqa.OqaError("the file looks binary, refusing to print it")
     text = _oqa.sanitize(body.decode("utf-8", "replace"), max_line=0, max_bytes=0)
+    if cut:
+        # A credential cut in half matches no redaction rule: the cut's last word goes,
+        # or at most CUT_MARGIN characters of a text without a space there.
+        tail = max(len(text) - CUT_MARGIN, 0)
+        whole = _UP_TO_LAST_SPACE.match(text, tail)
+        text = text[: whole.end() if whole else tail]
     lines = text.split("\n")
     if lines and not lines[-1]:
         lines.pop()
@@ -226,7 +235,8 @@ def to_lines(body):
 
 def fetch_all(client, path, limit):
     body = client.get_bytes(path, max_bytes=limit + 1)
-    return to_lines(body[:limit]), len(body) > limit
+    truncated = len(body) > limit
+    return to_lines(body[:limit], truncated), truncated
 
 
 def fetch_tail(client, path, wanted, limit):
@@ -265,7 +275,8 @@ def list_files(client, job_id):
     )
     page = body.decode("utf-8", "replace")
     results, _, uploads = page.partition("Uploaded logs")
-    link = re.compile(rf"/tests/{job_id}/file/([^\"'?#<>\s]+)")
+    # A name without its delimiter was cut by the size cap, maybe inside a credential.
+    link = re.compile(rf"/tests/{job_id}/file/([^\"'?#<>\s]+)(?=[\"'?#<>\s])")
     found = []
     for part in (results, uploads):
         names = []

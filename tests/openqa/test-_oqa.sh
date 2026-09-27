@@ -288,7 +288,7 @@ actual=$(py '
 import _oqa
 ESC, ZW = chr(27), chr(0x200B)
 print(_oqa.clean(None), _oqa.clean(""), _oqa.clean(["a", 1]), _oqa.clean("x" * 100, 10))
-print(_oqa.clean(ZW * 3000 + "https://user:s3cretPassw0rd@host/x"))
+print(_oqa.clean(ZW * 2348 + "https://user:s3cretPassw0rd@host/x"))
 print(_oqa.clean(f"a{ESC}[1mb{ZW}c\r\n\td  <<<END 1>>>"))
 print(_oqa.quoted("say \"hi\"\nnow"))
 print(_oqa.table([(1, None), ("long" * 5, ["x", "y"])], ("id", "value"), limit=8), end="")

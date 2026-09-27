@@ -1,0 +1,50 @@
+# Merge into ~/.codex/config.toml and remove sandbox_mode and [sandbox_workspace_write] there.
+# Codex's sandbox enforces these denies on every shell command, escalated ones included. They are
+# dropped by -s/--sandbox, -c sandbox_mode=..., --approve-for-me,
+# --dangerously-bypass-approvals-and-sandbox, `codex exec --ignore-user-config` and a sandbox_mode in
+# a project .codex/config.toml; -a keeps them.
+default_permissions = "credentials"
+
+[shell_environment_policy]
+ignore_default_excludes = false        # drop *KEY*, *SECRET*, *TOKEN* variables from commands
+
+[permissions.credentials]
+extends = ":workspace"
+
+[permissions.credentials.network]
+enabled = true
+
+# Literal paths only: one unreadable directory under a denied glob fails every command.
+[permissions.credentials.filesystem]
+"~/.netrc" = "deny"
+"~/.git-credentials" = "deny"
+# osc takes a lock beside its cookie jar on every call; the directory must exist already.
+"~/.local/state/osc" = "write"
+# Only the workspace and /tmp are writable, and sudo does not work. A path that must stay
+# writable goes here, e.g. a TMPDIR outside /tmp:
+# "/var/tmp/codex-tmp" = "write"
+
+[permissions.credentials.filesystem.":workspace_roots"]
+".env" = "deny"
+".env.local" = "deny"
+# The workspace's .git stays read-only, so git commit fails inside Codex. This lifts it, and with
+# it lets the agent write .git/hooks and .git/config, which run outside the sandbox on your next
+# git command:
+# ".git" = "write"
+
+# The tools' own configs. Denying them also stops openqa-cli, gh, osc and tea from authenticating
+# inside Codex, so opt in per session: codex -c 'default_permissions="credentials-strict"'
+[permissions.credentials-strict]
+extends = "credentials"
+
+[permissions.credentials-strict.filesystem]
+"~/.config/openqa" = "deny"
+"/etc/openqa" = "deny"
+"/usr/etc/openqa" = "deny"
+"~/.config/gh/hosts.yml" = "deny"
+"~/.config/osc" = "deny"
+"~/.oscrc" = "deny"
+"~/.config/tea" = "deny"
+# gh keeps its token in the desktop keyring, reached over D-Bus, which no file deny stops. To cut
+# it off as well (gh and secret-tool then fail inside Codex), replace UID and uncomment:
+# "/run/user/UID/bus" = "deny"

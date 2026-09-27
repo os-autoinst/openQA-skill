@@ -70,6 +70,11 @@ stops being what the agent reads.
 The link or directory name must stay `openqa`: the Agent Skills format requires the directory to equal the
 skill name. A harness without skill support can simply be pointed at `skills/openqa/SKILL.md`.
 
+Recommended with any install: the deny rules in [`contrib/harness/`](contrib/harness/README.md), which make
+Claude Code, opencode, grok, Gemini CLI, antigravity-cli, Codex CLI and Kimi Code refuse the common ways of
+reading credential files; that README states the limits of each. You merge them into your own settings; the skill
+cannot install them.
+
 ## Safety model
 
 - **Read-only by construction.** The bundled API scripts can only issue GET requests, never send a `Referer`

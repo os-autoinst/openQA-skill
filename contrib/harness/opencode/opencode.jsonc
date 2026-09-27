@@ -1,0 +1,81 @@
+// Merge the "permission" keys into ~/.config/opencode/opencode.jsonc.
+// Last matching rule wins, in file order: keep these after any "*" rule.
+{
+  "$schema": "https://opencode.ai/config.json",
+  "permission": {
+    // Absolute directory globs; asked when a tool (read, grep, glob, and cat/cp/mv/cd
+    // in bash) touches a path outside the project directory.
+    "external_directory": {
+      "~/.config/openqa/*": "deny",
+      "/etc/openqa/*": "deny",
+      "/usr/etc/openqa/*": "deny",
+      "~/.config/gh/*": "deny",
+      "~/.config/osc/*": "deny",
+      "~/.config/tea/*": "deny"
+    },
+    // The read tool matches the path relative to the git worktree ("../../.config/…"),
+    // or to "/" outside git ("home/u/.config/…"), so patterns start with "*", not "~".
+    "read": {
+      "*.env": "deny",
+      "*.env.*": "deny",
+      "*.env.example": "allow",
+      "*.config/openqa/*": "deny",
+      "*etc/openqa/*": "deny",
+      "*.config/gh/hosts.yml": "deny",
+      "*.config/osc/*": "deny",
+      "*.oscrc": "deny",
+      "*.config/tea/*": "deny",
+      "*.netrc": "deny",
+      "*.git-credentials": "deny"
+    },
+    // Matched against each simple command's source text, unexpanded.
+    "bash": {
+      "*.config/openqa*": "deny",
+      "*etc/openqa*": "deny",
+      "*gh/hosts.yml*": "deny",
+      "*.config/osc*": "deny",
+      "*oscrc*": "deny",
+      "*.config/tea*": "deny",
+      "*.netrc*": "deny",
+      "*.git-credentials*": "deny",
+      "*gh auth token*": "deny",
+      "*gh auth status*": "deny",
+      "*gh auth git-credential*": "deny",
+      "*-H*uthorization*": "deny",
+      "*--header*uthorization*": "deny",
+      "*openqa-cli *uthorization*": "deny",
+      "*--apikey*": "deny",
+      "*--apisecret*": "deny",
+      "*://*:*@*": "deny",
+      "*MOJO_CLIENT_DEBUG*": "deny",
+      "git-obs *login list*": "deny",
+      "git obs *login list*": "deny",
+      "*gitcredentials-helper*": "deny",
+      "*login helper*": "deny",
+      "*logins helper*": "deny",
+      "*login git-credential*": "deny",
+      "*logins git-credential*": "deny",
+      "tea login e*": "deny",
+      "tea logins e*": "deny",
+      "*--dump-*": "deny",
+      "*--http-d*": "deny",
+      "*--http-f*": "deny",
+      "*http_debug*": "deny",
+      "*http_full_debug*": "deny",
+      "*HTTP_DEBUG*": "deny",
+      "*HTTP_FULL_DEBUG*": "deny",
+      "osc -H*": "deny",
+      "osc * -H *": "deny",
+      "osc * -H": "deny",
+      "osc token*": "deny",
+      "osc -qH*": "deny",
+      "osc -vH*": "deny",
+      "osc * -qH*": "deny",
+      "osc * -vH*": "deny",
+      "osc *api*/person/*/token*": "deny",
+      "osc config * pass*": "deny",
+      "*credential fill*": "deny",
+      "*credential-* get*": "deny"
+    }
+  }
+}

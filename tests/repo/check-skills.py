@@ -156,7 +156,19 @@ CREDENTIAL_PATTERNS = [
     ),
 ]
 
-TEXT_SUFFIXES = {".md", ".py", ".sh", ".json", ".yaml", ".yml", ".txt", ".toml", ""}
+TEXT_SUFFIXES = {
+    ".md",
+    ".py",
+    ".sh",
+    ".json",
+    ".jsonc",
+    ".rules",
+    ".yaml",
+    ".yml",
+    ".txt",
+    ".toml",
+    "",
+}
 
 
 def headings(path):

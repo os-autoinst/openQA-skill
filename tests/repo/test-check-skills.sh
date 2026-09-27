@@ -21,14 +21,15 @@ check() {
 	fi
 }
 
-# plant NAME EXPECTED LINE: add LINE to a reference of a clean copy, run the check
+# plant NAME EXPECTED LINE [FILE]: add LINE to FILE (default a reference) of a clean copy, run the check
 plant() {
 	rm -rf "$work/repo"
 	mkdir -p "$work/repo/tests/repo"
 	cp -r "$root/skills" "$work/repo/"
 	cp "$here/check-skills.py" "$work/repo/tests/repo/"
-	printf '%s\n' "$3" >>"$work/repo/skills/openqa/references/redaction.md"
-	out=$(python3 "$work/repo/tests/repo/check-skills.py" --only credentials)
+	printf '%s\n' "$3" >>"$work/repo/skills/openqa/${4:-references/redaction.md}"
+	out=$(timeout 10 python3 "$work/repo/tests/repo/check-skills.py" --only credentials)
+	[ $? -ne 124 ] || out="credentials: -: timed out: "
 	check "$1" "$2" "$(sed -n 's/^credentials: [^ ]*: \([^:]*\):.*/\1/p' <<<"$out" | head -1)"
 }
 
@@ -98,5 +99,63 @@ plant "a read after ||" "reads a credential file" '    test -f x || cat ~/.netrc
 plant "sudo with options" "reads a credential file" '    sudo -u geekotest cat /etc/openqa/client.conf'
 plant "exporting MOJO_CLIENT_DEBUG" "turns on MOJO_CLIENT_DEBUG" '    export MOJO_CLIENT_DEBUG=1'
 plant "exporting it off passes" "" '    export MOJO_CLIENT_DEBUG=0'
+
+# shipped scripts are checked too
+plant "a read in a script" "reads a credential file" '    cat ~/.config/openqa/client.conf' scripts/oqa-job.py
+
+# quoted arguments, redirects, pathlib and more files
+plant "a quoted alternation before the file" "reads a credential file" "    grep -E 'key|secret' ~/.config/openqa/client.conf"
+plant "an awk program before the file" "reads a credential file" "    awk -F' = ' '/^key/ {print \$2; exit}' ~/.config/openqa/client.conf"
+plant "a redirect in a command substitution" "reads a credential file" 'KEY=$(< ~/.config/openqa/client.conf)'
+plant "open() of a pathlib expression" "reads a credential file" '    with open(Path.home() / ".config/openqa/client.conf") as f:'
+plant "pathlib read_text()" "reads a credential file" '    Path("~/.config/openqa/client.conf").expanduser().read_text()'
+plant "git's credential store under .config" "reads a credential file" '    cat ~/.config/git/credentials'
+plant "the environment of a process" "reads a credential file" '    cat /proc/self/environ'
+plant "a slot before a path passes" "" 'The packaged default is <prefix>/etc/openqa/client.conf.'
+
+# gh auth token behind a prefix
+plant "gh auth token after an assignment" "prints gh's token" '    GH_HOST=github.com gh auth token'
+plant "gh auth token after &&" "prints gh's token" '    cd repo && gh auth token'
+plant "gh auth token with flags, piped" "prints gh's token" 'Run `gh auth token -h github.com | wl-copy`'
+plant "a table cell naming gh auth token with flags passes" "" '| `gh auth token -h github.com` | denied |'
+
+# environment dumps
+plant "a bare printenv" "prints the environment or a token variable" '    printenv'
+plant "a bare env" "prints the environment or a token variable" '    env'
+plant "export -p" "prints the environment or a token variable" '    $ export -p'
+plant "env running a command passes" "" '    env LC_ALL=C sort names.txt'
+
+# prose naming the key flags
+plant "a flag followed by a word passes" "" 'Never pass --apikey because it lands in the shell history.'
+plant "a flag followed by a noun passes" "" 'openqa-cli has --apikey/--apisecret options; never use either.'
+plant "--api-key followed by a noun passes" "" 'The old --api-key option is gone.'
+
+# tokens in a URL
+plant "a PAT variable as the userinfo" "a token in a URL" 'git clone https://$GH_PAT@github.com/o/r'
+plant "a token query value" "a token in a URL" 'curl "https://x.example.org/repos/o/r?token=0123456789abcdef0123"'
+plant "an access_token query value" "a token in a URL" 'curl "https://x.example.org/api?format=json&access_token=0123456789abcdef0123"'
+plant "a word ending in PAT passes" "" '    echo "$COMPAT"'
+
+# 60 sudo options must not backtrack exponentially
+plant "sudo with 60 options stays linear" "" "    sudo$(printf ' -u%.0s' {1..60}) x"
+
+# tools that print their own secrets
+plant "piping into git credential fill" "runs a credential printer" "    printf 'protocol=https\nhost=github.com\n\n' | git credential fill"
+plant "secret-tool lookup" "runs a credential printer" '    secret-tool lookup service osc'
+plant "gh auth git-credential" "runs a credential printer" '    gh auth git-credential get'
+plant "osc config --dump-full in a span" "runs a credential printer" '`osc config --dump-full | grep pass`'
+plant "osc token in a substitution" "runs a credential printer" '    echo "$(osc token)"'
+plant "curl -u with a password" "passes a key on the command line" 'curl -u bob:hunter2hunter2 https://x.example.org'
+plant "curl --oauth2-bearer" "passes a key on the command line" 'curl --oauth2-bearer "$GITHUB_TOKEN" https://x.example.org'
+plant "prose naming the printers passes" "" 'The harness denies `git credential fill`, `secret-tool lookup`, `osc token` and `osc config --dump-full`.'
+plant "a table row naming a printer passes" "" '| git credential fill | denied |'
+plant "curl -u without a password passes" "" 'curl --negotiate -u : https://x.example.org'
+
+# pin behaviour that no other plant covers
+plant "a lower-case HTTP/2 header" "a concrete auth header value" '< authorization: Bearer 0123456789abcdef0123'
+plant "another file in the config directory passes" "" '    cat /etc/openqa/workers.ini'
+plant "a read after a prompt" "reads a credential file" '    $ cat ~/.netrc'
+plant "declare -x MOJO_CLIENT_DEBUG" "turns on MOJO_CLIENT_DEBUG" '    declare -x MOJO_CLIENT_DEBUG=1'
+plant "MOJO_CLIENT_DEBUG=0 before a command passes" "" 'MOJO_CLIENT_DEBUG=0 openqa-cli api jobs'
 
 exit $fail

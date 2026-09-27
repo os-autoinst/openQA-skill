@@ -26,7 +26,8 @@ You are the **triage** stage. Goal: a classification that a reviewer can act on,
 | which file holds what | -> job-triage.md "Artifact map", "Details fields" |
 | the job was restarted or is a clone | -> openqa-model.md "Clone chain", "Automatic restarts" |
 | a comment already names a bug | `scripts/oqa-ref.py <ref>`, -> openqa-model.md "Carry-over", review-workflow.md "Existing references", "Machine-written comments" |
-| a comment or ticket draft is wanted | -> review-comments-tickets.md "Comment recipes", site-policy.md "Overlay lookup", "No policy file"; lint with `scripts/oqa-comment-lint.py` |
+| a comment draft is wanted | -> review-comments-tickets.md "Comment recipes", site-policy.md "Overlay lookup", "No policy file"; lint with `scripts/oqa-comment-lint.py` |
+| a new bug or ticket is wanted | -> bugs-and-tickets.md "Before drafting" and the draft sections it names; return the draft as `ticket-lint.py` JSON, the caller refutes it |
 | a setting looks wrong: where is it set? | -> openqa-model.md "Read-only API recipes" |
 | it must be reproduced | -> clone-and-run.md "Reproduce a failure" (the caller posts) |
 

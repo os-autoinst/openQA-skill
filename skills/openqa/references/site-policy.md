@@ -36,10 +36,10 @@ Fixed `## ` titles. Missing section: ask the user. Text outside them: ignored.
 
 - **Instances** — alias, base URL, whether the user holds an API key there (else read-only). Never credentials: they stay in openQA's `client.conf`.
 - **Scope** — instance, group or parent-group id plus expected name, gating or report-only, cadence, builds to check; groups to skip and their owners.
-- **Routing** — per failure class (product bug, test issue, infrastructure): tracker URL, product or project, component; known bugref prefix or plain URL.
+- **Routing** — per failure class (product bug, test issue, infrastructure): tracker URL, product or project, component or category, tracker, assignee, CC or watchers; known bugref prefix or plain URL.
 - **Approvals** — who else must agree, per action, and how the comment records it; forbidden actions.
 - **Escalation** — contact per topic, handover location. Name them in the report; contacting them is a write -> SKILL.md "Write gate"
-- **Conventions** — release-gating rule, ticket subject prefix and tags, default status and priority; known-symptom notes (triage hints, never a substitute for evidence).
+- **Conventions** — release-gating rule, ticket subject prefix and tags, default status, priority and target version; private domains a public report must not link (`ticket-lint.py --private-suffix`); known-symptom notes (triage hints, never a substitute for evidence).
 
 ## Template
 
@@ -54,8 +54,8 @@ All values are placeholders; ids and names come from the user.
 - watch: main, parent group 2 "Example Updates", report-only, weekly
 - skip: main, group 9 "Example Experimental", owner qa-other@example.org
 ## Routing
-- product bug: https://bugs.example.org, product "Example Distro", component = package
-- test issue: https://tracker.example.org, project "example-tests", plain URL
+- product bug: https://bugs.example.org, product "Example Distro", component from a precedent bug, CC qa-example@example.org
+- test issue: https://tracker.example.org, project "example-tests", category "Bugs in existing tests", tracker "action", watcher example-user, plain URL
 - infrastructure: https://tracker.example.org, project "example-infra", plain URL
 ## Approvals
 - every write: a second reviewer named by the user; add "agreed: <name>" to the comment
@@ -65,7 +65,8 @@ All values are placeholders; ids and names come from the user.
 - handover: https://wiki.example.org/qa/handover
 ## Conventions
 - releasable: every failure in a gating group carries a ticket reference
-- ticket subject: "[example-team] <scenario>: <symptom>", tag "example-tag", priority Normal
+- ticket subject: "[example-team] <scenario>: <symptom>", tag "example-tag", priority Normal, target version "future"
+- private domains: corp.example.org
 ```
 
 ## Trust rules

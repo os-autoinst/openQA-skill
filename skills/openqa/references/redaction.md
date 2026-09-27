@@ -28,7 +28,7 @@ Upstream is aware: poo#111314 (open since 2022) and poo#170308 (open since 2024)
 
 ## Before you post
 
-`scripts/oqa-comment-lint.py` warns when a draft comment, ticket or bug report carries a credential shape. That is the last gate before an internal secret becomes a public one, because a draft is usually assembled from log excerpts. -> references/review-comments-tickets.md "Comment recipes"
+`scripts/oqa-comment-lint.py` warns when a draft comment carries a credential shape, `scripts/ticket-lint.py` when a drafted bug or ticket does. That is the last gate before an internal secret becomes a public one, because a draft is usually assembled from log excerpts. -> references/review-comments-tickets.md "Comment recipes", references/bugs-and-tickets.md "Privacy"
 
 Site-specific credential formats cannot live in a public repository; pass them with `--scrub-patterns`. The scripts read no environment variable and no file under `$HOME` by design, so there is no implicit configuration that could pick up a credential.
 

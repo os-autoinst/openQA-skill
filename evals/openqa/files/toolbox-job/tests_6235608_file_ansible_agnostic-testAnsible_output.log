@@ -1,0 +1,22 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.15, pytest-9.0.3, pluggy-1.6.0 -- /usr/bin/python3.13
+cachedir: .pytest_cache
+rootdir: /root/testAnsible
+collecting ... collected 13 items
+
+test_ansible.py::test_collection_is_present PASSED
+test_ansible.py::test_ansible_version PASSED
+test_ansible.py::test_setup_hostname PASSED
+test_ansible.py::test_setup_architecture PASSED
+test_ansible.py::test_galaxy_role PASSED
+test_ansible.py::test_general_collection_has_zypper PASSED
+test_ansible.py::test_ansible_community PASSED
+test_ansible.py::test_playbook_check PASSED
+test_ansible.py::test_ansible_test_sanity PASSED
+test_ansible.py::test_inventory PASSED
+test_ansible.py::test_playbook_run PASSED
+test_ansible.py::test_playbook_installed_ed SKIPPED (ed is installed...)
+test_ansible.py::test_vault_roundtrip PASSED
+
+-------------- generated xml file: /root/testAnsible/results.xml ---------------
+======================== 12 passed, 1 skipped in 47.23s ========================

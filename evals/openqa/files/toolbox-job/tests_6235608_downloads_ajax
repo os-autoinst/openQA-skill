@@ -1,0 +1,233 @@
+
+    <h5>Result files
+    </h5>
+    <ul class="resultfile-list">
+    <li>
+            <i title="Video of this testrun" class="fa-regular fa-file-video"></i>
+            <a href="/tests/6235608/video?filename=video.webm">
+                Video
+            </a>
+        <a href="/tests/6235608/file/video.webm" target="blank" title="Raw/download">
+            <i class="fa-solid fa-download"></i>
+        </a>
+    </li>
+    <li>
+            <i title="Logfile produced by this testrun" class="fa-solid fa-terminal"></i>
+            <a href="/tests/6235608/logfile?filename=autoinst-log.txt">
+                autoinst-log.txt
+            </a>
+        <a href="/tests/6235608/file/autoinst-log.txt" target="blank" title="Raw/download">
+            <i class="fa-solid fa-download"></i>
+        </a>
+    </li>
+    <li>
+            <i title="Logfile produced by this testrun" class="fa-solid fa-terminal"></i>
+            <a href="/tests/6235608/logfile?filename=worker-log.txt">
+                worker-log.txt
+            </a>
+        <a href="/tests/6235608/file/worker-log.txt" target="blank" title="Raw/download">
+            <i class="fa-solid fa-download"></i>
+        </a>
+    </li>
+    <li>
+            <i class="fa-regular fa-file"></i>
+            <a href="/tests/6235608/file/vars.json">
+                vars.json
+            </a>
+    <li>
+            <i title="Logfile produced by this testrun" class="fa-solid fa-terminal"></i>
+            <a href="/tests/6235608/logfile?filename=serial0.txt">
+                serial0.txt
+            </a>
+        <a href="/tests/6235608/file/serial0.txt" target="blank" title="Raw/download">
+            <i class="fa-solid fa-download"></i>
+        </a>
+    </li>
+    <li>
+            <i title="Logfile produced by this testrun" class="fa-solid fa-terminal"></i>
+            <a href="/tests/6235608/logfile?filename=serial_terminal.txt">
+                serial_terminal.txt
+            </a>
+        <a href="/tests/6235608/file/serial_terminal.txt" target="blank" title="Raw/download">
+            <i class="fa-solid fa-download"></i>
+        </a>
+    </li>
+    <li>
+            <i title="Logfile produced by this testrun" class="fa-solid fa-terminal"></i>
+            <a href="/tests/6235608/logfile?filename=serial_terminal_user.txt">
+                serial_terminal_user.txt
+            </a>
+        <a href="/tests/6235608/file/serial_terminal_user.txt" target="blank" title="Raw/download">
+            <i class="fa-solid fa-download"></i>
+        </a>
+    </li>
+</ul>
+
+    <h6>Uploaded logs
+    </h6>
+    <ul class="resultfile-list">
+    <li>
+            <i class="fa-regular fa-file"></i>
+            <a href="http://openqa-assets.opensuse.org/tests/6235608/file/ansible_agnostic-testAnsible_output.log">
+                ansible_agnostic-testAnsible_output.log
+            </a>
+    <li>
+            <i class="fa-regular fa-file"></i>
+            <a href="http://openqa-assets.opensuse.org/tests/6235608/file/ansible_agnostic-testansible_results.xml">
+                ansible_agnostic-testansible_results.xml
+            </a>
+    <li>
+            <i class="fa-regular fa-file"></i>
+            <a href="http://openqa-assets.opensuse.org/tests/6235608/file/logs_from_installation_system-y2logs.tar.bz2">
+                logs_from_installation_system-y2logs.tar.bz2
+            </a>
+    <li>
+            <i title="Logfile produced by this testrun" class="fa-solid fa-terminal"></i>
+            <a href="/tests/6235608/logfile?filename=textinfo-info.txt">
+                textinfo-info.txt
+            </a>
+        <a href="http://openqa-assets.opensuse.org/tests/6235608/file/textinfo-info.txt" target="blank" title="Raw/download">
+            <i class="fa-solid fa-download"></i>
+        </a>
+    </li>
+    <li>
+            <i class="fa-regular fa-file"></i>
+            <a href="http://openqa-assets.opensuse.org/tests/6235608/file/textinfo-logs.tar.bz2">
+                textinfo-logs.tar.bz2
+            </a>
+    <li>
+            <i title="Logfile produced by this testrun" class="fa-solid fa-terminal"></i>
+            <a href="/tests/6235608/logfile?filename=toolbox-basic_health_check.txt">
+                toolbox-basic_health_check.txt
+            </a>
+        <a href="http://openqa-assets.opensuse.org/tests/6235608/file/toolbox-basic_health_check.txt" target="blank" title="Raw/download">
+            <i class="fa-solid fa-download"></i>
+        </a>
+    </li>
+    <li>
+            <i title="Logfile produced by this testrun" class="fa-solid fa-terminal"></i>
+            <a href="/tests/6235608/logfile?filename=toolbox-bootctl.txt">
+                toolbox-bootctl.txt
+            </a>
+        <a href="http://openqa-assets.opensuse.org/tests/6235608/file/toolbox-bootctl.txt" target="blank" title="Raw/download">
+            <i class="fa-solid fa-download"></i>
+        </a>
+    </li>
+    <li>
+            <i title="Logfile produced by this testrun" class="fa-solid fa-terminal"></i>
+            <a href="/tests/6235608/logfile?filename=toolbox-dmesg.txt">
+                toolbox-dmesg.txt
+            </a>
+        <a href="http://openqa-assets.opensuse.org/tests/6235608/file/toolbox-dmesg.txt" target="blank" title="Raw/download">
+            <i class="fa-solid fa-download"></i>
+        </a>
+    </li>
+    <li>
+            <i class="fa-regular fa-file"></i>
+            <a href="http://openqa-assets.opensuse.org/tests/6235608/file/toolbox-esp-config.tar.gz">
+                toolbox-esp-config.tar.gz
+            </a>
+    <li>
+            <i title="Logfile produced by this testrun" class="fa-solid fa-terminal"></i>
+            <a href="/tests/6235608/logfile?filename=toolbox-ip-addr-show.txt">
+                toolbox-ip-addr-show.txt
+            </a>
+        <a href="http://openqa-assets.opensuse.org/tests/6235608/file/toolbox-ip-addr-show.txt" target="blank" title="Raw/download">
+            <i class="fa-solid fa-download"></i>
+        </a>
+    </li>
+    <li>
+            <i title="Logfile produced by this testrun" class="fa-solid fa-terminal"></i>
+            <a href="/tests/6235608/logfile?filename=toolbox-journal.txt">
+                toolbox-journal.txt
+            </a>
+        <a href="http://openqa-assets.opensuse.org/tests/6235608/file/toolbox-journal.txt" target="blank" title="Raw/download">
+            <i class="fa-solid fa-download"></i>
+        </a>
+    </li>
+    <li>
+            <i title="Logfile produced by this testrun" class="fa-solid fa-terminal"></i>
+            <a href="/tests/6235608/logfile?filename=toolbox-loadavg.txt">
+                toolbox-loadavg.txt
+            </a>
+        <a href="http://openqa-assets.opensuse.org/tests/6235608/file/toolbox-loadavg.txt" target="blank" title="Raw/download">
+            <i class="fa-solid fa-download"></i>
+        </a>
+    </li>
+    <li>
+            <i class="fa-regular fa-file"></i>
+            <a href="http://openqa-assets.opensuse.org/tests/6235608/file/toolbox-problem_detection_logs.tar.xz">
+                toolbox-problem_detection_logs.tar.xz
+            </a>
+    <li>
+            <i title="Logfile produced by this testrun" class="fa-solid fa-terminal"></i>
+            <a href="/tests/6235608/logfile?filename=toolbox-psaxf.txt">
+                toolbox-psaxf.txt
+            </a>
+        <a href="http://openqa-assets.opensuse.org/tests/6235608/file/toolbox-psaxf.txt" target="blank" title="Raw/download">
+            <i class="fa-solid fa-download"></i>
+        </a>
+    </li>
+    <li>
+            <i title="Logfile produced by this testrun" class="fa-solid fa-terminal"></i>
+            <a href="/tests/6235608/logfile?filename=toolbox-resolv-conf.txt">
+                toolbox-resolv-conf.txt
+            </a>
+        <a href="http://openqa-assets.opensuse.org/tests/6235608/file/toolbox-resolv-conf.txt" target="blank" title="Raw/download">
+            <i class="fa-solid fa-download"></i>
+        </a>
+    </li>
+    <li>
+            <i class="fa-regular fa-file"></i>
+            <a href="http://openqa-assets.opensuse.org/tests/6235608/file/toolbox-sysconfig.tar.gz">
+                toolbox-sysconfig.tar.gz
+            </a>
+    <li>
+            <i title="Logfile produced by this testrun" class="fa-solid fa-terminal"></i>
+            <a href="/tests/6235608/logfile?filename=toolbox-systemctl.txt">
+                toolbox-systemctl.txt
+            </a>
+        <a href="http://openqa-assets.opensuse.org/tests/6235608/file/toolbox-systemctl.txt" target="blank" title="Raw/download">
+            <i class="fa-solid fa-download"></i>
+        </a>
+    </li>
+    <li>
+            <i title="Logfile produced by this testrun" class="fa-solid fa-terminal"></i>
+            <a href="/tests/6235608/logfile?filename=toolbox-systemctl_status.txt">
+                toolbox-systemctl_status.txt
+            </a>
+        <a href="http://openqa-assets.opensuse.org/tests/6235608/file/toolbox-systemctl_status.txt" target="blank" title="Raw/download">
+            <i class="fa-solid fa-download"></i>
+        </a>
+    </li>
+    <li>
+            <i title="Logfile produced by this testrun" class="fa-solid fa-terminal"></i>
+            <a href="/tests/6235608/logfile?filename=toolbox-systemctl_unit-files.txt">
+                toolbox-systemctl_unit-files.txt
+            </a>
+        <a href="http://openqa-assets.opensuse.org/tests/6235608/file/toolbox-systemctl_unit-files.txt" target="blank" title="Raw/download">
+            <i class="fa-solid fa-download"></i>
+        </a>
+    </li>
+</ul>
+
+
+    <h5>Assets
+    </h5>
+    <ul id="asset-list">            <li>
+                    <a href="/tests/6235608/asset/iso/openSUSE-MicroOS-DVD-x86_64-Snapshot20260923-Media.iso" id="asset_99419887">
+                    openSUSE-MicroOS-DVD-x86_64-Snapshot20260923-Media.iso
+</a>                    (2.7 GiB)
+                <a href="/admin/assets?search=openSUSE-MicroOS-DVD-x86_64-Snapshot20260923-Media.iso" title="Find in assets table">
+                    <i class="fa-solid fa-table"></i>
+                </a>
+            </li>
+            <li>
+                    <a href="/tests/6235608/asset/other/openSUSE-MicroOS-DVD-x86_64-Snapshot20260923-Media.iso.sha256" id="asset_99419886">
+                    openSUSE-MicroOS-DVD-x86_64-Snapshot20260923-Media.iso.sha256
+</a>                    (121 Byte)
+                <a href="/admin/assets?search=openSUSE-MicroOS-DVD-x86_64-Snapshot20260923-Media.iso.sha256" title="Find in assets table">
+                    <i class="fa-solid fa-table"></i>
+                </a>
+            </li>
+</ul>

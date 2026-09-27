@@ -1,0 +1,34 @@
+[2026-09-24T18:04:49.869988Z] [info] Preparing cgroup to start isotovideo
+[2026-09-24T18:04:49.870418Z] [warn] Disabling cgroup usage because cgroup creation failed: mkdir /sys/fs/cgroup/systemd: Permission denied at /usr/lib/perl5/vendor_perl/5.42.0/Mojo/File.pm line 92.
+[2026-09-24T18:04:49.870463Z] [info] You can define a custom slice with OPENQA_CGROUP_SLICE or indicating the base mount with MOJO_CGROUP_FS.
+[2026-09-24T18:04:49.870631Z] [info] Starting isotovideo container
+[2026-09-24T18:04:49.873840Z] [info] isotovideo has been started (PID: 881449)
+[2026-09-24T18:04:49.874095Z] [info] 881449: WORKING 6235608
+[2026-09-24T18:47:59.216216Z] [info] Received signal HUP
+[2026-09-24T18:48:00.470934Z] [info] Received signal HUP
+[2026-09-24T18:48:56.962183Z] [warn] Websocket connection to https://openqa.opensuse.org/api/v1/ws/517 finished by remote side with code 1006, no reason - trying again in 10 seconds
+[2026-09-24T18:49:06.962928Z] [info] Registering with openQA https://openqa.opensuse.org
+[2026-09-24T18:49:07.729991Z] [info] Establishing ws connection via wss://openqa.opensuse.org/api/v1/ws/517
+[2026-09-24T18:49:08.494160Z] [info] Registered and connected via websockets with openQA host https://openqa.opensuse.org and worker ID 517
+[2026-09-24T18:59:11.640022Z] [info] Uploading ansible_agnostic-testAnsible_output.log
+[2026-09-24T18:59:11.682543Z] [info] Uploading ansible_agnostic-testansible_results.xml
+[2026-09-24T18:59:11.700846Z] [info] Uploading logs_from_installation_system-y2logs.tar.bz2
+[2026-09-24T18:59:11.733558Z] [info] Uploading textinfo-info.txt
+[2026-09-24T18:59:11.748901Z] [info] Uploading textinfo-logs.tar.bz2
+[2026-09-24T18:59:11.765930Z] [info] Uploading toolbox-basic_health_check.txt
+[2026-09-24T18:59:11.786430Z] [info] Uploading toolbox-bootctl.txt
+[2026-09-24T18:59:11.806273Z] [info] Uploading toolbox-dmesg.txt
+[2026-09-24T18:59:11.823842Z] [info] Uploading toolbox-esp-config.tar.gz
+[2026-09-24T18:59:11.841578Z] [info] Uploading toolbox-ip-addr-show.txt
+[2026-09-24T18:59:11.856681Z] [info] Uploading toolbox-journal.txt
+[2026-09-24T18:59:11.875609Z] [info] Uploading toolbox-loadavg.txt
+[2026-09-24T18:59:11.893406Z] [info] Uploading toolbox-problem_detection_logs.tar.xz
+[2026-09-24T18:59:11.912307Z] [info] Uploading toolbox-psaxf.txt
+[2026-09-24T18:59:11.939178Z] [info] Uploading toolbox-resolv-conf.txt
+[2026-09-24T18:59:11.954698Z] [info] Uploading toolbox-sysconfig.tar.gz
+[2026-09-24T18:59:11.970345Z] [info] Uploading toolbox-systemctl.txt
+[2026-09-24T18:59:11.985925Z] [info] Uploading toolbox-systemctl_status.txt
+[2026-09-24T18:59:12.008660Z] [info] Uploading toolbox-systemctl_unit-files.txt
+[2026-09-24T18:59:12.036104Z] [info] Uploading video.webm
+[2026-09-24T18:59:12.127864Z] [info] Uploading autoinst-log.txt
+[2026-09-24T18:59:12.299086Z] [info] Uploading worker-log.txt

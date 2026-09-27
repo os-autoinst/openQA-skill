@@ -267,6 +267,30 @@ hides "the tail of a keyed value longer than 256 characters" "TOKEN=${long}TAILP
 redacts "curl -u with the value attached" '+ curl -ubob:Sup3rS3cretX https://example.org/api\n' curl-user
 redacts "smbclient -U user%%password" '+ smbclient //srv/share -U bob%%Sup3rS3cretX -c ls\n' password-flag
 
+# --- a second review: flags that name no password, and keys that do ---------------
+keeps "a password read from stdin" '+ podman login --password-stdin quay.io\n'
+keeps "a password read from a file" '+ podman login --password-file /run/secrets/reg quay.io\n'
+redacts "a --password value after =" 'mytool --password=Sup3rS3cretX\n' password-flag
+keeps "a mysql port" 'mysql -h db -P 3306 -e x\n'
+keeps "an ipmitool port" 'ipmitool -I lanplus -H bmc -p 6230 chassis status\n'
+keeps "an sshpass prompt" 'sshpass -P assword: -f /run/pw ssh root@host.example.org uptime\n'
+keeps "an smbclient port" 'smbclient //srv/share -p 4450 -N -c ls\n'
+redacts "smbclient --user=user%%password" '+ smbclient //srv/share --user=bob%%Sup3rS3cretX -c ls\n' password-flag
+redacts "a *_PASS name in YAML" 'ROOT_PASS: Sup3rS3cretX\n' keyed-assignment
+hides "a quoted *_PASS value in YAML" "MITIGATION_GIT_REPO_PASS: 'Sup3rS3cretX'\n" Sup3rS3cretX
+keeps "an automake unexpected pass" 'XPASS: test-suite-runner\n'
+keeps "setting names without _ in openQA's job_settings query" 'GET /api/v1/job_settings/jobs?key=VERSION\nGET /api/v1/job_settings/jobs?key=MACHINE&list_value=1\n'
+redacts "an api key that starts with letters" 'GET https://openqa.example.org/api/v1/jobs?key=ABCDEF0123456789\n' url-query
+keeps "prose after Authorization:" 'Authorization: required for this endpoint\n'
+hides "a Basic credential" 'Authorization: Basic dXNlcjpwYXNzd29yZA==\n' dXNlcjpw
+keeps "compact single-quoted fields with a port and an e-mail" "{'url':'http://db.example.org:5432','owner':'alice@example.org'}\n"
+keeps "compact single-quoted fields with an e-mail" "{'url':'http://db.example.org','owner':'alice@example.org'}\n"
+redacts "userinfo in single-quoted fields" "{'url':'https://bob:hunter2hunter2@host/x'}\n" url-userinfo
+# A service-account key is JSON-escaped onto one line; the log after it is still evidence.
+actual=$(printf '%s\n' '{"private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBg\n-----END PRIVATE KEY-----\n"}' 'next line survives' |
+	python3 "$scripts/_secrets.py" 2>/dev/null)
+check "a key on one line swallows only that line" "$(printf '[REDACTED:private-key]\nnext line survives')" "$actual"
+
 # A rule alternative is dead unless its own literal passes the TRIGGERS pre-filter.
 actual=$(python3 -c "
 import sys; sys.path.insert(0, '$scripts')
@@ -313,6 +337,7 @@ for name, pattern, text in (
     ('pem', _secrets._PEM_BEGIN, '-----BEGIN' * 10000),
     ('url-userinfo', rules['url-userinfo'], 'x://h:' + 'a@' * 500000),
     ('url-userinfo', rules['url-userinfo'], 'x://h:' * 100000),
+    ('password-flag', rules['password-flag'], 'pass' + ':a' * 131072),
     ('url-query', rules['url-query'], '?key=' + 'A*' * 50000),
 ):
     start = time.monotonic()

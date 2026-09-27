@@ -296,6 +296,15 @@ run --job "$lab" --fork 'alice:Hunter2pw@x' --branch fix
 lacks "an @ in --fork: not echoed" "Hunter2pw" "$err"
 run --job "$lab" "${fork[@]}" --label $'admin:Hunter2pw\xe2\x80\x8b@files.example'
 lacks "an @ in a label with an invisible character: not echoed" "Hunter2pw" "$err"
+run --job "$lab" "${fork[@]}" --schedule 'tests/a/admin:Hunter2pw@x,tests/b/admin:Hunter2pw@x'
+lacks "an @ in a duplicate --schedule basename: not echoed" "Hunter2pw" "$err"
+# A secret setting's value is withheld in every message, whatever shape redaction skips.
+for arg in $'SCC_REGCODE=/AbCd+EfGh/1234\xe2\x80\x8b' $'PASSWORD=\nDummyVal99x' 'export SCC_REGCODE=/AbCd+EfGh/1234' \
+	' SCC_REGCODE=/AbCd+EfGh/1234' '"SCC_REGCODE=/AbCd+EfGh/1234"'; do
+	run --job "$lab" "${fork[@]}" --set "$arg"
+	check "a secret setting refused, its value not echoed: ${arg:0:12}" "2 0 0" \
+		"$rc $(grep -c AbCd <<<"$err") $(grep -c DummyVal <<<"$err")"
+done
 
 # A scope that never reaches the "=" used to split in quadratically many ways: 16 kB took 20 s.
 bomb="A:$(python3 -c 'print("a" * 8192)')"

@@ -12,7 +12,6 @@ value and loses the name), or a token split across a line wrap. A log known to h
 held a live credential needs that credential rotated, not redacted.
 """
 
-import argparse
 import re
 import sys
 from collections import Counter
@@ -42,11 +41,14 @@ TRIGGERS = (
     "xox",
     "ey",
     "pass",
+    "pw",
     "secret",
     "token",
     "key",
     "credential",
     "regcode",
+    "sig",
+    "x-api",
     "curl",
     "wget",
     "ipmitool",
@@ -57,6 +59,7 @@ TRIGGERS = (
     "podman",
     "docker",
     "kubectl",
+    "skopeo",
     # every prefix the aws-key-id rule alternates over; a missing one disables it
     "a3t",
     "agpa",
@@ -114,6 +117,7 @@ _ALLOW_KEYS = re.compile(r"\A(JOBTOKEN|NAME|CASEDIR|NEEDLES_DIR)\Z", re.IGNORECA
 # with no such guarantee, so the check has to happen here.
 _SECRET_KEY = re.compile(
     r"(?i)_SECRET_|PASSW|SECRET|TOKEN|REGCODE|APIKEY|API_KEY|ACCESS_KEY|CREDENTIAL|PRIVATE_KEY"
+    r"|PWD|(?<![A-Z])PW(?![A-Z])|PASS(?![A-Z])"
 )
 
 
@@ -148,6 +152,10 @@ def _keep_head(match):
     return match.group(1) + MARK.format(match.lastgroup or "secret")
 
 
+# A documentation slot ($VAR, ${VAR}, {{ var }}, <var>, %VAR%) is not a value; a
+# percent-encoded one (%2B...) is.
+_SLOT = r"(?![$<]|\{\{|%(?![0-9A-Fa-f]{2}))"
+
 # (id, pattern, replacement). Order matters: a specific rule must win over a general
 # one, so a token inside an Authorization header is reported as that rule.
 RULES = (
@@ -165,34 +173,52 @@ RULES = (
     ("slack-token", re.compile(r"\bxox[baprs]-[0-9A-Za-z-]{10,48}\b"), None),
     (
         "jwt",
-        re.compile(r"\bey[A-Za-z0-9_-]{17,}\.ey[A-Za-z0-9_-]{17,}\.[A-Za-z0-9_-]{10,}"),
+        re.compile(
+            r"(?<![A-Za-z0-9_-])ey[A-Za-z0-9_-]{17,}\.ey[A-Za-z0-9_-]{17,}\.[A-Za-z0-9_-]{10,}"
+        ),
         None,
     ),
     # Tier B - the structure carries the signal; keep the diagnostic half. Which host
     # and which account a job used is evidence; the password is not.
+    # A token used as the whole userinfo (https://<token>@host; "git@" is too short, and a
+    # host name there is a spoof of the real host), or as the user name before an empty or
+    # filler password. Before url-userinfo, which would redact only the filler.
+    (
+        "url-token",
+        re.compile(
+            r"([a-zA-Z][a-zA-Z0-9+.-]{0,30}://)"
+            r"(?:(?![A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+@)[A-Za-z0-9._~+%-]{16,256}(?=@)"
+            r"|[^/\s:@\[]{1,256}(?=:(?:x-oauth-basic|x-access-token)?@))"
+        ),
+        r"\1" + MARK.format("url-token"),
+    ),
+    # A password never holds "://"; stopping there keeps a line of URLs linear.
     (
         "url-userinfo",
-        re.compile(r"([a-zA-Z][a-zA-Z0-9+.-]{0,30}://[^/\s:@]{1,64}:)[^/\s@]{1,256}@"),
+        re.compile(
+            r"([a-zA-Z][a-zA-Z0-9+.-]{0,30}://[^/\s:@\[]{0,64}:)"
+            r"(?!\d{1,5}(?:[/?#\s]|$))(?:(?!://)[^\s@\"]|@(?=[^\s/@\"]*@)){1,512}@"
+        ),
         r"\1" + MARK.format("url-userinfo") + "@",
     ),
     (
         "auth-header",
         re.compile(
-            r"(?i)((?:Authorization|Proxy-Authorization)\s*:\s*(?:Bearer|Basic|Token|ApiKey)\s+)\S{8,}"
+            r"(?i)((?:Authorization|Proxy-Authorization)['\"]?\s*:\s*['\"]?(?:[A-Za-z][\w-]*\s+)?)[^\s'\"]{8,}"
         ),
         r"\1" + MARK.format("auth-header"),
     ),
     (
         "curl-user",
         re.compile(
-            r"(?i)((?:curl|wget)\b[^\n]{0,200}?(?:\s-u|\s--user)[= ]['\"]?[^\s:'\"]{1,64}:)[^\s'\"]{1,256}"
+            r"(?i)((?:curl|wget)\b[^\n]{0,200}?(?:\s-u[= ]?|\s--user[= ])['\"]?[^\s:'\"]{1,64}:)[^\s'\"]{1,256}"
         ),
         r"\1" + MARK.format("curl-user"),
     ),
     (
         "password-flag",
         re.compile(
-            r"(?i)((?:ipmitool\b[^\n]{0,200}?\s-P|(?:mysql|sshpass|smbclient)\b[^\n]{0,200}?\s-p|(?:helm|podman|docker|kubectl|skopeo)\b[^\n]{0,80}?\blogin\b[^\n]{0,200}?\s-p|[^\n]{0,200}?\s--password)[ =]?)\S{4,}"
+            r"(?i)((?:ipmitool\b[^\n]{0,200}?\s-P|(?:mysql|sshpass|smbclient)\b[^\n]{0,200}?\s-p|smbclient\b[^\n]{0,200}?\s-U\s*[^\s%]{1,64}%|(?:helm|podman|docker|kubectl|skopeo)\b[^\n]{0,80}?\blogin\b[^\n]{0,200}?\s-p|[^\n]{0,200}?\s--password)[ =]?)\S{4,}"
         ),
         r"\1" + MARK.format("password-flag"),
     ),
@@ -201,20 +227,60 @@ RULES = (
         re.compile(r'("auth"\s*:\s*")[A-Za-z0-9+/=]{16,}(")'),
         r"\1" + MARK.format("registry-auth") + r"\2",
     ),
+    # openQA signs requests with X-API-Key and X-API-Hash; a debug dump shows both.
+    (
+        "api-key-header",
+        re.compile(
+            r"(?i)((?:X-API-(?:Key|Hash)|X-Auth-Key|Api-Key)['\"]?\s*:\s*['\"]?)[^\s'\"]{6,}"
+        ),
+        r"\1" + MARK.format("api-key-header"),
+    ),
+    # openqa-cli --apikey K --apisecret S; a <slot> or $VAR in documentation stays.
+    (
+        "api-flag",
+        re.compile(
+            r"(?i)(--api-?(?:key|secret)(?:\s+|=)['\"]?)" + _SLOT + r"[^\s'\"]{6,}"
+        ),
+        r"\1" + MARK.format("api-flag"),
+    ),
+    # openQA's job_settings route passes a setting NAME as ?key=, and a JMESPath filter
+    # reads Tags[?Key==`Name`]; neither is a value.
+    (
+        "url-query",
+        re.compile(
+            r"(?i)([?&](?:key|api[-_]?key|sig|signature|x-amz-signature|x-amz-credential"
+            r"|x-amz-security-token|auth)=)" + _SLOT + r"(?!=)"
+            r"(?!(?-i:[A-Z0-9]*[_*][A-Z0-9_*]*(?:[&#\s'\"]|$)))[^&\s#'\"]{6,}"
+        ),
+        r"\1" + MARK.format("url-query"),
+    ),
+    # client.conf and similar INI files: "key = ...", commented out or quoted too (the
+    # "secret =" line is keyed). A value that runs into code or starts a path is not a key.
+    (
+        "ini-key",
+        re.compile(
+            r"(?im)^(\s*(?:[#;]\s*)?key\s*=\s*['\"]?)(?!/)[A-Za-z0-9+/=_-]{6,}(?=['\"]?\s*$)"
+        ),
+        r"\1" + MARK.format("ini-key"),
+    ),
 )
 
 # Tier C - only fires next to a key that names a credential, and only after the vetoes.
 # `sanitize()` sees "hunter2", never "PASSWORD=hunter2", so this is the only rule that
 # can know an SCC_REGCODE value is secret.
+# JSON, Python and Perl forms too, where a string value is quoted and anything else is
+# code. The short names count in upper case only: "pass=12|skip=0" and "TPASS:" are
+# test results.
 _KEYED = re.compile(
-    r"(?i)(?<![A-Z0-9_])([A-Z0-9_]{0,40}(?:PASSWORD|PASSWD|SECRET|TOKEN|APIKEY|API_KEY|ACCESS_KEY|PRIVATE_KEY|CREDENTIAL|REGCODE)[A-Z0-9_]{0,40})"
-    r"(\s*[:=]\s*)(['\"]?)([^\s'\"]{1,256})"
+    r"(?i)(?<![A-Z0-9_])([A-Z0-9_]{0,40}(?:PASSWORD|PASSWD|SECRET|TOKEN|APIKEY|API_KEY|ACCESS_KEY|PRIVATE_KEY|CREDENTIAL|REGCODE"
+    r"|(?-i:PWD|(?<![A-Z])PW(?![A-Z])|PASS(?![A-Z0-9_]|\s*:)))[A-Z0-9_]{0,40})"
+    r"((?:['\"]\s*(?:=>|[:=])|\s*=>)\s*(?=['\"])|\s+[:=]\s*|:\s*|=)(['\"]?)([^\s'\"]+)"
 )
 
 # A marker in the SOURCE text is an attacker dressing a secret as already-redacted.
 _IS_MARK = re.compile(r"\[REDACTED:[a-z-]+\]")
-_PEM_BEGIN = re.compile(r"-----BEGIN[ A-Z0-9_-]*PRIVATE KEY(?: BLOCK)?-----")
-_PEM_END = re.compile(r"-----END[ A-Z0-9_-]*PRIVATE KEY(?: BLOCK)?-----")
+_PEM_BEGIN = re.compile(r"-----BEGIN[ A-Z0-9_-]{0,64}PRIVATE KEY(?: BLOCK)?-----")
+_PEM_END = re.compile(r"-----END[ A-Z0-9_-]{0,64}PRIVATE KEY(?: BLOCK)?-----")
 
 
 def _keyed_sub(match, found):
@@ -308,7 +374,10 @@ def summary(found):
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(
+    # imported here: _sanitize imports this module
+    from _sanitize import ArgumentParser
+
+    parser = ArgumentParser(
         description="Replace credential-shaped values on stdin. A mitigation, not a boundary: "
         "shapeless passwords, values echoed without their key and tokens split across a line "
         "wrap all survive. Rotate a credential that reached a log; do not assume this caught it.",

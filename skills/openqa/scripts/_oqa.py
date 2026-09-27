@@ -8,7 +8,7 @@ Wiring a script:
     import _oqa
 
     def main():
-        parser = argparse.ArgumentParser(...)
+        parser = ArgumentParser(...)
         _oqa.add_common_args(parser)            # --host, --fixture-dir
         args = parser.parse_args()
         client = _oqa.client_from_args(args, "my-script")
@@ -119,7 +119,7 @@ import urllib.request
 from urllib.parse import quote, urlencode, urlsplit
 
 import _secrets
-from _sanitize import fence, sanitize
+from _sanitize import ArgumentParser, excerpt, fence, sanitize
 
 __all__ = [
     "DEFAULT_HOST",
@@ -211,6 +211,11 @@ _NETLOC = re.compile(
 )
 
 
+def _argument(value):
+    # Userinfo can hold a password no redaction rule recognises.
+    return "a value holding '@' (not echoed)" if "@" in value else clean(value)
+
+
 def normalize_host(value):
     value = HOST_ALIASES.get(value.strip(), value.strip())
     if "://" not in value:
@@ -228,10 +233,12 @@ def normalize_host(value):
     except ValueError:
         usable = False
     if not usable:
-        raise OqaError(f"not a usable host: {clean(value)}")
+        raise OqaError(f"not a usable host: {_argument(value)}")
     allowed = ("https", "http") if parts.hostname in LOCAL_HOSTS else ("https",)
     if parts.scheme not in allowed:
-        raise OqaError(f"only https is allowed (http for localhost): {clean(value)}")
+        raise OqaError(
+            f"only https is allowed (http for localhost): {_argument(value)}"
+        )
     return f"{parts.scheme}://{parts.netloc.lower()}"
 
 
@@ -244,7 +251,7 @@ def parse_job_url(text, default_host=DEFAULT_HOST):
         return normalize_host(default_host), int(text)
     match = _JOB_URL.match(text)
     if not match:
-        raise OqaError(f"not a job id or job URL: {clean(text)}")
+        raise OqaError(f"not a job id or job URL: {_argument(text)}")
     return normalize_host(match.group(1)), int(match.group(2))
 
 
@@ -508,11 +515,7 @@ def clean(value, limit=80):
         return "-"
     if isinstance(value, (list, tuple)):
         value = ",".join(str(item) for item in value)
-    text = sanitize(str(value)[: limit * 4], max_line=0, max_bytes=0)
-    text = " ".join(text.split())
-    if len(text) > limit:
-        text = text[: limit - 3] + "..."
-    return text or "-"
+    return excerpt(str(value), limit) or "-"
 
 
 def quoted(value, limit=80):
@@ -608,7 +611,7 @@ def run(main):
 
 
 def _main():
-    parser = argparse.ArgumentParser(
+    parser = ArgumentParser(
         prog="_oqa.py",
         description="Self-check of the shared read-only openQA helpers (GET only). "
         "Other scripts import this module; see its docstring.",

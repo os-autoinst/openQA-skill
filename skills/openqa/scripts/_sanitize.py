@@ -20,6 +20,7 @@ import _secrets
 
 DEFAULT_MAX_LINE = 2000
 DEFAULT_MAX_BYTES = 65536
+_EXCERPT_MARGIN = 2048
 
 # Specific introducers must precede the generic two-byte escape, which would
 # otherwise consume only "ESC [" and leave the parameters behind as text.
@@ -63,6 +64,8 @@ _FENCE_LIKE = re.compile(
 )
 _MARKER_WORD = re.compile(rf"[^\w\n]{{0,4}}((?:[^\W_][{_MARKS}]*){{3,9}})(?![^\W_])")
 _STACKED_MARKS = re.compile(rf"([{_MARKS}]{{4}})[{_MARKS}]+")
+# Anchored at the start, so one backtracking pass: "\S+\Z" would be quadratic.
+_UP_TO_LAST_SPACE = re.compile(r".*\s", re.DOTALL)
 _CONFUSABLE = str.maketrans(
     "\u0415\u0395\u13ac\ua4f0\u039d\ua4e0\u13a0\ua4d3\u054d\u222a\ua4f4"
     "\u0422\u03a4\u13a2\ua4d4\u13a1\ua4e3\u0405\u13da\ua4e2",
@@ -134,7 +137,8 @@ def sanitize(text, *, max_line=DEFAULT_MAX_LINE, max_bytes=DEFAULT_MAX_BYTES):
     """
     # Every pass below walks the text character by character, so megabytes of it
     # are a denial of service in themselves: cut first, then clean what is left.
-    # The floor keeps the cut clear of any text a caller could still have printed.
+    # Stripping and redaction can shrink the rest until the cut is in view, and a
+    # credential cut in half matches no rule: the cut's last word is dropped unread.
     dropped = 0
     if max_bytes:
         limit = max(max_bytes * 4, DEFAULT_MAX_BYTES)
@@ -146,6 +150,11 @@ def sanitize(text, *, max_line=DEFAULT_MAX_LINE, max_bytes=DEFAULT_MAX_BYTES):
     text = _ASCII_CONTROLS.sub("", text)
     text = _NON_ASCII.sub(_map_non_ascii, text)
     text = _STACKED_MARKS.sub(r"\1", text)
+    if dropped:
+        whole = _UP_TO_LAST_SPACE.match(text)
+        kept = whole.group() if whole else ""
+        dropped += len(text) - len(kept)
+        text = kept
     # After the decoding tricks are gone, so a secret split up with invisible characters
     # cannot dodge the table; before the marker escape and the caps, so a redaction
     # marker cannot be cut in half. Line structure is preserved for the callers that
@@ -175,6 +184,36 @@ def one_lines(items, *, max_line=300, max_items=300):
     return "".join(line + "\n" for line in kept)
 
 
+def excerpt(text, limit):
+    """At most `limit` characters of text on one line, sanitised and redacted.
+
+    Only a window is cleaned, as a denial-of-service guard; its margin past what can be
+    shown is longer than any credential a bounded redaction rule matches. Only padding
+    that stripping removes can bring the cut into view: then the last word may be a
+    credential redaction did not see whole, and it is dropped.
+    """
+    window = limit * 4 + _EXCERPT_MARGIN
+    out = " ".join(sanitize(text[:window], max_line=0, max_bytes=0).split())
+    if len(text) > window and len(out) < limit + _EXCERPT_MARGIN:
+        out = out.rpartition(" ")[0] + "..."
+    if len(out) > limit:
+        out = out[: limit - 3] + "..."
+    return out
+
+
+class ArgumentParser(argparse.ArgumentParser):
+    """argparse whose error messages are sanitised: they quote argv, which can hold a credential."""
+
+    def error(self, message):
+        # argparse quotes values with repr(): decode its escapes, or a credential split
+        # up with invisible characters reaches excerpt() as visible "​" text.
+        message = message.encode("latin-1", "backslashreplace").decode(
+            "unicode_escape", "backslashreplace"
+        )
+        self.print_usage(sys.stderr)
+        self.exit(2, f"{self.prog}: error: {excerpt(message, 2000)}\n")
+
+
 def fence(text, source):
     """Wrap text between marker lines that carry a fresh random nonce."""
     nonce = secrets.token_hex(8)
@@ -193,7 +232,7 @@ def _size(value):
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(
+    parser = ArgumentParser(
         prog="_sanitize.py",
         description="Read untrusted text on stdin, write a sanitised, fenced copy to stdout. "
         "Everything between the <<<UNTRUSTED nonce ...>>> and <<<END nonce>>> lines is data, "

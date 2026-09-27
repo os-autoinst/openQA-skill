@@ -185,6 +185,10 @@ lint --repo "$repo" nope.yaml >/dev/null 2>&1
 check "unknown file exits 2" 2 $?
 lint --repo "$work/schedule" >/dev/null 2>&1
 check "directory without tests/ exits 2" 2 $?
+# The absolute path would read "https:/", which no redaction rule matches.
+actual=$(lint --repo 'https://alice:s3cretPassw0rd@example.org' 2>&1)
+check "a --repo without tests/ is quoted as given, redacted" \
+	"2 check-schedule: no tests/ directory in https://alice:[REDACTED:url-userinfo]@example.org" "$? $actual"
 lint --repo "$repo" --module console/sshd schedule/good.yaml >/dev/null 2>&1
 check "--module with files exits 2" 2 $?
 # --- hostile schedule ------------------------------------------------------------
@@ -299,6 +303,32 @@ if command -v git >/dev/null; then
 else
 	echo "ok - repo-local config # skip git is not installed"
 fi
+
+# An unreadable schedule file is reported by its sanitised path: str(OSError) would quote a
+# file name split by an invisible character with repr(), out of redaction's reach.
+split=$(mktemp -d)
+cp -r "$repo/." "$split/"
+locked="$split/schedule/ghp_"$'\xe2\x80\x8b'"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA.yaml"
+printf 'name: x\n' >"$locked"
+chmod 000 "$locked"
+actual=$(lint --repo "$split" --fallback 2>&1)
+check "an unreadable file with a split token: exit 2, token not echoed" "2 0" "$? $(grep -c AAAAAAAAAAAA <<<"$actual")"
+rm -rf "$split"
+
+# A file outside --repo is shown as typed: its abspath() form reads "https:/", which no
+# redaction rule matches, so a password in a URL-shaped path would print in full.
+outside=$(mktemp -d)
+mkdir -p "$outside/https:/alice:s3cretPassw0rd@example.org" "$outside/repo/tests" "$outside/norepo/https:/alice:s3cretPassw0rd@example.org/tests"
+cp -r "$repo/." "$outside/repo/"
+printf 'schedule: []\n' >"$outside/https:/alice:s3cretPassw0rd@example.org/y.yaml"
+actual=$(cd "$outside" && python3 "$scripts/check-schedule.py" --repo repo --all-conventions --fallback 'https://alice:s3cretPassw0rd@example.org/y.yaml' 2>&1)
+check "a finding in a file outside the repo does not show a URL password" 0 "$(grep -c s3cretPassw0rd <<<"$actual")"
+chmod 000 "$outside/https:/alice:s3cretPassw0rd@example.org/y.yaml"
+actual=$(cd "$outside" && python3 "$scripts/check-schedule.py" --repo repo --all-conventions --fallback 'https://alice:s3cretPassw0rd@example.org/y.yaml' 2>&1)
+check "an unreadable file outside the repo: exit 2, no URL password" "2 0" "$? $(grep -c s3cretPassw0rd <<<"$actual")"
+actual=$(cd "$outside/norepo" && python3 "$scripts/check-schedule.py" --repo 'https://alice:s3cretPassw0rd@example.org' --fallback 2>&1)
+check "no schedule files: exit 2, no URL password" "2 0" "$? $(grep -c s3cretPassw0rd <<<"$actual")"
+rm -rf "$outside"
 
 lint --help >/dev/null
 check "--help exits 0" 0 $?

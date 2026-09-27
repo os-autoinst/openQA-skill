@@ -141,6 +141,13 @@ check "unknown file exits 2" 2 $?
 check "unknown file lists the bundled references" 'refsection: no such file: missing.md
 references: guide.md' "$actual"
 
+mkdir -p "$work/https:/alice:s3cretPassw0rd@example.org"
+printf '# T\n' >"$work/https:/alice:s3cretPassw0rd@example.org/r.md"
+chmod 000 "$work/https:/alice:s3cretPassw0rd@example.org/r.md"
+actual=$(ref "$work/https://alice:s3cretPassw0rd@example.org/r.md" --list 2>&1)
+check "an unreadable file's path is redacted" "2 0" "$? $(grep -c s3cretPassw0rd <<<"$actual")"
+chmod 644 "$work/https:/alice:s3cretPassw0rd@example.org/r.md"
+
 ref guide.md >/dev/null 2>&1
 check "no title and no --list exits 2" 2 $?
 ref --list guide.md Results >/dev/null 2>&1

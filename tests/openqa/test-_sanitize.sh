@@ -144,4 +144,40 @@ check "sanitize redacts credential values" "zypper ar https://alice:[REDACTED:ur
 actual=$(printf 'worker openqaworker20 ran module foo\n' | python3 "$scripts/_sanitize.py" --no-fence 2>/dev/null)
 check "and leaves ordinary log text alone" "worker openqaworker20 ran module foo" "$actual"
 
+# --- excerpt: the denial-of-service cut must not let a split credential through ---
+actual=$(cd "$scripts" && python3 -c 'from _sanitize import excerpt; print(excerpt("\u200b" * 3000 + "https://user:s3cretPassw0rd@host/x", 80))')
+check "padding that pushes a credential across the cut shows no part of it" "..." "$actual"
+actual=$(cd "$scripts" && python3 -c 'from _sanitize import excerpt; print(excerpt("m" * 5000, 20), excerpt("a b " * 3000, 12))')
+check "a long value is still shown up to the limit" "mmmmmmmmmmmmmmmmm... a b a b a..." "$actual"
+actual=$(cd "$scripts" && python3 -c 'from _sanitize import excerpt; print(excerpt("x" * 60 + " https://user:" + "p" * 250 + "@host", 80))')
+check "a long password near the limit is redacted whole, not cut" 0 "$(grep -c ppp <<<"$actual")"
+# sanitize() cuts at 262144 characters by default; the padding puts that cut 22 characters into the URL.
+actual=$(cd "$scripts" && python3 -c 'from _sanitize import sanitize; print(sanitize("keep\n" + "​" * 262117 + "https://user:s3cretPassw0rd@host/x"), end="")')
+check "sanitize: padding that brings its cut into view shows no part of the credential" "$(printf 'keep\n[... 34 chars omitted]')" "$actual"
+
+# --- argparse errors quote argv, which can hold a credential ---
+actual=$(cd "$scripts" && python3 -c '
+from _sanitize import ArgumentParser
+parser = ArgumentParser(prog="x")
+parser.add_argument("--n", type=int)
+parser.parse_args(["--n", "https://user:s3cretPassw0rd@host"])' 2>&1)
+check "an argparse error does not echo the password" 0 "$(grep -c s3cretPassw0rd <<<"$actual")"
+check "an argparse error says what was redacted" 1 "$(grep -c 'REDACTED:url-userinfo' <<<"$actual")"
+# "invalid choice" quotes the value with repr(), which spells the zero-width space as text.
+actual=$(cd "$scripts" && python3 -c '
+from _sanitize import ArgumentParser
+parser = ArgumentParser(prog="x")
+parser.add_argument("--k", choices=["a"])
+parser.parse_args(["--k", "ghp_​" + "A" * 36])' 2>&1)
+check "an argparse error redacts a token split by a zero-width space" 1 "$(grep -c 'REDACTED:github-token' <<<"$actual")"
+check "an argparse error does not echo the split token" 0 "$(grep -c AAAAAAAAAAAA <<<"$actual")"
+actual=$(cd "$scripts" && python3 -c '
+from _sanitize import ArgumentParser
+parser = ArgumentParser(prog="x")
+parser.add_argument("--n", type=int)
+parser.parse_args(["--n", "x\nkey = s3cretValue99"])' 2>&1)
+check "an argparse error sees the line break repr() escaped" 0 "$(grep -c s3cretValue99 <<<"$actual")"
+check "every script builds its parser from the sanitising one" "" \
+	"$(grep -l 'argparse\.ArgumentParser(' "$scripts"/*.py | grep -v '/_sanitize\.py$')"
+
 exit $fail

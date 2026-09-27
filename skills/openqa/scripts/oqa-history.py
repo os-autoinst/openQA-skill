@@ -20,6 +20,7 @@ import re
 
 import _oqa
 import _secrets
+from _sanitize import ArgumentParser
 
 OK_RESULTS = _oqa.RESULT_GROUPS["ok"]
 # Not-ok runs in a row from which a failure is called persistent rather than intermittent.
@@ -309,7 +310,7 @@ def investigation(client, job_id, limit, verbose):
 
 
 def main():
-    parser = argparse.ArgumentParser(
+    parser = ArgumentParser(
         prog="oqa-history.py",
         description="Newest-first history of the scenario of one openQA job (same distri, version, "
         "flavor, arch, test and machine), with last good / first bad, the failure rate and a "

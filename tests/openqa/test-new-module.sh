@@ -118,6 +118,24 @@ usage "tests/ itself is a symlink out of the checkout" --repo "$work/linked" --k
 usage "absolute path" --kind console --path /tests/console/a.pm --summary S --maintainer 'a@b.c'
 check "nothing was written through a symlink" "" "$(find "$work/outside" -mindepth 1)"
 
+# --- a credential in an argument ------------------------------------------------------
+actual=$(new --stdout --kind console --path tests/console/a.pm --summary 'see https://alice:s3cretPassw0rd@example.org' --maintainer 'a@b.c' 2>&1)
+check "a credential in the summary is named as one" "2 new-module.py: --summary: contains a credential (url-userinfo)" "$? $actual"
+actual=$(new --stdout --kind console --path tests/console/a.pm --summary $'S\e[31m' --maintainer 'a@b.c' 2>&1)
+check "an escape sequence is still reported as a control character" \
+	"new-module.py: --summary and --maintainer must not contain control or invisible characters" "$actual"
+cred=https://alice:s3cretPassw0rd@example.org
+mkdir -p "$work/https:/alice:s3cretPassw0rd@example.org" "$work/https:/bob:s3cretPassw0rd@example.org/tests"
+ln -s "$work/outside" "$work/https:/alice:s3cretPassw0rd@example.org/tests"
+touch "$work/https:/bob:s3cretPassw0rd@example.org/tests/afile"
+actual=$(new --repo "$cred" --kind console --path tests/console/a.pm --summary S --maintainer 'a@b.c' 2>&1)
+check "a --repo without tests/ is not echoed raw" "2 0" "$? $(grep -c s3cretPassw0rd <<<"$actual")"
+actual=$(new --repo "$work/$cred" --kind console --path tests/console/a.pm --summary S --maintainer 'a@b.c' 2>&1)
+check "a --repo whose tests/ leaves it is not echoed raw" "2 0" "$? $(grep -c s3cretPassw0rd <<<"$actual")"
+actual=$(new --repo "$work/${cred/alice/bob}" --kind console --path tests/afile/sub/a.pm --summary S --maintainer 'a@b.c' 2>&1)
+check "a write error names --path, not the resolved path" "2 new-module.py: tests/afile/sub/a.pm: Not a directory" "$? $actual"
+check "nothing was written for a --repo with a credential" "" "$(find "$work/outside" -mindepth 1)"
+
 new --help >/dev/null
 check "--help exits 0" 0 $?
 

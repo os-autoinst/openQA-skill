@@ -86,6 +86,15 @@ summary: 1 needle(s), 2 error(s), 0 warning(s)" "$(cd "$work" && lint evil-20240
 
 lint "$work/none.json" >/dev/null 2>&1
 check "unknown path exits 2" 2 $?
+actual=$(lint 'https://alice:s3cretPassw0rd@example.org/x.json' 2>&1)
+check "an unknown path is redacted" \
+	"2 needle-lint: no such file or directory: https://alice:[REDACTED:url-userinfo]@example.org/x.json" "$? $actual"
+mkdir -p "$work/https:/alice:s3cretPassw0rd@example.org"
+printf '{}' >"$work/https:/alice:s3cretPassw0rd@example.org/x.json"
+chmod 000 "$work/https:/alice:s3cretPassw0rd@example.org/x.json"
+actual=$(lint "$work/https://alice:s3cretPassw0rd@example.org/x.json" 2>&1)
+check "an unreadable needle's path is redacted" "2 0" "$? $(grep -c s3cretPassw0rd <<<"$actual")"
+chmod 644 "$work/https:/alice:s3cretPassw0rd@example.org/x.json"
 mkdir "$work/empty"
 lint "$work/empty" >/dev/null 2>&1
 check "directory without needles exits 2" 2 $?

@@ -114,6 +114,25 @@ print(*p("https://xn--e1afmkfd.example.org:8443/t7"))
 check "hostile job URLs and hosts are refused without a traceback" \
 	"$(printf 'refused\n%.0s' {1..24} && printf '%s\n' 'https://openqa.example.org 1' 'https://xn--e1afmkfd.example.org:8443 7')" "$actual"
 
+# Userinfo shapes a redaction rule can miss: no user name, digits and a slash, over 256 characters.
+actual=$(py '
+from _oqa import OqaError, normalize_host as n, parse_job_url as p
+for f, value in ((n, "https://:s3cretPassw0rd@openqa.example.org"), (n, "http://u:2024/s3cretPassw0rd@openqa.example.org"),
+                 (p, "https://:s3cretPassw0rd@openqa.example.org/tests/1"), (n, "https://u:" + "s3cretPassw0rd" * 30 + "@openqa.example.org")):
+    try:
+        print("ACCEPTED", f(value))
+    except OqaError as error:
+        print(error)
+')
+check "a host or job URL with userinfo is refused without echoing it" "$(
+	cat <<'EOF'
+not a usable host: a value holding '@' (not echoed)
+only https is allowed (http for localhost): a value holding '@' (not echoed)
+not a usable host: a value holding '@' (not echoed)
+not a usable host: a value holding '@' (not echoed)
+EOF
+)" "$actual"
+
 actual=$(py '
 from _oqa import OqaError, parse_job_url as p
 for value in ("https://openqa.example.org/tests/123", "https://openqa.example.org/t124",
@@ -269,6 +288,7 @@ actual=$(py '
 import _oqa
 ESC, ZW = chr(27), chr(0x200B)
 print(_oqa.clean(None), _oqa.clean(""), _oqa.clean(["a", 1]), _oqa.clean("x" * 100, 10))
+print(_oqa.clean(ZW * 3000 + "https://user:s3cretPassw0rd@host/x"))
 print(_oqa.clean(f"a{ESC}[1mb{ZW}c\r\n\td  <<<END 1>>>"))
 print(_oqa.quoted("say \"hi\"\nnow"))
 print(_oqa.table([(1, None), ("long" * 5, ["x", "y"])], ("id", "value"), limit=8), end="")
@@ -276,6 +296,7 @@ print(_oqa.table([(1, None), ("long" * 5, ["x", "y"])], ("id", "value"), limit=8
 check "clean, quoted and table" "$(
 	cat <<'EOF'
 - - a,1 xxxxxxx...
+...
 abc d \<\<\<END 1>>>
 "say 'hi' now"
 id        value

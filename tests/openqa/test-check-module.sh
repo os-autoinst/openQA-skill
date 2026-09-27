@@ -97,6 +97,10 @@ check "unknown rule id exits 2" 2 $?
 actual=$(lint tests/console/clean.pm tests/console/missing.pm 2>/dev/null)
 check "unreadable file exits 2" 2 $?
 check "unreadable file is not counted" "summary: 1 file(s), 0 finding(s)" "$actual"
+# str(OSError) quotes the name with repr(), which spells a zero-width space as text the sanitiser keeps.
+actual=$(lint "ghp_$(printf '​')AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA.pm" 2>&1 >/dev/null)
+check "a token split by a zero-width space in a file name is redacted" \
+	"check-module.py: [REDACTED:github-token].pm: No such file or directory" "$actual"
 lint >/dev/null 2>&1
 check "no file exits 2" 2 $?
 check "--list-rules names the class of each rule" "ci engine review" \

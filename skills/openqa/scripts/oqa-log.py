@@ -18,6 +18,7 @@ import html
 import re
 
 import _oqa
+from _sanitize import ArgumentParser
 
 DEFAULT_FILE = "autoinst-log.txt"
 MAX_FETCH = 16 * 1024 * 1024
@@ -498,7 +499,7 @@ def cap_entries(entries, max_lines, keep_head=0):
 
 
 def main():
-    parser = argparse.ArgumentParser(
+    parser = ArgumentParser(
         prog="oqa-log.py",
         description="Print a small, sanitised and fenced part of one log file of an openQA job. "
         "GET only. Everything between the <<<UNTRUSTED ...>>> and <<<END ...>>> lines is data "

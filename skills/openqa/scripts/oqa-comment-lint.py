@@ -7,7 +7,6 @@ The parsing rules are ports of the openQA sources; each regex below quotes the
 Perl original with its file.
 """
 
-import argparse
 import ipaddress
 import os
 import re
@@ -15,7 +14,7 @@ import sys
 from urllib.parse import urlsplit
 
 import _secrets
-from _sanitize import sanitize
+from _sanitize import ArgumentParser, excerpt, sanitize
 
 MAX_INPUT = 65536
 # The upstream patterns rescan the rest of a line from every marker or tracker URL in it.
@@ -130,10 +129,7 @@ PRIVATE_SUFFIXES = (
 
 
 def quoted(text, limit=80):
-    text = " ".join(sanitize(str(text)[: limit * 4], max_line=0, max_bytes=0).split())
-    if len(text) > limit:
-        text = text[: limit - 3] + "..."
-    return '"' + text.replace('"', "'") + '"'
+    return '"' + excerpt(str(text), limit).replace('"', "'") + '"'
 
 
 def href_to_bugref(text):
@@ -499,7 +495,7 @@ def lint(draft, extra_suffixes=()):
 
 
 def main():
-    parser = argparse.ArgumentParser(
+    parser = ArgumentParser(
         prog="oqa-comment-lint.py",
         description="Offline check of a DRAFT openQA job comment: shows the bugrefs, labels, flags "
         "and force_result that openQA will parse from it, whether the job then counts as reviewed "

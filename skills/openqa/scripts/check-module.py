@@ -8,12 +8,11 @@ Rule classes: "ci" ports a grep gate of the distri (Makefile, tools/check_*, t/0
 Line based: calls split over several lines are not inspected.
 """
 
-import argparse
 import os
 import re
 import sys
 
-from _sanitize import one_lines
+from _sanitize import ArgumentParser, one_lines
 
 RULES = {}
 ORDER = []
@@ -465,7 +464,7 @@ def check(module, disabled):
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(
+    parser = ArgumentParser(
         prog="check-module.py",
         description="Offline lint of os-autoinst-distri-opensuse test modules (.pm, .py). "
         "Prints one '<file>:<line>[,<line>...]: <id>' per file and rule; '<message> -> <fix>' "
@@ -510,7 +509,11 @@ def main(argv=None):
             with open(path, encoding="utf-8", errors="replace") as handle:
                 module = Module(path, handle.read())
         except OSError as error:
-            print(f"check-module.py: {error}", file=sys.stderr)
+            print(
+                one_lines([f"check-module.py: {path}: {error.strerror}"]),
+                end="",
+                file=sys.stderr,
+            )
             broken = True
             continue
         checked += 1

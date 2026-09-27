@@ -3,13 +3,12 @@
 # Lint YAML schedules of an os-autoinst distri checkout, or list the schedules that use a module.
 """Rules follow t/schema/Schedule-1.yaml, lib/main_common.pm loadtest() and .yamllint upstream."""
 
-import argparse
 import os
 import re
 import subprocess
 import sys
 
-from _sanitize import one_lines
+from _sanitize import ArgumentParser, one_lines
 
 try:
     import yaml
@@ -395,9 +394,14 @@ def readable(path, repo):
     return os.path.isfile(real) and (inside or not (named or os.path.islink(path)))
 
 
+# The name as typed, for a file outside the repository: abspath() folds "https://" into
+# "https:/", out of redaction's reach.
+TYPED = {}
+
+
 def shown(path, repo):
     relative = os.path.relpath(path, repo)
-    return path if relative.startswith("..") else relative
+    return TYPED.get(path, path) if relative.startswith("..") else relative
 
 
 def find_module(wanted, repo, use_yaml):
@@ -436,7 +440,7 @@ def capped(lines, most, head):
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(
+    parser = ArgumentParser(
         prog="check-schedule.py",
         description="Lint YAML schedules of an os-autoinst distri checkout: top-level keys, "
         "name, existence of every module under schedule and conditional_schedule "
@@ -495,7 +499,7 @@ def main(argv=None):
     repo = os.path.abspath(args.repo)
     if not os.path.isdir(os.path.join(repo, "tests")):
         print(
-            one_lines([f"check-schedule: no tests/ directory in {repo}"]),
+            one_lines([f"check-schedule: no tests/ directory in {args.repo}"]),
             end="",
             file=sys.stderr,
         )
@@ -524,11 +528,12 @@ def main(argv=None):
                 )
                 return 2
             paths.append(os.path.abspath(path))
+            TYPED[paths[-1]] = name
         new = None if args.all_conventions else new_in_git(repo, paths or ["schedule"])
         paths = paths or schedules(repo)
         if not paths:
             print(
-                one_lines([f"check-schedule: no schedule files in {repo}"]),
+                one_lines([f"check-schedule: no schedule files in {args.repo}"]),
                 end="",
                 file=sys.stderr,
             )
@@ -558,7 +563,13 @@ def main(argv=None):
                         )
                     )
     except OSError as error:
-        print(one_lines([f"check-schedule: {error}"]), end="", file=sys.stderr)
+        # str(OSError) quotes the file name with repr(), which hides a split credential
+        where = shown(error.filename, repo) if error.filename else "check-schedule"
+        print(
+            one_lines([f"check-schedule: {where}: {error.strerror}"]),
+            end="",
+            file=sys.stderr,
+        )
         return 2
 
     errors = sum(counts[kind] for kind in ERRORS)

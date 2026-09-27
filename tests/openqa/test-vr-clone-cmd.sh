@@ -208,7 +208,7 @@ eval "set -- $cmd"
 check "shell metacharacters in every value arrive verbatim" \
 	"FOO=\$(touch $canary) BAR=\`touch $canary\` BAZ=a;touch $canary|b&c>$canary BUILD=b \"q\" \$(touch $canary)" "$4 $5 $6 $7"
 check "parsing the printed command runs nothing" no "$([ -e "$canary" ] && echo yes || echo no)"
-refused "userinfo in the job URL" "not a plain host name" --job 'https://openqa.opensuse.org@evil.example.org/tests/1' "${fork[@]}"
+refused "userinfo in the job URL" "not a plain host name" --job 'https://openqa.suse.de@evil.example.org/tests/1' "${fork[@]}"
 # shellcheck disable=SC2016
 refused "command substitution in the host" "not a plain host name" --job 'https://ev$(id)il.example.org/tests/1' "${fork[@]}"
 refused "separator in a bare host" "not a plain host name" --job 'openqa.example.org;id' 1 "${fork[@]}"
@@ -258,6 +258,44 @@ check "fork form quotes a single quote itself" 0 "$rc"
 refused "escape sequence in a ref" "control or invisible" --job "$lab" --fork alice --branch $'fix\e[31m'
 refused "zero-width character in a setting" "control or invisible" --job "$lab" "${fork[@]}" --set $'FOO=a​b'
 refused "newline in a label" "control or invisible" --job "$lab" "${fork[@]}" --label $'a\nhazard: none'
+
+# A credential in an argument is refused before any message could echo it.
+refused "a password in the job URL" "contains a credential (url-userinfo)" --job 'https://u:s3cretPassw0rd@openqa.example.org/tests/1' "${fork[@]}"
+lacks "a password in the job URL: not echoed" "s3cretPassw0rd" "$err"
+refused "a token as a URL's userinfo in a setting" "contains a credential (url-token)" --job "$lab" "${fork[@]}" --set 'ASSET_1_URL=https://a1b2c3d4e5f6a7b8c9d0e1f2@host/x'
+lacks "a token in a setting: not echoed" "a1b2c3d4e5f6a7b8c9d0e1f2" "$err"
+refused "a secret setting" "contains a credential (keyed-assignment)" --job "$lab" "${fork[@]}" --set 'SCC_REGCODE=ABCD1234EFGH5678'
+lacks "a secret setting: not echoed" "ABCD1234EFGH5678" "$err"
+split="FOO=ghp_"$'\xe2\x80\x8b'"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+refused "a token split by an invisible character" "contains a credential (github-token)" --job "$lab" "${fork[@]}" --set "$split"
+lacks "a split token: not echoed" "AAAAAAAAAAAA" "$err"
+# A setting whose name says credential is refused whatever its value looks like; deleting it is fine.
+refused "a secret setting appended with +=" "--set SCC_REGCODE: a credential setting" --job "$lab" "${fork[@]}" --set 'SCC_REGCODE+=ABCD1234EFGH5678'
+lacks "a secret setting appended with +=: not echoed" "ABCD1234EFGH5678" "$err"
+refused "a secret array setting" "--set SCC_REGCODE: a credential setting" --job "$lab" "${fork[@]}" --set 'SCC_REGCODE[]=ABCD1234EFGH5678'
+lacks "a secret array setting: not echoed" "ABCD1234EFGH5678" "$err"
+# shellcheck disable=SC2016
+refused "a secret setting from a \$VAR" "--set SCC_REGCODE: a credential setting" --job "$lab" "${fork[@]}" --set 'SCC_REGCODE=$SCC_KEY'
+refused "a secret setting whose key is not uppercase" "--set scc_regcode: a credential setting" --job "$lab" "${fork[@]}" --set 'scc_regcode+=/AbCd+EfGh/1234'
+lacks "a secret setting whose key is not uppercase: not echoed" "AbCd" "$err"
+run --job "$lab" "${fork[@]}" --set 'SCC_REGCODE='
+check "deleting a secret setting: exit code 0" 0 "$rc"
+has "deleting a secret setting: listed" "deletes: SCC_REGCODE" "$out"
+# Userinfo shapes a redaction rule can miss: the value is not echoed at all.
+refused "a password with no user name in the job URL" "--job: " --job 'https://:s3cretPassw0rd@openqa.example.org/tests/1' "${fork[@]}"
+lacks "a password with no user name: not echoed" "s3cretPassw0rd" "$err"
+refused "a password with a slash in the job URL" "--job: " --job 'https://u:2024/Winter@openqa.example.org/tests/1' "${fork[@]}"
+lacks "a password with a slash: not echoed" "Winter" "$err"
+refused "a URL with a password as the job id" "--job: " --job openqa.example.org 'https://:s3cretPassw0rd@x/1' "${fork[@]}"
+lacks "a URL with a password as the job id: not echoed" "s3cretPassw0rd" "$err"
+
+# A value holding "@" is never echoed, whatever the message.
+run --job "$lab" "${fork[@]}" --schedule 'tests/x,admin:Hunter2pw@files.example.txt'
+lacks "an @ in a --schedule entry: not echoed" "Hunter2pw" "$err"
+run --job "$lab" --fork 'alice:Hunter2pw@x' --branch fix
+lacks "an @ in --fork: not echoed" "Hunter2pw" "$err"
+run --job "$lab" "${fork[@]}" --label $'admin:Hunter2pw\xe2\x80\x8b@files.example'
+lacks "an @ in a label with an invisible character: not echoed" "Hunter2pw" "$err"
 
 # A scope that never reaches the "=" used to split in quadratically many ways: 16 kB took 20 s.
 bomb="A:$(python3 -c 'print("a" * 8192)')"

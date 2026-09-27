@@ -7,14 +7,13 @@ No network access. Whether a finding is right is not checked, only whether the
 draft stays inside the budget and the form of references/pr-reviewing.md.
 """
 
-import argparse
 import json
 import os
 import re
 import sys
 import unicodedata
 
-from _sanitize import sanitize
+from _sanitize import ArgumentParser, sanitize
 
 MAX_INPUT = 262144
 MAX_LISTED = 40
@@ -314,7 +313,7 @@ def load(raw):
 
 
 def main():
-    parser = argparse.ArgumentParser(
+    parser = ArgumentParser(
         prog="review-lint.py",
         description="Offline size and form check of a DRAFT pull request review: the JSON for "
         "gh api -X POST repos/O/R/pulls/N/reviews --input FILE (commit_id, event, body, comments "

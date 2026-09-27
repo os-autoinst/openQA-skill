@@ -3,13 +3,12 @@
 # Lint needle JSON files the way os-autoinst needle.pm loads them and the needles-repo CI gates them.
 """Errors make os-autoinst drop the needle or the needles CI reject it; warnings are conventions."""
 
-import argparse
 import json
 import os
 import re
 import sys
 
-from _sanitize import one_lines
+from _sanitize import ArgumentParser, one_lines
 
 TOP_KEYS = ("area", "tags", "properties")
 AREA_TYPES = ("match", "ocr", "exclude")
@@ -224,7 +223,7 @@ def collect(targets):
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(
+    parser = ArgumentParser(
         prog="needle-lint.py",
         description="Lint needle JSON files: valid JSON, tags (non-empty, no duplicates), "
         "areas (integer xpos/ypos/width/height, type match|ocr|exclude, match 0-100, at least "
@@ -251,7 +250,7 @@ def main(argv=None):
     try:
         paths = collect(args.targets)
     except OSError as error:
-        print(f"needle-lint: {error}", file=sys.stderr)
+        print(one_lines([f"needle-lint: {error}"]), end="", file=sys.stderr)
         return 2
     if not paths:
         print("needle-lint: no .json files found", file=sys.stderr)
@@ -263,7 +262,11 @@ def main(argv=None):
         try:
             found = lint(path)
         except OSError as error:
-            print(f"needle-lint: {error}", file=sys.stderr)
+            print(
+                one_lines([f"needle-lint: {path}: {error.strerror}"]),
+                end="",
+                file=sys.stderr,
+            )
             return 2
         for wanted in ("error", "warning"):
             messages = [message for level, message in found if level == wanted]

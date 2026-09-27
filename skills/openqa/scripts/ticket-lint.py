@@ -6,7 +6,6 @@
 No network access. Whether the report is right is not checked: that is the refute pass.
 """
 
-import argparse
 import ipaddress
 import json
 import os
@@ -15,7 +14,7 @@ import sys
 from urllib.parse import urlsplit
 
 import _secrets
-from _sanitize import sanitize
+from _sanitize import ArgumentParser, sanitize
 
 MAX_INPUT = 262144
 MAX_LISTED = 40
@@ -367,7 +366,7 @@ def load(raw):
 
 
 def main():
-    parser = argparse.ArgumentParser(
+    parser = ArgumentParser(
         prog="ticket-lint.py",
         description="Offline check of a DRAFT Bugzilla bug or progress ticket, given as JSON: "
         '{"kind": "bugzilla"|"progress", "fields": {...}, "summary"|"subject": "...", '

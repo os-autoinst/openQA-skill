@@ -3,13 +3,12 @@
 # Print one section of a markdown reference (or its outline) so whole files never need loading.
 """Sections are ATX headings ("## Title"); setext underlines are not recognised."""
 
-import argparse
 import difflib
 import os
 import re
 import sys
 
-from _sanitize import fence, one_lines, sanitize
+from _sanitize import ArgumentParser, fence, one_lines, sanitize
 
 SKILL_DIR = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 REFERENCES = os.path.join(SKILL_DIR, "references")
@@ -110,7 +109,7 @@ def is_bundled(path):
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(
+    parser = ArgumentParser(
         prog="refsection.py",
         description="Print one or more sections of a markdown file. A section runs from its "
         "heading to the next heading of the same or higher level. Titles match exactly, then "
@@ -147,7 +146,11 @@ def main(argv=None):
         with open(path, encoding="utf-8", errors="replace") as handle:
             text = handle.read()
     except OSError as error:
-        print(f"refsection: {error}", file=sys.stderr)
+        print(
+            one_lines([f"refsection: {path}: {error.strerror}"]),
+            end="",
+            file=sys.stderr,
+        )
         return 2
 
     bundled = is_bundled(path)

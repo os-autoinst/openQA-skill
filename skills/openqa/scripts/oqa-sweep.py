@@ -53,6 +53,7 @@ import json
 import re
 
 import _oqa
+from _sanitize import ArgumentParser
 
 MODE_OVERVIEW = "overview"
 MODE_API = "api-fallback"
@@ -573,7 +574,7 @@ def positive(value):
 
 
 def main():
-    parser = argparse.ArgumentParser(
+    parser = ArgumentParser(
         prog="oqa-sweep.py",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=__doc__,

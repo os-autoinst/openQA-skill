@@ -47,7 +47,11 @@ Every third-party string the scripts print goes through it, stdout and stderr al
 credential-shaped value never reaches the transcript. `[REDACTED:<rule>]` marks what went;
 the diagnostic half is kept, so `https://alice:[REDACTED:url-userinfo]@host/` still names the
 account and the host. A per-rule count goes to stderr: treat it as "this job's artefacts held
-a credential", and say so.
+a credential", and say so. Error messages are covered too: every script's parser is
+`_sanitize.ArgumentParser`, whose errors (they quote argv) are redacted after their `repr()`
+escapes are decoded; any other error quotes an argument or path only once it is sanitised or
+validated, and a job URL or host holding `@` is not echoed at all. Neither `sanitize()` nor
+`_sanitize.excerpt` shows the visible half of a credential cut by its size guard.
 
 Also usable directly, `stdin` to `stdout`, exit 1 when anything was redacted:
 
@@ -235,7 +239,10 @@ Forgotten `_GROUP=0`, assets published from a test branch, clones on production.
 Exit 1: `hazard:` lines. Also `--needles-fork/--needles-branch`, `--skip-chained-deps`, `--parent-publishes`;
 `--repo-name`/`--needles-repo-name` when a fork renamed the repository; `--label` sets `BUILD`
 (default `<user>/<repo>#<ref>`); `--dry-run-flag` adds `--export-command`, which prints instead of posting.
-Fork unknown: literal `--fork '<user>' --branch '<branch>'`; a `note:` says to replace them.
+Fork unknown: literal `--fork '<user>' --branch '<branch>'`; a `note:` says to replace them. An argument
+that carries a credential is refused (exit 2) with the rule's name, never the value, and so is a `--set`
+whose key names one (`SCC_REGCODE`, `*PASSWORD*`), whatever its value or form (`KEY=` to delete is fine): a
+clone inherits the job's settings, and a secret does not belong in a printed command line.
 
 ## check-module.py - lint test modules (offline)
 

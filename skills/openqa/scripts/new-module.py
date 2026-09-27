@@ -3,12 +3,11 @@
 # Scaffold an os-autoinst-distri-opensuse test module with a CI-clean header and the idiomatic skeleton for its kind.
 """Writes tests/<dir>/<name>.pm (or .py) into a distri checkout, then prints the schedule line and the next checks."""
 
-import argparse
 import os
 import re
 import sys
 
-from _sanitize import sanitize
+from _sanitize import ArgumentParser, one_lines, sanitize
 
 # Header shape: tests/console/man_pages.pm:1-8 (year-less copyright per CONTRIBUTING.md "Copyright SUSE LLC").
 HEADER = """\
@@ -241,8 +240,13 @@ def validate(args):
                 args.kind, "py" if args.kind == "python" else "pm"
             )
         )
-    for value in (args.summary, args.maintainer):
-        if value != sanitize(value, max_line=0, max_bytes=0):
+    for flag, value in (("--summary", args.summary), ("--maintainer", args.maintainer)):
+        # sanitize() also redacts: report a credential as one, not as stray characters.
+        cleaned = sanitize(value, max_line=0, max_bytes=0)
+        rules = sorted(set(re.findall(r"\[REDACTED:([a-z-]+)\]", cleaned)))
+        if rules:
+            raise UsageError(f"{flag}: contains a credential ({', '.join(rules)})")
+        if value != cleaned:
             raise UsageError(
                 "--summary and --maintainer must not contain control or invisible characters"
             )
@@ -269,7 +273,7 @@ def same_basename(tests_dir, target, filename):
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(
+    parser = ArgumentParser(
         description="Scaffold an os-autoinst-distri-opensuse test module. Refuses to overwrite. "
         "Exit codes: 0 written/printed, 2 usage or runtime error.",
     )
@@ -315,7 +319,12 @@ def main(argv=None):
     target = os.path.realpath(os.path.join(repo, args.path))
     if not os.path.isdir(tests_dir):
         print(
-            f"new-module.py: {args.repo} has no tests/ directory, not a distri checkout",
+            one_lines(
+                [
+                    f"new-module.py: {args.repo} has no tests/ directory, not a distri checkout"
+                ]
+            ),
+            end="",
             file=sys.stderr,
         )
         return 2
@@ -326,7 +335,10 @@ def main(argv=None):
         or os.path.commonpath([target, tests_real]) != tests_real
     ):
         print(
-            f"new-module.py: {args.path} resolves outside {args.repo}/tests",
+            one_lines(
+                [f"new-module.py: {args.path} resolves outside {args.repo}/tests"]
+            ),
+            end="",
             file=sys.stderr,
         )
         return 2
@@ -338,7 +350,12 @@ def main(argv=None):
         print(f"new-module.py: {args.path} exists, not overwriting", file=sys.stderr)
         return 2
     except OSError as error:
-        print(f"new-module.py: {error}", file=sys.stderr)
+        # str(error) names the resolved path, where "https://" has lost a slash.
+        print(
+            one_lines([f"new-module.py: {args.path}: {error.strerror}"]),
+            end="",
+            file=sys.stderr,
+        )
         return 2
 
     suffix = ".py" if args.kind == "python" else ""

@@ -55,6 +55,7 @@ from urllib.parse import quote
 
 import _oqa
 import _secrets
+from _sanitize import ArgumentParser
 
 # The scenario line carries DISTRI..MACHINE and BUILD, the dependency lines the
 # START_AFTER_TEST / PARALLEL_WITH relations.
@@ -724,7 +725,7 @@ def regex(value):
 
 
 def main():
-    parser = argparse.ArgumentParser(
+    parser = ArgumentParser(
         prog="oqa-job.py",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=__doc__,

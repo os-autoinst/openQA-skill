@@ -6,13 +6,13 @@
 Nothing is executed and no network is used; the printed command is for review.
 """
 
-import argparse
 import re
 import shlex
 import sys
 from urllib.parse import urlsplit
 
-from _sanitize import sanitize
+import _secrets
+from _sanitize import ArgumentParser, sanitize
 
 PRODUCTION_HOSTS = ("openqa.opensuse.org", "openqa.suse.de", "openqa.debian.net")
 # A single argv string can be ~128 kB; nothing here needs more than a long SCHEDULE.
@@ -58,8 +58,24 @@ class UsageError(Exception):
 def check_clean(name, value):
     if len(value) > MAX_ARG:
         raise UsageError(f"{name}: longer than {MAX_ARG} characters ({len(value)})")
-    if value != sanitize(value, max_line=0, max_bytes=0) or "\n" in value:
-        raise UsageError(f"{name}: contains control or invisible characters: {value!a}")
+    # sanitize() strips invisible characters before it redacts, so a credential split up
+    # with them shows here too; neither message below may then echo the value.
+    cleaned = sanitize(value, max_line=0, max_bytes=0)
+    rules = sorted(set(re.findall(r"\[REDACTED:([a-z-]+)\]", cleaned)))
+    if rules:
+        raise UsageError(
+            f"{name}: contains a credential ({', '.join(rules)}); keep it out of the "
+            "command line, in the tool's own config or the job's settings"
+        )
+    if value != cleaned or "\n" in value:
+        raise UsageError(
+            f"{name}: contains control or invisible characters: {shown(value)}"
+        )
+
+
+def shown(value):
+    # Userinfo can hold a password no redaction rule recognises.
+    return "a value holding '@' (not echoed)" if "@" in value else ascii(value)
 
 
 def parse_job(values):
@@ -77,7 +93,7 @@ def parse_job(values):
     # "https://known.host@other.host/tests/1" would fetch from other.host.
     if not parts or not _NETLOC.fullmatch(parts.netloc):
         raise UsageError(
-            f"--job: not a plain host name (no user@, ASCII only) in {values[0]!a}"
+            f"--job: not a plain host name (no user@, ASCII only) in {shown(values[0])}"
         )
     if len(values) == 2:
         job_id = values[1]
@@ -88,18 +104,25 @@ def parse_job(values):
     else:
         match = re.match(r"/(?:tests/|t)([0-9]+)(?:/|$)", parts.path)
         if not match:
-            raise UsageError(f"--job: no /tests/<id> or /t<id> in {values[0]!a}")
+            raise UsageError(f"--job: no /tests/<id> or /t<id> in {shown(values[0])}")
         job_id = match.group(1)
     if not re.fullmatch(r"[0-9]+", job_id):
-        raise UsageError(f"--job: job id must be a number, got {job_id!a}")
+        raise UsageError(f"--job: job id must be a number, got {shown(job_id)}")
     return parts.hostname, f"{parts.scheme}://{parts.netloc}", job_id
 
 
 def parse_setting(arg):
     match = _SETTING.fullmatch(arg)
+    # By name, whatever the value looks like: redaction only knows credential shapes.
+    name = re.match(r"\w*", arg, re.ASCII).group()
+    if _secrets.is_secret_key(name) and not (match and match.group(4) == ""):
+        raise UsageError(
+            f"--set {name}: a credential setting; keep it out of the command line, "
+            "in the tool's own config or the job's settings"
+        )
     if not match:
         raise UsageError(
-            f"--set {arg!a}: expected KEY=VALUE, KEY= or KEY+=VALUE with an uppercase "
+            f"--set {shown(arg)}: expected KEY=VALUE, KEY= or KEY+=VALUE with an uppercase "
             "[A-Z0-9_] key (openqa-clone-job ignores or misparses anything else)"
         )
     key = match.group(1)
@@ -123,12 +146,12 @@ def check_schedule(value, settings):
             raise UsageError("--schedule: empty entry or whitespace in the comma list")
         if entry.startswith("/") or ".." in entry.split("/"):
             raise UsageError(
-                f"--schedule {entry}: must be a relative path within CASEDIR"
+                f"--schedule {shown(entry)}: must be a relative path within CASEDIR"
             )
         # os-autoinst appends .pm only when the entry has no dot at all.
         if "." in entry and not entry.endswith(_MODULE_EXT):
             raise UsageError(
-                f"--schedule {entry}: a dot disables the implicit .pm; end it with .pm, .py or .lua"
+                f"--schedule {shown(entry)}: a dot disables the implicit .pm; end it with .pm, .py or .lua"
             )
         path = entry if "." in entry else entry + ".pm"
         directory, _, filename = path.rpartition("/")
@@ -183,7 +206,7 @@ def build(args):
             continue
         if value and not pattern.fullmatch(value):
             raise UsageError(
-                f"{name}: not a GitHub name: {value!a} (unknown yet? pass the literal '<user>')"
+                f"{name}: not a GitHub name: {shown(value)} (unknown yet? pass the literal '<user>')"
             )
     for name, value in (
         ("--branch", args.branch),
@@ -353,7 +376,7 @@ def build(args):
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(
+    parser = ArgumentParser(
         prog="vr-clone-cmd.py",
         description="Build, but never run, the command line that clones an openQA job as a verification run "
         "of a test-distribution branch or pull request. _GROUP=0 is always included.",

@@ -12,6 +12,7 @@ import argparse
 import re
 
 import _oqa
+from _sanitize import ArgumentParser
 
 # prefix -> (API host, web URL of a ticket); mirrors the bugref table of openQA.
 TRACKERS = {
@@ -207,7 +208,7 @@ def pr_files(client, repo, number):
 
 
 def main():
-    parser = argparse.ArgumentParser(
+    parser = ArgumentParser(
         prog="oqa-ref.py",
         description="State of the ticket behind a bugref: anonymous GET to the fixed host of "
         "that tracker (api.github.com, bugzilla.opensuse.org, bugzilla.suse.com, "

@@ -36,7 +36,7 @@ Which tool does what in review work, and what each helper writes.
 
 - **Path is relative to `/api/v1`, parameters are `key=value` words, method defaults to GET.** Host: `--o3` or `--host openqa.example.com` (no scheme = `https://`; default `http://localhost`). `--links` prints pagination links on STDERR; `--retries N` covers only 502, 503 and connection errors.
 - **Non-API routes need `--apibase ''`** (or a full URL as path); a relative path always gets the prefix.
-- **Credentials**: `client.conf` or env, never `--apikey`/`--apisecret` (they leak) -> references/openqa-model.md "Auth and roles".
+- **Credentials:** -> references/untrusted-content.md "Rules"; where they live -> references/openqa-model.md "Auth and roles".
 
 ```sh
 openqa-cli api --o3 jobs/overview groupid=1 result=failed,incomplete
@@ -62,7 +62,7 @@ Comment text -> references/review-comments-tickets.md "Comment recipes". Restart
 
 **Bugzilla and Redmine MCP servers** file and read back bugs and tickets -> references/bugs-and-tickets.md "Filing and read-back"
 
-**Built-in `/mcp` endpoint**: off unless the instance sets `mcp_enabled = read-only`; needs the Bearer `USER:KEY:SECRET` header. Read-only tools: `openqa_get_info`, `openqa_get_job_info {job_id}` (result, modules, settings, log names, comments), `openqa_get_log_file {job_id, file_name}` (`*.txt` only; refused above `mcp_max_result_size`, default 500000 bytes). No listing tools.
+**Built-in `/mcp` endpoint**: off unless the instance sets `mcp_enabled = read-only`; needs a Bearer `USER:KEY:SECRET` header the user configures -> references/untrusted-content.md "Rules". Read-only tools: `openqa_get_info`, `openqa_get_job_info {job_id}` (result, modules, settings, log names, comments), `openqa_get_log_file {job_id, file_name}` (`*.txt` only; refused above `mcp_max_result_size`, default 500000 bytes). No listing tools.
 
 ## os-autoinst-scripts
 

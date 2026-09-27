@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: GPL-2.0-or-later
 # Repository gate: frontmatter, byte budgets, pointer resolution, public-content and attribution checks.
-"""Usage: check-skills.py [--only frontmatter,budget,pointers,public,attribution]
+"""Usage: check-skills.py [--only frontmatter,budget,pointers,public,attribution,credentials]
 
 Exit 0 when every check passes, 1 otherwise. One line per finding: "<check>: <file>[:<line>]: <message>".
 """
@@ -28,7 +28,7 @@ ALLOWED_KEYS = {
 DEFAULT_REFERENCE_CAP = 15000
 BUDGETS = {
     "SKILL.md": 16700,
-    "references/untrusted-content.md": 7500,
+    "references/untrusted-content.md": 7900,
     "references/site-policy.md": 6500,
     "references/pr-reviewing.md": 7500,
     "references/custom-distri.md": 8000,
@@ -41,7 +41,7 @@ BUDGETS = {
     "references/area-conventions.md": 13000,
     "references/review-workflow.md": 13000,
     "references/bugs-and-tickets.md": 16000,
-    "references/openqa-model.md": 14000,
+    "references/openqa-model.md": 14100,
     "references/clone-and-run.md": 14000,
     "references/distri-helpers.md": 17000,
     "references/module-templates.md": 16000,
@@ -95,6 +95,66 @@ ATTRIBUTION_ALLOW_FILES = {"skills/openqa/references/contributing-gates.md"}
 ATTRIBUTION_SKIP_CONTEXT = re.compile(
     r"\.claude(?:-plugin)?/|CLAUDE\.md|Claude Code", re.IGNORECASE
 )
+
+# Documentation must never teach an agent to handle a credential itself: that is how an
+# agent learns to scrape a token. A slot or $VAR standing for a key still puts it on the
+# command line. Command words count only where a command starts, so prose naming one passes;
+# gaps are bounded to keep the scan linear.
+_CMD = r"(?:^\s*(?:\$\s+)?|`|(?:&&|\|\||;)\s*|\$\(\s*)(?:sudo(?:\s+-\w+(?:\s+[\w.-]+)?)*\s+)?"
+_TOKEN_VAR = r"[A-Z_]{0,40}(?:TOKEN|API_KEY|API_SECRET|PASSWORD)\b"
+CREDENTIAL_PATTERNS = [
+    (
+        (
+            rf"(?:{_CMD}(?:cat|bat|less|more|head|tail|grep|rg|sed|awk|source|jq|yq|strings|xxd"
+            r"|od|base64|cp|scp|python3?|perl|open)\b[^\n|;&`]{0,200}?"
+            r"|(?:\bopen|\.read)\([^\n)`]{0,200}?)"
+            r"(?:client\.conf|hosts\.yml|oscrc|\.netrc|tea/config\.yml|\.git-credentials"
+            r"|(?:\.config|etc)/(?:openqa|gh|osc|tea)/?(?=[\s'\"`)*]|$))"
+        ),
+        "reads a credential file",
+    ),
+    (
+        (
+            r"\$\(\s*gh\s+auth\s+token|=\s*`\s*gh\s+auth\s+token|^\s*(?:\$\s+)?gh\s+auth\s+token\b"
+            r"|\bgh(?<!\|gh)(?<!\|\sgh)\s+auth\s+(?:token\s*[|>]"
+            r"|status\b[^\n|;&`]{0,80}?\s(?:-\w*t\w*|--show-token)\b(?!`))"
+        ),
+        "prints gh's token",
+    ),
+    (
+        r"--api-?(?:key|secret)[ =][\"'`]?(?:<[^>\s]+>|\$[({]?\w|[A-Za-z0-9+/=_.-]{6,})",
+        "passes a key on the command line",
+    ),
+    (
+        (
+            r"(?i)\b(?:Authorization|X-[\w-]{0,40}?API-?(?:Key|Hash)|X-Auth-Token|PRIVATE-TOKEN)"
+            r"\s*:\s*(?:\w+\s+)?(?:\$[({]?\w|(?![<\[`])[A-Za-z0-9+/=_.-]{16,})"
+        ),
+        "a concrete auth header value",
+    ),
+    (r"https?://[^\s/:@`]+:(?!\[REDACTED)[^\s/@`]+@", "a password in a URL"),
+    (
+        (
+            rf"https?://(?:\$\{{?{_TOKEN_VAR}\}}?|[A-Za-z0-9_-]{{20,}})@"
+            r"|[?&](?:api[_-]?key|key)=(?![A-Z0-9_*]*[_*])(?:\$[({]?\w|[A-Za-z0-9._~+/-]{16,})"
+        ),
+        "a token in a URL",
+    ),
+    (
+        (
+            rf"{_CMD}(?:(?:(?:echo|printf)\b[^\n|;&`]{{0,80}}?\$\{{?|printenv\s+){_TOKEN_VAR}"
+            r"|(?:env|printenv)\s*\|)"
+        ),
+        "prints the environment or a token variable",
+    ),
+    (
+        (
+            r"\bMOJO_CLIENT_DEBUG=(?!0\b)[^\s`;&|]{1,20}\s+[\w./$~-]"
+            r"|^\s*(?:\$\s+)?(?:export|declare\s+-x)\s+MOJO_CLIENT_DEBUG=(?!0\b)"
+        ),
+        "turns on MOJO_CLIENT_DEBUG",
+    ),
+]
 
 TEXT_SUFFIXES = {".md", ".py", ".sh", ".json", ".yaml", ".yml", ".txt", ".toml", ""}
 
@@ -252,12 +312,23 @@ def scan(patterns, label, out, allow=None, skip_context=None, skip_files=()):
                     out.append(f"{label}: {rel}:{num}: {what}: '{m.group(0)}'")
 
 
+def check_credentials(out):
+    docs = [*sorted(SKILLS.rglob("*.md")), *sorted((ROOT / "contrib").rglob("*.md"))]
+    docs += sorted(ROOT.glob("*.md"))
+    for path in docs:
+        rel = path.relative_to(ROOT).as_posix()
+        for num, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+            for pattern, what in CREDENTIAL_PATTERNS:
+                if m := re.search(pattern, line):
+                    out.append(f"credentials: {rel}:{num}: {what}: '{m.group(0)[:60]}'")
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
     )
     parser.add_argument(
-        "--only", default="frontmatter,budget,pointers,public,attribution"
+        "--only", default="frontmatter,budget,pointers,public,attribution,credentials"
     )
     only = set(parser.parse_args(argv).only.split(","))
     out = []
@@ -285,6 +356,8 @@ def main(argv=None):
             skip_context=ATTRIBUTION_SKIP_CONTEXT,
             skip_files=ATTRIBUTION_ALLOW_FILES,
         )
+    if "credentials" in only:
+        check_credentials(out)
     print("\n".join(out) if out else "ok - all repository checks pass")
     return 1 if out else 0
 

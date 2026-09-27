@@ -14,22 +14,27 @@ named below.
 gh keeps its token in the desktop keyring, reached over D-Bus, so no file rule stops
 `gh auth token`: only the command rules do, and a fake `$HOME` does not isolate it either.
 The same goes for the tools that print their own secrets: `gh auth git-credential`, `git
-credential fill` and the credential helpers' `get`, `osc config --dump-full`, osc's `-H` and
-`--http-debug`, `osc token`, `tea login helper` and `tea login edit`, and `git-obs login list`
-are denied by name in every snippet; most also catch osc's abbreviated options, its
-`http_debug` settings and its token API path.
+credential fill` and the credential helpers' `get`, `secret-tool lookup`, `osc config
+--dump-full`, osc's `-H` and `--http-debug`, `osc token`, `tea login helper` and `tea login
+edit`, and `git-obs login list` are denied by name in every snippet; most also catch osc's
+option clusters and abbreviations, its `http_debug` settings and its token API path.
 
-A command with a password in a URL (`user:password@` before the host) is refused, and so is an
-`Authorization:` header after `-H` or `--header`, or anywhere in an `openqa-cli` call, which also
-takes `-a`. The glob snippets (Claude Code, opencode, grok) match any `://`, a later `:` and a later
-`@`, so a PR body with a link and a mention is refused as well: pass such text as a file
+All but the Codex and agy snippets, which match argv prefixes, also refuse a command with a
+password in a URL (`user:password@` before the host) and an `Authorization:` header after `-H`,
+`--header` or an option cluster such as `-sH`, or anywhere in an `openqa-cli` call, which also
+takes `-a`. The glob snippets (Claude Code, opencode, grok) match any `://`, a later `:` and a
+later `@`, so a PR body with a link and a mention is refused as well: pass such text as a file
 (`--body-file`).
 
-They all match text, not intent. A path spelled with a glob or a variable, split quoting, a
-relative path after `cd` or under a shell tool's own working-directory argument (only the Kimi
-hook resolves Kimi's `cwd`), a script written first and run later, or a program that opens the
-file itself gets past every one of them. For a hard boundary, run the agent in the harness's
-sandbox (or a container) that does not mount these files.
+They all match text, not intent. A path spelled with a glob or a variable, split quoting, a line
+continuation (only the Kimi hook joins one), a relative path after `cd` or under a shell tool's
+own working-directory argument (only the Kimi hook resolves Kimi's `cwd`), a recursive read of an
+ancestor directory such as `grep -r token ~`, a script written first and run later, or a program
+that opens the file itself gets past every one of them. So does a global option in front of a
+printer's subcommand (`osc -A obs token`, `tea --debug login edit`) for the glob, Codex and agy
+rules, and a key the agent reads from its environment for all but Codex, which drops `*KEY*`,
+`*SECRET*` and `*TOKEN*` variables from commands. For a hard boundary, run the agent in the
+harness's sandbox (or a container) that does not mount these files.
 
 | Harness | Snippet | Goes into |
 |---|---|---|
@@ -54,7 +59,7 @@ of these does. Paths use `~/` for the home directory and `//` for an absolute pa
 
 ## opencode
 
-Checked on 1.18.32: `opencode debug config` loads all 63 rules, and `opencode debug agent build
+Checked on 1.18.32: `opencode debug config` loads all 69 rules, and `opencode debug agent build
 --tool read` refuses the credential paths in a throw-away home. The last matching rule wins, so
 keep these after any `"*"` rule. The `.env` lines are deliberate: the built-in ones only ask, and
 an "always" answer to a read prompt would otherwise approve every read for the session.
@@ -64,10 +69,12 @@ an "always" answer to a read prompt would otherwise approve every read for the s
   project, which is why that block is here. It does nothing when opencode starts in `$HOME`.
 - A statement that only sets a variable (`export MOJO_CLIENT_DEBUG=1; ...`, `declare -x`) is not
   matched; the same assignment in front of a command is.
+- The read tool sees a path relative to the worktree, so inside an openQA checkout its
+  `etc/openqa/` is refused as well; read those files with a shell command.
 
 ## grok
 
-Checked on 1.0.32: `grok inspect --json` loads all 60 rules with none skipped (an unknown rule is
+Checked on 1.0.32: `grok inspect --json` loads all 65 rules with none skipped (an unknown rule is
 skipped silently, so compare the count after merging). A leading `~/` is literal text in grok, so
 home paths use `**/`; this is also why the Claude Code snippet, which grok reads from
 `~/.claude/settings.json` too, does not cover grok. A deny beats every allow and still applies
@@ -102,20 +109,23 @@ that flag with this skill.
 
 Codex has no file-read tool: everything goes through its shell, so the two files guard that.
 - `openqa-credentials.rules`: `forbidden` rules for `gh auth token`, `gh auth status`,
-  `openqa-cli ... --apikey`, `env MOJO_CLIENT_DEBUG=1`, the tools that print their own secrets
-  (osc's abbreviated options included) and common readers of the exact credential files.
+  `--apikey` right after an `openqa-cli` subcommand or its `--o3`/`--osd`, `env
+  MOJO_CLIENT_DEBUG=1`, the tools that print their own secrets (osc's abbreviated options
+  included) and common readers of the exact credential files.
   Checked on 0.154.0 with `codex execpolicy check --rules`; `forbidden` holds even with
   `--dangerously-bypass-approvals-and-sandbox`. A rule matches an argv prefix, so a flag before the
-  path (`cat -n`), a relative path after `cd` or a `~` inside `bash -lc` is not caught.
+  path (`cat -n`), another option before `--apikey`, `--apikey=K`, a relative path after `cd` or
+  a `~` inside `bash -lc` is not caught.
 - `config.toml`: a permission profile whose denies Codex's sandbox enforces on every command:
   `.netrc`, `.git-credentials` and a workspace root's `.env` and `.env.local` always, and in
-  `credentials-strict` the tools' own configs as well. Both hold literal paths only: one
-  unreadable directory under a denied glob fails every command, so a `.env` below the workspace
-  root stays readable. Both extend `:workspace`: commands can write only in the project and
-  `/tmp` (not `/var/tmp`), `sudo` does not work, and the project's `.git` is read-only, so
-  `git commit` fails inside Codex. A commented `".git" = "write"` line lifts that, at a price: the
-  agent can then write `.git/hooks` and `.git/config`, which run outside the sandbox on your next
-  git command. `~/.local/state/osc` stays writable because osc locks its cookie jar on every call.
+  `credentials-strict` the tools' own configs and osc's cookie jar as well. Both hold literal
+  paths only: one unreadable directory under a denied glob fails every command, so a `.env` below
+  the workspace root stays readable. Both extend `:workspace`: commands can write only in the
+  project and `/tmp` (not `/var/tmp`), `sudo` does not work, and the project's `.git` is
+  read-only, so `git commit` fails inside Codex. A commented `".git" = "write"` line lifts that,
+  at a price: the agent can then write `.git/hooks` and `.git/config`, which run outside the
+  sandbox on your next git command. `~/.local/state/osc` stays writable because osc locks its
+  cookie jar on every call.
   Checked on 0.154.0 with `codex sandbox -P` on dummy files in a throw-away home (a home under
   `/tmp` does not work: bubblewrap cannot bind the denies there). The strict profile also stops
   `openqa-cli`, gh, osc and tea from authenticating, so turn it on per session.

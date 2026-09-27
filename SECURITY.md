@@ -20,6 +20,8 @@ the guarantees `README.md` claims:
   vulnerability.
 - **A path that leaks credentials**, an API key, `client.conf` or environment contents into
   output, an error message or a traceback.
+- **Instructions that would lead an agent to handle a credential itself** — read a credential
+  file, pass a key on a command line, in a URL or a header, or print a token.
 - **Instructions that would lead an agent to act on text it read** — from a job, a log, a ticket,
   a pull request or a repository file — rather than treating it as evidence.
 

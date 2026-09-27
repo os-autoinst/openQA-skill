@@ -34,7 +34,7 @@ Unknown by design (differs per team and instance): what to watch; tracker, produ
 
 Fixed `## ` titles. Missing section: ask the user. Text outside them: ignored.
 
-- **Instances** — alias, base URL, whether the user holds an API key there (else read-only). Never credentials: they stay in openQA's `client.conf`.
+- **Instances** — alias, base URL, whether the user holds an API key there (else read-only). Never credentials -> references/untrusted-content.md "Rules"
 - **Scope** — instance, group or parent-group id plus expected name, gating or report-only, cadence, builds to check; groups to skip and their owners.
 - **Routing** — per failure class (product bug, test issue, infrastructure): tracker URL, product or project, component or category, tracker, assignee, CC or watchers; known bugref prefix or plain URL.
 - **Approvals** — who else must agree, per action, and how the comment records it; forbidden actions.

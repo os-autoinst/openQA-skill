@@ -28,8 +28,8 @@ openqa-clone-custom-git-refspec -c '--export-command' \
 
 Drop `--export-command` to submit (-> SKILL.md "Write gate"); it prints the POST payload. `-c` is a passthrough not a guard; `-v` is `set -x`: it traces `GITHUB_TOKEN`.
 
-- **Arg 1:** PR URL (fork and branch come from the GitHub API; rate-limited without `GITHUB_TOKEN`) or branch URL `.../<user>/<repo>/tree/<branch>` (no API call).
-- **Arg 2:** job URL or comma-separated list; the host is taken from it.
+- **Arg 1:** PR URL (fork and branch from the GitHub API; rate-limited without the user's `GITHUB_TOKEN`) or branch URL `.../<user>/<repo>/tree/<branch>` (no API call).
+- **Arg 2:** job URL or comma-separated list; host from it.
 - **It runs** `openqa-clone-job --skip-chained-deps --parental-inheritance --within-instance <host> <id> _GROUP=0 TEST+=@<user>/<repo>#<branch> BUILD=<user>/<repo>#<PR> CASEDIR=<fork>.git#<branch>` plus a matching `PRODUCTDIR`; branch mode: `BUILD=...#<branch>`.
 - **It never sets `NEEDLES_DIR`** - production needles are used. For needle changes append `NEEDLES_DIR=<needles fork>.git#<branch>`.
 - **PR mode trap:** if the first line of the PR body contains `@openqa: Clone http...`, the rest of that line silently replaces the job URL you passed - trailing settings included, which breaks the job id.

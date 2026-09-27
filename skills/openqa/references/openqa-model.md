@@ -175,7 +175,7 @@ Overview routes pick the latest job before filtering, so they are safe; `scripts
 
 ## Auth and roles
 
-Reads need nothing. Writes need the user's API key and secret (web UI `/api_keys`) from `client.conf` in `$OPENQA_CONFIG`, `~/.config/openqa` or `/etc/openqa` (section = host name), or `OPENQA_API_KEY`/`OPENQA_API_SECRET`. Never pass `--apikey/--apisecret` or print the file. Failure: 403 `no api key`, `Operator level required`.
+Reads need nothing. Writes need the user's API key and secret (web UI `/api_keys`) from `client.conf` or `client.conf.d/*.conf` in `$OPENQA_CONFIG`, `~/.config/openqa`, `/etc/openqa` or `/usr/etc/openqa` (section = host name), or `OPENQA_API_KEY`/`OPENQA_API_SECRET`. Handling them -> references/untrusted-content.md "Rules". Failure: 403 `no api key`, `Operator level required`.
 
 | Role | Writes (routes under `/api/v1`) |
 |---|---|

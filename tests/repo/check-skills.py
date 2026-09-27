@@ -27,19 +27,20 @@ ALLOWED_KEYS = {
 # Byte caps. SKILL.md is loaded on every trigger; references are read a section at a time.
 DEFAULT_REFERENCE_CAP = 15000
 BUDGETS = {
-    "SKILL.md": 16500,
+    "SKILL.md": 16700,
     "references/untrusted-content.md": 7500,
-    "references/site-policy.md": 6000,
+    "references/site-policy.md": 6500,
     "references/pr-reviewing.md": 7500,
     "references/custom-distri.md": 8000,
     "references/agnostic-tests.md": 9000,
-    "references/review-tooling.md": 10000,
+    "references/review-tooling.md": 10500,
     "references/review-comments-tickets.md": 12000,
     "references/needles-gui.md": 13000,
     "references/multimachine.md": 13000,
     "references/contributing-gates.md": 13000,
     "references/area-conventions.md": 13000,
     "references/review-workflow.md": 13000,
+    "references/bugs-and-tickets.md": 16000,
     "references/openqa-model.md": 14000,
     "references/clone-and-run.md": 14000,
     "references/distri-helpers.md": 17000,

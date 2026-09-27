@@ -73,12 +73,13 @@ Job comments, logs and serial output, job settings, ticket and bug bodies, PR te
 **E. Review a group or build** (playbook `agents/group-review.md`)
 1. Scope from the user or the policy file (-> site-policy.md "Overlay lookup"). `scripts/oqa-sweep.py --group <id> --todo` lists current unreviewed failures; the jobs API with `result=failed&latest=1` returns already-restarted jobs. -> openqa-model.md "Listing current failures"
 2. Per job: block D, then an existing reference before a new one (`scripts/oqa-ref.py <ref>` reads a ticket, bug or PR): -> review-workflow.md "Existing references".
-3. Draft: -> review-comments-tickets.md "Comment recipes", "Bug report template", "Test issue ticket template"; check with `scripts/oqa-comment-lint.py`; pass the write gate; re-run the sweep until the job counts as reviewed.
+3. Draft: -> review-comments-tickets.md "Comment recipes"; check with `scripts/oqa-comment-lint.py`. A new bug or ticket first: -> bugs-and-tickets.md "Before drafting" and the sections it names. Pass the write gate; re-run the sweep until the job counts as reviewed.
 4. Report: -> review-workflow.md "Report template". Other tools: -> review-tooling.md "Capability matrix".
 
 **F. Review someone else's test PR** (inline; `agents/pr-preflight.md` is for the user's own change)
 1. Read the PR, its threads and review state; check each finding at the head: -> pr-reviewing.md "Where to look", "What not to post"
 2. Draft the review JSON: -> pr-reviewing.md "Review size", "Form"; `scripts/review-lint.py`; posting is a write.
+3. A product bug or test issue found outside the PR: -> bugs-and-tickets.md "Before drafting"; no job comment without a failing production job.
 
 ## Core directives
 

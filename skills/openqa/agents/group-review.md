@@ -23,8 +23,7 @@ You are the **review** stage. Goal: every current not-ok job of the scope that n
 | classifying and choosing the tracker | -> review-workflow.md "Classification and routing" |
 | writing a comment | -> review-comments-tickets.md "Comment recipes", "Do and do not" |
 | a label, a flag, a forced result | -> openqa-model.md "Labels and flags", "force_result", review-comments-tickets.md "Forcing a result" |
-| before drafting any new bug or ticket | -> review-comments-tickets.md "Duplicate search" |
-| a bug or ticket has to be drafted | -> review-comments-tickets.md "Bug report template", "Test issue ticket template" |
+| a new bug or ticket may be needed | -> bugs-and-tickets.md "Before drafting" and the draft sections it names; return the draft as `ticket-lint.py` JSON, the caller refutes it |
 | a subject that automation will match | -> review-comments-tickets.md "auto_review subjects" |
 | bot or carried-over comments present | -> review-workflow.md "Machine-written comments", openqa-model.md "Carry-over"; read the bot comment once per cluster, not once per build (the digest shows its first text line, `oqa-job.py -v` the body) |
 | restart instead of comment? | -> review-workflow.md "Retrigger or comment" (a restart is a write: propose it) |

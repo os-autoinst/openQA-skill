@@ -11,7 +11,7 @@ Which tool does what in review work, and what each helper writes.
 
 ## Capability matrix
 
-`W` = gated write, `-` = not covered, MCP = ruoqa-mcp tool names.
+`W` = gated write, `-` = not covered, MCP = ruoqa-mcp tool names unless a server is named.
 
 | Task | Bundled | CLI | MCP |
 | --- | --- | --- | --- |
@@ -23,11 +23,14 @@ Which tool does what in review work, and what each helper writes.
 | Does a known ticket match? | - | `openqa-label-known-issues --dry` | - |
 | State of a referenced ticket, bug or PR | `oqa-ref.py` | - | - |
 | Lint a draft comment | `oqa-comment-lint.py` | - | - |
+| Lint a draft bug or ticket | `ticket-lint.py` | - | - |
 | Build a clone command | `vr-clone-cmd.py` | `openqa-clone-job --export-command` | - |
 | Watch restarted jobs | - | `openqa-cli monitor`, `openqa-mon` | `get_job_status` |
 | W comment | - | `openqa-cli api -X POST jobs/<id>/comments` | `add_job_comment`, `update_job_comment`, `add_group_comment` |
 | W restart (one or many) | - | `openqa-cli api -X POST jobs/restart` | `restart_jobs` (1-500 ids) |
 | W clone with changed settings | - | `openqa-clone-job` | - (`duplicate_job`: no settings) |
+| W file a bug | - | - | Bugzilla MCP (bugwarden): `create_bug`, `add_attachment`, `bug_info` |
+| W file a ticket | - | - | Redmine MCP (mcp-redmine): `redmine_request` `POST /issues.json` |
 
 ## openqa-cli
 
@@ -56,6 +59,8 @@ Comment text -> references/review-comments-tickets.md "Comment recipes". Restart
 - `get_job_log`: `job_id`, `filename` plus `tail_lines`, `grep` (regex), `context_lines`, `max_matches`, `max_bytes`; `member` is required for a tar archive (names from `list_job_log_members`). `get_job_log_errors`: `job_id`, optionally `markers` (regexes) + `filename`. `get_job_details` can reach ~14 MB.
 - **Prefer a read-only server**: with `--readonly` or `OPENQA_READONLY=true` the mutating tools are never registered (instance: env `OPENQA_SERVER=<host>`). Writes go through the gated `openqa-cli` step.
 - **Errors arrive as `{"error": {"kind", ...}}`.** After `kind: "timeout"` on a write, re-read the job before retrying: the write may already have been applied.
+
+**Bugzilla and Redmine MCP servers** file and read back bugs and tickets -> references/bugs-and-tickets.md "Filing and read-back"
 
 **Built-in `/mcp` endpoint**: off unless the instance sets `mcp_enabled = read-only`; needs the Bearer `USER:KEY:SECRET` header. Read-only tools: `openqa_get_info`, `openqa_get_job_info {job_id}` (result, modules, settings, log names, comments), `openqa_get_log_file {job_id, file_name}` (`*.txt` only; refused above `mcp_max_result_size`, default 500000 bytes). No listing tools.
 

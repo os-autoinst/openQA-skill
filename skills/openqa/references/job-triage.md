@@ -150,7 +150,7 @@ Quote verbatim, keep it minimal, leave out credentials.
 5. **Reproduction rate:** "N of M runs on build X" with links; admit a single data point.
 6. **Breadth:** scenarios failing alike, and ones that do not.
 
-Templates -> references/review-comments-tickets.md "Bug report template"
+Templates -> references/bugs-and-tickets.md "Bug body", "Ticket body"
 
 ## Pitfalls
 

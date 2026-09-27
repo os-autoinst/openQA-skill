@@ -100,29 +100,47 @@ ATTRIBUTION_SKIP_CONTEXT = re.compile(
 # agent learns to scrape a token. A slot or $VAR standing for a key still puts it on the
 # command line. Command words count only where a command starts, so prose naming one passes;
 # gaps are bounded to keep the scan linear.
-_CMD = r"(?:^\s*(?:\$\s+)?|`|(?:&&|\|\||;)\s*|\$\(\s*)(?:sudo(?:\s+-\w+(?:\s+[\w.-]+)?)*\s+)?"
-_TOKEN_VAR = r"[A-Z_]{0,40}(?:TOKEN|API_KEY|API_SECRET|PASSWORD)\b"
+_CMD = r"(?:^\s*(?:\$\s+)?|`|(?:&&|\|\||;)\s*|\$\(\s*)(?:sudo(?:\s+-\w+(?:\s+(?!-)[\w.-]+)?)*\s+)?"
+_TOKEN_VAR = r"[A-Z_]{0,40}(?:TOKEN|API_KEY|API_SECRET|PASSWORD|(?<![A-Z])PAT)\b"
+_PRINTER = (
+    r"(?:git\s+credential\s+fill|gh\s+auth\s+git-credential|secret-tool\s+lookup"
+    r"|osc\s+(?:config\s+--dump-full|token))\b"
+)
 CREDENTIAL_PATTERNS = [
     (
         (
             rf"(?:{_CMD}(?:cat|bat|less|more|head|tail|grep|rg|sed|awk|source|jq|yq|strings|xxd"
-            r"|od|base64|cp|scp|python3?|perl|open)\b[^\n|;&`]{0,200}?"
-            r"|(?:\bopen|\.read)\([^\n)`]{0,200}?)"
-            r"(?:client\.conf|hosts\.yml|oscrc|\.netrc|tea/config\.yml|\.git-credentials"
-            r"|(?:\.config|etc)/(?:openqa|gh|osc|tea)/?(?=[\s'\"`)*]|$))"
+            r"|od|base64|cp|scp|python3?|perl|open)\b"
+            r"(?:[^\n|;&`'\"]{0,100}?(?:'[^'\n]{0,100}'|\"[^\"\n]{0,100}\")){0,3}[^\n|;&`]{0,200}?"
+            r"|(?:\bopen|\.read|\bPath)\((?:[^\n)`]|\(\)){0,200}?|(?:\$\(|\s)<\s*(?=[~/$.])[^\s`]{0,200}?)"
+            r"(?:client\.conf|hosts\.yml|oscrc|\.netrc|tea/config\.yml|\.git-credentials|git/credentials"
+            r"|/proc/[^/\s]+/environ|(?:\.config|etc)/(?:openqa|gh|osc|tea)/?(?=[\s'\"`)*]|$))"
         ),
         "reads a credential file",
     ),
     (
         (
-            r"\$\(\s*gh\s+auth\s+token|=\s*`\s*gh\s+auth\s+token|^\s*(?:\$\s+)?gh\s+auth\s+token\b"
-            r"|\bgh(?<!\|gh)(?<!\|\sgh)\s+auth\s+(?:token\s*[|>]"
+            r"\$\(\s*gh\s+auth\s+token|=\s*`\s*gh\s+auth\s+token"
+            r"|(?:^\s*(?:\$\s+)?|(?:&&|\|\|)\s*)(?:\w+=[^\s&|;]*\s+)*gh\s+auth\s+token\b"
+            r"|\bgh(?<!\|gh)(?<!\|\sgh)\s+auth\s+(?:token\b[^\n|>`]{0,80}?[|>]"
             r"|status\b[^\n|;&`]{0,80}?\s(?:-\w*t\w*|--show-token)\b(?!`))"
         ),
         "prints gh's token",
     ),
     (
-        r"--api-?(?:key|secret)[ =][\"'`]?(?:<[^>\s]+>|\$[({]?\w|[A-Za-z0-9+/=_.-]{6,})",
+        # a span holding only the command names it; a leading | opens a table row, not a pipe
+        rf"{_CMD}(?<!`){_PRINTER}|`{_PRINTER}(?!`)|^(?!\s*\|)[^\n]*?\|\s*{_PRINTER}",
+        "runs a credential printer",
+    ),
+    (
+        r"--api-?(?:key|secret)[ =][\"'`]?(?:<[^>\s]+>|\$[({]?\w|(?![a-z]+\b)[A-Za-z0-9+/=_.-]{6,})",
+        "passes a key on the command line",
+    ),
+    (
+        (
+            rf"{_CMD}curl\b[^\n|;&`]{{0,200}}?\s(?:(?:-u\s*|--user[\s=]\s*)[\"']?[^\s:\"'`]{{0,100}}:"
+            r"(?:<[^>\s]+>|\$[({]?\w|[^\s\"'`]{6,})|--oauth2-bearer[\s=])"
+        ),
         "passes a key on the command line",
     ),
     (
@@ -136,14 +154,15 @@ CREDENTIAL_PATTERNS = [
     (
         (
             rf"https?://(?:\$\{{?{_TOKEN_VAR}\}}?|[A-Za-z0-9_-]{{20,}})@"
-            r"|[?&](?:api[_-]?key|key)=(?![A-Z0-9_*]*[_*])(?:\$[({]?\w|[A-Za-z0-9._~+/-]{16,})"
+            r"|[?&](?:api[_-]?key|key|(?:access_|private_)?token)=(?![A-Z0-9_*]*[_*])"
+            r"(?:\$[({]?\w|[A-Za-z0-9._~+/-]{16,})"
         ),
         "a token in a URL",
     ),
     (
         (
             rf"{_CMD}(?:(?:(?:echo|printf)\b[^\n|;&`]{{0,80}}?\$\{{?|printenv\s+){_TOKEN_VAR}"
-            r"|(?:env|printenv)\s*\|)"
+            r"|(?:env|printenv)\s*\|)|^\s*(?:\$\s+)?(?:env|printenv|export(?:\s+-p)?)\s*$"
         ),
         "prints the environment or a token variable",
     ),
@@ -279,8 +298,8 @@ def check_pointers(skill, out):
             )
 
 
-def tracked_text_files():
-    for path in sorted(ROOT.rglob("*")):
+def tracked_text_files(base=ROOT):
+    for path in sorted(base.rglob("*")):
         rel = path.relative_to(ROOT)
         if (
             not path.is_file()
@@ -325,13 +344,15 @@ def scan(patterns, label, out, allow=None, skip_context=None, skip_files=()):
 
 
 def check_credentials(out):
-    docs = [*sorted(SKILLS.rglob("*.md")), *sorted((ROOT / "contrib").rglob("*.md"))]
-    docs += sorted(ROOT.glob("*.md"))
+    # contrib/ and the root stay .md-only: the harness deny lists name these forms on purpose
+    docs = [path for path, _ in tracked_text_files(SKILLS)]
+    docs += [*sorted((ROOT / "contrib").rglob("*.md")), *sorted(ROOT.glob("*.md"))]
+    patterns = [(re.compile(p), what) for p, what in CREDENTIAL_PATTERNS]
     for path in docs:
         rel = path.relative_to(ROOT).as_posix()
         for num, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
-            for pattern, what in CREDENTIAL_PATTERNS:
-                if m := re.search(pattern, line):
+            for pattern, what in patterns:
+                if m := pattern.search(line):
                     out.append(f"credentials: {rel}:{num}: {what}: '{m.group(0)[:60]}'")
 
 

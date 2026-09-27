@@ -1,0 +1,735 @@
+[2026-09-24T18:03:23.952721Z] [info] +++ setup notes +++
+[2026-09-24T18:03:23.952987Z] [info] Running on openqaworker20:24 (Linux 6.12.0-160000.37-default #1 SMP PREEMPT_DYNAMIC Thu Aug  6 15:43:26 UTC 2026 (cf8ec7a) x86_64)
+[2026-09-24T18:03:23.958584Z] [debug] Found ASSET_256, caching openSUSE-MicroOS-DVD-x86_64-Snapshot20260923-Media.iso.sha256
+[2026-09-24T18:03:23.965137Z] [info] Downloading openSUSE-MicroOS-DVD-x86_64-Snapshot20260923-Media.iso.sha256, request #1275567 sent to Cache Service
+[2026-09-24T18:03:34.181220Z] [info] Download of openSUSE-MicroOS-DVD-x86_64-Snapshot20260923-Media.iso.sha256 processed:
+[info] [#1275567] Cache size of "/var/lib/openqa/cache" is 400 GiB, with limit 400 GiB
+[info] [#1275567] Downloading "openSUSE-MicroOS-DVD-x86_64-Snapshot20260923-Media.iso.sha256" from "https://openqa.opensuse.org/tests/6235608/asset/other/openSUSE-MicroOS-DVD-x86_64-Snapshot20260923-Media.iso.sha256"
+[info] [#1275567] Content of "/var/lib/openqa/cache/openqa.opensuse.org/openSUSE-MicroOS-DVD-x86_64-Snapshot20260923-Media.iso.sha256" has not changed, updating last use
+
+[2026-09-24T18:03:34.183271Z] [debug] Found ISO, caching openSUSE-MicroOS-DVD-x86_64-Snapshot20260923-Media.iso
+[2026-09-24T18:03:34.184915Z] [info] Downloading openSUSE-MicroOS-DVD-x86_64-Snapshot20260923-Media.iso, request #1275568 sent to Cache Service
+[2026-09-24T18:03:44.288702Z] [info] Download of openSUSE-MicroOS-DVD-x86_64-Snapshot20260923-Media.iso processed:
+[info] [#1275568] Cache size of "/var/lib/openqa/cache" is 400 GiB, with limit 400 GiB
+[info] [#1275568] Downloading "openSUSE-MicroOS-DVD-x86_64-Snapshot20260923-Media.iso" from "https://openqa.opensuse.org/tests/6235608/asset/iso/openSUSE-MicroOS-DVD-x86_64-Snapshot20260923-Media.iso"
+[info] [#1275568] Content of "/var/lib/openqa/cache/openqa.opensuse.org/openSUSE-MicroOS-DVD-x86_64-Snapshot20260923-Media.iso" has not changed, updating last use
+
+[2026-09-24T18:03:44.290880Z] [info] Rsync from 'rsync://openqa.opensuse.org/tests' to '/var/lib/openqa/cache/openqa.opensuse.org', request #1275569 sent to Cache Service
+[2026-09-24T18:04:49.869359Z] [info] Output of rsync:
+[info] [#1275569] Calling: rsync -avHP --timeout 1800 rsync://openqa.opensuse.org/tests/ --delete /var/lib/openqa/cache/openqa.opensuse.org/tests/
+Try 1:
+STDOUT:
+receiving incremental file list
+example/.git/
+example/.git/FETCH_HEAD
+              0   0%    0.00kB/s    0:00:00              117 100%  114.26kB/s    0:00:00 (xfr#1, ir-chk=1013/1148)
+example/.git/index
+              0   0%    0.00kB/s    0:00:00            8,071 100%    7.70MB/s    0:00:00 (xfr#2, ir-chk=1009/1148)
+example/.git/logs/HEAD
+              0   0%    0.00kB/s    0:00:00       13,715,372 100%    1.06GB/s    0:00:00 (xfr#3, ir-chk=1004/1148)
+example/.git/objects/
+example/.git/refs/heads/
+microos.bak/.git/
+microos.bak/.git/FETCH_HEAD
+              0   0%    0.00kB/s    0:00:00              114 100%    6.18kB/s    0:00:00 (xfr#4, ir-chk=1024/1683)
+microos.bak/.git/index
+              0   0%    0.00kB/s    0:00:00          779,750 100%   39.14MB/s    0:00:00 (xfr#5, ir-chk=1020/1683)
+microos.bak/.git/logs/HEAD
+              0   0%    0.00kB/s    0:00:00          225,134 100%   11.30MB/s    0:00:00 (xfr#6, ir-chk=1013/1683)
+microos.bak/.git/objects/
+microos.bak/.git/refs/heads/
+none/.git/
+none/.git/FETCH_HEAD
+              0   0%    0.00kB/s    0:00:00              114 100%    0.36kB/s    0:00:00 (xfr#7, ir-chk=1011/9743)
+none/.git/index
+              0   0%    0.00kB/s    0:00:00          443,560 100%    1.36MB/s    0:00:00 (xfr#8, ir-chk=1007/9743)
+none/.git/logs/HEAD
+              0   0%    0.00kB/s    0:00:00        1,681,900 100%    5.11MB/s    0:00:00 (xfr#9, ir-chk=1002/9743)
+none/.git/objects/
+none/.git/refs/heads/
+obs/.git/
+obs/.git/FETCH_HEAD
+              0   0%    0.00kB/s    0:00:00              107 100%    0.24kB/s    0:00:00 (xfr#10, ir-chk=1013/14320)
+obs/.git/index
+              0   0%    0.00kB/s    0:00:00            2,745 100%    6.25kB/s    0:00:00 (xfr#11, ir-chk=1008/14320)
+obs/.git/logs/HEAD
+              0   0%    0.00kB/s    0:00:00      426,745,168  62%   18.07MB/s    0:00:13      679,169,183 100%   28.50MB/s    0:00:22 (xfr#12, ir-chk=1002/14334)
+obs/.git/objects/
+obs/.git/refs/heads/
+openqa/.git/
+openqa/.git/FETCH_HEAD
+              0   0%    0.00kB/s    0:00:00              118 100%    0.19kB/s    0:00:00 (xfr#13, ir-chk=1212/14807)
+openqa/.git/index
+              0   0%    0.00kB/s    0:00:00           10,115 100%   15.88kB/s    0:00:00 (xfr#14, ir-chk=1208/14807)
+openqa/.git/logs/HEAD
+              0   0%    0.00kB/s    0:00:00        5,622,564 100%    8.55MB/s    0:00:00 (xfr#15, ir-chk=1203/14807)
+openqa/.git/objects/
+openqa/.git/refs/heads/
+openqa/needles/.git/
+openqa/needles/.git/FETCH_HEAD
+              0   0%    0.00kB/s    0:00:00              111 100%    0.17kB/s    0:00:00 (xfr#16, ir-chk=1015/15824)
+openqa/needles/.git/index
+              0   0%    0.00kB/s    0:00:00           24,115 100%   37.09kB/s    0:00:00 (xfr#17, ir-chk=1011/15824)
+openqa/needles/.git/logs/HEAD
+              0   0%    0.00kB/s    0:00:00        3,221,652 100%    3.27MB/s    0:00:00 (xfr#18, ir-chk=1006/15824)
+openqa/needles/.git/objects/
+openqa/needles/.git/refs/heads/
+opensuse/.git/
+opensuse/.git/FETCH_HEAD
+              0   0%    0.00kB/s    0:00:00              120 100%    0.12kB/s    0:00:00 (xfr#19, ir-chk=1034/16252)
+opensuse/.git/index
+              0   0%    0.00kB/s    0:00:00          688,128  88%  653.70kB/s    0:00:00          779,934 100%  740.19kB/s    0:00:01 (xfr#20, ir-chk=1029/16252)
+opensuse/.git/logs/HEAD
+              0   0%    0.00kB/s    0:00:00        2,852,115 100%  906.66MB/s    0:00:00 (xfr#21, ir-chk=1010/16252)
+opensuse/.git/objects/
+opensuse/.git/refs/heads/
+opensuse/products/aeon/needles/.git/
+opensuse/products/aeon/needles/.git/FETCH_HEAD
+              0   0%    0.00kB/s    0:00:00              115 100%    0.48kB/s    0:00:00 (xfr#22, ir-chk=12419/37497)
+opensuse/products/aeon/needles/.git/index
+              0   0%    0.00kB/s    0:00:00            8,418 100%   35.28kB/s    0:00:00 (xfr#23, ir-chk=12415/37497)
+opensuse/products/aeon/needles/.git/logs/HEAD
+              0   0%    0.00kB/s    0:00:00        1,013,283 100%    4.13MB/s    0:00:00 (xfr#24, ir-chk=12410/37497)
+opensuse/products/aeon/needles/.git/objects/
+opensuse/products/aeon/needles/.git/refs/heads/
+opensuse/products/opensuse/needles/.git/
+opensuse/products/opensuse/needles/.git/FETCH_HEAD
+              0   0%    0.00kB/s    0:00:00              113 100%    0.45kB/s    0:00:00 (xfr#25, ir-chk=1020/38519)
+opensuse/products/opensuse/needles/.git/index
+              0   0%    0.00kB/s    0:00:00        1,349,911 100%    4.97MB/s    0:00:00 (xfr#26, ir-chk=1015/38519)
+opensuse/products/opensuse/needles/.git/logs/HEAD
+              0   0%    0.00kB/s    0:00:00            5,296   0%    4.51kB/s    1:43:36       28,060,570 100%   22.87MB/s    0:00:01 (xfr#27, ir-chk=1015/38538)
+opensuse/products/opensuse/needles/.git/objects/
+opensuse/products/opensuse/needles/.git/refs/heads/
+deleting opensuse/tests/x11/__pycache__/doom.cpython-313.pyc
+deleting opensuse/tests/x11/__pycache__/
+opensuse/tests/x11/
+sle/.git/
+sle/.git/FETCH_HEAD
+              0   0%    0.00kB/s    0:00:00              119 100%    0.65kB/s    0:00:00 (xfr#28, ir-chk=1040/50045)
+sle/.git/index
+              0   0%    0.00kB/s    0:00:00          779,750 100%    4.11MB/s    0:00:00 (xfr#29, ir-chk=1036/50045)
+sle/.git/logs/HEAD
+              0   0%    0.00kB/s    0:00:00        2,973,919 100%    5.96MB/s    0:00:00 (xfr#30, ir-chk=1031/50045)
+sle/.git/objects/
+sle/.git/refs/heads/
+
+sent 331,884 bytes  received 4,568,932 bytes  79,688.07 bytes/sec
+total size is 8,102,137,604  speedup is 1,653.22
+
+STDERR:
+
+
+[2026-09-24T18:04:49.869500Z] [info] Finished to rsync tests
+[2026-09-24T18:04:49.874306Z] [debug] +++ worker notes +++
+[2026-09-24T18:04:50.241055Z] [debug] [pid:881449] [37mCurrent version is 5.1790268649.6700621 [interface v59][0m
+[2026-09-24T18:04:50.254847Z] [debug] [pid:881449] [37mgit hash in 'opensuse': d29faf7e1715a99a6c184d71c7882d211610c870[0m
+[2026-09-24T18:04:50.559102Z] [debug] [pid:881449] [37mgit url in 'opensuse': "https://github.com/os-autoinst/os-autoinst-distri-opensuse.git"[0m
+[2026-09-24T18:04:50.559272Z] [debug] [pid:881449] [37mTEST_GIT_HASH=d29faf7e1715a99a6c184d71c7882d211610c870 TEST_GIT_URL=https://github.com/os-autoinst/os-autoinst-distri-opensuse.git[0m
+[2026-09-24T18:04:50.846943Z] [debug] [pid:881449] [37mscheduling bootloader_uefi tests/installation/bootloader_uefi.pm[0m
+[2026-09-24T18:04:50.850309Z] [debug] [pid:881449] [37mscheduling welcome tests/installation/welcome.pm[0m
+[2026-09-24T18:04:50.851115Z] [debug] [pid:881449] [37mscheduling online_repos tests/installation/online_repos.pm[0m
+[2026-09-24T18:04:50.851696Z] [debug] [pid:881449] [37mscheduling installation_mode tests/installation/installation_mode.pm[0m
+[2026-09-24T18:04:50.852228Z] [debug] [pid:881449] [37mscheduling logpackages tests/installation/logpackages.pm[0m
+[2026-09-24T18:04:50.852996Z] [debug] [pid:881449] [37mscheduling system_role tests/installation/system_role.pm[0m
+[2026-09-24T18:04:50.853500Z] [debug] [pid:881449] [37mscheduling ntp_config_settings tests/installation/ntp_config_settings.pm[0m
+[2026-09-24T18:04:50.854375Z] [debug] [pid:881449] [37mscheduling user_settings_root tests/installation/user_settings_root.pm[0m
+[2026-09-24T18:04:50.854951Z] [debug] [pid:881449] [37mscheduling resolve_dependency_issues tests/installation/resolve_dependency_issues.pm[0m
+[2026-09-24T18:04:50.856133Z] [debug] [pid:881449] [37mscheduling installation_overview tests/installation/installation_overview.pm[0m
+[2026-09-24T18:04:50.856973Z] [debug] [pid:881449] [37mscheduling configure_bls tests/installation/configure_bls.pm[0m
+[2026-09-24T18:04:50.857878Z] [debug] [pid:881449] [37mscheduling start_install tests/installation/start_install.pm[0m
+[2026-09-24T18:04:50.859254Z] [debug] [pid:881449] [37mscheduling await_install tests/installation/await_install.pm[0m
+[2026-09-24T18:04:50.860180Z] [debug] [pid:881449] [37mscheduling logs_from_installation_system tests/installation/logs_from_installation_system.pm[0m
+[2026-09-24T18:04:50.861051Z] [debug] [pid:881449] [37mscheduling reboot_after_installation tests/installation/reboot_after_installation.pm[0m
+[2026-09-24T18:04:50.863013Z] [debug] [pid:881449] [37mscheduling disk_boot tests/microos/disk_boot.pm[0m
+[2026-09-24T18:04:50.863533Z] [debug] [pid:881449] [37mscheduling textinfo tests/console/textinfo.pm[0m
+[2026-09-24T18:04:50.864193Z] [debug] [pid:881449] [37mscheduling zypper_clear_repos tests/update/zypper_clear_repos.pm[0m
+[2026-09-24T18:04:50.864826Z] [debug] [pid:881449] [37mscheduling zypper_ar tests/console/zypper_ar.pm[0m
+[2026-09-24T18:04:50.865333Z] [debug] [pid:881449] [37mscheduling zypper_ref tests/console/zypper_ref.pm[0m
+[2026-09-24T18:04:50.866219Z] [debug] [pid:881449] [37mscheduling services_enabled tests/microos/services_enabled.pm[0m
+[2026-09-24T18:04:50.866854Z] [debug] [pid:881449] [37mscheduling disable_timers tests/transactional/disable_timers.pm[0m
+[2026-09-24T18:04:50.867558Z] [debug] [pid:881449] [37mscheduling networking tests/microos/networking.pm[0m
+[2026-09-24T18:04:50.868214Z] [debug] [pid:881449] [37mscheduling libzypp_config tests/microos/libzypp_config.pm[0m
+[2026-09-24T18:04:50.868895Z] [debug] [pid:881449] [37mscheduling one_line_checks tests/microos/one_line_checks.pm[0m
+[2026-09-24T18:04:50.870462Z] [debug] [pid:881449] [37mscheduling ansible_agnostic tests/console/oqa_agnostic/ansible_agnostic.pm[0m
+[2026-09-24T18:04:50.871177Z] [debug] [pid:881449] [37mscheduling salt tests/console/salt.pm[0m
+[2026-09-24T18:04:50.871735Z] [debug] [pid:881449] [37mscheduling filesystem_ro tests/transactional/filesystem_ro.pm[0m
+[2026-09-24T18:04:50.872392Z] [debug] [pid:881449] [37mscheduling trup_smoke tests/transactional/trup_smoke.pm[0m
+[2026-09-24T18:04:50.873320Z] [debug] [pid:881449] [37mscheduling transactional_update tests/transactional/transactional_update.pm[0m
+[2026-09-24T18:04:50.874131Z] [debug] [pid:881449] [37mscheduling rebootmgr tests/transactional/rebootmgr.pm[0m
+[2026-09-24T18:04:50.877450Z] [debug] [pid:881449] [37mscheduling toolbox tests/microos/toolbox.pm[0m
+[2026-09-24T18:04:50.883188Z] [debug] [pid:881449] [37mscheduling podman tests/containers/container_engine.pm[0m
+[2026-09-24T18:04:50.885622Z] [debug] [pid:881449] [37mscheduling image_podman tests/containers/image.pm[0m
+[2026-09-24T18:04:50.886428Z] [debug] [pid:881449] [37mscheduling podman_privileged_mode tests/containers/privileged_mode.pm[0m
+[2026-09-24T18:04:50.887210Z] [debug] [pid:881449] [37mscheduling podman_bci_systemd tests/containers/podman_bci_systemd.pm[0m
+[2026-09-24T18:04:50.888120Z] [debug] [pid:881449] [37mscheduling podman_pods tests/containers/podman_pods.pm[0m
+[2026-09-24T18:04:50.889768Z] [debug] [pid:881449] [37mscheduling podman_netavark tests/containers/podman_netavark.pm[0m
+[2026-09-24T18:04:50.890580Z] [debug] [pid:881449] [37mscheduling skopeo tests/containers/skopeo.pm[0m
+[2026-09-24T18:04:50.891611Z] [debug] [pid:881449] [37mscheduling podman_quadlet tests/containers/podman_quadlet.pm[0m
+[2026-09-24T18:04:50.892445Z] [debug] [pid:881449] [37mscheduling secret_podman tests/containers/secret.pm[0m
+[2026-09-24T18:04:50.893701Z] [debug] [pid:881449] [37mscheduling rootless_podman tests/containers/rootless_podman.pm[0m
+[2026-09-24T18:04:50.894783Z] [debug] [pid:881449] [37mscheduling volumes_podman tests/containers/volumes.pm[0m
+[2026-09-24T18:04:50.895593Z] [debug] [pid:881449] [37mscheduling podman_seccomp tests/containers/seccomp.pm[0m
+[2026-09-24T18:04:50.895753Z] [debug] [pid:881449] [37mscheduling docker tests/containers/container_engine.pm[0m
+[2026-09-24T18:04:50.895882Z] [debug] [pid:881449] [37mscheduling image_docker tests/containers/image.pm[0m
+[2026-09-24T18:04:50.896006Z] [debug] [pid:881449] [37mscheduling docker_privileged_mode tests/containers/privileged_mode.pm[0m
+[2026-09-24T18:04:50.896147Z] [debug] [pid:881449] [37mscheduling docker_seccomp tests/containers/seccomp.pm[0m
+[2026-09-24T18:04:50.896262Z] [debug] [pid:881449] [37mscheduling volumes_docker tests/containers/volumes.pm[0m
+[2026-09-24T18:04:50.902153Z] [info] [pid:881474] cmdsrv: daemon reachable under http://*:20243/xxxxxxxxxxxxxxxx/
+[2026-09-24T18:04:50.903442Z] [info] [pid:881474] Listening at "http://[::]:20243"
+Web application available at http://[::]:20243
+[2026-09-24T18:04:50.907538Z] [debug] [pid:881449] [37mgit hash in 'needles': d871c87467e988de7fd7815e6df36d7e4b62f1b6[0m
+[2026-09-24T18:04:52.876258Z] [debug] [pid:881449] [37mgit url in 'needles': "git@github.com:os-autoinst/os-autoinst-needles-opensuse.git"[0m
+[2026-09-24T18:04:52.876445Z] [debug] [pid:881449] [37minit needles from needles[0m
+[2026-09-24T18:04:53.323607Z] [debug] [pid:881449] [37mloaded 6103 needles[0m
+[2026-09-24T18:04:53.421894Z] [debug] [pid:881449] [37m881449: channel_out 15, channel_in 14[0m
+[2026-09-24T18:04:53.460917Z] [debug] [pid:881628] [37m881628: cmdpipe 13, rsppipe 16[0m
+[2026-09-24T18:04:53.461420Z] [debug] [pid:881628] [37mstarted mgmt loop with pid 881628[0m
+[2026-09-24T18:04:53.531613Z] [debug] [pid:881628] [37mLaunching external video encoder: ffmpeg -y -hide_banner -nostats -r 24 -f image2pipe -vcodec ppm -i - -pix_fmt yuv420p -c:v libsvtav1 -crf 50 -preset 7 -b:v 0 'video.webm'[0m
+[2026-09-24T18:04:53.603707Z] [debug] [pid:881628] [37mqemu version detected: 10.0.12[0m
+[2026-09-24T18:04:53.605483Z] [debug] [pid:881628] [37mrunning `/usr/bin/chattr +C /var/lib/openqa/pool/24/raid`[0m
+[2026-09-24T18:04:53.617616Z] [debug] [pid:881628] [37mCommand `/usr/bin/chattr +C /var/lib/openqa/pool/24/raid` terminated with 1
+  /usr/bin/chattr: Operation not supported while setting flags on /var/lib/openqa/pool/24/raid[0m
+[2026-09-24T18:04:53.617709Z] [debug] [pid:881628] [37mConfiguring storage controllers and block devices[0m
+[2026-09-24T18:04:53.618242Z] [debug] [pid:881628] [37mrunning `/usr/bin/qemu-img info --output=json /var/lib/openqa/pool/24/openSUSE-MicroOS-DVD-x86_64-Snapshot20260923-Media.iso`[0m
+[2026-09-24T18:04:53.660429Z] [debug] [pid:881628] [37mrunning `/usr/bin/qemu-img info --output=json /usr/share/qemu/ovmf-x86_64-ms-4m-code.bin`[0m
+[2026-09-24T18:04:53.690787Z] [debug] [pid:881628] [37mrunning `/usr/bin/qemu-img info --output=json /usr/share/qemu/ovmf-x86_64-ms-4m-vars.bin`[0m
+[2026-09-24T18:04:53.723695Z] [debug] [pid:881628] [37mInitializing block device images[0m
+[2026-09-24T18:04:53.723947Z] [debug] [pid:881628] [37mrunning `/usr/bin/qemu-img create -f qcow2 /var/lib/openqa/pool/24/raid/hd0 20G`[0m
+[2026-09-24T18:04:53.756970Z] [debug] [pid:881628] [37mFormatting '/var/lib/openqa/pool/24/raid/hd0', fmt=qcow2 cluster_size=65536 extended_l2=off compression_type=zlib size=21474836480 lazy_refcounts=off refcount_bits=16[0m
+[2026-09-24T18:04:53.757063Z] [debug] [pid:881628] [37mrunning `/usr/bin/qemu-img create -f qcow2 -F raw -b /var/lib/openqa/pool/24/openSUSE-MicroOS-DVD-x86_64-Snapshot20260923-Media.iso /var/lib/openqa/pool/24/raid/cd0-overlay0 2940207104`[0m
+[2026-09-24T18:04:53.789876Z] [debug] [pid:881628] [37mFormatting '/var/lib/openqa/pool/24/raid/cd0-overlay0', fmt=qcow2 cluster_size=65536 extended_l2=off compression_type=zlib size=2940207104 backing_file=/var/lib/openqa/pool/24/openSUSE-MicroOS-DVD-x86_64-Snapshot20260923-Media.iso backing_fmt=raw lazy_refcounts=off refcount_bits=16[0m
+[2026-09-24T18:04:53.789996Z] [debug] [pid:881628] [37mrunning `/usr/bin/qemu-img create -f qcow2 -F raw -b /usr/share/qemu/ovmf-x86_64-ms-4m-code.bin /var/lib/openqa/pool/24/raid/pflash-code-overlay0 3653632`[0m
+[2026-09-24T18:04:53.823339Z] [debug] [pid:881628] [37mFormatting '/var/lib/openqa/pool/24/raid/pflash-code-overlay0', fmt=qcow2 cluster_size=65536 extended_l2=off compression_type=zlib size=3653632 backing_file=/usr/share/qemu/ovmf-x86_64-ms-4m-code.bin backing_fmt=raw lazy_refcounts=off refcount_bits=16[0m
+[2026-09-24T18:04:53.823458Z] [debug] [pid:881628] [37mrunning `/usr/bin/qemu-img create -f qcow2 -F raw -b /usr/share/qemu/ovmf-x86_64-ms-4m-vars.bin /var/lib/openqa/pool/24/raid/pflash-vars-overlay0 540672`[0m
+[2026-09-24T18:04:53.856731Z] [debug] [pid:881628] [37mFormatting '/var/lib/openqa/pool/24/raid/pflash-vars-overlay0', fmt=qcow2 cluster_size=65536 extended_l2=off compression_type=zlib size=540672 backing_file=/usr/share/qemu/ovmf-x86_64-ms-4m-vars.bin backing_fmt=raw lazy_refcounts=off refcount_bits=16[0m
+[2026-09-24T18:04:53.856857Z] [debug] [pid:881628] [37minit_blockdev_images: Finished creating block devices[0m
+[2026-09-24T18:04:53.857840Z] [debug] [pid:881628] [37mstarting: /usr/bin/qemu-system-x86_64 -device VGA,edid=on,xres=1024,yres=768 -only-migratable -chardev ringbuf,id=serial0,logfile=serial0,logappend=on -serial chardev:serial0 -audiodev none,id=snd0 -device intel-hda -device hda-output,audiodev=snd0 -global isa-fdc.fdtypeA=none -m 2048 -cpu host -netdev user,id=qanet0 -device virtio-net,netdev=qanet0,mac=52:54:00:12:34:56 -object rng-random,filename=/dev/urandom,id=rng0 -device virtio-rng-pci,rng=rng0 -device qemu-xhci -device usb-tablet -smp 2 -enable-kvm -no-shutdown -vnc :114,share=force-shared -device virtio-serial -chardev pipe,id=virtio_console,path=virtio_console,logfile=virtio_console.log,logappend=on -device virtconsole,chardev=virtio_console,name=org.openqa.console.virtio_console -chardev pipe,id=virtio_console_user,path=virtio_console_user,logfile=virtio_console_user.log,logappend=on -device virtconsole,chardev=virtio_console_user,name=org.openqa.console.virtio_console_user -chardev socket,path=qmp_socket,server=on,wait=off,id=qmp_socket,logfile=qmp_socket.log,logappend=on -qmp chardev:qmp_socket -S -device virtio-scsi-pci,id=scsi0 -blockdev driver=file,node-name=hd0-file,filename=/var/lib/openqa/pool/24/raid/hd0,cache.no-flush=on -blockdev driver=qcow2,node-name=hd0,file=hd0-file,cache.no-flush=on,discard=unmap -device virtio-blk,id=hd0-device,drive=hd0,serial=hd0 -blockdev driver=file,node-name=cd0-overlay0-file,filename=/var/lib/openqa/pool/24/raid/cd0-overlay0,cache.no-flush=on -blockdev driver=qcow2,node-name=cd0-overlay0,file=cd0-overlay0-file,cache.no-flush=on,discard=unmap -device scsi-cd,id=cd0-device,drive=cd0-overlay0,serial=cd0 -drive id=pflash-code-overlay0,if=pflash,file=/var/lib/openqa/pool/24/raid/pflash-code-overlay0,unit=0,readonly=on -drive id=pflash-vars-overlay0,if=pflash,file=/var/lib/openqa/pool/24/raid/pflash-vars-overlay0,unit=1[0m
+[2026-09-24T18:04:53.863241Z] [debug] [pid:881628] [37mWaiting for 0 attempts[0m
+[2026-09-24T18:04:54.863786Z] [debug] [pid:881628] [37mWaiting for 1 attempts[0m
+[2026-09-24T18:04:55.864200Z] [debug] [pid:881628] [37mFinished after 2 attempts[0m
+[2026-09-24T18:04:55.876564Z] [debug] [pid:881628] [37mEstablishing VNC connection to localhost:6014[0m
+[2026-09-24T18:04:55.929273Z] [debug] [pid:881628] [37mpointer type 0 0 640 480 -257[0m
+[2026-09-24T18:04:55.929335Z] [debug] [pid:881628] [37mled state 0 1 1 -261[0m
+[2026-09-24T18:04:55.932783Z] [debug] [pid:881628] [37mStart CPU[0m
+[2026-09-24T18:04:55.933011Z] [debug] [pid:881628] [37mEVENT {"data":{"client":{"family":"ipv4","host":"127.0.0.1","service":"37492","websocket":false},"server":{"auth":"none","family":"ipv4","host":"0.0.0.0","service":"6014","websocket":false}},"event":"VNC_CONNECTED","timestamp":{"microseconds":877063,"seconds":1790273095}}[0m
+[2026-09-24T18:04:55.933083Z] [debug] [pid:881628] [37mEVENT {"data":{"client":{"family":"ipv4","host":"127.0.0.1","service":"37492","websocket":false},"server":{"auth":"none","family":"ipv4","host":"0.0.0.0","service":"6014","websocket":false}},"event":"VNC_INITIALIZED","timestamp":{"microseconds":878343,"seconds":1790273095}}[0m
+[2026-09-24T18:04:55.933156Z] [debug] [pid:881628] [37mEVENT {"event":"RESUME","timestamp":{"microseconds":933020,"seconds":1790273095}}[0m
+[2026-09-24T18:04:55.934135Z] [debug] [pid:881502] [37mGOT GO[0m
+[2026-09-24T18:04:55.935664Z] [debug] [pid:881628] [37mQEMU: QEMU emulator version 10.0.12 (SUSE Linux 16)[0m
+[2026-09-24T18:04:55.935710Z] [debug] [pid:881628] [37mQEMU: Copyright (c) 2003-2025 Fabrice Bellard and the QEMU Project developers[0m
+[2026-09-24T18:04:55.936375Z] [debug] [pid:881502] [37mSnapshots are supported[0m
+[2026-09-24T18:04:55.939806Z] [debug] [pid:881502] [1;34m||| starting bootloader_uefi tests/installation/bootloader_uefi.pm[0m
+[2026-09-24T18:05:40.217919Z] [debug] [pid:881502] [1;34m||| finished bootloader_uefi installation (runtime: 45 s)[0m
+[2026-09-24T18:05:40.219280Z] [debug] [pid:881502] [1;34m||| starting welcome tests/installation/welcome.pm[0m
+[2026-09-24T18:06:50.948975Z] [debug] [pid:881502] [1;34m||| finished welcome installation (runtime: 70 s)[0m
+[2026-09-24T18:06:50.950196Z] [debug] [pid:881502] [1;34m||| starting online_repos tests/installation/online_repos.pm[0m
+[2026-09-24T18:07:17.220803Z] [debug] [pid:881502] [1;34m||| finished online_repos installation (runtime: 27 s)[0m
+[2026-09-24T18:07:17.221813Z] [debug] [pid:881502] [1;34m||| starting installation_mode tests/installation/installation_mode.pm[0m
+[2026-09-24T18:07:21.787593Z] [debug] [pid:881502] [1;34m||| finished installation_mode installation (runtime: 4 s)[0m
+[2026-09-24T18:07:21.788438Z] [debug] [pid:881502] [1;34m||| starting logpackages tests/installation/logpackages.pm[0m
+[2026-09-24T18:08:13.078023Z] [debug] [pid:881502] [1;34m||| finished logpackages installation (runtime: 52 s)[0m
+[2026-09-24T18:08:13.079844Z] [debug] [pid:881502] [1;34m||| starting system_role tests/installation/system_role.pm[0m
+[2026-09-24T18:08:22.797709Z] [debug] [pid:881502] [1;34m||| finished system_role installation (runtime: 9 s)[0m
+[2026-09-24T18:08:22.798640Z] [debug] [pid:881502] [1;34m||| starting ntp_config_settings tests/installation/ntp_config_settings.pm[0m
+[2026-09-24T18:08:25.171971Z] [debug] [pid:881502] [1;34m||| finished ntp_config_settings installation (runtime: 3 s)[0m
+[2026-09-24T18:08:25.172940Z] [debug] [pid:881502] [1;34m||| starting user_settings_root tests/installation/user_settings_root.pm[0m
+[2026-09-24T18:08:29.166681Z] [debug] [pid:881502] [1;34m||| finished user_settings_root installation (runtime: 4 s)[0m
+[2026-09-24T18:08:29.167760Z] [debug] [pid:881502] [1;34m||| starting resolve_dependency_issues tests/installation/resolve_dependency_issues.pm[0m
+[2026-09-24T18:08:33.935076Z] [debug] [pid:881502] [1;34m||| finished resolve_dependency_issues installation (runtime: 4 s)[0m
+[2026-09-24T18:08:33.936115Z] [debug] [pid:881502] [1;34m||| starting installation_overview tests/installation/installation_overview.pm[0m
+[2026-09-24T18:08:34.931989Z] [debug] [pid:881502] [1;34m||| finished installation_overview installation (runtime: 1 s)[0m
+[2026-09-24T18:08:34.932984Z] [debug] [pid:881502] [1;34m||| starting configure_bls tests/installation/configure_bls.pm[0m
+[2026-09-24T18:09:17.343949Z] [debug] [pid:881502] [1;34m||| finished configure_bls installation (runtime: 43 s)[0m
+[2026-09-24T18:09:17.345770Z] [debug] [pid:881502] [1;34m||| starting start_install tests/installation/start_install.pm[0m
+[2026-09-24T18:09:33.851696Z] [debug] [pid:881502] [1;34m||| finished start_install installation (runtime: 16 s)[0m
+[2026-09-24T18:09:33.852768Z] [debug] [pid:881502] [1;34m||| starting await_install tests/installation/await_install.pm[0m
+[2026-09-24T18:11:22.250823Z] [debug] [pid:881502] [1;34m||| finished await_install installation (runtime: 109 s)[0m
+[2026-09-24T18:11:22.251849Z] [debug] [pid:881502] [1;34m||| starting logs_from_installation_system tests/installation/logs_from_installation_system.pm[0m
+[2026-09-24T18:11:59.290481Z] [debug] [pid:881502] [1;34m||| finished logs_from_installation_system installation (runtime: 37 s)[0m
+[2026-09-24T18:11:59.292095Z] [debug] [pid:881502] [1;34m||| starting reboot_after_installation tests/installation/reboot_after_installation.pm[0m
+[2026-09-24T18:12:00.863999Z] [debug] [pid:881502] [1;34m||| finished reboot_after_installation installation (runtime: 1 s)[0m
+[2026-09-24T18:12:00.865026Z] [debug] [pid:881502] [1;34m||| starting disk_boot tests/microos/disk_boot.pm[0m
+[2026-09-24T18:13:21.912694Z] [debug] [pid:881502] [1;34m||| finished disk_boot microos (runtime: 81 s)[0m
+[2026-09-24T18:13:21.913866Z] [debug] [pid:881502] [1;34m||| starting textinfo tests/console/textinfo.pm[0m
+[2026-09-24T18:13:22.537618Z] [debug] [pid:881502] [1;34m||| finished textinfo console (runtime: 1 s)[0m
+[2026-09-24T18:13:22.538298Z] [debug] [pid:881502] [1;34m||| starting zypper_clear_repos tests/update/zypper_clear_repos.pm[0m
+[2026-09-24T18:13:57.335632Z] [debug] [pid:881502] [1;34m||| finished zypper_clear_repos update (runtime: 35 s)[0m
+[2026-09-24T18:13:57.336476Z] [debug] [pid:881502] [1;34m||| starting zypper_ar tests/console/zypper_ar.pm[0m
+[2026-09-24T18:14:47.770252Z] [debug] [pid:881502] [1;34m||| finished zypper_ar console (runtime: 50 s)[0m
+[2026-09-24T18:14:47.771219Z] [debug] [pid:881502] [1;34m||| starting zypper_ref tests/console/zypper_ref.pm[0m
+[2026-09-24T18:14:53.664777Z] [debug] [pid:881502] [1;34m||| finished zypper_ref console (runtime: 6 s)[0m
+[2026-09-24T18:14:56.663371Z] [debug] [pid:881502] [1;34m||| starting services_enabled tests/microos/services_enabled.pm[0m
+[2026-09-24T18:14:56.698408Z] [debug] [pid:881502] [1;34m||| finished services_enabled microos (runtime: 0 s)[0m
+[2026-09-24T18:14:56.698962Z] [debug] [pid:881502] [1;34m||| starting disable_timers tests/transactional/disable_timers.pm[0m
+[2026-09-24T18:14:58.350753Z] [debug] [pid:881502] [1;34m||| finished disable_timers transactional (runtime: 2 s)[0m
+[2026-09-24T18:14:58.351308Z] [debug] [pid:881502] [1;34m||| starting networking tests/microos/networking.pm[0m
+[2026-09-24T18:14:58.834030Z] [debug] [pid:881502] [1;34m||| finished networking microos (runtime: 0 s)[0m
+[2026-09-24T18:14:58.834542Z] [debug] [pid:881502] [1;34m||| starting libzypp_config tests/microos/libzypp_config.pm[0m
+[2026-09-24T18:14:58.883978Z] [debug] [pid:881502] [1;34m||| finished libzypp_config microos (runtime: 0 s)[0m
+[2026-09-24T18:14:58.884473Z] [debug] [pid:881502] [1;34m||| starting one_line_checks tests/microos/one_line_checks.pm[0m
+[2026-09-24T18:14:59.088046Z] [debug] [pid:881502] [1;34m||| finished one_line_checks microos (runtime: 1 s)[0m
+[2026-09-24T18:14:59.088572Z] [debug] [pid:881502] [1;34m||| starting ansible_agnostic tests/console/oqa_agnostic/ansible_agnostic.pm[0m
+[2026-09-24T18:14:59.102815Z] [debug] [pid:881502] <<< testapi::script_run(cmd="transactional-update -n pkg install sudo git-core ansible ansible-test python3-yamllint", output="", timeout=180, quiet=undef, max_interval=250)
+[2026-09-24T18:15:14.413560Z] [debug] [pid:881502] <<< testapi::assert_script_run(cmd="mount | grep 'on / ' | grep -E -o 'subvolid=[0-9]*' | cut -d'=' -f2 > mnt-1790273714", quiet=undef, timeout=90, fail_message="", max_interval=250)
+[2026-09-24T18:15:14.421123Z] [debug] [pid:881502] <<< testapi::assert_script_run(cmd="btrfs su get-default / | cut -d' ' -f2 > def-1790273714", max_interval=250, fail_message="", timeout=90, quiet=undef)
+[2026-09-24T18:15:14.425697Z] [debug] [pid:881502] <<< testapi::script_run(cmd="diff mnt-1790273714 def-1790273714", max_interval=250, quiet=undef, timeout=30, output="")
+[2026-09-24T18:16:05.421803Z] [debug] [pid:881502] <<< testapi::assert_script_run(cmd="clear", quiet=undef, timeout=90, fail_message="", max_interval=250)
+[2026-09-24T18:16:15.587208Z] [debug] [pid:881502] <<< testapi::assert_script_run(cmd="export TERM=dumb", max_interval=250, fail_message="", timeout=90, quiet=undef)
+[2026-09-24T18:16:15.592025Z] [debug] [pid:881502] <<< testapi::assert_script_run(cmd="echo Logged into \$(tty)", result_title="vconsole_login", timeout=30, quiet=undef, max_interval=250, fail_message="")
+[2026-09-24T18:16:15.595801Z] [debug] [pid:881502] <<< testapi::assert_script_run(cmd="systemctl --no-pager start sshd", fail_message="", max_interval=250, quiet=undef, timeout=90)
+[2026-09-24T18:16:15.611079Z] [debug] [pid:881502] <<< testapi::assert_script_run(cmd="mkdir -p ~/ansible_collections/openqa", quiet=undef, timeout=90, fail_message="", max_interval=250)
+[2026-09-24T18:16:15.615019Z] [debug] [pid:881502] <<< testapi::assert_script_run(cmd="curl http://10.0.2.2:20243/xxxxxxxxxxxxxxxx/data/console/ansible/ | cpio -id", timeout=90, quiet=undef, max_interval=250, fail_message="")
+[2026-09-24T18:16:15.638754Z] [debug] [pid:881502] <<< testapi::assert_script_run(cmd="mv data ~/ansible_collections/openqa/ansible", quiet=undef, timeout=90, fail_message="", max_interval=250)
+[2026-09-24T18:16:15.644097Z] [debug] [pid:881502] <<< testapi::assert_script_run(cmd="sed -i 's/ANSIBLEUSER/bernhard/' ~/ansible_collections/openqa/ansible/hosts", timeout=90, quiet=undef, max_interval=250, fail_message="")
+[2026-09-24T18:16:15.675813Z] [debug] [pid:881502] <<< testapi::script_run(cmd="python3 -m pytest --version", max_interval=250, quiet=1, timeout=10, output="")
+[2026-09-24T18:16:15.709283Z] [debug] [pid:881502] <<< testapi::script_run(cmd="transactional-update -n pkg in -l python3-pytest ", timeout=180, output="", quiet=undef, max_interval=250)
+[2026-09-24T18:17:12.353505Z] [debug] [pid:881502] <<< testapi::assert_script_run(cmd="clear", fail_message="", max_interval=250, quiet=undef, timeout=90)
+[2026-09-24T18:17:22.516908Z] [debug] [pid:881502] <<< testapi::assert_script_run(cmd="export TERM=dumb", quiet=undef, timeout=90, fail_message="", max_interval=250)
+[2026-09-24T18:17:22.521708Z] [debug] [pid:881502] <<< testapi::assert_script_run(cmd="echo Logged into \$(tty)", result_title="vconsole_login", timeout=30, quiet=undef, max_interval=250, fail_message="")
+[2026-09-24T18:17:22.525644Z] [debug] [pid:881502] <<< testapi::assert_script_run(cmd="mkdir -p ~/testAnsible/../lib", quiet=1, timeout=90, fail_message="", max_interval=250)
+[2026-09-24T18:17:22.529424Z] [debug] [pid:881502] <<< testapi::assert_script_run(cmd="curl -s -o ~/testAnsible/../lib/helper.sh http://10.0.2.2:20243/xxxxxxxxxxxxxxxx/data/openqa_agnostic/lib/helper.sh", quiet=1, timeout=90, fail_message="", max_interval=250)
+[2026-09-24T18:17:22.541516Z] [debug] [pid:881502] <<< testapi::assert_script_run(cmd="curl -s -o ~/testAnsible/runtest http://10.0.2.2:20243/xxxxxxxxxxxxxxxx/data/console/openqa_agnostic/python/testAnsible/runtest", max_interval=250, fail_message="", timeout=90, quiet=1)
+[2026-09-24T18:17:22.551489Z] [debug] [pid:881502] <<< testapi::assert_script_run(cmd="chmod +x ~/testAnsible/runtest", timeout=90, quiet=1, max_interval=250, fail_message="")
+[2026-09-24T18:17:22.566641Z] [debug] [pid:881502] <<< testapi::assert_script_run(cmd="cd ~/testAnsible && curl -s -O http://10.0.2.2:20243/xxxxxxxxxxxxxxxx/data/console/openqa_agnostic/python/testAnsible/test_ansible.py", max_interval=250, fail_message="", timeout=90, quiet=1)
+[2026-09-24T18:17:22.576358Z] [debug] [pid:881502] <<< testapi::assert_script_run(cmd="cd ~/testAnsible && chmod +x ./runtest && ( set -o pipefail; ./runtest 2>&1 | tee /tmp/testAnsible_output.log ) && mv results.xml /tmp/testansible_results.xml", max_interval=250, fail_message="", timeout=90, quiet=1)
+[2026-09-24T18:18:10.074699Z] [debug] [pid:881502] <<< testapi::upload_logs(file="/tmp/testAnsible_output.log", failok=1, timeout=90, failok=1)
+[2026-09-24T18:18:10.074957Z] [debug] [pid:881502] <<< testapi::script_run(cmd="curl --form upload=\@/tmp/testAnsible_output.log --form upname=ansible_agnostic-testAnsible_output.log --max-time 90 http://10.0.2.2:20243/xxxxxxxxxxxxxxxx/uploadlog/testAnsible_output.log", quiet=undef, output="", timeout=100, max_interval=250)
+[2026-09-24T18:18:10.119953Z] [debug] [pid:881502] <<< testapi::upload_logs(file="/tmp/testansible_results.xml", failok=0, timeout=90)
+[2026-09-24T18:18:10.120149Z] [debug] [pid:881502] <<< testapi::assert_script_run(cmd="curl --form upload=\@/tmp/testansible_results.xml --form upname=ansible_agnostic-testansible_results.xml http://10.0.2.2:20243/xxxxxxxxxxxxxxxx/uploadlog/testansible_results.xml", timeout=90, quiet=undef, max_interval=250, fail_message="")
+[2026-09-24T18:18:10.193489Z] [debug] [pid:881502] <<< testapi::record_info(title="PASSED: test_collection_is_present", output="", result="ok")
+[2026-09-24T18:18:10.193763Z] [debug] [pid:881502] <<< testapi::record_info(title="PASSED: test_ansible_version", output="", result="ok")
+[2026-09-24T18:18:10.194022Z] [debug] [pid:881502] <<< testapi::record_info(title="PASSED: test_setup_hostname", output="", result="ok")
+[2026-09-24T18:18:10.194263Z] [debug] [pid:881502] <<< testapi::record_info(title="PASSED: test_setup_architecture", output="", result="ok")
+[2026-09-24T18:18:10.194496Z] [debug] [pid:881502] <<< testapi::record_info(title="PASSED: test_galaxy_role", output="", result="ok")
+[2026-09-24T18:18:10.194731Z] [debug] [pid:881502] <<< testapi::record_info(title="PASSED: test_general_collection_has_zypper", output="", result="ok")
+[2026-09-24T18:18:10.194983Z] [debug] [pid:881502] <<< testapi::record_info(title="PASSED: test_ansible_community", output="", result="ok")
+[2026-09-24T18:18:10.195219Z] [debug] [pid:881502] <<< testapi::record_info(title="PASSED: test_playbook_check", output="", result="ok")
+[2026-09-24T18:18:10.195456Z] [debug] [pid:881502] <<< testapi::record_info(title="PASSED: test_ansible_test_sanity", output="", result="ok")
+[2026-09-24T18:18:10.195692Z] [debug] [pid:881502] <<< testapi::record_info(title="PASSED: test_inventory", output="", result="ok")
+[2026-09-24T18:18:10.195934Z] [debug] [pid:881502] <<< testapi::record_info(title="PASSED: test_playbook_run", output="", result="ok")
+[2026-09-24T18:18:10.196191Z] [debug] [pid:881502] <<< testapi::record_info(title="SKIPPED: test_playbook_installed_ed", output="ed is installed into a new transactional snapshot, needs a reboot", result="ok")
+[2026-09-24T18:18:10.196449Z] [debug] [pid:881502] <<< testapi::record_info(title="PASSED: test_vault_roundtrip", output="", result="ok")
+[2026-09-24T18:18:10.196665Z] [debug] [pid:881502] <<< testapi::assert_script_run(cmd="cd ~ && rm -rf ~/testAnsible", fail_message="", max_interval=250, quiet=1, timeout=90)
+[2026-09-24T18:18:10.200887Z] [debug] [pid:881502] [1;34m||| finished ansible_agnostic console/oqa_agnostic (runtime: 191 s)[0m
+[2026-09-24T18:18:10.202151Z] [debug] [pid:881502] [1;34m||| starting salt tests/console/salt.pm[0m
+[2026-09-24T18:20:47.095394Z] [debug] [pid:881502] [1;34m||| finished salt console (runtime: 157 s)[0m
+[2026-09-24T18:20:47.096430Z] [debug] [pid:881502] [1;34m||| starting filesystem_ro tests/transactional/filesystem_ro.pm[0m
+[2026-09-24T18:20:47.145829Z] [debug] [pid:881502] [1;34m||| finished filesystem_ro transactional (runtime: 0 s)[0m
+[2026-09-24T18:20:47.146423Z] [debug] [pid:881502] [1;34m||| starting trup_smoke tests/transactional/trup_smoke.pm[0m
+[2026-09-24T18:24:00.925351Z] [debug] [pid:881502] [1;34m||| finished trup_smoke transactional (runtime: 193 s)[0m
+[2026-09-24T18:24:00.926623Z] [debug] [pid:881502] [1;34m||| starting transactional_update tests/transactional/transactional_update.pm[0m
+[2026-09-24T18:30:38.459775Z] [debug] [pid:881502] [1;34m||| finished transactional_update transactional (runtime: 398 s)[0m
+[2026-09-24T18:30:38.461604Z] [debug] [pid:881502] [1;34m||| starting rebootmgr tests/transactional/rebootmgr.pm[0m
+[2026-09-24T18:37:15.583953Z] [debug] [pid:881502] [1;34m||| finished rebootmgr transactional (runtime: 397 s)[0m
+[2026-09-24T18:37:15.585377Z] [debug] [pid:881502] [1;34m||| starting toolbox tests/microos/toolbox.pm[0m
+[2026-09-24T18:37:15.585879Z] [debug] [pid:881502] [step:microos,toolbox,1] tests/microos/toolbox.pm:60 called testapi::select_console
+[2026-09-24T18:37:15.585969Z] [debug] [pid:881502] <<< testapi::select_console(testapi_console="root-console")
+[2026-09-24T18:37:15.888821Z] [debug] [pid:881502] [step:microos,toolbox,1] tests/microos/toolbox.pm:60 called testapi::select_console -> lib/susedistribution.pm:1038 called testapi::assert_screen
+[2026-09-24T18:37:15.888934Z] [debug] [pid:881502] <<< testapi::assert_screen(mustmatch="root-console", timeout=30, no_wait=1)
+[2026-09-24T18:37:15.951244Z] [debug] [pid:881502] [32m>>> testapi::_handle_found_needle: found root-console-20200501, similarity 0.99 @ 95/1[0m
+[2026-09-24T18:37:15.951472Z] [debug] [pid:881502] [step:microos,toolbox,2] tests/microos/toolbox.pm:61 called toolbox::create_user -> tests/microos/toolbox.pm:29 called testapi::script_run
+[2026-09-24T18:37:15.951581Z] [debug] [pid:881502] <<< testapi::script_run(cmd="getent passwd bernhard", output="", timeout=30, quiet=undef, max_interval=250)
+[2026-09-24T18:37:15.952209Z] [debug] [pid:881502] [step:microos,toolbox,2] tests/microos/toolbox.pm:61 called toolbox::create_user -> tests/microos/toolbox.pm:29 called testapi::script_run
+[2026-09-24T18:37:15.952297Z] [debug] [pid:881502] <<< testapi::type_string(string="getent passwd bernhard\n", max_interval=250, wait_screen_change=0, wait_still_screen=0, timeout=30, similarity_level=47)
+[2026-09-24T18:37:16.726602Z] [debug] [pid:881502] [step:microos,toolbox,2] tests/microos/toolbox.pm:61 called toolbox::create_user -> tests/microos/toolbox.pm:29 called testapi::script_run
+[2026-09-24T18:37:16.726817Z] [debug] [pid:881502] <<< testapi::wait_serial(no_regex=0, buffer_size=undef, record_output=undef, record_command="getent passwd bernhard", quiet=undef, expect_not_found=0, timeout=30, regexp=qr/OA:DONE-[0-9a-f]{4}-(\d+)-OA\:gete22hard/u, internal_marker=1, capture_name="Exit code")
+[2026-09-24T18:37:17.764412Z] [debug] [pid:881502] [step:microos,toolbox,3] tests/microos/toolbox.pm:61 called toolbox::create_user -> tests/microos/toolbox.pm:29 called testapi::script_run
+[2026-09-24T18:37:17.764622Z] [debug] [pid:881502] [32m>>> testapi::wait_serial: (?^u:OA:DONE-[0-9a-f]{4}-(\d+)-OA\:gete22hard): ok[0m
+[2026-09-24T18:37:17.764801Z] [debug] [pid:881502] [step:microos,toolbox,4] tests/microos/toolbox.pm:61 called toolbox::create_user -> tests/microos/toolbox.pm:36 called testapi::script_output
+[2026-09-24T18:37:17.764931Z] [debug] [pid:881502] <<< testapi::type_string(string="cat - > /tmp/scriptjuTEW.sh;", max_interval=250, wait_screen_change=0, wait_still_screen=0, timeout=30, similarity_level=47)
+[2026-09-24T18:37:18.775532Z] [debug] [pid:881502] [step:microos,toolbox,4] tests/microos/toolbox.pm:61 called toolbox::create_user -> tests/microos/toolbox.pm:36 called testapi::script_output
+[2026-09-24T18:37:18.775702Z] [debug] [pid:881502] <<< testapi::type_string(string="\n", max_interval=250, wait_screen_change=0, wait_still_screen=0, timeout=30, similarity_level=47)
+[2026-09-24T18:37:18.810030Z] [debug] [pid:881502] [step:microos,toolbox,4] tests/microos/toolbox.pm:61 called toolbox::create_user -> tests/microos/toolbox.pm:36 called testapi::script_output
+[2026-09-24T18:37:18.810137Z] [debug] [pid:881502] <<< testapi::type_string(string="stat -c %G /dev/ttyS0\n", max_interval=250, wait_screen_change=0, wait_still_screen=0, timeout=30, similarity_level=47)
+[2026-09-24T18:37:19.601563Z] [debug] [pid:881502] [step:microos,toolbox,4] tests/microos/toolbox.pm:61 called toolbox::create_user -> tests/microos/toolbox.pm:36 called testapi::script_output
+[2026-09-24T18:37:19.601699Z] [debug] [pid:881502] <<< testapi::send_key(key="ctrl-d", wait_screen_change=0)
+[2026-09-24T18:37:19.869759Z] [debug] [pid:881502] [step:microos,toolbox,4] tests/microos/toolbox.pm:61 called toolbox::create_user -> tests/microos/toolbox.pm:36 called testapi::script_output
+[2026-09-24T18:37:19.869898Z] [debug] [pid:881502] <<< testapi::type_string(string="(echo juTEW; bash -eox pipefail /tmp/scriptjuTEW.sh ; echo SCRIPT_FINISHEDjuTEW-\$?-) | tee /dev/ttyS0\n", max_interval=250, wait_screen_change=0, wait_still_screen=0, timeout=30, similarity_level=47)
+[2026-09-24T18:37:23.807062Z] [debug] [pid:881502] [step:microos,toolbox,4] tests/microos/toolbox.pm:61 called toolbox::create_user -> tests/microos/toolbox.pm:36 called testapi::script_output
+[2026-09-24T18:37:23.807269Z] [debug] [pid:881502] <<< testapi::wait_serial(buffer_size=undef, no_regex=0, record_output=1, record_command=undef, regexp=qr/SCRIPT_FINISHEDjuTEW-(\d+)-/u, internal_marker=1, capture_name="Exit code", expect_not_found=0, quiet=undef, timeout=90)
+[2026-09-24T18:37:24.845677Z] [debug] [pid:881502] [step:microos,toolbox,5] tests/microos/toolbox.pm:61 called toolbox::create_user -> tests/microos/toolbox.pm:36 called testapi::script_output
+[2026-09-24T18:37:24.845871Z] [debug] [pid:881502] [32m>>> testapi::wait_serial: (?^u:SCRIPT_FINISHEDjuTEW-(\d+)-): ok[0m
+[2026-09-24T18:37:24.846011Z] [debug] [pid:881502] [step:microos,toolbox,6] tests/microos/toolbox.pm:61 called toolbox::create_user -> tests/microos/toolbox.pm:37 called testapi::assert_script_run
+[2026-09-24T18:37:24.846128Z] [debug] [pid:881502] <<< testapi::assert_script_run(cmd="grep '^dialout:.*:bernhard\$' /etc/group || (chown bernhard /dev/ttyS0 && gpasswd -a bernhard dialout)", quiet=undef, timeout=90, fail_message="", max_interval=250)
+[2026-09-24T18:37:24.846778Z] [debug] [pid:881502] [step:microos,toolbox,6] tests/microos/toolbox.pm:61 called toolbox::create_user -> tests/microos/toolbox.pm:37 called testapi::assert_script_run
+[2026-09-24T18:37:24.846878Z] [debug] [pid:881502] <<< testapi::type_string(string="grep '^dialout:.*:bernhard\$' /etc/group || (chown bernhard /dev/ttyS0 && gpasswd -a bernhard dialout)\n", max_interval=250, wait_screen_change=0, wait_still_screen=0, timeout=30, similarity_level=47)
+[2026-09-24T18:37:28.479027Z] [debug] [pid:881502] [step:microos,toolbox,6] tests/microos/toolbox.pm:61 called toolbox::create_user -> tests/microos/toolbox.pm:37 called testapi::assert_script_run
+[2026-09-24T18:37:28.479264Z] [debug] [pid:881502] <<< testapi::wait_serial(record_command="grep '^dialout:.*:bernhard\$' /etc/group || (chown bernhard /dev/ttyS0 && gpasswd -a bernhard dialout)", regexp=qr/OA:DONE-[0-9a-f]{4}-(\d+)-OA\:grep101out\)/u, capture_name="Exit code", internal_marker=1, quiet=undef, expect_not_found=0, timeout=90, buffer_size=undef, no_regex=0, record_output=undef)
+[2026-09-24T18:37:30.518848Z] [debug] [pid:881502] [step:microos,toolbox,7] tests/microos/toolbox.pm:61 called toolbox::create_user -> tests/microos/toolbox.pm:37 called testapi::assert_script_run
+[2026-09-24T18:37:30.519051Z] [debug] [pid:881502] [32m>>> testapi::wait_serial: (?^u:OA:DONE-[0-9a-f]{4}-(\d+)-OA\:grep101out\)): ok[0m
+[2026-09-24T18:37:30.519174Z] [debug] [pid:881502] [step:microos,toolbox,8] tests/microos/toolbox.pm:61 called toolbox::create_user -> tests/microos/toolbox.pm:40 called testapi::assert_script_run
+[2026-09-24T18:37:30.519290Z] [debug] [pid:881502] <<< testapi::assert_script_run(cmd="echo 'bernhard ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers.d/50-bernhard", fail_message="", max_interval=250, quiet=undef, timeout=90)
+[2026-09-24T18:37:30.519994Z] [debug] [pid:881502] [step:microos,toolbox,8] tests/microos/toolbox.pm:61 called toolbox::create_user -> tests/microos/toolbox.pm:40 called testapi::assert_script_run
+[2026-09-24T18:37:30.520085Z] [debug] [pid:881502] <<< testapi::type_string(string="echo 'bernhard ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers.d/50-bernhard\n", max_interval=250, wait_screen_change=0, wait_still_screen=0, timeout=30, similarity_level=47)
+[2026-09-24T18:37:33.210538Z] [debug] [pid:881502] [step:microos,toolbox,8] tests/microos/toolbox.pm:61 called toolbox::create_user -> tests/microos/toolbox.pm:40 called testapi::assert_script_run
+[2026-09-24T18:37:33.210764Z] [debug] [pid:881502] <<< testapi::wait_serial(no_regex=0, buffer_size=undef, record_output=undef, record_command="echo 'bernhard ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers.d/50-bernhard", timeout=90, expect_not_found=0, quiet=undef, internal_marker=1, capture_name="Exit code", regexp=qr/OA:DONE-[0-9a-f]{4}-(\d+)-OA\:echo68hard/u)
+[2026-09-24T18:37:34.249593Z] [debug] [pid:881502] [step:microos,toolbox,9] tests/microos/toolbox.pm:61 called toolbox::create_user -> tests/microos/toolbox.pm:40 called testapi::assert_script_run
+[2026-09-24T18:37:34.249786Z] [debug] [pid:881502] [32m>>> testapi::wait_serial: (?^u:OA:DONE-[0-9a-f]{4}-(\d+)-OA\:echo68hard): ok[0m
+[2026-09-24T18:37:34.249952Z] [debug] [pid:881502] [step:microos,toolbox,10] tests/microos/toolbox.pm:74 called testapi::assert_script_run
+[2026-09-24T18:37:34.250065Z] [debug] [pid:881502] <<< testapi::assert_script_run(cmd="echo REGISTRY=registry.opensuse.org > /etc/toolboxrc", fail_message="", max_interval=250, quiet=undef, timeout=90)
+[2026-09-24T18:37:34.250713Z] [debug] [pid:881502] [step:microos,toolbox,10] tests/microos/toolbox.pm:74 called testapi::assert_script_run
+[2026-09-24T18:37:34.250805Z] [debug] [pid:881502] <<< testapi::type_string(string="echo REGISTRY=registry.opensuse.org > /etc/toolboxrc\n", max_interval=250, wait_screen_change=0, wait_still_screen=0, timeout=30, similarity_level=47)
+[2026-09-24T18:37:36.186784Z] [debug] [pid:881502] [step:microos,toolbox,10] tests/microos/toolbox.pm:74 called testapi::assert_script_run
+[2026-09-24T18:37:36.187028Z] [debug] [pid:881502] <<< testapi::wait_serial(quiet=undef, expect_not_found=0, timeout=90, regexp=qr/OA:DONE-[0-9a-f]{4}-(\d+)-OA\:echo52oxrc/u, capture_name="Exit code", internal_marker=1, record_command="echo REGISTRY=registry.opensuse.org > /etc/toolboxrc", record_output=undef, no_regex=0, buffer_size=undef)
+[2026-09-24T18:37:37.225891Z] [debug] [pid:881502] [step:microos,toolbox,11] tests/microos/toolbox.pm:74 called testapi::assert_script_run
+[2026-09-24T18:37:37.226083Z] [debug] [pid:881502] [32m>>> testapi::wait_serial: (?^u:OA:DONE-[0-9a-f]{4}-(\d+)-OA\:echo52oxrc): ok[0m
+[2026-09-24T18:37:37.226202Z] [debug] [pid:881502] [step:microos,toolbox,12] tests/microos/toolbox.pm:75 called testapi::assert_script_run
+[2026-09-24T18:37:37.226317Z] [debug] [pid:881502] <<< testapi::assert_script_run(cmd="echo IMAGE=opensuse/factory/totest/containers/opensuse/toolbox >> /etc/toolboxrc", quiet=undef, timeout=90, fail_message="", max_interval=250)
+[2026-09-24T18:37:37.226976Z] [debug] [pid:881502] [step:microos,toolbox,12] tests/microos/toolbox.pm:75 called testapi::assert_script_run
+[2026-09-24T18:37:37.227079Z] [debug] [pid:881502] <<< testapi::type_string(string="echo IMAGE=opensuse/factory/totest/containers/opensuse/toolbox >> /etc/toolboxrc\n", max_interval=250, wait_screen_change=0, wait_still_screen=0, timeout=30, similarity_level=47)
+[2026-09-24T18:37:40.071314Z] [debug] [pid:881502] [step:microos,toolbox,12] tests/microos/toolbox.pm:75 called testapi::assert_script_run
+[2026-09-24T18:37:40.071532Z] [debug] [pid:881502] <<< testapi::wait_serial(regexp=qr/OA:DONE-[0-9a-f]{4}-(\d+)-OA\:echo80oxrc/u, internal_marker=1, capture_name="Exit code", expect_not_found=0, quiet=undef, timeout=90, record_command="echo IMAGE=opensuse/factory/totest/containers/opensuse/toolbox >> /etc/toolboxrc", record_output=undef, buffer_size=undef, no_regex=0)
+[2026-09-24T18:37:41.111790Z] [debug] [pid:881502] [step:microos,toolbox,13] tests/microos/toolbox.pm:75 called testapi::assert_script_run
+[2026-09-24T18:37:41.111988Z] [debug] [pid:881502] [32m>>> testapi::wait_serial: (?^u:OA:DONE-[0-9a-f]{4}-(\d+)-OA\:echo80oxrc): ok[0m
+[2026-09-24T18:37:41.112141Z] [debug] [pid:881502] [step:microos,toolbox,14] tests/microos/toolbox.pm:76 called testapi::script_output
+[2026-09-24T18:37:41.112263Z] [debug] [pid:881502] <<< testapi::type_string(string="cat - > /tmp/scriptZ4Om3.sh;", max_interval=250, wait_screen_change=0, wait_still_screen=0, timeout=30, similarity_level=47)
+[2026-09-24T18:37:42.105211Z] [debug] [pid:881502] [step:microos,toolbox,14] tests/microos/toolbox.pm:76 called testapi::script_output
+[2026-09-24T18:37:42.105388Z] [debug] [pid:881502] <<< testapi::type_string(string="\n", max_interval=250, wait_screen_change=0, wait_still_screen=0, timeout=30, similarity_level=47)
+[2026-09-24T18:37:42.139699Z] [debug] [pid:881502] [step:microos,toolbox,14] tests/microos/toolbox.pm:76 called testapi::script_output
+[2026-09-24T18:37:42.139830Z] [debug] [pid:881502] <<< testapi::type_string(string="cat /etc/toolboxrc\n", max_interval=250, wait_screen_change=0, wait_still_screen=0, timeout=30, similarity_level=47)
+[2026-09-24T18:37:42.780056Z] [debug] [pid:881502] [step:microos,toolbox,14] tests/microos/toolbox.pm:76 called testapi::script_output
+[2026-09-24T18:37:42.780186Z] [debug] [pid:881502] <<< testapi::send_key(key="ctrl-d", wait_screen_change=0)
+[2026-09-24T18:37:43.048412Z] [debug] [pid:881502] [step:microos,toolbox,14] tests/microos/toolbox.pm:76 called testapi::script_output
+[2026-09-24T18:37:43.048610Z] [debug] [pid:881502] <<< testapi::type_string(string="(echo Z4Om3; bash -eox pipefail /tmp/scriptZ4Om3.sh ; echo SCRIPT_FINISHEDZ4Om3-\$?-) | tee /dev/ttyS0\n", max_interval=250, wait_screen_change=0, wait_still_screen=0, timeout=30, similarity_level=47)
+[2026-09-24T18:37:46.932742Z] [debug] [pid:881502] [step:microos,toolbox,14] tests/microos/toolbox.pm:76 called testapi::script_output
+[2026-09-24T18:37:46.932967Z] [debug] [pid:881502] <<< testapi::wait_serial(record_output=1, no_regex=0, buffer_size=undef, expect_not_found=0, quiet=undef, timeout=90, regexp=qr/SCRIPT_FINISHEDZ4Om3-(\d+)-/u, internal_marker=1, capture_name="Exit code", record_command=undef)
+[2026-09-24T18:37:47.972259Z] [debug] [pid:881502] [step:microos,toolbox,15] tests/microos/toolbox.pm:76 called testapi::script_output
+[2026-09-24T18:37:47.972453Z] [debug] [pid:881502] [32m>>> testapi::wait_serial: (?^u:SCRIPT_FINISHEDZ4Om3-(\d+)-): ok[0m
+[2026-09-24T18:37:47.972584Z] [debug] [pid:881502] [step:microos,toolbox,16] tests/microos/toolbox.pm:76 called testapi::record_info
+[2026-09-24T18:37:47.972687Z] [debug] [pid:881502] <<< testapi::record_info(title="toolboxrc", output="REGISTRY=registry.opensuse.org\nIMAGE=opensuse/factory/totest/containers/opensuse/toolbox", result="ok")
+[2026-09-24T18:37:47.972841Z] [debug] [pid:881502] [step:microos,toolbox,17] tests/microos/toolbox.pm:80 called testapi::script_run
+[2026-09-24T18:37:47.972919Z] [debug] [pid:881502] <<< testapi::script_run(cmd="toolbox -h", max_interval=250, quiet=undef, timeout=30, output="")
+[2026-09-24T18:37:47.973575Z] [debug] [pid:881502] [step:microos,toolbox,17] tests/microos/toolbox.pm:80 called testapi::script_run
+[2026-09-24T18:37:47.973657Z] [debug] [pid:881502] <<< testapi::type_string(string="toolbox -h\n", max_interval=250, wait_screen_change=0, wait_still_screen=0, timeout=30, similarity_level=47)
+[2026-09-24T18:37:48.344347Z] [debug] [pid:881502] [step:microos,toolbox,17] tests/microos/toolbox.pm:80 called testapi::script_run
+[2026-09-24T18:37:48.344545Z] [debug] [pid:881502] <<< testapi::wait_serial(record_output=undef, no_regex=0, buffer_size=undef, timeout=30, quiet=undef, expect_not_found=0, capture_name="Exit code", internal_marker=1, regexp=qr/OA:DONE-[0-9a-f]{4}-(\d+)-OA\:tool10x\ \-h/u, record_command="toolbox -h")
+[2026-09-24T18:37:49.384735Z] [debug] [pid:881502] [step:microos,toolbox,18] tests/microos/toolbox.pm:80 called testapi::script_run
+[2026-09-24T18:37:49.384940Z] [debug] [pid:881502] [32m>>> testapi::wait_serial: (?^u:OA:DONE-[0-9a-f]{4}-(\d+)-OA\:tool10x\ \-h): ok[0m
+[2026-09-24T18:37:49.385047Z] [debug] [pid:881502] [step:microos,toolbox,19] tests/microos/toolbox.pm:88 called testapi::record_info
+[2026-09-24T18:37:49.385141Z] [debug] [pid:881502] <<< testapi::record_info(title="Test", output="Run toolbox without flags", result="ok")
+[2026-09-24T18:37:49.385290Z] [debug] [pid:881502] [step:microos,toolbox,20] tests/microos/toolbox.pm:89 called testapi::assert_script_run
+[2026-09-24T18:37:49.385367Z] [debug] [pid:881502] <<< testapi::assert_script_run(cmd="toolbox -r id", fail_message="", max_interval=250, quiet=undef, timeout=300)
+[2026-09-24T18:37:49.386048Z] [debug] [pid:881502] [step:microos,toolbox,20] tests/microos/toolbox.pm:89 called testapi::assert_script_run
+[2026-09-24T18:37:49.386134Z] [debug] [pid:881502] <<< testapi::type_string(string="toolbox -r id\n", max_interval=250, wait_screen_change=0, wait_still_screen=0, timeout=30, similarity_level=47)
+[2026-09-24T18:37:49.857893Z] [debug] [pid:881502] [step:microos,toolbox,20] tests/microos/toolbox.pm:89 called testapi::assert_script_run
+[2026-09-24T18:37:49.858117Z] [debug] [pid:881502] <<< testapi::wait_serial(record_command="toolbox -r id", regexp=qr/OA:DONE-[0-9a-f]{4}-(\d+)-OA\:tool13r\ id/u, internal_marker=1, capture_name="Exit code", expect_not_found=0, quiet=undef, timeout=300, buffer_size=undef, no_regex=0, record_output=undef)
+[2026-09-24T18:37:58.905661Z] [debug] [pid:881502] [step:microos,toolbox,21] tests/microos/toolbox.pm:89 called testapi::assert_script_run
+[2026-09-24T18:37:58.905847Z] [debug] [pid:881502] [32m>>> testapi::wait_serial: (?^u:OA:DONE-[0-9a-f]{4}-(\d+)-OA\:tool13r\ id): ok[0m
+[2026-09-24T18:37:58.906007Z] [debug] [pid:881502] [step:microos,toolbox,22] tests/microos/toolbox.pm:90 called testapi::validate_script_output
+[2026-09-24T18:37:58.906125Z] [debug] [pid:881502] <<< testapi::type_string(string="cat - > /tmp/script8oVY9.sh;", max_interval=250, wait_screen_change=0, wait_still_screen=0, timeout=30, similarity_level=47)
+[2026-09-24T18:37:59.897338Z] [debug] [pid:881502] [step:microos,toolbox,22] tests/microos/toolbox.pm:90 called testapi::validate_script_output
+[2026-09-24T18:37:59.897494Z] [debug] [pid:881502] <<< testapi::type_string(string="\n", max_interval=250, wait_screen_change=0, wait_still_screen=0, timeout=30, similarity_level=47)
+[2026-09-24T18:37:59.931878Z] [debug] [pid:881502] [step:microos,toolbox,22] tests/microos/toolbox.pm:90 called testapi::validate_script_output
+[2026-09-24T18:37:59.932026Z] [debug] [pid:881502] <<< testapi::type_string(string="podman ps -a\n", max_interval=250, wait_screen_change=0, wait_still_screen=0, timeout=30, similarity_level=47)
+[2026-09-24T18:38:00.370123Z] [debug] [pid:881502] [step:microos,toolbox,22] tests/microos/toolbox.pm:90 called testapi::validate_script_output
+[2026-09-24T18:38:00.370244Z] [debug] [pid:881502] <<< testapi::send_key(key="ctrl-d", wait_screen_change=0)
+[2026-09-24T18:38:00.638299Z] [debug] [pid:881502] [step:microos,toolbox,22] tests/microos/toolbox.pm:90 called testapi::validate_script_output
+[2026-09-24T18:38:00.638422Z] [debug] [pid:881502] <<< testapi::type_string(string="(echo 8oVY9; bash -eox pipefail /tmp/script8oVY9.sh ; echo SCRIPT_FINISHED8oVY9-\$?-) | tee /dev/ttyS0\n", max_interval=250, wait_screen_change=0, wait_still_screen=0, timeout=30, similarity_level=47)
+[2026-09-24T18:38:04.524082Z] [debug] [pid:881502] [step:microos,toolbox,22] tests/microos/toolbox.pm:90 called testapi::validate_script_output
+[2026-09-24T18:38:04.524321Z] [debug] [pid:881502] <<< testapi::wait_serial(timeout=90, expect_not_found=0, quiet=1, capture_name="Exit code", internal_marker=1, regexp=qr/SCRIPT_FINISHED8oVY9-(\d+)-/u, record_command=undef, record_output=1, no_regex=0, buffer_size=undef)
+[2026-09-24T18:38:05.525252Z] [debug] [pid:881502] [32m>>> testapi::wait_serial: (?^u:SCRIPT_FINISHED8oVY9-(\d+)-): ok[0m
+[2026-09-24T18:38:05.526746Z] [debug] [pid:881502] [step:microos,toolbox,23] tests/microos/toolbox.pm:91 called testapi::assert_script_run
+[2026-09-24T18:38:05.526872Z] [debug] [pid:881502] <<< testapi::assert_script_run(cmd="podman rm toolbox-root", fail_message="", max_interval=250, quiet=undef, timeout=90)
+[2026-09-24T18:38:05.527571Z] [debug] [pid:881502] [step:microos,toolbox,23] tests/microos/toolbox.pm:91 called testapi::assert_script_run
+[2026-09-24T18:38:05.527659Z] [debug] [pid:881502] <<< testapi::type_string(string="podman rm toolbox-root\n", max_interval=250, wait_screen_change=0, wait_still_screen=0, timeout=30, similarity_level=47)
+[2026-09-24T18:38:06.301327Z] [debug] [pid:881502] [step:microos,toolbox,23] tests/microos/toolbox.pm:91 called testapi::assert_script_run
+[2026-09-24T18:38:06.301503Z] [debug] [pid:881502] <<< testapi::wait_serial(no_regex=0, buffer_size=undef, record_output=undef, record_command="podman rm toolbox-root", timeout=90, quiet=undef, expect_not_found=0, internal_marker=1, capture_name="Exit code", regexp=qr/OA:DONE-[0-9a-f]{4}-(\d+)-OA\:podm22root/u)
+[2026-09-24T18:38:08.345443Z] [debug] [pid:881502] [step:microos,toolbox,24] tests/microos/toolbox.pm:91 called testapi::assert_script_run
+[2026-09-24T18:38:08.345623Z] [debug] [pid:881502] [32m>>> testapi::wait_serial: (?^u:OA:DONE-[0-9a-f]{4}-(\d+)-OA\:podm22root): ok[0m
+[2026-09-24T18:38:08.345733Z] [debug] [pid:881502] [step:microos,toolbox,25] tests/microos/toolbox.pm:93 called testapi::record_info
+[2026-09-24T18:38:08.345834Z] [debug] [pid:881502] <<< testapi::record_info(title="Test", output="Run toolbox with a given tag", result="ok")
+[2026-09-24T18:38:08.345988Z] [debug] [pid:881502] [step:microos,toolbox,26] tests/microos/toolbox.pm:94 called testapi::assert_script_run
+[2026-09-24T18:38:08.346065Z] [debug] [pid:881502] <<< testapi::assert_script_run(cmd="toolbox -t test_tag id", timeout=180, quiet=undef, max_interval=250, fail_message="")
+[2026-09-24T18:38:08.346707Z] [debug] [pid:881502] [step:microos,toolbox,26] tests/microos/toolbox.pm:94 called testapi::assert_script_run
+[2026-09-24T18:38:08.346792Z] [debug] [pid:881502] <<< testapi::type_string(string="toolbox -t test_tag id\n", max_interval=250, wait_screen_change=0, wait_still_screen=0, timeout=30, similarity_level=47)
+[2026-09-24T18:38:09.138272Z] [debug] [pid:881502] [step:microos,toolbox,26] tests/microos/toolbox.pm:94 called testapi::assert_script_run
+[2026-09-24T18:38:09.138493Z] [debug] [pid:881502] <<< testapi::wait_serial(record_output=undef, buffer_size=undef, no_regex=0, internal_marker=1, capture_name="Exit code", regexp=qr/OA:DONE-[0-9a-f]{4}-(\d+)-OA\:tool22g\ id/u, timeout=180, quiet=undef, expect_not_found=0, record_command="toolbox -t test_tag id")
+[2026-09-24T18:38:11.179550Z] [debug] [pid:881502] [step:microos,toolbox,27] tests/microos/toolbox.pm:94 called testapi::assert_script_run
+[2026-09-24T18:38:11.179738Z] [debug] [pid:881502] [32m>>> testapi::wait_serial: (?^u:OA:DONE-[0-9a-f]{4}-(\d+)-OA\:tool22g\ id): ok[0m
+[2026-09-24T18:38:11.179912Z] [debug] [pid:881502] [step:microos,toolbox,28] tests/microos/toolbox.pm:95 called testapi::validate_script_output
+[2026-09-24T18:38:11.180036Z] [debug] [pid:881502] <<< testapi::type_string(string="cat - > /tmp/script8oVY9.sh;", max_interval=250, wait_screen_change=0, wait_still_screen=0, timeout=30, similarity_level=47)
+[2026-09-24T18:38:12.172939Z] [debug] [pid:881502] [step:microos,toolbox,28] tests/microos/toolbox.pm:95 called testapi::validate_script_output
+[2026-09-24T18:38:12.173113Z] [debug] [pid:881502] <<< testapi::type_string(string="\n", max_interval=250, wait_screen_change=0, wait_still_screen=0, timeout=30, similarity_level=47)
+[2026-09-24T18:38:12.207369Z] [debug] [pid:881502] [step:microos,toolbox,28] tests/microos/toolbox.pm:95 called testapi::validate_script_output
+[2026-09-24T18:38:12.207485Z] [debug] [pid:881502] <<< testapi::type_string(string="podman ps -a\n", max_interval=250, wait_screen_change=0, wait_still_screen=0, timeout=30, similarity_level=47)
+[2026-09-24T18:38:12.649238Z] [debug] [pid:881502] [step:microos,toolbox,28] tests/microos/toolbox.pm:95 called testapi::validate_script_output
+[2026-09-24T18:38:12.649369Z] [debug] [pid:881502] <<< testapi::send_key(key="ctrl-d", wait_screen_change=0)
+[2026-09-24T18:38:12.917242Z] [debug] [pid:881502] [step:microos,toolbox,28] tests/microos/toolbox.pm:95 called testapi::validate_script_output
+[2026-09-24T18:38:12.917415Z] [debug] [pid:881502] <<< testapi::type_string(string="(echo 8oVY9; bash -eox pipefail /tmp/script8oVY9.sh ; echo SCRIPT_FINISHED8oVY9-\$?-) | tee /dev/ttyS0\n", max_interval=250, wait_screen_change=0, wait_still_screen=0, timeout=30, similarity_level=47)
+[2026-09-24T18:38:16.808497Z] [debug] [pid:881502] [step:microos,toolbox,28] tests/microos/toolbox.pm:95 called testapi::validate_script_output
+[2026-09-24T18:38:16.808720Z] [debug] [pid:881502] <<< testapi::wait_serial(quiet=1, expect_not_found=0, timeout=90, regexp=qr/SCRIPT_FINISHED8oVY9-(\d+)-/u, internal_marker=1, capture_name="Exit code", record_command=undef, record_output=1, no_regex=0, buffer_size=undef)
+[2026-09-24T18:38:18.810491Z] [debug] [pid:881502] [32m>>> testapi::wait_serial: (?^u:SCRIPT_FINISHED8oVY9-(\d+)-): ok[0m
+[2026-09-24T18:38:18.812002Z] [debug] [pid:881502] [step:microos,toolbox,29] tests/microos/toolbox.pm:96 called testapi::assert_script_run
+[2026-09-24T18:38:18.812120Z] [debug] [pid:881502] <<< testapi::assert_script_run(cmd="podman rm toolbox-root-test_tag", max_interval=250, fail_message="", timeout=90, quiet=undef)
+[2026-09-24T18:38:18.812816Z] [debug] [pid:881502] [step:microos,toolbox,29] tests/microos/toolbox.pm:96 called testapi::assert_script_run
+[2026-09-24T18:38:18.812907Z] [debug] [pid:881502] <<< testapi::type_string(string="podman rm toolbox-root-test_tag\n", max_interval=250, wait_screen_change=0, wait_still_screen=0, timeout=30, similarity_level=47)
+[2026-09-24T18:38:19.907117Z] [debug] [pid:881502] [step:microos,toolbox,29] tests/microos/toolbox.pm:96 called testapi::assert_script_run
+[2026-09-24T18:38:19.907292Z] [debug] [pid:881502] <<< testapi::wait_serial(record_output=undef, buffer_size=undef, no_regex=0, internal_marker=1, capture_name="Exit code", regexp=qr/OA:DONE-[0-9a-f]{4}-(\d+)-OA\:podm31_tag/u, timeout=90, quiet=undef, expect_not_found=0, record_command="podman rm toolbox-root-test_tag")
+[2026-09-24T18:38:21.947786Z] [debug] [pid:881502] [step:microos,toolbox,30] tests/microos/toolbox.pm:96 called testapi::assert_script_run
+[2026-09-24T18:38:21.947969Z] [debug] [pid:881502] [32m>>> testapi::wait_serial: (?^u:OA:DONE-[0-9a-f]{4}-(\d+)-OA\:podm31_tag): ok[0m
+[2026-09-24T18:38:21.948079Z] [debug] [pid:881502] [step:microos,toolbox,31] tests/microos/toolbox.pm:98 called testapi::record_info
+[2026-09-24T18:38:21.948167Z] [debug] [pid:881502] <<< testapi::record_info(title="Test", output="Run toolbox with a given name", result="ok")
+[2026-09-24T18:38:21.948310Z] [debug] [pid:881502] [step:microos,toolbox,32] tests/microos/toolbox.pm:99 called testapi::assert_script_run
+[2026-09-24T18:38:21.948383Z] [debug] [pid:881502] <<< testapi::assert_script_run(cmd="toolbox -c test_name id", quiet=undef, timeout=90, fail_message="", max_interval=250)
+[2026-09-24T18:38:21.949012Z] [debug] [pid:881502] [step:microos,toolbox,32] tests/microos/toolbox.pm:99 called testapi::assert_script_run
+[2026-09-24T18:38:21.949099Z] [debug] [pid:881502] <<< testapi::type_string(string="toolbox -c test_name id\n", max_interval=250, wait_screen_change=0, wait_still_screen=0, timeout=30, similarity_level=47)
+[2026-09-24T18:38:22.773348Z] [debug] [pid:881502] [step:microos,toolbox,32] tests/microos/toolbox.pm:99 called testapi::assert_script_run
+[2026-09-24T18:38:22.773590Z] [debug] [pid:881502] <<< testapi::wait_serial(record_command="toolbox -c test_name id", timeout=90, quiet=undef, expect_not_found=0, capture_name="Exit code", internal_marker=1, regexp=qr/OA:DONE-[0-9a-f]{4}-(\d+)-OA\:tool23e\ id/u, no_regex=0, buffer_size=undef, record_output=undef)
+[2026-09-24T18:38:24.819972Z] [debug] [pid:881502] [step:microos,toolbox,33] tests/microos/toolbox.pm:99 called testapi::assert_script_run
+[2026-09-24T18:38:24.820167Z] [debug] [pid:881502] [32m>>> testapi::wait_serial: (?^u:OA:DONE-[0-9a-f]{4}-(\d+)-OA\:tool23e\ id): ok[0m
+[2026-09-24T18:38:24.820340Z] [debug] [pid:881502] [step:microos,toolbox,34] tests/microos/toolbox.pm:100 called testapi::validate_script_output
+[2026-09-24T18:38:24.820466Z] [debug] [pid:881502] <<< testapi::type_string(string="cat - > /tmp/script8oVY9.sh;", max_interval=250, wait_screen_change=0, wait_still_screen=0, timeout=30, similarity_level=47)
+[2026-09-24T18:38:25.811826Z] [debug] [pid:881502] [step:microos,toolbox,34] tests/microos/toolbox.pm:100 called testapi::validate_script_output
+[2026-09-24T18:38:25.812011Z] [debug] [pid:881502] <<< testapi::type_string(string="\n", max_interval=250, wait_screen_change=0, wait_still_screen=0, timeout=30, similarity_level=47)
+[2026-09-24T18:38:25.846262Z] [debug] [pid:881502] [step:microos,toolbox,34] tests/microos/toolbox.pm:100 called testapi::validate_script_output
+[2026-09-24T18:38:25.846386Z] [debug] [pid:881502] <<< testapi::type_string(string="podman ps -a\n", max_interval=250, wait_screen_change=0, wait_still_screen=0, timeout=30, similarity_level=47)
+[2026-09-24T18:38:26.287867Z] [debug] [pid:881502] [step:microos,toolbox,34] tests/microos/toolbox.pm:100 called testapi::validate_script_output
+[2026-09-24T18:38:26.288027Z] [debug] [pid:881502] <<< testapi::send_key(key="ctrl-d", wait_screen_change=0)
+[2026-09-24T18:38:26.556064Z] [debug] [pid:881502] [step:microos,toolbox,34] tests/microos/toolbox.pm:100 called testapi::validate_script_output
+[2026-09-24T18:38:26.556239Z] [debug] [pid:881502] <<< testapi::type_string(string="(echo 8oVY9; bash -eox pipefail /tmp/script8oVY9.sh ; echo SCRIPT_FINISHED8oVY9-\$?-) | tee /dev/ttyS0\n", max_interval=250, wait_screen_change=0, wait_still_screen=0, timeout=30, similarity_level=47)
+[2026-09-24T18:38:30.451343Z] [debug] [pid:881502] [step:microos,toolbox,34] tests/microos/toolbox.pm:100 called testapi::validate_script_output
+[2026-09-24T18:38:30.451575Z] [debug] [pid:881502] <<< testapi::wait_serial(record_command=undef, timeout=90, quiet=1, expect_not_found=0, capture_name="Exit code", internal_marker=1, regexp=qr/SCRIPT_FINISHED8oVY9-(\d+)-/u, no_regex=0, buffer_size=undef, record_output=1)
+[2026-09-24T18:38:32.453014Z] [debug] [pid:881502] [32m>>> testapi::wait_serial: (?^u:SCRIPT_FINISHED8oVY9-(\d+)-): ok[0m
+[2026-09-24T18:38:32.454758Z] [debug] [pid:881502] [step:microos,toolbox,35] tests/microos/toolbox.pm:101 called testapi::assert_script_run
+[2026-09-24T18:38:32.454882Z] [debug] [pid:881502] <<< testapi::assert_script_run(cmd="podman rm test_name", max_interval=250, fail_message="", timeout=90, quiet=undef)
+[2026-09-24T18:38:32.455657Z] [debug] [pid:881502] [step:microos,toolbox,35] tests/microos/toolbox.pm:101 called testapi::assert_script_run
+[2026-09-24T18:38:32.455745Z] [debug] [pid:881502] <<< testapi::type_string(string="podman rm test_name\n", max_interval=250, wait_screen_change=0, wait_still_screen=0, timeout=30, similarity_level=47)
+[2026-09-24T18:38:33.146472Z] [debug] [pid:881502] [step:microos,toolbox,35] tests/microos/toolbox.pm:101 called testapi::assert_script_run
+[2026-09-24T18:38:33.146711Z] [debug] [pid:881502] <<< testapi::wait_serial(quiet=undef, expect_not_found=0, timeout=90, regexp=qr/OA:DONE-[0-9a-f]{4}-(\d+)-OA\:podm19name/u, capture_name="Exit code", internal_marker=1, record_command="podman rm test_name", record_output=undef, no_regex=0, buffer_size=undef)
+[2026-09-24T18:38:35.187259Z] [debug] [pid:881502] [step:microos,toolbox,36] tests/microos/toolbox.pm:101 called testapi::assert_script_run
+[2026-09-24T18:38:35.187452Z] [debug] [pid:881502] [32m>>> testapi::wait_serial: (?^u:OA:DONE-[0-9a-f]{4}-(\d+)-OA\:podm19name): ok[0m
+[2026-09-24T18:38:35.187573Z] [debug] [pid:881502] [step:microos,toolbox,37] tests/microos/toolbox.pm:103 called testapi::record_info
+[2026-09-24T18:38:35.187670Z] [debug] [pid:881502] <<< testapi::record_info(title="Test", output="Rootless toolbox as bernhard", result="ok")
+[2026-09-24T18:38:35.187801Z] [debug] [pid:881502] [step:microos,toolbox,38] tests/microos/toolbox.pm:104 called testapi::select_console
+[2026-09-24T18:38:35.187848Z] [debug] [pid:881502] <<< testapi::select_console(testapi_console="user-console")
+[2026-09-24T18:38:35.490488Z] [debug] [pid:881502] [37mactivate_console, console: user-console, type: console[0m
+[2026-09-24T18:38:35.490744Z] [debug] [pid:881502] [step:microos,toolbox,38] tests/microos/toolbox.pm:104 called testapi::select_console -> lib/susedistribution.pm:898 called testapi::wait_still_screen
+[2026-09-24T18:38:35.490860Z] [debug] [pid:881502] <<< testapi::wait_still_screen(timeout=30, stilltime=1, similarity_level=47)
+[2026-09-24T18:38:36.716828Z] [debug] [pid:881502] [32m>>> testapi::wait_still_screen: detected same image for 1 seconds (1.22456192970276 s elapsed), last detected similarity is 50.4372371212676[0m
+[2026-09-24T18:38:36.717052Z] [debug] [pid:881502] [step:microos,toolbox,38] tests/microos/toolbox.pm:104 called testapi::select_console -> lib/susedistribution.pm:903 called testapi::assert_screen
+[2026-09-24T18:38:36.717182Z] [debug] [pid:881502] <<< testapi::assert_screen(mustmatch=[
+    "tty4-selected",
+    "text-logged-in-bernhard"
+  ], timeout=90)
+[2026-09-24T18:38:36.782238Z] [debug] [pid:881502] [32m>>> testapi::_handle_found_needle: found tty4-selected-2-20180514, similarity 1.00 @ 82/130[0m
+[2026-09-24T18:38:36.782988Z] [debug] [pid:881502] [step:microos,toolbox,39] tests/microos/toolbox.pm:104 called testapi::select_console -> lib/susedistribution.pm:905 called testapi::enter_cmd
+[2026-09-24T18:38:36.783112Z] [debug] [pid:881502] <<< testapi::type_string(string="bernhard\n", max_interval=250, wait_screen_change=0, wait_still_screen=0, timeout=30, similarity_level=47)
+[2026-09-24T18:38:37.086106Z] [debug] [pid:881502] [step:microos,toolbox,39] tests/microos/toolbox.pm:104 called testapi::select_console -> lib/susedistribution.pm:906 called susedistribution::handle_password_prompt -> lib/susedistribution.pm:67 called testapi::assert_screen
+[2026-09-24T18:38:37.086212Z] [debug] [pid:881502] <<< testapi::assert_screen(mustmatch="password-prompt", timeout=60)
+[2026-09-24T18:38:37.831426Z] [debug] [pid:881502] [32m>>> testapi::_handle_found_needle: found password-prompt-20200507, similarity 1.00 @ 0/144[0m
+[2026-09-24T18:38:37.831641Z] [debug] [pid:881502] [step:microos,toolbox,40] tests/microos/toolbox.pm:104 called testapi::select_console -> lib/susedistribution.pm:906 called susedistribution::handle_password_prompt -> lib/susedistribution.pm:76 called testapi::type_password
+[2026-09-24T18:38:37.831771Z] [debug] [pid:881502] <<< testapi::type_string(string="[masked]", max_interval=100, wait_screen_change=0, wait_still_screen=0, timeout=30, similarity_level=47)
+[2026-09-24T18:38:39.036008Z] [debug] [pid:881502] [step:microos,toolbox,40] tests/microos/toolbox.pm:104 called testapi::select_console -> lib/susedistribution.pm:906 called susedistribution::handle_password_prompt -> lib/susedistribution.pm:78 called testapi::send_key
+[2026-09-24T18:38:39.036143Z] [debug] [pid:881502] <<< testapi::send_key(key="ret", wait_screen_change=0)
+[2026-09-24T18:38:39.270682Z] [debug] [pid:881502] [step:microos,toolbox,40] tests/microos/toolbox.pm:104 called testapi::select_console -> lib/susedistribution.pm:917 called testapi::assert_screen
+[2026-09-24T18:38:39.270755Z] [debug] [pid:881502] <<< testapi::assert_screen(mustmatch="text-logged-in-bernhard", timeout=60)
+[2026-09-24T18:38:39.273303Z] [debug] [pid:881628] [37mno match: 59.9s, best candidate: text-logged-in-bernhard-20151205 (0.00)[0m
+[2026-09-24T18:38:40.274454Z] [debug] [pid:881628] [37mno match: 58.9s, best candidate: text-logged-in-bernhard-20151205 (0.00)[0m
+[2026-09-24T18:38:41.273161Z] [debug] [pid:881628] [37mno change: 57.9s[0m
+[2026-09-24T18:38:41.274317Z] [debug] [pid:881628] [37mno match: 57.9s, best candidate: text-logged-in-bernhard-20151205 (0.00)[0m
+[2026-09-24T18:38:42.276217Z] [debug] [pid:881628] [37mno match: 56.9s, best candidate: text-logged-in-bernhard-20151205 (0.00)[0m
+[2026-09-24T18:38:43.311326Z] [debug] [pid:881628] [37mno match: 55.9s, best candidate: text-logged-in-bernhard-20151205 (0.00)[0m
+[2026-09-24T18:38:44.278417Z] [debug] [pid:881628] [37mno match: 54.9s, best candidate: text-logged-in-bernhard-20151205 (0.00)[0m
+[2026-09-24T18:38:45.277505Z] [debug] [pid:881628] [37mno change: 53.9s[0m
+[2026-09-24T18:38:45.278646Z] [debug] [pid:881628] [37mno match: 53.9s, best candidate: text-logged-in-bernhard-20151205 (0.00)[0m
+[2026-09-24T18:38:46.280528Z] [debug] [pid:881628] [37mno match: 52.9s, best candidate: text-logged-in-bernhard-20151205 (0.00)[0m
+[2026-09-24T18:38:47.281611Z] [debug] [pid:881628] [37mno match: 51.9s, best candidate: text-logged-in-bernhard-20151205 (0.00)[0m
+[2026-09-24T18:38:48.316595Z] [debug] [pid:881628] [37mno match: 50.9s, best candidate: text-logged-in-bernhard-20151205 (0.00)[0m
+[2026-09-24T18:38:49.283617Z] [debug] [pid:881628] [37mno match: 49.9s, best candidate: text-logged-in-bernhard-20151205 (0.00)[0m
+[2026-09-24T18:38:50.284811Z] [debug] [pid:881628] [37mno match: 48.9s, best candidate: text-logged-in-bernhard-20151205 (0.00)[0m
+[2026-09-24T18:38:51.285947Z] [debug] [pid:881628] [37mno match: 47.9s, best candidate: text-logged-in-bernhard-20151205 (0.00)[0m
+[2026-09-24T18:38:52.285033Z] [debug] [pid:881628] [37mno change: 46.9s[0m
+[2026-09-24T18:38:52.286131Z] [debug] [pid:881628] [37mno match: 46.9s, best candidate: text-logged-in-bernhard-20151205 (0.00)[0m
+[2026-09-24T18:38:53.322257Z] [debug] [pid:881628] [37mno match: 45.9s, best candidate: text-logged-in-bernhard-20151205 (0.00)[0m
+[2026-09-24T18:38:54.289006Z] [debug] [pid:881628] [37mno match: 44.9s, best candidate: text-logged-in-bernhard-20151205 (0.00)[0m
+[2026-09-24T18:38:55.289893Z] [debug] [pid:881628] [37mno match: 43.9s, best candidate: text-logged-in-bernhard-20151205 (0.00)[0m
+[2026-09-24T18:38:56.289219Z] [debug] [pid:881628] [37mno change: 42.9s[0m
+[2026-09-24T18:38:56.290342Z] [debug] [pid:881628] [37mno match: 42.9s, best candidate: text-logged-in-bernhard-20151205 (0.00)[0m
+[2026-09-24T18:38:57.292257Z] [debug] [pid:881628] [37mno match: 41.9s, best candidate: text-logged-in-bernhard-20151205 (0.00)[0m
+[2026-09-24T18:38:58.327167Z] [debug] [pid:881628] [37mno match: 40.9s, best candidate: text-logged-in-bernhard-20151205 (0.00)[0m
+[2026-09-24T18:38:59.294152Z] [debug] [pid:881628] [37mno match: 39.9s, best candidate: text-logged-in-bernhard-20151205 (0.00)[0m
+[2026-09-24T18:39:00.295122Z] [debug] [pid:881628] [37mno match: 38.9s, best candidate: text-logged-in-bernhard-20151205 (0.00)[0m
+[2026-09-24T18:39:01.296063Z] [debug] [pid:881628] [37mno match: 37.9s, best candidate: text-logged-in-bernhard-20151205 (0.00)[0m
+[2026-09-24T18:39:02.295291Z] [debug] [pid:881628] [37mno change: 36.9s[0m
+[2026-09-24T18:39:02.296440Z] [debug] [pid:881628] [37mno match: 36.9s, best candidate: text-logged-in-bernhard-20151205 (0.00)[0m
+[2026-09-24T18:39:03.332428Z] [debug] [pid:881628] [37mno match: 35.9s, best candidate: text-logged-in-bernhard-20151205 (0.00)[0m
+[2026-09-24T18:39:04.299037Z] [debug] [pid:881628] [37mno match: 34.9s, best candidate: text-logged-in-bernhard-20151205 (0.00)[0m
+[2026-09-24T18:39:05.299728Z] [debug] [pid:881628] [37mno match: 33.9s, best candidate: text-logged-in-bernhard-20151205 (0.00)[0m
+[2026-09-24T18:39:06.300680Z] [debug] [pid:881628] [37mno match: 32.9s, best candidate: text-logged-in-bernhard-20151205 (0.00)[0m
+[2026-09-24T18:39:07.301685Z] [debug] [pid:881628] [37mno match: 31.9s, best candidate: text-logged-in-bernhard-20151205 (0.00)[0m
+[2026-09-24T18:39:08.337356Z] [debug] [pid:881628] [37mno match: 30.9s, best candidate: text-logged-in-bernhard-20151205 (0.00)[0m
+[2026-09-24T18:39:09.304395Z] [debug] [pid:881628] [37mno match: 29.9s, best candidate: text-logged-in-bernhard-20151205 (0.00)[0m
+[2026-09-24T18:39:10.305400Z] [debug] [pid:881628] [37mno match: 28.9s, best candidate: text-logged-in-bernhard-20151205 (0.00)[0m
+[2026-09-24T18:39:11.306389Z] [debug] [pid:881628] [37mno match: 27.9s, best candidate: text-logged-in-bernhard-20151205 (0.00)[0m
+[2026-09-24T18:39:12.305596Z] [debug] [pid:881628] [37mno change: 26.9s[0m
+[2026-09-24T18:39:12.306717Z] [debug] [pid:881628] [37mno match: 26.9s, best candidate: text-logged-in-bernhard-20151205 (0.00)[0m
+[2026-09-24T18:39:13.342716Z] [debug] [pid:881628] [37mno match: 25.9s, best candidate: text-logged-in-bernhard-20151205 (0.00)[0m
+[2026-09-24T18:39:14.309258Z] [debug] [pid:881628] [37mno match: 24.9s, best candidate: text-logged-in-bernhard-20151205 (0.00)[0m
+[2026-09-24T18:39:15.308846Z] [debug] [pid:881628] [37mno change: 23.9s[0m
+[2026-09-24T18:39:15.309935Z] [debug] [pid:881628] [37mno match: 23.9s, best candidate: text-logged-in-bernhard-20151205 (0.00)[0m
+[2026-09-24T18:39:16.311320Z] [debug] [pid:881628] [37mno match: 22.9s, best candidate: text-logged-in-bernhard-20151205 (0.00)[0m
+[2026-09-24T18:39:17.312839Z] [debug] [pid:881628] [37mno match: 21.9s, best candidate: text-logged-in-bernhard-20151205 (0.00)[0m
+[2026-09-24T18:39:18.348442Z] [debug] [pid:881628] [37mno match: 20.9s, best candidate: text-logged-in-bernhard-20151205 (0.00)[0m
+[2026-09-24T18:39:19.313048Z] [debug] [pid:881628] [37mno change: 19.9s[0m
+[2026-09-24T18:39:19.314172Z] [debug] [pid:881628] [37mno match: 19.9s, best candidate: text-logged-in-bernhard-20151205 (0.00)[0m
+[2026-09-24T18:39:20.315989Z] [debug] [pid:881628] [37mno match: 18.9s, best candidate: text-logged-in-bernhard-20151205 (0.00)[0m
+[2026-09-24T18:39:21.317123Z] [debug] [pid:881628] [37mno match: 17.9s, best candidate: text-logged-in-bernhard-20151205 (0.00)[0m
+[2026-09-24T18:39:22.317964Z] [debug] [pid:881628] [37mno match: 16.9s, best candidate: text-logged-in-bernhard-20151205 (0.00)[0m
+[2026-09-24T18:39:23.353061Z] [debug] [pid:881628] [37mno match: 15.9s, best candidate: text-logged-in-bernhard-20151205 (0.00)[0m
+[2026-09-24T18:39:24.318165Z] [debug] [pid:881628] [37mno change: 14.9s[0m
+[2026-09-24T18:39:24.319331Z] [debug] [pid:881628] [37mno match: 14.9s, best candidate: text-logged-in-bernhard-20151205 (0.00)[0m
+[2026-09-24T18:39:25.320678Z] [debug] [pid:881628] [37mno match: 13.9s, best candidate: text-logged-in-bernhard-20151205 (0.00)[0m
+[2026-09-24T18:39:26.321498Z] [debug] [pid:881628] [37mno match: 12.9s, best candidate: text-logged-in-bernhard-20151205 (0.00)[0m
+[2026-09-24T18:39:27.322527Z] [debug] [pid:881628] [37mno match: 11.9s, best candidate: text-logged-in-bernhard-20151205 (0.00)[0m
+[2026-09-24T18:39:28.357492Z] [debug] [pid:881628] [37mno match: 10.9s, best candidate: text-logged-in-bernhard-20151205 (0.00)[0m
+[2026-09-24T18:39:29.323190Z] [debug] [pid:881628] [37mno change: 9.9s[0m
+[2026-09-24T18:39:29.324410Z] [debug] [pid:881628] [37mno match: 9.9s, best candidate: text-logged-in-bernhard-20151205 (0.00)[0m
+[2026-09-24T18:39:30.325438Z] [debug] [pid:881628] [37mno match: 8.9s, best candidate: text-logged-in-bernhard-20151205 (0.00)[0m
+[2026-09-24T18:39:31.326353Z] [debug] [pid:881628] [37mno match: 7.9s, best candidate: text-logged-in-bernhard-20151205 (0.00)[0m
+[2026-09-24T18:39:32.327335Z] [debug] [pid:881628] [37mno match: 6.9s, best candidate: text-logged-in-bernhard-20151205 (0.00)[0m
+[2026-09-24T18:39:33.363056Z] [debug] [pid:881628] [37mno match: 5.9s, best candidate: text-logged-in-bernhard-20151205 (0.00)[0m
+[2026-09-24T18:39:34.330091Z] [debug] [pid:881628] [37mno match: 4.9s, best candidate: text-logged-in-bernhard-20151205 (0.00)[0m
+[2026-09-24T18:39:35.329066Z] [debug] [pid:881628] [37mno change: 3.9s[0m
+[2026-09-24T18:39:35.330095Z] [debug] [pid:881628] [37mno match: 3.9s, best candidate: text-logged-in-bernhard-20151205 (0.00)[0m
+[2026-09-24T18:39:36.331973Z] [debug] [pid:881628] [37mno match: 2.9s, best candidate: text-logged-in-bernhard-20151205 (0.00)[0m
+[2026-09-24T18:39:37.333151Z] [debug] [pid:881628] [37mno match: 1.9s, best candidate: text-logged-in-bernhard-20151205 (0.00)[0m
+[2026-09-24T18:39:38.368254Z] [debug] [pid:881628] [37mno match: 0.9s, best candidate: text-logged-in-bernhard-20151205 (0.00)[0m
+[2026-09-24T18:39:39.369323Z] [debug] [pid:881628] [37mno match: -0.1s, best candidate: text-logged-in-bernhard-20151205 (0.00)[0m
+[2026-09-24T18:39:39.449132Z] [debug] [pid:881502] [32m>>> testapi::_check_backend_response: match=text-logged-in-bernhard timed out after 60 (assert_screen)[0m
+[2026-09-24T18:39:39.460180Z] [debug] [pid:881502] [step:microos,toolbox,41] tests/microos/toolbox.pm:104 called testapi::select_console -> lib/susedistribution.pm:917 called testapi::assert_screen
+[2026-09-24T18:39:39.468597Z] [debug] [pid:881502] [step:microos,toolbox,42] tests/microos/toolbox.pm:104 called testapi::select_console -> lib/susedistribution.pm:917 called testapi::assert_screen
+[2026-09-24T18:39:39.469812Z] [info] [pid:881502] [33m::: basetest::runtest: # Test died: no candidate needle with tag(s) 'text-logged-in-bernhard' matched
+  --- # stack trace
+  testapi::assert_screen('text-logged-in-bernhard', 60) called at lib/susedistribution.pm line 917
+  testapi::select_console('user-console') called at tests/microos/toolbox.pm line 104
+  [0m
+[2026-09-24T18:39:39.469863Z] [debug] [pid:881502] [step:microos,toolbox,42] tests/microos/toolbox.pm:104 called testapi::select_console -> lib/susedistribution.pm:917 called testapi::assert_screen
+[2026-09-24T18:39:39.471024Z] [debug] [pid:881502] [step:microos,toolbox,43] lib/consoletest.pm:51 called opensusebasetest::post_fail_hook -> products/microos/../../lib/opensusebasetest.pm:1042 called serial_terminal::select_serial_terminal -> products/microos/../../lib/serial_terminal.pm:398 called testapi::select_console
+[2026-09-24T18:39:39.471108Z] [debug] [pid:881502] <<< testapi::select_console(testapi_console="root-virtio-terminal")
+[2026-09-24T18:39:39.471558Z] [debug] [pid:881502] [37mactivate_console, console: root-virtio-terminal, type: virtio-terminal[0m
+[2026-09-24T18:39:39.471650Z] [debug] [pid:881502] [step:microos,toolbox,43] lib/consoletest.pm:51 called opensusebasetest::post_fail_hook -> products/microos/../../lib/opensusebasetest.pm:1042 called serial_terminal::select_serial_terminal -> products/microos/../../lib/serial_terminal.pm:398 called testapi::select_console -> lib/susedistribution.pm:879 called serial_terminal::login -> products/microos/../../lib/serial_terminal.pm:169 called bmwqemu::log_call
+[2026-09-24T18:39:39.471674Z] [debug] [pid:881502] <<< serial_terminal::login()
+[2026-09-24T18:39:39.471763Z] [debug] [pid:881502] [step:microos,toolbox,43] lib/consoletest.pm:51 called opensusebasetest::post_fail_hook -> products/microos/../../lib/opensusebasetest.pm:1042 called serial_terminal::select_serial_terminal -> products/microos/../../lib/serial_terminal.pm:398 called testapi::select_console -> lib/susedistribution.pm:879 called serial_terminal::login -> products/microos/../../lib/serial_terminal.pm:174 called testapi::wait_serial
+[2026-09-24T18:39:39.471882Z] [debug] [pid:881502] <<< testapi::wait_serial(record_command=undef, regexp=qr/login:\s*$/ui, internal_marker=0, capture_name=undef, quiet=1, expect_not_found=0, timeout=3, buffer_size=undef, no_regex=0, record_output=undef)
+[2026-09-24T18:39:39.472314Z] [debug] [pid:881628] <<< consoles::serial_screen::read_until(expect_not_found=0, timeout=3, cmd="backend_wait_serial", record_command=undef, no_regex=0, buffer_size=undef, quiet=1, regexp="(?^ui:login:\\s*\$)", capture_name=undef, internal_marker=0, json_cmd_token="ISKmxrRO", pattern="(?^ui:login:\\s*\$)", record_output=undef)
+[2026-09-24T18:39:39.472454Z] [info] [pid:881628] [33m::: consoles::serial_screen::read_until: Matched output from SUT in 4 loops & 0.000286670168861747 seconds: login: [0m
+[2026-09-24T18:39:39.472932Z] [debug] [pid:881502] [32m>>> testapi::wait_serial: (?^ui:login:\s*$): ok[0m
+[2026-09-24T18:39:39.473022Z] [debug] [pid:881502] [step:microos,toolbox,43] lib/consoletest.pm:51 called opensusebasetest::post_fail_hook -> products/microos/../../lib/opensusebasetest.pm:1042 called serial_terminal::select_serial_terminal -> products/microos/../../lib/serial_terminal.pm:398 called testapi::select_console -> lib/susedistribution.pm:879 called serial_terminal::login -> products/microos/../../lib/serial_terminal.pm:177 called testapi::send_key
+[2026-09-24T18:39:39.473070Z] [debug] [pid:881502] <<< testapi::send_key(key="ret", wait_screen_change=0)
+[2026-09-24T18:39:39.473347Z] [debug] [pid:881628] <<< consoles::serial_screen::type_string(key="ret", text="\n", cmd="backend_send_key", json_cmd_token="umgEoNOR")
+[2026-09-24T18:39:39.473539Z] [debug] [pid:881502] [step:microos,toolbox,43] lib/consoletest.pm:51 called opensusebasetest::post_fail_hook -> products/microos/../../lib/opensusebasetest.pm:1042 called serial_terminal::select_serial_terminal -> products/microos/../../lib/serial_terminal.pm:398 called testapi::select_console -> lib/susedistribution.pm:879 called serial_terminal::login -> products/microos/../../lib/serial_terminal.pm:178 called testapi::wait_serial
+[2026-09-24T18:39:39.473645Z] [debug] [pid:881502] <<< testapi::wait_serial(timeout=90, expect_not_found=0, quiet=undef, internal_marker=0, capture_name=undef, regexp=qr/login:\s*$/ui, record_command=undef, record_output=undef, no_regex=0, buffer_size=undef)
+[2026-09-24T18:39:39.474002Z] [debug] [pid:881628] <<< consoles::serial_screen::read_until(record_output=undef, pattern="(?^ui:login:\\s*\$)", json_cmd_token="MsjneluS", internal_marker=0, capture_name=undef, regexp="(?^ui:login:\\s*\$)", quiet=undef, buffer_size=undef, no_regex=0, record_command=undef, cmd="backend_wait_serial", timeout=90, expect_not_found=0)
+[2026-09-24T18:39:39.474074Z] [info] [pid:881628] [33m::: consoles::serial_screen::read_until: Matched output from SUT in 2 loops & 0.000172066036611795 seconds: login: [0m
+[2026-09-24T18:39:39.474268Z] [debug] [pid:881502] [step:microos,toolbox,43] lib/consoletest.pm:51 called opensusebasetest::post_fail_hook -> products/microos/../../lib/opensusebasetest.pm:1042 called serial_terminal::select_serial_terminal -> products/microos/../../lib/serial_terminal.pm:398 called testapi::select_console -> lib/susedistribution.pm:879 called serial_terminal::login -> products/microos/../../lib/serial_terminal.pm:178 called testapi::wait_serial
+[2026-09-24T18:39:39.474373Z] [debug] [pid:881502] [32m>>> testapi::wait_serial: (?^ui:login:\s*$): ok[0m
+[2026-09-24T18:39:39.474661Z] [debug] [pid:881628] <<< consoles::serial_screen::type_string(json_cmd_token="AAyBbuqb", text="root\n", cmd="backend_type_string", lf=1)
+[2026-09-24T18:39:39.474847Z] [debug] [pid:881502] [step:microos,toolbox,44] lib/consoletest.pm:51 called opensusebasetest::post_fail_hook -> products/microos/../../lib/opensusebasetest.pm:1042 called serial_terminal::select_serial_terminal -> products/microos/../../lib/serial_terminal.pm:398 called testapi::select_console -> lib/susedistribution.pm:879 called serial_terminal::login -> products/microos/../../lib/serial_terminal.pm:182 called testapi::wait_serial
+[2026-09-24T18:39:39.474968Z] [debug] [pid:881502] <<< testapi::wait_serial(record_output=undef, no_regex=0, buffer_size=undef, quiet=undef, expect_not_found=0, timeout=3, regexp=qr/root[\r\n]/ui, capture_name=undef, internal_marker=0, record_command=undef)
+[2026-09-24T18:39:39.475317Z] [debug] [pid:881628] <<< consoles::serial_screen::read_until(record_output=undef, regexp="(?^ui:root[\\r\\n])", capture_name=undef, internal_marker=0, quiet=undef, pattern="(?^ui:root[\\r\\n])", json_cmd_token="KNcVNxMW", buffer_size=undef, no_regex=0, cmd="backend_wait_serial", expect_not_found=0, timeout=3, record_command=undef)
+[2026-09-24T18:39:39.475397Z] [info] [pid:881628] [33m::: consoles::serial_screen::read_until: Matched output from SUT in 2 loops & 0.000178745947778225 seconds: root[0m
+[2026-09-24T18:39:39.475583Z] [debug] [pid:881502] [step:microos,toolbox,44] lib/consoletest.pm:51 called opensusebasetest::post_fail_hook -> products/microos/../../lib/opensusebasetest.pm:1042 called serial_terminal::select_serial_terminal -> products/microos/../../lib/serial_terminal.pm:398 called testapi::select_console -> lib/susedistribution.pm:879 called serial_terminal::login -> products/microos/../../lib/serial_terminal.pm:182 called testapi::wait_serial
+[2026-09-24T18:39:39.475680Z] [debug] [pid:881502] [32m>>> testapi::wait_serial: (?^ui:root[\r\n]): ok[0m
+[2026-09-24T18:39:39.475770Z] [debug] [pid:881502] [step:microos,toolbox,45] lib/consoletest.pm:51 called opensusebasetest::post_fail_hook -> products/microos/../../lib/opensusebasetest.pm:1042 called serial_terminal::select_serial_terminal -> products/microos/../../lib/serial_terminal.pm:398 called testapi::select_console -> lib/susedistribution.pm:879 called serial_terminal::login -> products/microos/../../lib/serial_terminal.pm:189 called testapi::wait_serial
+[2026-09-24T18:39:39.475881Z] [debug] [pid:881502] <<< testapi::wait_serial(buffer_size=undef, no_regex=0, record_output=undef, record_command=undef, capture_name=undef, internal_marker=0, regexp=qr/Password:\s*$/ui, timeout=30, quiet=undef, expect_not_found=0)
+[2026-09-24T18:39:39.476234Z] [debug] [pid:881628] <<< consoles::serial_screen::read_until(json_cmd_token="xBzvbjMc", pattern="(?^ui:Password:\\s*\$)", quiet=undef, regexp="(?^ui:Password:\\s*\$)", capture_name=undef, internal_marker=0, record_output=undef, record_command=undef, expect_not_found=0, timeout=30, cmd="backend_wait_serial", no_regex=0, buffer_size=undef)
+[2026-09-24T18:39:39.478349Z] [info] [pid:881628] [33m::: consoles::serial_screen::read_until: Matched output from SUT in 2 loops & 0.00220575905404985 seconds: Password: [0m
+[2026-09-24T18:39:39.478550Z] [debug] [pid:881502] [step:microos,toolbox,45] lib/consoletest.pm:51 called opensusebasetest::post_fail_hook -> products/microos/../../lib/opensusebasetest.pm:1042 called serial_terminal::select_serial_terminal -> products/microos/../../lib/serial_terminal.pm:398 called testapi::select_console -> lib/susedistribution.pm:879 called serial_terminal::login -> products/microos/../../lib/serial_terminal.pm:189 called testapi::wait_serial
+[2026-09-24T18:39:39.478647Z] [debug] [pid:881502] [32m>>> testapi::wait_serial: (?^ui:Password:\s*$): ok[0m
+[2026-09-24T18:39:39.478980Z] [debug] [pid:881628] <<< consoles::serial_screen::type_string(secret=1, json_cmd_token="kCOOJjaq", text="[masked]", max_interval=100, cmd="backend_type_string")
+[2026-09-24T18:39:39.479178Z] [debug] [pid:881502] [step:microos,toolbox,46] lib/consoletest.pm:51 called opensusebasetest::post_fail_hook -> products/microos/../../lib/opensusebasetest.pm:1042 called serial_terminal::select_serial_terminal -> products/microos/../../lib/serial_terminal.pm:398 called testapi::select_console -> lib/susedistribution.pm:879 called serial_terminal::login -> products/microos/../../lib/serial_terminal.pm:191 called testapi::send_key
+[2026-09-24T18:42:27.925215Z] [debug] [pid:881502] [1;34m||| finished toolbox microos (runtime: 312 s)[0m
+[2026-09-24T18:42:33.237735Z] [debug] [pid:881502] [1;34m||| starting podman tests/containers/container_engine.pm[0m
+[2026-09-24T18:44:11.650291Z] [debug] [pid:881502] [1;34m||| finished podman containers (runtime: 98 s)[0m
+[2026-09-24T18:44:15.174256Z] [debug] [pid:881502] [1;34m||| starting image_podman tests/containers/image.pm[0m
+[2026-09-24T18:45:07.374072Z] [debug] [pid:881502] [1;34m||| finished image_podman containers (runtime: 52 s)[0m
+[2026-09-24T18:45:07.374718Z] [debug] [pid:881502] [1;34m||| starting podman_privileged_mode tests/containers/privileged_mode.pm[0m
+[2026-09-24T18:45:22.737913Z] [debug] [pid:881502] [1;34m||| finished podman_privileged_mode containers (runtime: 15 s)[0m
+[2026-09-24T18:45:22.738644Z] [debug] [pid:881502] [1;34m||| starting podman_bci_systemd tests/containers/podman_bci_systemd.pm[0m
+[2026-09-24T18:45:34.050081Z] [debug] [pid:881502] [1;34m||| finished podman_bci_systemd containers (runtime: 12 s)[0m
+[2026-09-24T18:45:34.050825Z] [debug] [pid:881502] [1;34m||| starting podman_pods tests/containers/podman_pods.pm[0m
+[2026-09-24T18:46:00.573119Z] [debug] [pid:881502] [1;34m||| finished podman_pods containers (runtime: 26 s)[0m
+[2026-09-24T18:46:00.573992Z] [debug] [pid:881502] [1;34m||| starting podman_netavark tests/containers/podman_netavark.pm[0m
+[2026-09-24T18:46:32.374608Z] [debug] [pid:881502] [1;34m||| finished podman_netavark containers (runtime: 32 s)[0m
+[2026-09-24T18:46:32.375381Z] [debug] [pid:881502] [1;34m||| starting skopeo tests/containers/skopeo.pm[0m
+[2026-09-24T18:47:39.088403Z] [debug] [pid:881502] [1;34m||| finished skopeo containers (runtime: 67 s)[0m
+[2026-09-24T18:47:39.089377Z] [debug] [pid:881502] [1;34m||| starting podman_quadlet tests/containers/podman_quadlet.pm[0m
+[2026-09-24T18:47:54.510075Z] [debug] [pid:881502] [1;34m||| finished podman_quadlet containers (runtime: 15 s)[0m
+[2026-09-24T18:47:54.510880Z] [debug] [pid:881502] [1;34m||| starting secret_podman tests/containers/secret.pm[0m
+[2026-09-24T18:47:56.532737Z] [debug] [pid:881502] [1;34m||| finished secret_podman containers (runtime: 2 s)[0m
+[2026-09-24T18:47:56.533408Z] [debug] [pid:881502] [1;34m||| starting rootless_podman tests/containers/rootless_podman.pm[0m
+[2026-09-24T18:55:09.848065Z] [debug] [pid:881502] [1;34m||| finished rootless_podman containers (runtime: 433 s)[0m
+[2026-09-24T18:55:09.848984Z] [debug] [pid:881502] [1;34m||| starting volumes_podman tests/containers/volumes.pm[0m
+[2026-09-24T18:55:16.694363Z] [debug] [pid:881502] [1;34m||| finished volumes_podman containers (runtime: 7 s)[0m
+[2026-09-24T18:55:16.695015Z] [debug] [pid:881502] [1;34m||| starting podman_seccomp tests/containers/seccomp.pm[0m
+[2026-09-24T18:55:19.856569Z] [debug] [pid:881502] [1;34m||| finished podman_seccomp containers (runtime: 3 s)[0m
+[2026-09-24T18:55:19.857213Z] [debug] [pid:881502] [1;34m||| starting docker tests/containers/container_engine.pm[0m
+[2026-09-24T18:58:09.995622Z] [debug] [pid:881502] [1;34m||| finished docker containers (runtime: 170 s)[0m
+[2026-09-24T18:58:13.951548Z] [debug] [pid:881502] [1;34m||| starting image_docker tests/containers/image.pm[0m
+[2026-09-24T18:58:55.616151Z] [debug] [pid:881502] [1;34m||| finished image_docker containers (runtime: 42 s)[0m
+[2026-09-24T18:58:55.616777Z] [debug] [pid:881502] [1;34m||| starting docker_privileged_mode tests/containers/privileged_mode.pm[0m
+[2026-09-24T18:59:00.267909Z] [debug] [pid:881502] [1;34m||| finished docker_privileged_mode containers (runtime: 5 s)[0m
+[2026-09-24T18:59:00.268665Z] [debug] [pid:881502] [1;34m||| starting docker_seccomp tests/containers/seccomp.pm[0m
+[2026-09-24T18:59:03.546976Z] [debug] [pid:881502] [1;34m||| finished docker_seccomp containers (runtime: 3 s)[0m
+[2026-09-24T18:59:03.547612Z] [debug] [pid:881502] [1;34m||| starting volumes_docker tests/containers/volumes.pm[0m
+[2026-09-24T18:59:09.817988Z] [debug] [pid:881628] <<< consoles::serial_screen::read_until(record_command=undef, expect_not_found=0, timeout=300, cmd="backend_wait_serial", no_regex=0, buffer_size=undef, json_cmd_token="AOORIbAa", pattern="(?^u:SCRIPT_FINISHEDcRlTo-(\\d+)-)", quiet=undef, regexp="(?^u:SCRIPT_FINISHEDcRlTo-(\\d+)-)", capture_name="Exit code", internal_marker=1, record_output=1)
+[2026-09-24T18:59:09.823932Z] [info] [pid:881628] [33m::: consoles::serial_screen::read_until: Matched output from SUT in 2 loops & 0.00601236498914659 seconds: SCRIPT_FINISHEDcRlTo-1-[0m
+[2026-09-24T18:59:09.824303Z] [debug] [pid:881502] [step:containers,volumes_docker,74] tests/containers/volumes.pm:167 called containers::basetest::post_run_hook -> lib/containers/basetest.pm:58 called Utils::Logging::record_avc_selinux_alerts -> products/microos/../../lib/Utils/Logging.pm:636 called testapi::script_output
+[2026-09-24T18:59:09.824414Z] [debug] [pid:881502] [32m>>> testapi::wait_serial: (?^u:SCRIPT_FINISHEDcRlTo-(\d+)-): ok[0m
+[2026-09-24T18:59:09.824500Z] [debug] [pid:881502] [step:containers,volumes_docker,75] tests/containers/volumes.pm:167 called containers::basetest::post_run_hook -> lib/containers/basetest.pm:58 called Utils::Logging::record_avc_selinux_alerts -> products/microos/../../lib/Utils/Logging.pm:636 called testapi::script_output
+[2026-09-24T18:59:09.824540Z] [debug] [pid:881502] <<< distribution::script_output("script failed with : \ncRlTo\nSCRIPT_FINISHEDcRlTo-1-")
+[2026-09-24T18:59:09.824638Z] [debug] [pid:881502] [step:containers,volumes_docker,75] tests/containers/volumes.pm:167 called containers::basetest::post_run_hook -> lib/containers/basetest.pm:58 called Utils::Logging::record_avc_selinux_alerts -> products/microos/../../lib/Utils/Logging.pm:640 called testapi::record_info
+[2026-09-24T18:59:09.824692Z] [debug] [pid:881502] <<< testapi::record_info(title="AVC", output="No AVCs were recorded", result="ok")
+[2026-09-24T18:59:09.825005Z] [debug] [pid:881502] [1;34m||| finished volumes_docker containers (runtime: 6 s)[0m
+[2026-09-24T18:59:09.826115Z] [debug] [pid:881502] [37mSending tests_done[0m
+[2026-09-24T18:59:09.826345Z] [debug] [pid:881449] [37mstopping autotest process 881502[0m
+[2026-09-24T18:59:09.833402Z] [debug] [pid:881449] [37m[autotest] process exited: 0[0m
+[2026-09-24T18:59:09.933692Z] [debug] [pid:881449] [37mdone with autotest process[0m
+[2026-09-24T18:59:09.934130Z] [debug] [pid:881449] [37misotovideo starting handle_shutdown[0m
+[2026-09-24T18:59:09.934236Z] [debug] [pid:881449] [37mstopping command server 881474 because test execution ended[0m
+[2026-09-24T18:59:09.934342Z] [debug] [pid:881449] [37misotovideo: informing websocket clients before stopping command server: http://127.0.0.1:20243/xxxxxxxxxxxxxxxx/broadcast[0m
+[2026-09-24T18:59:09.946111Z] [debug] [pid:881449] [37mcommands process exited: 0[0m
+[2026-09-24T18:59:10.046375Z] [debug] [pid:881449] [37mdone with command server[0m
+[2026-09-24T18:59:10.047260Z] [debug] [pid:881628] [37mQEMU status is not 'shutdown', it is 'running'[0m
+[2026-09-24T18:59:10.047450Z] [debug] [pid:881449] [37mbackend shutdown state: 0[0m
+[2026-09-24T18:59:10.047765Z] [info] [pid:881628] [33m::: OpenQA::Qemu::Proc::save_state: Saving QEMU state to qemu_state.json[0m
+[2026-09-24T18:59:11.095661Z] [debug] [pid:881628] [37mPassing remaining frames to the video encoder[0m
+[out#0/webm @ 0x55928155c080] video:3797KiB audio:0KiB subtitle:0KiB other streams:0KiB global headers:0KiB muxing overhead: 0.584095%
+frame= 5092 fps=1.6 q=43.0 Lsize=    3820KiB time=00:03:32.12 bitrate= 147.5kbits/s speed=0.0652x    
+[2026-09-24T18:59:11.466955Z] [debug] [pid:881628] [37mWaiting for video encoder to finalize the video[0m
+[2026-09-24T18:59:11.467083Z] [debug] [pid:881628] [37mThe built-in video encoder (pid 881756) terminated[0m
+[2026-09-24T18:59:11.467137Z] [debug] [pid:881628] [37mThe external video encoder (pid 881755) terminated[0m
+[2026-09-24T18:59:11.467296Z] [debug] [pid:881628] [37mQEMU: qemu-system-x86_64: terminating on signal 15 from pid 881628 (/usr/bin/isotovideo: backend)[0m
+[2026-09-24T18:59:11.467458Z] [debug] [pid:881628] [37msending magic and exit[0m
+[2026-09-24T18:59:11.467664Z] [debug] [pid:881449] [37mreceived magic close[0m
+[2026-09-24T18:59:11.476006Z] [debug] [pid:881449] [37mbackend process exited: 0[0m
+[2026-09-24T18:59:11.576817Z] [debug] [pid:881449] [37misotovideo completed handle_shutdown: done[0m
+[2026-09-24T18:59:11.576967Z] [debug] [pid:881449] [37mstopping backend process 881628[0m
+[2026-09-24T18:59:11.577006Z] [debug] [pid:881449] [37mdone with backend process[0m
+881449: EXIT 0
+[2026-09-24T18:59:11.617276Z] [info] Isotovideo exit status: 0
+[2026-09-24T18:59:11.637408Z] [info] +++ worker notes +++
+[2026-09-24T18:59:11.637487Z] [info] End time: 2026-09-24 18:59:11
+[2026-09-24T18:59:11.637527Z] [info] Result: done
+[2026-09-24T18:59:11.640179Z] [info] Uploading ansible_agnostic-testAnsible_output.log
+[2026-09-24T18:59:11.682585Z] [info] Uploading ansible_agnostic-testansible_results.xml
+[2026-09-24T18:59:11.700878Z] [info] Uploading logs_from_installation_system-y2logs.tar.bz2
+[2026-09-24T18:59:11.733590Z] [info] Uploading textinfo-info.txt
+[2026-09-24T18:59:11.748943Z] [info] Uploading textinfo-logs.tar.bz2
+[2026-09-24T18:59:11.765966Z] [info] Uploading toolbox-basic_health_check.txt
+[2026-09-24T18:59:11.786472Z] [info] Uploading toolbox-bootctl.txt
+[2026-09-24T18:59:11.806338Z] [info] Uploading toolbox-dmesg.txt
+[2026-09-24T18:59:11.823876Z] [info] Uploading toolbox-esp-config.tar.gz
+[2026-09-24T18:59:11.841648Z] [info] Uploading toolbox-ip-addr-show.txt
+[2026-09-24T18:59:11.856710Z] [info] Uploading toolbox-journal.txt
+[2026-09-24T18:59:11.875675Z] [info] Uploading toolbox-loadavg.txt
+[2026-09-24T18:59:11.893436Z] [info] Uploading toolbox-problem_detection_logs.tar.xz
+[2026-09-24T18:59:11.912338Z] [info] Uploading toolbox-psaxf.txt
+[2026-09-24T18:59:11.939239Z] [info] Uploading toolbox-resolv-conf.txt
+[2026-09-24T18:59:11.954759Z] [info] Uploading toolbox-sysconfig.tar.gz
+[2026-09-24T18:59:11.970411Z] [info] Uploading toolbox-systemctl.txt
+[2026-09-24T18:59:11.985982Z] [info] Uploading toolbox-systemctl_status.txt
+[2026-09-24T18:59:12.008735Z] [info] Uploading toolbox-systemctl_unit-files.txt
+[2026-09-24T18:59:12.036133Z] [info] Uploading video.webm
+[2026-09-24T18:59:12.127927Z] [info] Uploading autoinst-log.txt

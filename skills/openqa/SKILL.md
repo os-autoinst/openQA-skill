@@ -117,6 +117,7 @@ What a flag means: `python3 scripts/refsection.py scripts/README.md "<script>"`.
 - `oqa-sweep.py [--group ID]... [--build BUILD] [--todo] [--include-softfailed] [--limit N] [--passed] [--module NAME] [--groups] [--match REGEX] [--uses-schedule PATH] [--exit-code]`
 - `refsection.py [--list] FILE [TITLE...]`; exit 1: section missing or ambiguous
 - `review-lint.py [FILE] --lines N [--lib] [--replies N] [--late]`; exit 1: findings
+- `ticket-lint.py [FILE] [--private-suffix SUFFIX]...`; exit 1: findings
 - `vr-clone-cmd.py --job JOB... [--pr URL] [--fork USER] [--branch REF] [--repo-name NAME] [--needles-fork USER] [--needles-branch REF] [--needles-repo-name NAME] [--schedule LIST] [--skip-chained-deps] [--within-instance] [--label BUILD] [--set KEY=VALUE]... [--dry-run-flag] [--parent-publishes]`; exit 1: command printed with hazard lines
 
 ## References

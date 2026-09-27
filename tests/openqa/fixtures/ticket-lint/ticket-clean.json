@@ -1,0 +1,13 @@
+{
+ "kind": "progress",
+ "public": true,
+ "fields": {
+  "project": "openqatests",
+  "tracker": "action",
+  "category": "Bugs in existing tests",
+  "priority": "Normal"
+ },
+ "subject": "test fails in toolbox - Login incorrect after ansible_agnostic created the user",
+ "body": "## Observation\nopenQA test in scenario `microos-Tumbleweed-DVD-x86_64-container_host@uefi-2G` fails in\n[toolbox](https://openqa.example.org/tests/600#step/toolbox/40): the tty login as the test\nuser says \"Login incorrect\".\n\nansible_agnostic runs first and creates the test user with `useradd -m` and no password;\ntoolbox only sets the password when the user does not exist yet.\n\n## Reproducible\nFails since Build 20300923 in every run where ansible_agnostic passed (4 of 7).\n\n## Expected result\nLast good: Build 20300922 (https://openqa.example.org/tests/590), still on console/ansible.\n\n## Suggestions\n- Create the test user with its password in the ansible_agnostic wrapper\n  (`ensure_testuser_present`), as console/ansible did.\n\n## Acceptance criteria\n- **AC1:** container_host passes toolbox after a passing ansible_agnostic.\n",
+ "notes": "Searched openqatests subject and description for 'toolbox' and 'Login incorrect': no open ticket."
+}

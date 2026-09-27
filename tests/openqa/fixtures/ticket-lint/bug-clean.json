@@ -1,0 +1,15 @@
+{
+ "kind": "bugzilla",
+ "public": true,
+ "fields": {
+  "product": "openSUSE Tumbleweed",
+  "component": "Other",
+  "version": "Current",
+  "severity": "Normal",
+  "cf_foundby": "openQA",
+  "url": "https://openqa.example.org/tests/500#step/zypper_in/12"
+ },
+ "summary": "[QE][Build 20300102] openQA test fails in zypper_in - apache2 not installable, libapr-1.so.0 missing",
+ "body": "## Observation\nopenQA test in scenario `opensuse-Tumbleweed-DVD-x86_64-textmode@64bit` fails\nin zypper_in:\nhttps://openqa.example.org/tests/500#step/zypper_in/12\nFound in: Build 20300102, openSUSE Tumbleweed, x86_64\napache2 cannot be installed because libapr-1.so.0 is missing from the\nrepository; the test only runs zypper, so this is a product bug.\n    # zypper -n in apache2; echo \"exit=$?\"\n    Problem: nothing provides 'libapr-1.so.0()(64bit)' needed by apache2\n    exit=4\n\n## Test suite description\nTextmode installation with extra console tests.\n\n## Reproducible\nFails since Build 20300102 (https://openqa.example.org/tests/500);\n3 of 3 runs. Not reproduced outside openQA.\n\n## Expected result\nExpected: apache2 installs.\nActual: zypper aborts with the missing dependency above.\nLast good: Build 20300101 (https://openqa.example.org/tests/480), where\nlibapr1 was still in the repository.\n\n## Further details\nNot affected: none checked on other arches.\nSuspected: libapr1 dropped from the build; not verified in OBS.\nLatest: https://openqa.example.org/tests/latest?test=textmode&arch=x86_64\n",
+ "notes": "Searched boo quicksearch 'libapr-1.so.0' and 'apache2 zypper' (open and closed): no match. Component Other is a best fit."
+}

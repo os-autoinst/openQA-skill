@@ -195,6 +195,34 @@ inline comment and nothing blocking), `duplicate` (suggestion-only comments may 
 object (`event` COMMENT, APPROVE or REQUEST_CHANGES; `body` and `commit_id` strings; each comment a non-empty
 `body`, a `path` and an integer `line` or `position`), over 262144 characters.
 
+## ticket-lint.py - shape of a drafted bug or progress ticket (offline)
+
+Checks a draft against references/bugs-and-tickets.md before the approval ask, not whether it is right.
+
+    ticket-lint.py [FILE] [--private-suffix SUFFIX]...    # FILE: the draft JSON
+
+    draft: bugzilla, summary 100/255 chars, body 1097 chars (target 1500, limit 3000), notes 121 chars (not filed)
+    shape ok; whether the report is right is the refute pass's job
+
+The draft is `{"kind": "bugzilla"|"progress", "fields": {...}, "summary"|"subject": "...", "body": "...",
+"notes": "...", "public": true}`: `summary` for Bugzilla, `subject` for progress; fields by name, not API id
+(`"tracker": "openqa-force-result"`); `notes` are the approver notes, counted but never checked as filed text;
+`public: false` for a private product or project allows internal links; for an `openSUSE` or `PUBLIC`
+product or the openqatests, openqav3 and openqa-infrastructure projects it is a finding and the check stays on. `--private-suffix` adds a host
+that readers of a public tracker cannot reach, itself and everything under it (repeatable). Exit 1: findings
+(`  F <id> <where>: ...`): `field` (Bugzilla: product, component, version, severity, a known severity, no
+priority; progress: project, tracker, category), `title` (one line, at most 255), `section` (missing or out of
+order: Observation, Reproducible, Expected result, and Further details on Bugzilla), `label` (Bugzilla
+`Expected:` and `Actual:`, each followed by text), `size` (over 3000 Bugzilla, 4000 progress), `markdown`
+(Bugzilla: link, bold, fence, table, HTML; progress: an unclosed fence), `long-line` (Bugzilla prose over 80
+with its URLs taken out), `placeholder` (`<slot>`, TBD, TODO, XXX, PLACEHOLDER, xyz), `see-title`, `notes`
+(approver notes in the body), `credential` and `private-url` (title, body and every text field, the URL field
+included), `auto-review` (more than one pair of double quotes, a term under 16 characters, not compiling or
+matching an empty log, force_result off its tracker, no `openqa-query-for-job-label` snippet). Verbatim blocks
+(4-space or tab indented on Bugzilla; fenced on progress, closed only by the same fence character) are output:
+they count for neither headings nor labels and skip the markup, line, placeholder and see-title checks; progress
+code spans skip the placeholder check. Exit 2: not a draft JSON object, over 262144 characters.
+
 ## vr-clone-cmd.py - build, never run, a clone command
 
 Forgotten `_GROUP=0`, assets published from a test branch, clones on production.

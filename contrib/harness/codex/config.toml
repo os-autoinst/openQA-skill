@@ -45,6 +45,7 @@ extends = "credentials"
 "~/.config/osc" = "deny"
 "~/.oscrc" = "deny"
 "~/.config/tea" = "deny"
+"~/.local/state/osc/cookiejar" = "deny"
 # gh keeps its token in the desktop keyring, reached over D-Bus, which no file deny stops. To cut
 # it off as well (gh and secret-tool then fail inside Codex), replace UID and uncomment:
 # "/run/user/UID/bus" = "deny"

@@ -12,6 +12,7 @@
       "read_file(/home/USER/.config/tea)",
       "read_file(/home/USER/.netrc)",
       "read_file(/home/USER/.git-credentials)",
+      "read_file(/home/USER/.local/state/osc/cookiejar)",
       "command(gh auth token)",
       "command(gh auth status)",
       "command(gh auth git-credential)",
@@ -31,6 +32,8 @@
       "command(osc -H)",
       "command(osc -qH)",
       "command(osc -vH)",
+      "command(osc -Hq)",
+      "command(osc -Hv)",
       "command(osc --http-debug)",
       "command(osc --http-full-debug)",
       "command(osc token)",
@@ -39,7 +42,9 @@
       "command(git-credential-cache get)",
       "command(git-credential-libsecret get)",
       "command(git-credential-oauth get)",
-      "command(git-credential-keepassxc get)"
+      "command(git-credential-keepassxc get)",
+      "command(secret-tool lookup)",
+      "command(secret-tool search)"
     ]
   }
 }

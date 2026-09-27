@@ -21,19 +21,21 @@ PATH_MAX = 4096
 PATHS = [
     r"\.config/openqa\b",
     r"(?<![\w.-])/(?:usr/)?etc/openqa\b",
-    r"\.config/gh/hosts\.yml",
+    r"\.config/gh(?![\w.-])",
+    r"gh/hosts\.yml",
     r"\.config/osc\b",
     r"\.oscrc\b",
     r"\.config/tea\b",
     r"\.netrc\b",
     r"\.git-credentials\b",
+    r"\.local/state/osc/cookiejar\b",
     r"(?:^|[\s/\"'=:<>(|;&])\.env(?:\.(?!example\b)[\w.-]+)?(?=$|[\s\"'/;|&)<>,*?\[])",
 ]
 # Each rule holds when all its parts occur in one simple command. Parts are searched
 # separately, which keeps the scan linear in the command's length.
 COMMANDS = [
     (r"\bgh\s+auth\s+(?:token|status|git-credential)\b",),
-    (r"(?:-H|--header)[\s=]*(?:['\"]\s*)?authorization\s*:",),
+    (r"(?:(?<!\S)(?-i:-[a-zA-Z]*H)|--header)[\s=]*(?:['\"]\s*)?authorization\s*:",),
     (r"\bopenqa-cli\b", r"authorization\s*:"),
     (r"--api(?:key|secret)\b",),
     (r"://[^\s/:@]+:[^\s/@]+@",),
@@ -43,11 +45,12 @@ COMMANDS = [
     (r"gitcredentials-helper",),
     (r"\blogins?\s+(?:helper|git-credential)\b",),
     (r"\btea\b", r"\blogins?\s+(?:edit|e)\b"),
-    (r"--dump-",),
+    (r"\bosc\b", r"--dump-"),
     (r"--http-[df]|http[-_](?:full[-_])?debug",),
-    (r"\bosc\b", r"(?:^|\s)(?-i:-[a-zA-Z]*H)\b"),
+    (r"\bosc\b", r"(?:^|\s)(?-i:-[a-zA-Z]*H[a-zA-Z]*)\b"),
     (r"\bcredential\s+fill\b",),
     (r"\bgit[\s-]credential-", r"(?:^|\s)get\b"),
+    (r"\bsecret-tool\s+(?:lookup|search)\b",),
 ]
 # A recursive search rooted at one of these, or at an ancestor of one, would read them.
 SECRET_ROOTS = [
@@ -60,13 +63,18 @@ SECRET_ROOTS = [
     f"{HOME}/.config/tea",
     f"{HOME}/.netrc",
     f"{HOME}/.git-credentials",
+    f"{HOME}/.local/state/osc/cookiejar",
 ]
 PATH_RE = re.compile("|".join(PATHS), re.IGNORECASE)
 RULES = [[re.compile(p, re.IGNORECASE) for p in parts] for parts in COMMANDS]
 WORD_RE = re.compile(r"[\s\"'`=<>|;&()]+")
 UP_RE = re.compile(r"(?:\.\.(?:/|$))*")
 MCP_KEY_RE = re.compile(r"path|file|dir|root|scope|glob|url|command|cmd", re.IGNORECASE)
+MCP_ROOT_RE = re.compile(r"path|dir|root|scope", re.IGNORECASE)
 OSC_ARG_OPTIONS = {"-A", "--apiurl", "-c", "--config"}
+# osc takes any unambiguous prefix of a long option.
+OSC_LONG_ARG_OPTIONS = ("--apiurl", "--config", "--setopt")
+OSC_WORD_RE = re.compile(r"[\s`$(){}]+")
 OSC_TOKEN_API = re.compile(r"/person/[^/]+/token")
 
 
@@ -76,8 +84,7 @@ def block(why):
 
 
 def segments(text):
-    """Split at ; & | and newlines outside quotes, in one pass; a continued line is one."""
-    text = text.replace("\\\n", " ")
+    """Split at ; & | and newlines outside quotes, in one pass."""
     out, start, quote, i = [], 0, "", 0
     while i < len(text):
         c = text[i]
@@ -98,30 +105,37 @@ def segments(text):
 
 
 def osc_prints_secret(segment):
-    """osc's subcommand, found past its global options, lists tokens or prints a password."""
-    words = [word.strip("'\"") for word in segment.split()]
+    """An osc call whose subcommand, past the global options, lists tokens or prints a password."""
+    # Command substitution and subshells start a call of their own, so split at them too.
+    words = [word.strip("'\"") for word in OSC_WORD_RE.split(segment) if word]
     names = [word.rsplit("/", 1)[-1] for word in words]
-    if "osc" not in names:
-        return False
-    rest = iter(words[names.index("osc") + 1 :])
-    for word in rest:
-        if word in OSC_ARG_OPTIONS:
-            next(rest, None)
-        elif not word.startswith("-"):
-            args = list(rest)
-            return (
-                word == "token"
-                or word == "config"
-                and bool({"pass", "passx"} & set(args))
-                or word == "api"
-                and any(OSC_TOKEN_API.search(arg) for arg in args)
-            )
+    starts = [i for i, name in enumerate(names) if name == "osc"]
+    for start, end in zip(starts, starts[1:] + [len(words)]):
+        rest = iter(words[start + 1 : end])
+        for word in rest:
+            if word in OSC_ARG_OPTIONS or (
+                len(word) > 3 and any(o.startswith(word) for o in OSC_LONG_ARG_OPTIONS)
+            ):
+                next(rest, None)
+            elif not word.startswith("-"):
+                args = list(rest)
+                if (
+                    word == "token"
+                    or word == "config"
+                    and bool({"pass", "passx"} & set(args))
+                    or word == "api"
+                    and any(OSC_TOKEN_API.search(arg) for arg in args)
+                ):
+                    return True
+                break
     return False
 
 
 def refused(text):
     if len(text) > MAX_COMMAND:
         return f"is over {MAX_COMMAND} characters, too long to check"
+    # The shell drops a backslash-newline, even inside a word.
+    text = text.replace("\\\n", "")
     if PATH_RE.search(text):
         return "names a credential file"
     # A rule can hold in a segment only when all its parts occur in the whole text.
@@ -177,7 +191,7 @@ def mcp_strings(obj, key=""):
         for value in obj:
             yield from mcp_strings(value, key)
     elif isinstance(obj, str) and MCP_KEY_RE.search(key):
-        yield obj
+        yield key, obj
 
 
 def session_dirs(session):
@@ -212,7 +226,7 @@ def main():
         event.get("session_id") or "\0"
     )
     if tool == "Bash":
-        command = args.get("command", "")
+        command = args.get("command", "").replace("\\\n", "")
         why = refused(command)
         if why:
             block(f"the command {why}")
@@ -234,10 +248,13 @@ def main():
         if PATH_RE.search(args.get("url", "")):
             block("the URL names a credential file")
     elif tool.startswith("mcp__"):
-        for text in mcp_strings(args):
+        for key, text in mcp_strings(args):
             why = refused(text)
             if why:
                 block(f"an MCP argument {why}")
+            # A search rooted at an ancestor of a credential file would read it.
+            if MCP_ROOT_RE.search(key):
+                check_path(text, cwds, recursive=True)
 
 
 if __name__ == "__main__":

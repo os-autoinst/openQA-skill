@@ -172,6 +172,102 @@ check "kimi hook: a block says why on stderr" 1 "$(
 	grep -c 'Denied by openqa-credentials hook' <<<"$hook_err"
 )"
 
+for command in 'echo $(osc token)' 'echo "$(osc token)"' '(osc token)' 'echo `osc token`' \
+	'x=$(osc config general pass); echo $x' 'osc ls $(osc token)' 'osc --api obs token' 'osc --setopt x=y token' \
+	'osc --conf /x token'; do
+	hook "an osc printer in a subshell or past a global option: $command" 2 "$(bash_call "$command")"
+done
+for command in $'gh auth \\\ntoken' $'git credential \\\nfill' $'cat ~/.net\\\nrc'; do
+	hook "a line continuation does not split a match: ${command//$'\n'/ }" 2 "$(bash_call "$command")"
+done
+hook "reading .env" 2 "$(bash_call 'cat .env')"
+hook "reading .env.example" 0 "$(bash_call 'cat .env.example')"
+hook "a quoted ; does not end the command" 2 "$(bash_call "openqa-cli api -a 'Accept: a;b' -a 'Authorization: Bearer x' jobs")"
+hook "an MCP search rooted at the home directory" 2 "$(tool_call mcp__fs__search "{\"scope\":\"$home\"}")"
+hook "an MCP search rooted in the project" 0 "$(tool_call mcp__fs__search "{\"scope\":\"$home/proj\"}")"
+
+# --- the same commands through every text-matching snippet -------------------------------
+# Commands each of them must refuse, and ordinary ones none may; test input, never executed.
+refuse=(
+	'cat ~/.config/openqa/client.conf' 'head -1 /etc/openqa/client.conf' 'grep -r oauth_token ~/.config/gh'
+	'cat ~/.config/gh/hosts.yml' 'cat ~/.netrc' 'cat ~/.git-credentials' 'cat ~/.local/state/osc/cookiejar'
+	'gh auth token' 'gh auth status -t' 'gh auth git-credential get'
+	"curl -H 'Authorization: Bearer x' https://x.example.org" "curl -sH 'Authorization: Bearer x' https://x.example.org"
+	"openqa-cli api -a 'Authorization: Bearer u:k:s' --host o3 mcp" 'openqa-cli api --apikey K jobs'
+	'git clone https://user:dummy@github.com/o/r' 'MOJO_CLIENT_DEBUG=1 openqa-cli api jobs'
+	'git-obs login list' 'tea login helper get' 'tea login edit' 'osc config --dump-full' 'osc --http-debug ls'
+	'osc -H ls' 'osc -Hq ls' 'osc -A obs -qvH api /' 'osc token' 'osc api /person/someone/token'
+	'osc config general pass' 'git credential fill' 'git-credential-store get' 'secret-tool lookup service gh:github.com'
+)
+ordinary=(
+	'openqa-cli api --host o3 jobs' 'git status' 'grep -rn Authorization: lib/' 'git clone git@github.com:o/r'
+	'curl --dump-header h.txt https://openqa.opensuse.org/api/v1/jobs' 'cat etc/openqa/openqa.ini'
+	'osc ls openSUSE:Factory' 'osc ci -m "fix token handling"' 'osc ls && echo token'
+	'cat ~/.config/ghostty/config' 'tea pr list' 'git credential-cache exit' 'osc vc -m "Update to OpenSSH 9.9"'
+)
+# glob_decide SNIPPET COMMAND...: "refused" or "passed" per command, as a whole-command glob match
+glob_decide() {
+	python3 - "$@" <<'PY'
+import re, sys
+path, commands = sys.argv[1], sys.argv[2:]
+text = open(path, encoding="utf-8").read()
+if path.endswith(".jsonc"):
+    body = text[text.index('"bash": {') :]
+    globs = re.findall(r'^\s*"(.+)": "deny"', body[: body.index("}")], re.M)
+else:
+    globs = re.findall(r'"Bash\((.*)\)",?$', text, re.M)
+rules = [re.compile(".*".join(map(re.escape, glob.split("*"))), re.S) for glob in globs]
+for command in commands:
+    print("refused" if any(rule.fullmatch(command) for rule in rules) else "passed")
+PY
+}
+for snippet in claude/settings.json grok/config.toml opencode/opencode.jsonc; do
+	mapfile -t decided < <(glob_decide "$harness/$snippet" "${refuse[@]}" "${ordinary[@]}")
+	for i in "${!refuse[@]}"; do
+		check "$snippet refuses: ${refuse[i]}" refused "${decided[i]}"
+	done
+	for i in "${!ordinary[@]}"; do
+		check "$snippet passes: ${ordinary[i]}" passed "${decided[${#refuse[@]} + i]}"
+	done
+done
+# The Gemini policy, as gemini-cli 2fe7c2d's loader and matcher treat it.
+if command -v node >/dev/null; then
+	mapfile -t decided < <(
+		python3 -c 'import json, re, sys; print(json.dumps(re.findall(r"^commandRegex = \x27(.*)\x27$", open(sys.argv[1]).read(), re.M)))' \
+			"$harness/gemini/openqa-credentials.toml" |
+			node -e '
+const regexes = JSON.parse(require("fs").readFileSync(0, "utf8"));
+// The loader drops a rule whose regex has a quantified group holding a quantifier.
+const unsafe = regexes.filter((r) => /\([^)]*[*+?{].*\)[*+?{]/.test(`"command":"${r}`));
+const rules = regexes.map((r) => new RegExp(`"command":"${r}`));
+const args = (command) =>
+  "{" + [["command", command], ["description", "x"]].map(([k, v]) => "\0" + JSON.stringify(k) + ":" + JSON.stringify(v) + "\0").join(",") + "}";
+console.log(unsafe.length || !regexes.length ? "unsafe" : "safe");
+for (const command of process.argv.slice(1)) console.log(rules.some((r) => r.test(args(command))) ? "refused" : "passed");
+' "${refuse[@]}" "${ordinary[@]}"
+	)
+	check "gemini: the loader accepts every commandRegex" safe "${decided[0]}"
+	for i in "${!refuse[@]}"; do
+		check "gemini refuses: ${refuse[i]}" refused "${decided[i + 1]}"
+	done
+	for i in "${!ordinary[@]}"; do
+		check "gemini passes: ${ordinary[i]}" passed "${decided[${#refuse[@]} + i + 1]}"
+	done
+else
+	echo "ok - gemini rules: node not installed, rules not evaluated"
+fi
+for command in "${refuse[@]}"; do
+	hook "refuses: $command" 2 "$(bash_call "$command")"
+done
+for command in "${ordinary[@]}"; do
+	hook "passes: $command" 0 "$(bash_call "$command")"
+done
+# agy's command() rules are word prefixes, so each printer needs its own.
+for printer in 'gh auth token' 'gh auth status' 'gh auth git-credential' 'git credential fill' 'osc config --dump-full' \
+	'osc -H' 'osc -Hq' 'osc token' 'tea login helper' 'tea login edit' 'git-obs login list' 'secret-tool lookup'; do
+	check "agy denies: $printer" 1 "$(grep -c -F "\"command($printer)\"" "$harness/agy/settings.json")"
+done
+
 # --- the Codex rules, when codex is installed -------------------------------------------
 if command -v codex >/dev/null; then
 	rules=$harness/codex/openqa-credentials.rules
@@ -196,6 +292,10 @@ if command -v codex >/dev/null; then
 	check "codex rules: osc --http-d" forbidden "$(decide osc --http-d ls)"
 	check "codex rules: osc -H" forbidden "$(decide osc -H ls)"
 	check "codex rules: osc -qH" forbidden "$(decide osc -qH ls)"
+	check "codex rules: osc -Hq" forbidden "$(decide osc -Hq ls)"
+	check "codex rules: secret-tool lookup" forbidden "$(decide secret-tool lookup service gh:github.com)"
+	check "codex rules: --apikey after --osd" forbidden "$(decide openqa-cli api --osd --apikey K jobs)"
+	check "codex rules: cat of osc's cookie jar" forbidden "$(decide cat /home/USER/.local/state/osc/cookiejar)"
 	check "codex rules: osc token" forbidden "$(decide osc token --create)"
 	check "codex rules: tea login e" forbidden "$(decide tea login e)"
 	check "codex rules: tea logins edit" forbidden "$(decide tea logins edit)"

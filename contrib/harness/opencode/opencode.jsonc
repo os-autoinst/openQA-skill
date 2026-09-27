@@ -11,7 +11,8 @@
       "/usr/etc/openqa/*": "deny",
       "~/.config/gh/*": "deny",
       "~/.config/osc/*": "deny",
-      "~/.config/tea/*": "deny"
+      "~/.config/tea/*": "deny",
+      "~/.local/state/osc/*": "deny"
     },
     // The read tool matches the path relative to the git worktree ("../../.config/…"),
     // or to "/" outside git ("home/u/.config/…"), so patterns start with "*", not "~".
@@ -26,22 +27,28 @@
       "*.oscrc": "deny",
       "*.config/tea/*": "deny",
       "*.netrc": "deny",
-      "*.git-credentials": "deny"
+      "*.git-credentials": "deny",
+      "*.local/state/osc/cookiejar": "deny"
     },
     // Matched against each simple command's source text, unexpanded.
     "bash": {
       "*.config/openqa*": "deny",
-      "*etc/openqa*": "deny",
+      "*/etc/openqa*": "deny",
       "*gh/hosts.yml*": "deny",
+      "*.config/gh/*": "deny",
+      "*.config/gh": "deny",
+      "*.config/gh *": "deny",
       "*.config/osc*": "deny",
       "*oscrc*": "deny",
       "*.config/tea*": "deny",
       "*.netrc*": "deny",
       "*.git-credentials*": "deny",
+      "*osc/cookiejar*": "deny",
       "*gh auth token*": "deny",
       "*gh auth status*": "deny",
       "*gh auth git-credential*": "deny",
       "*-H*uthorization*": "deny",
+      "*-*H *uthorization*": "deny",
       "*--header*uthorization*": "deny",
       "*openqa-cli *uthorization*": "deny",
       "*--apikey*": "deny",
@@ -57,7 +64,7 @@
       "*logins git-credential*": "deny",
       "tea login e*": "deny",
       "tea logins e*": "deny",
-      "*--dump-*": "deny",
+      "osc *--dump-*": "deny",
       "*--http-d*": "deny",
       "*--http-f*": "deny",
       "*http_debug*": "deny",
@@ -65,17 +72,16 @@
       "*HTTP_DEBUG*": "deny",
       "*HTTP_FULL_DEBUG*": "deny",
       "osc -H*": "deny",
-      "osc * -H *": "deny",
-      "osc * -H": "deny",
+      "osc * -H*": "deny",
+      "osc -*H *": "deny",
+      "osc -*H": "deny",
       "osc token*": "deny",
-      "osc -qH*": "deny",
-      "osc -vH*": "deny",
-      "osc * -qH*": "deny",
-      "osc * -vH*": "deny",
       "osc *api*/person/*/token*": "deny",
       "osc config * pass*": "deny",
       "*credential fill*": "deny",
-      "*credential-* get*": "deny"
+      "*credential-* get*": "deny",
+      "*secret-tool lookup*": "deny",
+      "*secret-tool search*": "deny"
     }
   }
 }

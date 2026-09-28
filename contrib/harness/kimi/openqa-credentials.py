@@ -16,6 +16,9 @@ HOME = os.path.expanduser("~")
 # Larger input could outrun the hook's timeout, and Kimi runs the call when it does.
 MAX_INPUT = 1 << 20
 MAX_COMMAND = 1 << 16
+MAX_BRACE_TEXT = 1 << 20
+MAX_SEQUENCE = 4096
+SEQUENCE_RE = re.compile(r"(-?\d+|[A-Za-z])\.\.(-?\d+|[A-Za-z])(?:\.\.(-?\d+))?")
 PATH_MAX = 4096
 
 PATHS = [
@@ -131,11 +134,130 @@ def osc_prints_secret(segment):
     return False
 
 
+def _alternatives(body):
+    """A brace group's comma-separated parts, split outside quotes, quotes removed."""
+    parts, start, quote, i = [], 0, "", 0
+    while i < len(body):
+        c = body[i]
+        if c == "\\" and quote != "'":
+            i += 2
+            continue
+        if quote:
+            if c == quote:
+                quote = ""
+        elif c in "'\"":
+            quote = c
+        elif c == ",":
+            parts.append(body[start:i])
+            start = i + 1
+        i += 1
+    parts.append(body[start:])
+    return [
+        re.sub(r"\\(.)", r"\1", part).replace('"', "").replace("'", "")
+        for part in parts
+    ]
+
+
+def _sequence(body):
+    """The items of a {x..y[..step]} sequence of letters or integers, None for anything else."""
+    match = SEQUENCE_RE.fullmatch(body)
+    if not match:
+        return None
+    first, last, step = (
+        match.group(1),
+        match.group(2),
+        abs(int(match.group(3) or 1)) or 1,
+    )
+    if first.lstrip("-").isdigit() and last.lstrip("-").isdigit():
+        low, high = int(first), int(last)
+        items = (
+            range(low, high + 1, step) if low <= high else range(low, high - 1, -step)
+        )
+        # Digits alone never spell a credential path, so a long range is checked in part.
+        return [str(item) for item in items[:MAX_SEQUENCE]]
+    if first.isalpha() and last.isalpha():
+        low, high = ord(first), ord(last)
+        items = (
+            range(low, high + 1, step) if low <= high else range(low, high - 1, -step)
+        )
+        return [chr(item) for item in items]
+    return None
+
+
+def _brace_group(text):
+    """(start, end, parts) of the first innermost brace group that expands, or None.
+
+    Braces count inside quotes too: a stray quote in a comment or heredoc must not hide a
+    group, and a group found in error only adds text to check. A group never spans words."""
+    stack, quote, i = [], "", 0  # [start, has comma], or None for a ${...}
+    while i < len(text):
+        c = text[i]
+        if c == "\\" and quote != "'":
+            i += 2
+            continue
+        if c in "'\"":
+            if not quote:
+                quote = c
+            elif c == quote:
+                quote = ""
+        elif c == "{":
+            stack.append(None if text[i - 1 : i] == "$" else [i, False])
+        elif c == "}" and stack:
+            top = stack.pop()
+            parts = _alternatives(text[top[0] + 1 : i]) if top and top[1] else None
+            if parts and len(parts) > 1:
+                return top[0], i + 1, parts
+            if top and i - top[0] <= 64 and ".." in text[top[0] : i]:
+                parts = _sequence(text[top[0] + 1 : i])
+                if parts:
+                    return top[0], i + 1, parts
+        elif c == "," and stack and stack[-1]:
+            stack[-1][1] = True
+        elif not quote and (c.isspace() or c in ";&|<>()"):
+            stack.clear()
+        i += 1
+    return None
+
+
+def brace_variants(text):
+    """The text itself and its brace expansions, None when they outgrow MAX_BRACE_TEXT.
+
+    The unexpanded text is always among them, so expanding can only add refusals."""
+    done, todo, size = [text], [text], len(text)
+    while todo:
+        current = todo.pop()
+        group = _brace_group(current)
+        if not group:
+            if current is not text:
+                done.append(current)
+            continue
+        start, end, parts = group
+        # Budget before building: one group can hold thousands of parts.
+        size += len(parts) * (len(current) - (end - start)) + sum(map(len, parts))
+        if size > MAX_BRACE_TEXT:
+            return None
+        todo += [current[:start] + part + current[end:] for part in parts]
+    return done
+
+
 def refused(text):
     if len(text) > MAX_COMMAND:
         return f"is over {MAX_COMMAND} characters, too long to check"
     # The shell drops a backslash-newline, even inside a word.
     text = text.replace("\\\n", "")
+    texts = brace_variants(text)
+    if texts is None:
+        return (
+            f"expands its braces beyond {MAX_BRACE_TEXT} characters, too many to check"
+        )
+    for variant in texts:
+        why = _refused(variant)
+        if why:
+            return why
+    return None
+
+
+def _refused(text):
     if PATH_RE.search(text):
         return "names a credential file"
     # A rule can hold in a segment only when all its parts occur in the whole text.
@@ -233,8 +355,10 @@ def main():
         # Without its own cwd the command runs in the session's directory.
         workdir = args.get("cwd") or "."
         check_path(workdir, cwds)
-        for cwd in cwds:
-            check_words(command, os.path.join(cwd, os.path.expanduser(workdir)))
+        # refused() already rejected an expansion too large to check.
+        for variant in brace_variants(command):
+            for cwd in cwds:
+                check_words(variant, os.path.join(cwd, os.path.expanduser(workdir)))
     elif tool in ("Read", "ReadMediaFile", "Write", "Edit"):
         check_path(args.get("path", ""), cwds)
     elif tool == "Grep":

@@ -180,6 +180,28 @@ done
 for command in $'gh auth \\\ntoken' $'git credential \\\nfill' $'cat ~/.net\\\nrc'; do
 	hook "a line continuation does not split a match: ${command//$'\n'/ }" 2 "$(bash_call "$command")"
 done
+# The shell expands braces before it removes quotes, so a path can be spelt in pieces.
+for command in 'cat ~/.config/{osc/oscrc,"tea config"}' 'cat ~/.config/{osc/oscrc,tea\ config}' 'cat ~/.{net,x}rc' \
+	'cat ~/.config/{openqa,x}/client.conf' 'cat ~/.config/{gh/{hosts.yml,x},y}' 'gh auth {token,x}'; do
+	hook "a brace expansion does not hide a match: $command" 2 "$(bash_call "$command")"
+done
+hook "a brace expansion in the call's cwd" 2 "$(bash_call 'cat {osc,x}/oscrc' "$home/.config")"
+for command in "awk '{print \$1,\$2}' notes.txt" 'find . -name x -exec grep y {} \;' 'echo {a,b}' 'echo ${HOME}' 'cp notes.{txt,bak}'; do
+	hook "ordinary braces pass: $command" 0 "$(bash_call "$command")"
+done
+hook "a brace bomb is refused in time" 2 "$(bash_call "echo $(printf '{a,b}%.0s' {1..24})")"
+for command in 'cat ~/.{x,net}rc' 'cat ~/.config/{x,"tea"}/config.yml' 'cat ~/.{n..n}etrc' 'cat ~/.config/{g..g}h/hosts.yml' \
+	'cat ~/.config/{g,${x}}h/hosts.yml' 'cat ~/.{n,${x}}etrc' $'# it\'s a note\ncat ~/.{net,x}rc' \
+	$'# it\'s\ncat ~/.{net,x}rc # don\'t' "echo \$'a\\'b'; cat ~/.{net,x}rc" $'cat <<EOF\ndon\'t\nEOF\ncat ~/.{net,x}rc'; do
+	hook "a brace expansion does not hide a match: ${command//$'\n'/ }" 2 "$(bash_call "$command")"
+done
+# A brace group never spans words, and the unexpanded text is checked too.
+for command in 'echo {; curl -s https://u:p,w@example.com/; echo }' 'echo {; git credential-store --file=a,b get; echo }'; do
+	hook "a fake brace group across commands hides nothing: $command" 2 "$(bash_call "$command")"
+done
+hook "deeply nested braces are checked in time" 2 "$(bash_call "cat ~/.netrc; echo $(printf '{%.0s' {1..6000})$(printf '}%.0s' {1..6000})")"
+hook "a huge brace expansion is refused in time" 2 "$(python3 -c 'import json; print(json.dumps({"tool_name": "Bash", "tool_input": {"command": "\U0001F600" * 32000 + "{" + "," * 32000 + "}"}}))')"
+hook "a compact dict in a heredoc passes" 0 "$(bash_call "$(printf 'cat > conf.py <<"EOF"\n%s\nCFG = {"a":1,"b":2,"c":3,"d":4,"e":5,"f":6,"g":7,"h":8,"i":9,"j":10,"k":11,"l":12}\nEOF' "$(printf '# filler line\n%.0s' {1..2500})")")"
 hook "reading .env" 2 "$(bash_call 'cat .env')"
 hook "reading .env.example" 0 "$(bash_call 'cat .env.example')"
 hook "a quoted ; does not end the command" 2 "$(bash_call "openqa-cli api -a 'Accept: a;b' -a 'Authorization: Bearer x' jobs")"

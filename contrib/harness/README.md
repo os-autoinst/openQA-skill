@@ -27,14 +27,15 @@ later `@`, so a PR body with a link and a mention is refused as well: pass such 
 (`--body-file`).
 
 They all match text, not intent. A path spelled with a glob or a variable, split quoting, a line
-continuation (only the Kimi hook joins one), a relative path after `cd` or under a shell tool's
-own working-directory argument (only the Kimi hook resolves Kimi's `cwd`), a recursive read of an
-ancestor directory such as `grep -r token ~`, a script written first and run later, or a program
-that opens the file itself gets past every one of them. So does a global option in front of a
-printer's subcommand (`osc -A obs token`, `tea --debug login edit`) for the glob, Codex and agy
-rules, and a key the agent reads from its environment for all but Codex, which drops `*KEY*`,
-`*SECRET*` and `*TOKEN*` variables from commands. For a hard boundary, run the agent in the
-harness's sandbox (or a container) that does not mount these files.
+continuation or a brace expansion such as `~/.{net,x}rc` (only the Kimi hook joins and expands
+those), a relative path after `cd` or under a shell tool's own working-directory argument (only
+the Kimi hook resolves Kimi's `cwd`), a recursive read of an ancestor directory such as `grep -r
+token ~`, a script written first and run later, or a program that opens the file itself gets past
+every one of them. So does a global option in front of a printer's subcommand (`osc -A obs token`,
+`tea --debug login edit`) for the glob, Codex and agy rules, and a key the agent reads from its
+environment for all but Codex, which drops `*KEY*`, `*SECRET*` and `*TOKEN*` variables from
+commands. For a hard boundary, run the agent in the harness's sandbox (or a container) that does
+not mount these files.
 
 | Harness | Snippet | Goes into |
 |---|---|---|
@@ -137,13 +138,15 @@ Codex has no file-read tool: everything goes through its shell, so the two files
 Kimi Code 0.42.0 parses `[permission]` rules but does not enforce them, so this harness gets a
 hook: `openqa-credentials.py` runs before every file, shell, fetch and MCP tool call and blocks
 (exit 2) the ones that name a credential file or print a secret, checking each simple command
-(split at `;`, `&`, `|` and newlines outside quotes) on its own. An error inside the hook blocks
-too, and so does a call over 1 MB, a command or MCP argument over 64 KB or a path over 4096
-characters, which keeps the hook inside its timeout: Kimi lets the call run when the hook times
-out, cannot be spawned, or exits with any code other than 2 (127 without `python3`, 1 on a syntax
-error).
-`kimi doctor config` validates the entry (one invalid `[[hooks]]` entry disables all hooks).
-Checked on 0.42.0 with `kimi doctor` and the hook's own tests in `tests/repo/test-harness.sh`.
-Kimi runs the hook in its own working directory, not the session's, so the hook resolves paths
-against both, and each word of a Bash command against the call's `cwd`; a path assembled at run
-time or a relative path after `cd` still gets past it.
+(split at `;`, `&`, `|` and newlines outside quotes) on its own, and again after expanding its
+brace groups (comma lists and `{a..z}` sequences, including groups that a stray quote in a comment
+or heredoc would hide from a quote-aware scan; it errs toward checking more text). An error inside
+the hook blocks too, and so does a call over 1 MB, a command or MCP argument over 64 KB, brace
+expansions over 1 M characters in total or a path over 4096 characters, which keeps the hook
+inside its timeout: Kimi lets the call run when the hook times out, cannot be spawned, or exits
+with any code other than 2 (127 without `python3`, 1 on a syntax error). `kimi doctor config`
+validates the entry (one invalid `[[hooks]]` entry disables all hooks). Checked on 0.42.0 with
+`kimi doctor` and the hook's own tests in `tests/repo/test-harness.sh`. Kimi runs the hook in its
+own working directory, not the session's, so the hook resolves paths against both, and each word
+of a Bash command against the call's `cwd`; a path assembled at run time or a relative path after
+`cd` still gets past it.

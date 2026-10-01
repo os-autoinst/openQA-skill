@@ -40,7 +40,8 @@ not mount these files.
 | Harness | Snippet | Goes into |
 |---|---|---|
 | Claude Code | `claude/settings.json` | `permissions.deny` of `~/.claude/settings.json` |
-| opencode | `opencode/opencode.jsonc` | `permission` of `~/.config/opencode/opencode.jsonc` (or `.json`) |
+| opencode 1.x | `opencode/opencode.jsonc` | `permission` of `~/.config/opencode/opencode.jsonc` (or `.json`) |
+| opencode 2.x | `opencode-v2/opencode.jsonc` | the end of the `permissions` array of the same file, instead of the 1.x block |
 | grok | `grok/config.toml` | `[permission]` of `~/.grok/config.toml` |
 | Gemini CLI | `gemini/openqa-credentials.toml` | copy to `~/.gemini/policies/openqa-credentials.toml` |
 | antigravity-cli (`agy`) | `agy/settings.json` | `~/.gemini/antigravity-cli/settings.json`; replace `/home/USER` |
@@ -58,12 +59,15 @@ A rule that ends in `:*` is Claude Code's legacy prefix form and never matches a
 of these does. Paths use `~/` for the home directory and `//` for an absolute path;
 `$OPENQA_CONFIG` cannot be named, so a config kept there needs its own `Read(//...)` line.
 
-## opencode
+## opencode 1.x
 
 Checked on 1.18.32: `opencode debug config` loads all 69 rules, and `opencode debug agent build
 --tool read` refuses the credential paths in a throw-away home. The last matching rule wins, so
 keep these after any `"*"` rule. The `.env` lines are deliberate: the built-in ones only ask, and
 an "always" answer to a read prompt would otherwise approve every read for the session.
+- 1.18.32 offers an `execute` tool only when `OPENCODE_EXPERIMENTAL_CODE_MODE` is true, or unset
+  while `OPENCODE_EXPERIMENTAL` is true. Unlike the 2.x one below, it only scripts connected MCP
+  tools, each through that tool's own permission check, and has no `fetch`.
 - A project's own `opencode.json` can re-allow what the global file denies; only
   `OPENCODE_DISABLE_PROJECT_CONFIG=1` prevents that.
 - The grep tool ignores `read` rules; `external_directory` asks before it searches outside the
@@ -72,6 +76,64 @@ an "always" answer to a read prompt would otherwise approve every read for the s
   matched; the same assignment in front of a command is.
 - The read tool sees a path relative to the worktree, so inside an openQA checkout its
   `etc/openqa/` is refused as well; read those files with a shell command.
+
+## opencode 2.x
+
+Tested against 2.0.18 in a disposable home that held only dummy credential files. A local
+stand-in for an OpenAI-compatible model drove `opencode run --standalone --auto` through
+scripted tool calls, small fake programs recorded which commands really started, and each
+result below is opencode's own decision. `opencode debug agents` shows the 75 entries loaded
+behind opencode's defaults, in the file's order, with `~` replaced by the home directory. The 30
+commands of the suite's refuse list and the two bare forms named below are refused and its 13
+ordinary commands run; with the snippet removed, the refuse list went through (the clone with a
+password in its URL was left out of that run).
+- 2.x still reads a 1.x `permission` block, renaming `bash` to `shell`, and adds a `permissions`
+  array behind it: install one of the two snippets. The 1.x block keeps refusing commands and
+  reads on 2.x but has no `edit` or `execute` entries.
+- The final matching entry decides, and opencode's first default allows everything, so the
+  snippet holds no `"*"` allow. A `shell` pattern that ends in ` *` also covers the command with
+  no arguments, which is why `*.config/gh` and `osc -*H` are not repeated: `ls ~/.config/gh` and
+  `osc -qH` are still refused.
+- A read is matched on the path relative to the session's directory or worktree when the file
+  lies inside them and on the absolute path otherwise; the `*` prefix covers both. The read
+  probes name nine credential files, every location here except `/usr/etc/openqa`:
+  `external_directory` stops six, `read` the other three (`~/.oscrc`, `~/.netrc`,
+  `~/.git-credentials`). `.env` is refused, `.env.example` read, and a `cd` into a denied
+  directory is refused even where no shell pattern names it.
+- The grep tool's permission covers its regex, not its path, so only `external_directory`
+  bounds where it searches: aimed at `~/.config/openqa` it is refused, aimed at `~/.config` it is
+  only asked about, and under `--auto` it printed the tokens of the gh and tea files there. A
+  session started in `$HOME` greps them with no check at all.
+- A pattern that begins with a command name misses it behind `env`, `command`, a variable
+  assignment or the full path: `env osc token`, `A=1 osc token`, `/usr/local/bin/osc token` and
+  `command tea login edit` ran.
+- Code Mode's `execute` tool is on by default. The JavaScript it runs has a `fetch` that sends
+  any method, header and body without a permission check: with the snippet removed it delivered
+  a POST to a stub's `/pulls/1/merge`. The `execute` deny withdraws it with every Code Mode tool,
+  MCP tools included; an MCP server whose tools you need wants `"codemode": false`.
+- The `edit` entries apply to the write, edit and patch tools. They refuse writes to the
+  Claude Code settings and hooks and to opencode's config, global or a project's, and keep
+  `.opencode/plan/` writable, the Plan agent's `~/.opencode/plan/` included. They go by file
+  name: a session started in `~/.claude/` wrote `settings.json`, one started in
+  `~/.config/opencode/` wrote `plugins/x.ts`, a shell command can write any of these files, and
+  the other harnesses' files in the table above are not covered. By the same name match they
+  refuse such files in a source tree, this repository's `contrib/harness/opencode*/opencode.jsonc`
+  and os-autoinst-distri-opensuse's `data/opencode/opencode.json` among them.
+- Any `edit` entry also brings the write, edit and patch tools back to the read-only Explore and
+  Title agents, which are otherwise denied them outright; going by `opencode debug agents`, their
+  own deny still covers every path except `.opencode/plan/`.
+- A project's `opencode.json`, in `.opencode/` or in any directory from the session up, can allow
+  again what this array denies: a `shell` `"*"` allow there let a denied call run.
+  `OPENCODE_DISABLE_PROJECT_CONFIG=1` prevents it. The background service reads the variable only
+  when it starts, so set it with `opencode service set env OPENCODE_DISABLE_PROJECT_CONFIG 1` and
+  `opencode service restart`; a `--standalone` run inherits the calling shell's environment, so
+  export it there as well.
+- Rules under `agents.<name>.permissions` are applied after this array and override it: a
+  `shell` `"*"` allow under `agents.build` let a denied call run. Keep `"*"` allows out of them.
+- `experimental.policies` in the global file go further, and are still experimental: with a
+  project file allowing everything, the calls named by `{"action": "permission", "resource":
+  "shell:*gh auth token*", "effect": "deny"}` and a matching `read:*.netrc` entry were blocked
+  ("Blocked by configuration policy"), while a call only this array denies ran.
 
 ## grok
 

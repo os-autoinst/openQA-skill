@@ -75,6 +75,91 @@ for dir in "$harness"/*/; do
 	check "$name has no glob rule ending in :*" 0 "$(grep -c -E ':\*\)?"' <<<"$all")"
 done
 
+# --- opencode 2.x: the 1.x rules in the same order, then what only 2.x offers ---------------
+# An ordered array of {action, resource, effect}; the last match wins over a base policy that
+# already allows everything, and a pattern ending in " *" also matches the bare command.
+v2_checks=$(
+	python3 - "$harness" <<'PY'
+import json, re, sys
+
+def load(path):
+    text = open(f"{sys.argv[1]}/{path}", encoding="utf-8").read()
+    return json.loads("\n".join(l for l in text.splitlines() if not l.lstrip().startswith("//")))
+
+def glob(pattern):
+    return re.compile(".*".join(map(re.escape, pattern.split("*"))), re.S)
+
+def report(name, bad):
+    print(f"{name}\t{'ok' if not bad else bad}")
+
+v1 = load("opencode/opencode.jsonc")["permission"]
+v2 = load("opencode-v2/opencode.jsonc")["permissions"]
+report("every entry is an action, a resource and an effect with known values",
+       [r for r in v2 if set(r) != {"action", "resource", "effect"}
+        or r["action"] not in ("external_directory", "read", "shell", "edit", "execute")
+        or r["effect"] not in ("allow", "deny", "ask")])
+# A 1.x pattern whose "x *" twin has its effect adds nothing on 2.x.
+as_v2 = [{"action": {"bash": "shell"}.get(section, section), "resource": pattern, "effect": effect}
+         for section, rules in v1.items() for pattern, effect in rules.items()
+         if not (section == "bash" and rules.get(pattern + " *") == effect)]
+report("the 1.x rules, in the same order, minus those a ' *' twin covers",
+       "" if v2[:len(as_v2)] == as_v2 else f"{len(as_v2)} expected first")
+tail = v2[len(as_v2):]
+plan = {"action": "edit", "resource": "*.opencode/plan/*", "effect": "allow"}
+report("past them only edit and execute denies and the plan directory's allow",
+       [r for r in tail if r["action"] not in ("edit", "execute") or (r["effect"] != "deny" and r != plan)])
+# opencode drops a tool only when the last entry whose action fits it ("*" fits any) is a "*" deny.
+last_execute = [r for r in v2 if r["action"] in ("execute", "*")][-1:]
+report("the last entry for execute is a '*' deny, which removes the tool",
+       "" if last_execute == [{"action": "execute", "resource": "*", "effect": "deny"}] else last_execute or "missing")
+report("no '*' allow, which appended after other entries would undo them",
+       [r for r in v2 if r["resource"] == "*" and r["effect"] == "allow"])
+report("every read pattern starts with '*' but not '*/', and none is a bare '*'",
+       [r["resource"] for r in v2 if r["action"] == "read"
+        and (not r["resource"].startswith("*") or r["resource"].startswith("*/") or r["resource"] == "*")])
+report("external_directory patterns are absolute or ~",
+       [r["resource"] for r in v2 if r["action"] == "external_directory" and not r["resource"].startswith(("~/", "/"))])
+
+edits = [(glob(r["resource"]), r["resource"], r["effect"]) for r in tail if r["action"] == "edit"]
+
+def edit_denied(path, skip=None):
+    verdict = "allow"
+    for rule, pattern, effect in edits:
+        if pattern != skip and rule.fullmatch(path):
+            verdict = effect
+    return verdict == "deny"
+
+configs = [".claude/settings.json", "/home/user/.claude/settings.json", "/home/user/.claude/hooks/x.py",
+           "/home/user/.config/opencode/opencode.jsonc", "/home/user/.config/opencode/plugins/x.ts",
+           "opencode.json", "sub/opencode.jsonc", ".opencode/plugins/x.ts",
+           "contrib/harness/opencode-v2/opencode.jsonc"]
+ordinary = ["notes.txt", "skills/openqa/SKILL.md", "tests/console/opencode.pm", "opencode.spec", "README.md",
+            ".opencode/plan/x.md", "/home/user/.opencode/plan/x.md"]
+report("edit denied on the Claude Code and opencode configs", [p for p in configs if not edit_denied(p)])
+report("the edit denies leave other files and the plan directory alone", [p for p in ordinary if edit_denied(p)])
+report("every edit entry decides some path",
+       [s for _, s, _ in edits if not any(edit_denied(p) != edit_denied(p, s) for p in configs + ordinary)])
+
+shell = [(glob(r["resource"]), glob(r["resource"][:-2]) if r["resource"].endswith(" *") else None, r["effect"])
+         for r in v2 if r["action"] == "shell"]
+
+def refused(command):
+    verdict = "allow"
+    for full, bare, effect in shell:
+        if full.fullmatch(command) or (bare and bare.fullmatch(command)):
+            verdict = effect
+    return verdict == "deny"
+
+report("a ' *' twin also refuses the bare form its 1.x pattern named",
+       [c for c in ("ls ~/.config/gh", "osc -qH") if not refused(c)] + [c for c in ("ls ~/.config/ghostty",) if refused(c)])
+PY
+)
+# A crash above prints fewer results instead of failing ones.
+check "opencode-v2: all 11 structure checks ran" 11 "$(grep -c $'\t' <<<"$v2_checks")"
+while IFS=$'\t' read -r name result; do
+	check "opencode-v2: $name" ok "$result"
+done <<<"$v2_checks"
+
 # --- kimi doctor does not compile the hook matcher; a broken one disables the hook silently ---
 matcher=$(sed -n 's/^matcher = "\(.*\)"$/\1/p' "$harness/kimi/config.toml")
 # Kimi evaluates it as a JavaScript RegExp; a pattern that throws there never matches.
@@ -230,9 +315,23 @@ ordinary=(
 # glob_decide SNIPPET COMMAND...: "refused" or "passed" per command, as a whole-command glob match
 glob_decide() {
 	python3 - "$@" <<'PY'
-import re, sys
+import json, re, sys
 path, commands = sys.argv[1], sys.argv[2:]
 text = open(path, encoding="utf-8").read()
+if re.search(r'"permissions":\s*\[', text):
+    # opencode 2.x: the last matching shell entry wins; a pattern ending in " *" also matches the bare command.
+    entries = json.loads("\n".join(l for l in text.splitlines() if not l.lstrip().startswith("//")))["permissions"]
+    shell = [(e["resource"], e["effect"]) for e in entries if e["action"] == "shell"]
+    def matches(pattern, command):
+        rule = lambda p: re.compile(".*".join(map(re.escape, p.split("*"))), re.S).fullmatch(command)
+        return rule(pattern) or (pattern.endswith(" *") and rule(pattern[:-2]))
+    for command in commands:
+        verdict = "allow"
+        for pattern, effect in shell:
+            if matches(pattern, command):
+                verdict = effect
+        print("refused" if verdict == "deny" else "passed")
+    sys.exit()
 if path.endswith(".jsonc"):
     body = text[text.index('"bash": {') :]
     globs = re.findall(r'^\s*"(.+)": "deny"', body[: body.index("}")], re.M)
@@ -243,7 +342,7 @@ for command in commands:
     print("refused" if any(rule.fullmatch(command) for rule in rules) else "passed")
 PY
 }
-for snippet in claude/settings.json grok/config.toml opencode/opencode.jsonc; do
+for snippet in claude/settings.json grok/config.toml opencode/opencode.jsonc opencode-v2/opencode.jsonc; do
 	mapfile -t decided < <(glob_decide "$harness/$snippet" "${refuse[@]}" "${ordinary[@]}")
 	for i in "${!refuse[@]}"; do
 		check "$snippet refuses: ${refuse[i]}" refused "${decided[i]}"

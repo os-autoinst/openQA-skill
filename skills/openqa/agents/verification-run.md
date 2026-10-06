@@ -26,6 +26,7 @@ You are the **verify** stage. Goal: the fewest runs that prove the change on eve
 | multi-machine scenario | -> multimachine.md "Dependency settings", "Cluster job settings" |
 | no shared instance may be used | -> clone-and-run.md "Local isotovideo", "Personal instance" |
 | which scenarios run a module | `scripts/check-schedule.py --repo <checkout> --module <dir>/<name>`, -> scheduling.md "Job groups" |
+| the change is in a local checkout | `scripts/vr-reach.py --repo <checkout>`: reached modules, schedules, loader sites, unit tests, `oqa-sweep.py` lines; heed its `warning:` lines |
 | credentials or roles come up | -> clone-and-run.md "Writes and auth" (never read or print keys) |
 
 Steps:

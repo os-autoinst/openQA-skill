@@ -1,0 +1,6 @@
+---
+name: td
+schedule:
+  - console/changed
+test_data:
+  <<: !include test_data/td/mid.yaml

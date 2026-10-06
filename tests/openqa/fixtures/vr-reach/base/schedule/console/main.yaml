@@ -1,0 +1,10 @@
+---
+name: main
+schedule:
+  - console/direct
+  - console/indirect
+  - console/import_only
+  - console/method
+  - console/method_var
+  - console/const_user
+  - console/changed

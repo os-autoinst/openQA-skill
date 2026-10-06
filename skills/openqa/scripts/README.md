@@ -271,6 +271,43 @@ that carries a credential is refused (exit 2) with the rule's name, never the va
 whose key names one (`SCC_REGCODE`, `*PASSWORD*`), whatever its value or form (`KEY=` to delete is fine): a
 clone inherits the job's settings, and a secret does not belong in a printed command line.
 
+## vr-reach.py - what a branch reaches (offline)
+
+Which scenarios must a verification run cover? Grepping for one module misses the callers of a changed lib
+sub, data files and Perl loaders.
+
+    vr-reach.py [--repo CHECKOUT] [--base REF] [--max-items N]
+
+Plans the commits `BASE...HEAD` only (`--base`: `origin/master`), because a verification run fetches the
+pushed branch: `warning:` lines count uncommitted (changed or touched) and untracked files and say when no
+remote-tracking branch holds HEAD. Per changed file (a rename is its old path `(removed)` plus its new one):
+a test module; a schedule; a lib file's changed subs (comment- or POD-only: no run; import or export lines
+only: not traced; `use constant`/`base`/`parent` count as code), followed to the files that call them and
+name their package, or call them as a method (also `$var->name`) that only one lib file defines, `via <lib>:`
+for each lib in between, at most 3 lib levels (`depth:` names where it stopped); a change outside any sub or
+to a hook (`run`, `*_hook`, `test_flags`, `new`, `cleanup`) reaches every file naming the package, and a sub
+called from more than 60 files is not expanded (`wide:`); `loadtest` lines added or removed in a loader
+(`lib/main_*.pm`, `products/*/main.pm`); the files naming a `data/` path, else its directory, else the
+directory's name quoted (paths built at run time; never a top-level directory alone); the schedules that
+include a `test_data/` file, also through other test_data files; `t/*.t`. Docs and CI files are counted on
+one `no openQA run needed:` line. Then `module <entry> (<why>): <n> schedule line(s); loadtest at <file:line>`,
+modules a change reaches directly first, a `summary:`, and `next:` lines: `prove` for the unit tests that
+`use` a changed package, one `oqa-sweep.py --uses-schedule` per schedule (more than `--max-items`, default
+25: pick 1-3 by hand) and `oqa-sweep.py --passed --module` for modules a loader loads; names from the
+checkout are shell-quoted there. `--max-items` also caps the file, module, `via`, note and `next:` lines,
+each with a `[+N more]`. Callers are a heuristic: a call through a code reference or a sub name other
+packages define too can hide or add one, and a call guarded by a runtime condition counts like any other.
+git runs without fsmonitor, external diff, textconv, colour or any filter driver; files outside the checkout
+are never read; every name printed is sanitised. Exit 0 = digest, 2 = not a distri or git checkout, unknown
+`--base`, no merge base (shallow clone).
+
+    lib/publiccloud/utils.pm: publiccloud::utils: subs check_dns
+    module publiccloud/registration (changed, lib/publiccloud/utils.pm: check_dns): 3 schedule line(s); loadtest at lib/main_publiccloud.pm:35 ...
+    summary: modules=1 schedules=3 loaded_by_perl=1 unit_tests=1
+    next: prove -l -Ios-autoinst/ t/50_publiccloud_utils.t
+    next: scripts/oqa-sweep.py --uses-schedule schedule/sles4sap/sles4sap_gnome_saptune.yaml --group <id>|--match <regex>
+    next: scripts/oqa-sweep.py --group <id> --passed --module registration
+
 ## check-module.py - lint test modules (offline)
 
     check-module.py FILE... [--disable id,id] | --list-rules

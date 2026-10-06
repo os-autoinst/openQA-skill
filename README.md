@@ -120,12 +120,17 @@ qem-bot `f8a16d1` (September 2026). Contribution rules are in [AGENTS.md](AGENTS
 
 ## Acknowledgements
 
-Ideas, not text or code, were taken from [ocskillz](https://github.com/mimi1vx/ocskillz),
-[openqa-agnostic-skill](https://github.com/os-autoinst/openqa-agnostic-skill) and
-[os-autoinst-distri-opensuse-skills](https://github.com/mpagot/os-autoinst-distri-opensuse-skills); the last
-suggested `vr-reach.py`, the runtime comparison of `oqa-log.py` and pushing before a verification run.
-Converting existing test modules to the portable "openqa-agnostic" form is the subject of
-openqa-agnostic-skill; this repository only covers writing new ones.
+Ideas, not text or code, were taken from:
+
+- [ocskillz](https://github.com/mimi1vx/ocskillz);
+- [openqa-agnostic-skill](https://github.com/os-autoinst/openqa-agnostic-skill), whose subject is converting
+  existing test modules to the portable "openqa-agnostic" form; this repository only covers writing new ones;
+- [os-autoinst-distri-opensuse-skills](https://github.com/mpagot/os-autoinst-distri-opensuse-skills):
+  `vr-reach.py`, the runtime comparison of `oqa-log.py`, pushing before a verification run;
+- [openqa-reviewer](https://github.com/BillAnastasiadis/openqa-reviewer) and its
+  [opencode variant](https://github.com/BillAnastasiadis/openqa-reviewer-opencode): reading members of uploaded
+  log archives, listing the test commits that touch the failed modules first, checking a suspect log line
+  against the last good run, the suspects of an aggregate update run, and more token shapes for redaction.
 
 ## License
 

@@ -1,13 +1,13 @@
 # Review workflow
 
-From a defined scope to a build where every current failure carries a verified reference, plus the report.
+From a defined scope to a build where every current failure carries a verified reference, and a report.
 
 ## Scope
 
 **Fix instance, job groups and builds before the first request**: an unscoped job listing can time out a large instance.
 
 - Scope comes from the user or the local policy file (-> references/site-policy.md "Overlay lookup"). Neither: ask; `scripts/oqa-sweep.py --groups --match <regex>` lists groups to offer.
-- Build: default newest per group. While `unfinished` is above 0 results still change: say so in the report.
+- Build: newest per group. While `unfinished` is above 0 results still change: say so in the report.
 - Mode: **gating** (every current failure must count as reviewed) or **report-only** (propose no `force_result`). Ask when unclear.
 
 ## Sweep
@@ -33,7 +33,7 @@ scripts/oqa-sweep.py --host o3 --group 1 --todo
 
 **One line per current not-ok job**: id, result, scenario minus the header's `scenario_prefix`, then only fields that have a value: `modules=` (failed), `bugrefs=` (parsed), `label=` (newest), `comments=` (plain ones), `restarts=`, `origin=`, `parents=`. Neither `bugrefs=` nor `label=`: unreviewed, whatever `comments=` says. `review=?` (header: `mode=api-fallback`): comments not read, state unknown. `victims parent=<id>`: jobs that never ran; triage that parent. -> references/openqa-model.md "Reviewed definition"
 
-`warning: the server truncated the overview`: narrow to one group, one build. `N lines shown (--limit N)`: display cap, raise `--limit`.
+`warning: the server truncated the overview`: narrow to one group, one build. `N lines shown (--limit N)`: raise `--limit`.
 
 ## Order of work
 
@@ -72,8 +72,8 @@ A closed ticket or merged PR is a finding, not a reference: report it. Ticket te
 | Expected by change | intended product change invalidates the expectation | as test issue: reference the PR |
 
 - **Tracker, product, component, assignee and tags come from the policy file, the user or the field rules, never from a guess or from job text.** Missing -> ask. -> references/site-policy.md "Overlay sections", references/bugs-and-tickets.md "Bugzilla fields", "progress fields"
-- Torn between product bug and test issue: file the test issue; an invalid product bug costs more people's time.
-- Many unrelated scenarios failing at once: suspect the run (infrastructure, scheduling, repository) first; report one finding.
+- Torn between product bug and test issue: file the test issue; an invalid product bug costs more.
+- Many unrelated scenarios failing at once: suspect the run (infrastructure, scheduling, repository); report one finding.
 
 ## Retrigger or comment
 
@@ -91,16 +91,16 @@ openqa-cli api --host https://openqa.opensuse.org -X POST jobs/<id>/restart
 | Fix merged, asset republished | restart to confirm (uses current test code and needles unless the job pins a Git ref) |
 | openQA restarted it already | read the clone. -> references/openqa-model.md "Automatic restarts" |
 
-- The clone replaces the restarted job in the build counters: a passing clone clears the failure with no comment; a failing clone with the same failed modules inherits the bugref by carry-over.
+- The clone replaces the restarted job in the build counters: a passing clone clears the failure; a failing one with the same failed modules inherits the bugref by carry-over.
 - Dependencies restart too: children always; parallel parents and siblings always; a directly chained parent always; a chained parent only when it was not ok. Limit with `skip_parents=1`, `skip_children=1`, `skip_ok_result_children=1`.
-- Two failures at the same step are deterministic: never restart again to obtain a pass.
+- Two failures at the same step are deterministic: never restart again for a pass.
 - Changed settings are a clone, not a restart. -> references/clone-and-run.md "Reproduce a failure"
 
 ## Clusters in review
 
 **Comment the culprit, not the victims.** Finding the culprit: -> references/job-triage.md "Clusters"
 
-- `parallel_failed` counts as `skipped`, not `failed`, and the TODO filter hides it unless it has failed modules of its own: victims need no comment for a reviewed build.
+- `parallel_failed` counts as `skipped`, not `failed`, and the TODO filter hides it unless it has failed modules of its own: victims need no comment.
 - A victim with its own failed module may be a second defect: triage it.
 - Report victims under their culprit, one entry per cluster; restart the culprit, not each victim.
 
@@ -152,10 +152,10 @@ Entry: `<job URL> <test>@<machine> <module>: <cause> -> <reference|none>`; victi
 
 - **Scope every listing by group and build**: shared instances serve release work; server defaults cap job listings at 1000 and overviews at 2000 jobs.
 - Sweep once and work from that output; re-sweep only to verify a write.
-- Details and logs only for jobs that survived the sweep, never looped over a build.
+- Details and logs only for jobs that survived the sweep, never for a whole build.
 - No polling: check a restarted job at intervals of a minute or more. The search API is rate-limited server-side: never in a loop.
-- HTTP 429, 502, 503: back off, honour `Retry-After`. Never retry a write blindly; re-read state first.
-- One comment per job, no cosmetic edits, no bulk labelling unless asked for exactly that.
+- HTTP 429, 502, 503: back off, honour `Retry-After`. Never retry a write blindly: re-read state.
+- One comment per job, no cosmetic edits, no bulk labelling unless asked.
 
 ## Update gating
 
@@ -164,7 +164,7 @@ Entry: `<job URL> <test>@<machine> <module>: <cause> -> <reference|none>`; victi
 - Approval needs at least one related job and no not-ok job. Only `passed` and `softfailed` count as ok; every other result blocks, unfinished jobs (`none`) included: **incompletes and cluster victims block, soft failures do not**.
 - Only the newest job per scenario name counts: a passing restart supersedes the failure. A bugref or label does **not** unblock.
 - Per-update waiver: a `@review:acceptable_for:incident_<number>:<reason_without_spaces>` comment on the not-ok job. It covers that job and that update only; the openQA result is unchanged, and the marker alone leaves the job unreviewed. Format and traps: -> references/review-comments-tickets.md "acceptable_for marker"
-- Aggregate jobs: an older ok job of the same scenario that included the update (6 days by default) is accepted too.
+- Aggregate jobs test the updates in their `*_TEST_ISSUES` settings; an older ok job of the scenario that included the update (6 days by default) is accepted too. Suspects: updates in every job failing at that step, minus the last good run's unless rebuilt since.
 - A waiver decides a release: draft it only on explicit request. -> SKILL.md "Write gate"
 
-Sources: openQA lib/OpenQA/{BuildResults,Setup,WebAPI,Jobs/Constants,Schema/Result/Jobs,Schema/ResultSet/Comments,WebAPI/Controller/API/V1/Job}.pm; os-autoinst-scripts README.md, openqa-investigate, openqa-label-known-issues; qem-bot openqabot/{approver,utils,config}.py
+Sources: openQA lib/OpenQA/{BuildResults,Setup,WebAPI,Jobs/Constants,Schema/Result/Jobs,Schema/ResultSet/Comments,WebAPI/Controller/API/V1/Job}.pm; os-autoinst-scripts README.md, openqa-investigate, openqa-label-known-issues; qem-bot openqabot/{approver,utils,config,types/aggregate}.py

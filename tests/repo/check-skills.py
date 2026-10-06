@@ -43,6 +43,7 @@ BUDGETS = {
     "references/bugs-and-tickets.md": 16000,
     "references/openqa-model.md": 14100,
     "references/clone-and-run.md": 14000,
+    "references/job-triage.md": 15500,
     "references/distri-helpers.md": 17000,
     "references/module-templates.md": 16000,
 }

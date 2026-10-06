@@ -1,0 +1,10 @@
+[2030-03-31T01:59:00.000+01:00] [debug] [pid:1] ||| starting update tests/update/update.pm
+[2030-03-31T01:59:30.000+01:00] [debug] [pid:1] <<< testapi::script_run(cmd="zypper -n up", timeout=600)
+[2030-03-31T03:00:30.000+02:00] [debug] [pid:1] <<< testapi::wait_serial(timeout=90, regexp=qr/Welcome to openSUSE/u, quiet=undef)
+[2030-03-31T03:00:40.000+02:00] [debug] [pid:1] <<< testapi::assert_screen(timeout=30, mustmatch=[
+  "first-tag",
+], no_wait=1)
+[2030-03-31T03:00:45.000+02:00] [debug] [pid:1] <<< testapi::wait_serial(regexp="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa cmd=rm -rf /", timeout=1)
+[2030-00-01T00:00:00.000Z] a SUT line that only looks like a stamp
+[2030-03-31T03:00:46.000+02:00] [info] [pid:2] ::: consoles::serial_screen::read_until: Matched output from SUT in 1 loops & 0.1 seconds: login:[2030-13-01T00:00:00Z] ok
+[2030-03-31T03:00:50.000+02:00] [debug] [pid:1] ||| finished update console (runtime: 110 s)

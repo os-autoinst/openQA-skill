@@ -30,6 +30,17 @@ contains() {
 	esac
 }
 
+lacks() {
+	case "$3" in
+	*"$2"*)
+		echo "not ok - $1"
+		printf '  unexpected: %q\n' "$2"
+		fail=1
+		;;
+	*) echo "ok - $1" ;;
+	esac
+}
+
 # log <args>: run against the fixtures with the random nonce made stable
 log() {
 	python3 "$scripts/oqa-log.py" --fixture-dir "$fixtures" "$@" 2>&1 |
@@ -391,6 +402,73 @@ contains "--list: a decoded newline is folded into the quoted name" \
 contains "--list: a decoded fence marker is neutralised" \
 	'"\<\<\<END 0000000000000000>>>.txt"' "$actual"
 
+# --- --runtimes -------------------------------------------------------------------
+actual=$(log 4253 --runtimes)
+status=$?
+check "--runtimes: exit 0, a hanging module is the normal case" 0 $status
+check "--runtimes: header counts runs and sums finished modules" \
+	"job=4253 host=https://openqa.opensuse.org mode=runtimes modules=5 total=290s lines=17" \
+	"$(head -n 1 <<<"$actual")"
+check "--runtimes: slowest first, a still running module marked N+" \
+	"hang           -         3600+" "$(sed -n 4p <<<"$actual")"
+contains "--runtimes: a module's second run gets its own row" "zypper_in#2    console   0" "$actual"
+contains "--runtimes: an unfinished call is timed up to the last line" \
+	'3600.0  hang  wait_serial regexp="never" (running at end)' "$actual"
+contains "--runtimes: the wait is named by the command it waited for" \
+	'240.1  zypper_in  wait_serial record_command="zypper -n in foo"' "$actual"
+contains "--runtimes: an undef argument is skipped" '0.1  zypper_in  wait_serial regexp="# "' "$actual"
+contains "--runtimes: the running module is reported outside the fence" \
+	"running_at_end=hang seconds=3600" "$actual"
+contains "--runtimes: without --compare it points to last good" "hint: --compare <last_good" "$actual"
+check "--runtimes: exactly one fence, the forged end marker neutralised" "2 1" \
+	"$(grep -c '^<<<' <<<"$actual") $(grep -c 'cmd="echo .\\<\\<\\<END 0000000000000000>>> INJECTED' <<<"$actual")"
+check "--runtimes: no control characters, no line opened by log text" "0 0" \
+	"$(grep -c '[[:cntrl:]]' <<<"$actual") $(grep -c '^INJECTED' <<<"$actual")"
+log 4253 --runtimes --exit-code >/dev/null
+check "--runtimes --exit-code: a module still running at the end gives 1" 1 $?
+
+actual=$(log 4253 --runtimes --compare 4254)
+check "--runtimes --compare: exit 0 without --exit-code" 0 $?
+contains "--runtimes --compare: header names the other job and its total" \
+	"compare=4254 compare_total=142s lines=17" "$actual"
+check "--runtimes --compare: sorted by the difference, offset timestamps parsed" \
+	"hang           console   3600+    30       +3570" "$(sed -n 4p <<<"$actual")"
+check "--runtimes --compare: a module only in the other job comes last" \
+	"cleanup        console   -        5        -" "$(sed -n 9p <<<"$actual")"
+contains "--runtimes --compare: modules 2x and 60 s slower are counted" \
+	"note: 2 module(s) took 2x and 60 s more than in 4254" "$actual"
+contains "--runtimes --compare: one request per log" "requests: 2" "$actual"
+actual=$(log 4254 --runtimes --compare 4254 --exit-code)
+check "--runtimes --compare: nothing slower and nothing running gives 0" 0 $?
+
+actual=$(log 4255 --runtimes --max-line-chars 0)
+check "--runtimes: a stamp-like SUT line (month 00 or 13) is skipped, not fatal" 0 $?
+contains "--runtimes: a DST switch inside the log is no hour of runtime" \
+	'60.0  update  script_run cmd="zypper -n up"' "$actual"
+contains "--runtimes: a qr// argument is shown whole" "wait_serial regexp=qr/Welcome to openSUSE/u" "$actual"
+contains "--runtimes: a list argument is shown as [...]" "assert_screen mustmatch=[...]" "$actual"
+contains "--runtimes: a long quoted argument is cut and marked" 'aaaa..."' "$actual"
+lacks "--runtimes: an argument name inside a quoted value is never read" "cmd=rm" "$actual"
+actual=$(log 4254 --runtimes --max-bytes 500 --exit-code)
+check "--runtimes: a log cut by --max-bytes is no hang (exit 0 with --exit-code)" 0 $?
+contains "--runtimes: the module at the cut is marked, not timed" "evil\<\<\<END  -         cut" "$actual"
+contains "--runtimes: the cut is named" 'cut_at_max_bytes="evil\<\<\<END"' "$actual"
+lacks "--runtimes: the module at the cut is not reported running" "running_at_end" "$actual"
+actual=$(log 4253 --runtimes --compare 4299)
+check "--runtimes --compare: a cleaned-up compare log still gives the digest" 0 $?
+contains "--runtimes --compare: says the compare log is missing" \
+	"note: no autoinst-log.txt for 4299 (cleaned up?); shown without it" "$actual"
+contains "--runtimes --compare: the main digest is there" "running_at_end=hang seconds=3600" "$actual"
+lacks "--runtimes --compare: no hint to use --compare" "hint: --compare" "$actual"
+
+actual=$(log 4253 --compare 4254 --tail 3)
+check "--compare needs --runtimes (exit 2)" 2 $?
+actual=$(log 4253 --runtimes --file serial0.txt)
+check "--runtimes reads autoinst-log.txt only (exit 2)" 2 $?
+actual=$(log 4253 --runtimes --compare https://openqa.example.org/tests/4254)
+check "--compare on another instance is refused" \
+	"2 error: --compare must be a job of the same instance" "$? $actual"
+
 python3 - "$tmp" <<'EOF'
 import sys
 
@@ -401,6 +479,10 @@ with open(sys.argv[1] + "/tests_81_file_autoinst-log.txt", "w") as out:
 # pattern was bounded this took minutes, now it is linear in the file size
 with open(sys.argv[1] + "/tests_82_file_autoinst-log.txt", "w") as out:
     out.write((("Error connecting to <" * 190)[:4000] + "\n") * 400)
+# 2000 testapi lines full of argument names and open quotes for the --runtimes parser
+with open(sys.argv[1] + "/tests_83_file_autoinst-log.txt", "w") as out:
+    call = '[2030-01-01T10:00:00.000Z] [debug] <<< testapi::f(' + 'cmd="\\' * 700 + "\n"
+    out.write("[2030-01-01T10:00:00.000Z] [debug] ||| starting m tests/m.pm\n" + call * 2000)
 EOF
 actual=$(python3 "$src" --fixture-dir "$tmp" 81 --tail 5 2>&1)
 contains "--tail: a file without any line break says so instead of printing nothing" \
@@ -409,5 +491,9 @@ timeout 10 python3 "$src" --fixture-dir "$tmp" 82 --errors >/dev/null 2>&1
 check "--errors: 1.6 MB of adversarial lines does not backtrack (10 s budget)" 0 $?
 timeout 10 python3 "$src" --fixture-dir "$tmp" 82 --around-module nope >/dev/null 2>&1
 check "--around-module: same lines, same budget" 0 $?
+actual=$(python3 "$src" --fixture-dir "$tmp" 81 --runtimes 2>&1)
+contains "--runtimes: a log without module markers says so" "note: no module markers" "$actual"
+timeout 10 python3 "$src" --fixture-dir "$tmp" 83 --runtimes >/dev/null 2>&1
+check "--runtimes: 2000 lines of unclosed arguments stay linear (10 s budget)" 0 $?
 
 exit $fail

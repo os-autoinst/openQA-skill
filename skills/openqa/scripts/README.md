@@ -104,10 +104,12 @@ automated, carried-over.
 Logs are MBs; grepping `error|failed` drowns in `timeout=` noise.
 
     oqa-log.py JOB [--file NAME] --list | --errors | --around-module M | --grep REGEX | --tail N
+    oqa-log.py JOB --runtimes [--compare JOB]
 
 `--file` (`autoinst-log.txt`; uploaded logs: `ulogs/<name>`), `--max-lines` (60), `--max-line-chars` (200),
 `--context` (2), `--max-matches` (10), `-i`, `--max-bytes` (16 MiB downloaded per file); `-v` full line prefix, whole traces, console plumbing and screen
-polling lines. `--exit-code`: 1 when `--errors`/`--grep` matched or the module never started.
+polling lines. `--exit-code`: 1 when `--errors`/`--grep` matched, the module never started, or `--runtimes`
+found a module still running at the end or one that took 2x and 60 s more than in `--compare`.
 `[date] [level] [pid]` prints as `HH:MM:SS` (level kept unless debug/info). `--around-module` ends just after
 `# Test died` and folds assert_screen polling (no match / no change / check_asserted_screen took / stall)
 into one `~` line: counts, first..last time. `--errors` with only a `Test died` hit hints at
@@ -116,6 +118,31 @@ into one `~` line: counts, first..last time. `--errors` with only a `Test died` 
 `(a+)+b` can hang on a single line, the same way `grep -E` would, and the script cannot time it out.
 Prefer anchored patterns without nested quantifiers. Names from `--list` go to `--file`, which validates
 them; do not paste one into a shell.
+
+`--runtimes` reads `autoinst-log.txt` only: seconds per module run from `||| finished <module> <category>
+(runtime: <n> s)`, hooks included (os-autoinst names a repeated load `<module>#1`; a name logged twice gets
+`#<n>` here; `<n>+` = still running at the end, timed up to the last timestamped line, also reported as
+`running_at_end=`), and the 8 slowest testapi calls. A call lasts from its `<<< testapi::` line to the next
+one or the next module marker, so a plain `sleep` in between counts too, and is named by its most telling
+argument: `cmd`, then `record_command` (the command an internal `wait_serial` waits for), `string`, `text`,
+`mustmatch`, `regexp`, `key`, `title`, `testapi_console`; a value longer than 400 characters ends in `...`, a
+list shows as `[...]`. Timestamps are converted with their zone offset, so a DST switch costs no hour; a
+stamp-like line the SUT printed is skipped. `--compare JOB` (same instance; take `last_good=` from
+oqa-history.py) adds that job's seconds and the difference and sorts by it; a module in only one of the
+logs shows `-`, and a compare log that is gone gives a `note:` and the digest without it. A log cut by
+`--max-bytes` shows its last module as `cut` and `cut_at_max_bytes=`, never as running. `--max-lines` caps
+the table rows.
+
+    job=6239986 host=https://openqa.opensuse.org mode=runtimes modules=15 total=1575s compare=6251263 compare_total=402s lines=26526
+    <<<UNTRUSTED d5187fd996528373 source=openqa.opensuse.org/tests/6239986/file/autoinst-log.txt>>>
+    module             category      seconds  compare  delta
+    rust               console       307      86       +221
+    gdb                console       206      5        +201
+    slowest calls (seconds, module, call):
+        91.1  gdb  wait_serial regexp=qr/sysrq\s*:\s+show\s+blocked\s+state/i
+        28.4  rust  wait_serial record_command="/tmp/missing_libraries.sh | tee binaries-with-missing-libraries.txt"
+    <<<END d5187fd996528373>>>
+    note: 6 module(s) took 2x and 60 s more than in 6251263
 
     job=6228714 host=https://openqa.opensuse.org mode=errors hits=backend:57,needle:1 lines=8056
     <<<UNTRUSTED 913c73df649ed098 source=openqa.opensuse.org/tests/6228714/file/autoinst-log.txt>>>

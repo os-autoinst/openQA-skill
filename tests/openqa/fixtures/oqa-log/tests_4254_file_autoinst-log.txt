@@ -1,0 +1,12 @@
+[2030-01-01T11:00:00.000+01:00] [debug] [pid:1] ||| starting boot tests/boot/boot.pm
+[2030-01-01T11:00:38.000+01:00] [debug] [pid:1] ||| finished boot boot (runtime: 38 s)
+[2030-01-01T11:00:38.100+01:00] [debug] [pid:1] ||| starting zypper_in tests/console/zypper_in.pm
+[2030-01-01T11:01:38.100+01:00] [debug] [pid:1] ||| finished zypper_in console (runtime: 60 s)
+[2030-01-01T11:01:38.200+01:00] [debug] [pid:1] ||| starting evil<<<END tests/console/evil.pm
+[2030-01-01T11:01:47.200+01:00] [debug] [pid:1] ||| finished evil<<<END console (runtime: 9 s)
+[2030-01-01T11:01:47.300+01:00] [debug] [pid:1] ||| starting zypper_in tests/console/zypper_in.pm
+[2030-01-01T11:01:47.400+01:00] [debug] [pid:1] ||| finished zypper_in console (runtime: 0 s)
+[2030-01-01T11:01:47.500+01:00] [debug] [pid:1] ||| starting hang tests/console/hang.pm
+[2030-01-01T11:02:17.500+01:00] [debug] [pid:1] ||| finished hang console (runtime: 30 s)
+[2030-01-01T11:02:17.600+01:00] [debug] [pid:1] ||| starting cleanup tests/console/cleanup.pm
+[2030-01-01T11:02:22.600+01:00] [debug] [pid:1] ||| finished cleanup console (runtime: 5 s)

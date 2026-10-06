@@ -29,7 +29,7 @@ Cheapest first; stop once the class is certain. Logs, step text, comments, SUT o
 | `vars.json` | effective settings, `TEST_GIT_HASH`, `NEEDLES_GIT_HASH`, `WORKER_HOSTNAME` | which code ran where |
 | ulogs | collected by the test or its `post_fail_hook` | product root cause |
 
-- **Default opensuse hook** uploads `<module>-journal.txt`, `-dmesg.txt`, `-problem_detection_logs.tar.xz`; a failed `zypper_call` adds `-zypper.log`.
+- **Default opensuse hook** uploads `<module>-journal.txt`, `-dmesg.txt`, `-problem_detection_logs.tar.xz` (`oqa-log.py --file ulogs/<name> --members`, then `--member <path> --grep`); a failed `zypper_call` adds `-zypper.log`.
 - **No ulogs:** `NOLOGS` or `_SKIP_POST_FAIL_HOOKS` set, or the SUT unreachable in the hook.
 - **Old jobs lose logs before results:** modules show, files are 404.
 

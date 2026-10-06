@@ -17,7 +17,7 @@ Which tool does what in review work, and what each helper writes.
 | --- | --- | --- | --- |
 | Builds of a group; unreviewed failures | `oqa-sweep.py` | `openqa-review` (report), `openqa-revtui` (live view) | `get_job_group_build_results`, `list_jobs_overview` |
 | One job: result, failed modules, comments | `oqa-job.py` | `openqa-cli api --o3 jobs/<id>/details` (large) | `get_job`, `get_job_details`, `get_job_comments` |
-| Log tail / grep | `oqa-log.py` | `openqa-cli archive --o3 -l <max asset bytes> <id> <dir>` (whole job) | `list_job_logs`, `list_job_log_members`, `get_job_log` |
+| Log tail / grep, archive members | `oqa-log.py` (`--members`) | `openqa-cli archive --o3 -l <max asset bytes> <id> <dir>` (whole job) | `list_job_logs`, `list_job_log_members`, `get_job_log` |
 | Error digest | `oqa-log.py --errors` | - | `get_job_log_errors` |
 | Scenario history, investigation data | `oqa-history.py [--investigation]` | - | - |
 | Does a known ticket match? | - | `openqa-label-known-issues --dry` | - |

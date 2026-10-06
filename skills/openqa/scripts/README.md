@@ -105,6 +105,7 @@ Logs are MBs; grepping `error|failed` drowns in `timeout=` noise.
 
     oqa-log.py JOB [--file NAME] --list | --errors | --around-module M | --grep REGEX | --tail N
     oqa-log.py JOB --runtimes [--compare JOB]
+    oqa-log.py JOB --file ulogs/<name>.tar.xz (--members | --member PATH --grep REGEX|--tail N|--errors)
 
 `--file` (`autoinst-log.txt`; uploaded logs: `ulogs/<name>`), `--max-lines` (60), `--max-line-chars` (200),
 `--context` (2), `--max-matches` (10), `-i`, `--max-bytes` (16 MiB downloaded per file); `-v` full line prefix, whole traces, console plumbing and screen
@@ -118,6 +119,20 @@ into one `~` line: counts, first..last time. `--errors` with only a `Test died` 
 `(a+)+b` can hang on a single line, the same way `grep -E` would, and the script cannot time it out.
 Prefer anchored patterns without nested quantifiers. Names from `--list` go to `--file`, which validates
 them; do not paste one into a shell.
+
+`--members` lists an uploaded tar archive (`.tar`, `.tar.gz`/`.tgz`, `.tar.bz2`/`.tbz2`, `.tar.xz`/`.txz`, also when
+split over several compressed streams; zstd and zip are refused) as `<size> <type> <name>`, names as stored and
+quoted when unusual, first members first; `--member PATH` (a name from that list, a leading `./` does not
+matter) feeds one regular-file member to `--grep`, `--tail`, `--errors` or `--around-module`, and the header line
+gains `file=` and `member=`. Of two members with one name the last is read, as tar does, with a `note:`. The
+archive is downloaded whole (at most `--max-bytes`, else refused rather than read cut) and decompressed as a
+stream in memory, never to disk. The script reads the tar headers itself (ustar, GNU long names, pax path and
+size), because the archive comes from the system under test: it refuses a member declaring more than
+8 x `--max-bytes`, an extended header over 64 KiB, more than 20000 members, a bad header checksum, compressed
+data that ends early, and stops once the archive expands beyond 8 x `--max-bytes`; a member's text is capped
+at `--max-bytes`; links, directories, devices and sparse files are listed but never read. Typical archives:
+`<module>-problem_detection_logs.tar.xz` (journal errors, zypper and audit logs), `-y2logs.tar.bz2`,
+`-solverTestCase.tar.bz2`, `-sysconfig.tar.gz`.
 
 `--runtimes` reads `autoinst-log.txt` only: seconds per module run from `||| finished <module> <category>
 (runtime: <n> s)`, hooks included (os-autoinst names a repeated load `<module>#1`; a name logged twice gets

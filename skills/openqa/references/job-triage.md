@@ -128,7 +128,7 @@ Strip ANSI colours (`\x1b\[[0-9;]*m`). Timestamps are UTC (`Z`) or worker-local 
 | `SUT packages diff`, `worker packages diff` | absent: openQA had no diff |
 | `test changes`, `needle changes` | commits since last good, or `No test changes recorded, ...` |
 
-**Reasoning:** only `BUILD` changed and no suite is cloned at run time ("Pitfalls"): PRODUCT regression; name both builds. Test log touches the failing module or its libraries: TEST. Only worker side changed: INFRA.
+**Reasoning:** only `BUILD` changed and no suite is cloned at run time ("Pitfalls"): PRODUCT regression; name both builds. A test commit marked `[failed module <m>]` or `[lib]` (listed first): TEST, if it changes the failing path. Only worker side changed: INFRA.
 
 ## Investigate jobs
 

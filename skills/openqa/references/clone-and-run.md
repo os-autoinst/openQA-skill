@@ -32,7 +32,7 @@ Drop `--export-command` to submit (-> SKILL.md "Write gate"); it prints the POST
 - **Arg 2:** job URL or comma-separated list; host from it.
 - **It runs** `openqa-clone-job --skip-chained-deps --parental-inheritance --within-instance <host> <id> _GROUP=0 TEST+=@<user>/<repo>#<branch> BUILD=<user>/<repo>#<PR> CASEDIR=<fork>.git#<branch>` plus a matching `PRODUCTDIR`; branch mode: `BUILD=...#<branch>`.
 - **It never sets `NEEDLES_DIR`** - production needles are used. For needle changes append `NEEDLES_DIR=<needles fork>.git#<branch>`.
-- **PR mode trap:** if the first line of the PR body contains `@openqa: Clone http...`, the rest of that line silently replaces the job URL you passed - trailing settings included, which breaks the job id.
+- **PR mode trap:** if the first line of the PR body contains `@openqa: Clone http...`, the rest of that line silently replaces the job URL you passed, with trailing settings, breaking the job id.
 
 ## Manual clone
 
@@ -51,10 +51,10 @@ openqa-clone-job --skip-chained-deps --within-instance \
 | --- | --- |
 | `--within-instance URL` | = `--skip-download --from H --host H`. Without it `--host` is `localhost` and assets are downloaded. |
 | `_GROUP=0` | Else the clone inherits the source's `_GROUP_ID` and lands in the production build results. |
-| `BUILD=`, `TEST+=@...` | The helper script's labelling; a changed `TEST` is another scenario - no carry-over either way, so what production shows as `softfailed` via a carried `label:force_result:` is `failed` here. |
-| `CASEDIR=<fork>.git#<ref>` | `<ref>` = branch, tag or SHA; the worker checks it out and derives `PRODUCTDIR`. A branch is re-resolved on restart; a SHA pins. |
+| `BUILD=`, `TEST+=@...` | The helper script's labelling; a changed `TEST` is another scenario: no carry-over, so a softfail carried by `label:force_result:` is `failed` here. |
+| `CASEDIR=<fork>.git#<ref>` | `<ref>` = branch, tag or SHA, fetched when the job starts: push first; a branch takes what is pushed by then, also on restart; a SHA pins. `PRODUCTDIR` follows. Ran: `TEST_GIT_HASH` in `vars.json`. |
 | `NEEDLES_DIR=<fork>.git#<ref>` | A custom `CASEDIR` never changes needles, even if that repo holds some; omit when no needle changed. Needles inside the checkout: `%%CASEDIR%%` in "Settings override grammar". |
-| `--export-command` | Prints the equivalent `openqa-cli api --host ... -X POST jobs ...` instead of posting - show it when asking for approval. Its values are the source job's settings: data -> references/untrusted-content.md "Rules" |
+| `--export-command` | Prints the `openqa-cli api --host ... -X POST jobs ...` equivalent instead of posting; show it for approval. Its values are the source job's settings: data -> references/untrusted-content.md "Rules" |
 
 - **Cloned settings are literal:** the server skips template expansion for clones, so `BUILD=` does not rename `HDD_1`/`ISO`. `CLONED_FROM` is added.
 - **Wait:** `openqa-cli monitor --host <host> <id>` exits non-zero unless passed/softfailed.

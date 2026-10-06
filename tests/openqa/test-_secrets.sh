@@ -86,6 +86,36 @@ redacts "gitlab token" 'glpat-AAAAAAAAAAAAAAAAAAAA\n' gitlab-token
 redacts "aws access key id" 'aws_access_key_id = AKIAIOSFODNN7EXAMPLE\n' aws-key-id
 redacts "slack token" 'xoxb-1234567890-abcdefghij\n' slack-token
 redacts "jwt" 'Cookie: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dBjftJeZ4CVP\n' jwt
+redacts "google oauth access token" '+ gcloud storage ls --access-token-file=- <<< ya29.a0AfH6SMBc0123456789abcd\n' google-oauth-token
+redacts "google api key" 'export MAPS_KEY_FILE_CONTENT=AIzaSyA1234567890abcdefghijklmnopqrstuv\n' google-api-key
+# Fake token-shaped values are joined at run time: no committed line holds one whole, which push
+# protection and other secret scanners refuse even when the value is a test fake.
+slack_hook="https://hooks.slack.com/services/""T0000AAAA/B0000BBBB/abcdefghijklmnopqrstuvwx"
+slack_bot="xox""b-1234567890123-1234567890123-AbCdEfGhIjKlMnOpQrStUvWx"
+redacts "slack webhook" "curl -X POST $slack_hook\n" slack-webhook
+actual=$(printf -- 'post to %s\n' "$slack_hook" |
+	python3 "$scripts/_secrets.py" 2>/dev/null)
+check "a slack webhook keeps its host, loses its path" "post to https://hooks.slack.com/services/[REDACTED:slack-webhook]" "$actual"
+for case in 'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dBjftJeZ4CVP|jwt' \
+	'Authorization: Bearer ya29.a0AfH6SMBc0123456789abcd|google-oauth-token' \
+	'GET /maps?key=AIzaSyA1234567890abcdefghijklmnopqrstuv&z=1|google-api-key'; do
+	actual=$(printf -- '%s\n' "${case%|*}" | python3 "$scripts/_secrets.py" 2>&1)
+	check "a header or query value keeps the specific rule's name: ${case#*|}" \
+		"redacted 1: ${case#*|}=1" "$(head -n 1 <<<"$actual")"
+done
+for case in "Authorization: Bearer $slack_bot|AbCdEfGhIjKlMnOpQrStUvWx" \
+	"GET /x?auth=$slack_bot|AbCdEfGhIjKlMnOpQrStUvWx" \
+	'Authorization: Bearer [REDACTED:jwt]hunter2hunter2hunter2|hunter2hunter2'; do
+	actual=$(printf -- '%s\n' "${case%|*}" | python3 "$scripts/_secrets.py" 2>/dev/null)
+	check "no secret tail survives a partial or forged marker: ${case%%|*}" 0 "$(grep -c "${case#*|}" <<<"$actual")"
+done
+redacts "a long slack bot token, whole" "$slack_bot\n" slack-token
+actual=$(printf -- 'gcloud printed ya29.c.b0AXv0zTOabcdefghijklmnopqrstuvwxyz0123456789\n' | python3 "$scripts/_secrets.py" 2>/dev/null)
+check "a service-account ya29.c. token is redacted whole" "gcloud printed [REDACTED:google-oauth-token]" "$actual"
+keeps "a ya29 host name" 'resolved ya29.example.com\n'
+keeps "a name that starts like a google api key" 'Aizawa-san uploaded the logs\n'
+keeps "a short ya29 word" 'ya29.1 is a version string\n'
+keeps "the slack webhook docs path without a secret" 'see https://hooks.slack.com/services/ for the API\n'
 redacts "url userinfo" 'zypper ar https://alice:hunter2@example.org/repo x\n' url-userinfo
 redacts "authorization header" '> Authorization: Bearer abcdefghijklmnop\n' auth-header
 redacts "curl -u" '+ curl -u alice:s3cretvalue https://example.org/api\n' curl-user
@@ -319,6 +349,9 @@ for rule, literal, line in (
     ('keyed-assignment', 'pwd', 'DB_PWD=Sup3rS3cretX'),
     ('keyed-assignment', 'pw', 'DB_PW=Sup3rS3cretX'),
     ('keyed-assignment', 'pass', 'DB_PASS=Sup3rS3cretX'),
+    ('google-oauth-token', 'ya29', 'ya29.A0AfH6SMBc0123456789abcdQRST'),
+    ('google-api-key', 'aiza', 'AIzaSyA1234567890abcdefghijklmnopqrstuv'),
+    ('slack-webhook', 'hooks.slack', 'hooks.slack.com/services/' + 'T0000AAAA/B0000BBBB/abcdefghijklmnopqrstuvwx'),
 ):
     hits = [trigger for trigger in _secrets.TRIGGERS if trigger in line.lower()]
     _, found = _secrets.redact(line)
@@ -339,6 +372,9 @@ for name, pattern, text in (
     ('url-userinfo', rules['url-userinfo'], 'x://h:' * 100000),
     ('password-flag', rules['password-flag'], 'pass' + ':a' * 131072),
     ('url-query', rules['url-query'], '?key=' + 'A*' * 50000),
+    ('google-oauth-token', rules['google-oauth-token'], 'ya29.' * 60000),
+    ('google-api-key', rules['google-api-key'], 'AIza' * 80000),
+    ('slack-webhook', rules['slack-webhook'], 'hooks.slack.com/services/' * 20000),
 ):
     start = time.monotonic()
     pattern.subn('', text)

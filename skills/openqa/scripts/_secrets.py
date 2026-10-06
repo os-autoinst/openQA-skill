@@ -38,6 +38,9 @@ TRIGGERS = (
     "ghr_",
     "github_pat_",
     "glpat-",
+    "ya29",
+    "aiza",
+    "hooks.slack",
     "xox",
     "ey",
     "pass",
@@ -170,7 +173,20 @@ RULES = (
         ),
         None,
     ),
-    ("slack-token", re.compile(r"\bxox[baprs]-[0-9A-Za-z-]{10,48}\b"), None),
+    # No upper bound: a bot or user token runs to 70 characters, and a cut leaves its tail.
+    ("slack-token", re.compile(r"\bxox[baprs]-[0-9A-Za-z-]{10,}"), None),
+    # Google OAuth access token (gcloud, public-cloud tests) and Google API key.
+    # Service-account tokens carry one more short segment: ya29.c.<token>.
+    ("google-oauth-token", re.compile(r"\bya29\.(?:[a-z]\.)?[0-9A-Za-z_-]{10,}"), None),
+    ("google-api-key", re.compile(r"\bAIza[0-9A-Za-z_-]{35}(?![0-9A-Za-z_-])"), None),
+    # The path of a Slack webhook is its secret; the host stays as evidence.
+    (
+        "slack-webhook",
+        re.compile(
+            r"(hooks\.slack\.com/(?:services|workflows|triggers)/)[A-Za-z0-9+/]{20,200}"
+        ),
+        r"\1" + MARK.format("slack-webhook"),
+    ),
     (
         "jwt",
         re.compile(
@@ -205,7 +221,9 @@ RULES = (
         "auth-header",
         re.compile(
             r"(?i)((?:Authorization|Proxy-Authorization)['\"]?\s*:\s*['\"]?"
-            r"(?:[A-Za-z][\w-]*\s+(?=[^\s'\"]{8,})|(?=[^\s'\"]*[^A-Za-z\s'\"])))[^\s'\"]{8,}"
+            r"(?:[A-Za-z][\w-]*\s+(?=[^\s'\"]{8,})|(?=[^\s'\"]*[^A-Za-z\s'\"])))"
+            # a token a specific rule already replaced keeps that rule's name
+            r"(?!\[REDACTED:[a-z-]+\](?:[\s'\"]|$))[^\s'\"]{8,}"
         ),
         r"\1" + MARK.format("auth-header"),
     ),
@@ -250,7 +268,9 @@ RULES = (
         "url-query",
         re.compile(
             r"(?i)([?&](?:key|api[-_]?key|sig|signature|x-amz-signature|x-amz-credential"
-            r"|x-amz-security-token|auth)=)" + _SLOT + r"(?!=)"
+            r"|x-amz-security-token|auth)=)"
+            + _SLOT
+            + r"(?!=)(?!\[REDACTED:[a-z-]+\](?:[&\s#'\"]|$))"
             r"(?!(?-i:(?:[A-Z0-9]*[_*][A-Z0-9_*]*|[A-Z]+)(?:[&#\s'\"]|$)))[^&\s#'\"]{6,}"
         ),
         r"\1" + MARK.format("url-query"),

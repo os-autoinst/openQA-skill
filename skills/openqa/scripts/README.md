@@ -158,6 +158,11 @@ the table rows.
 `--previous` runs to look at (10, openQA's carry-over depth); `--investigation` adds the settings diff (per-run
 noise left out), package diffs, test and needle commits, `--max-items` (10) lines each: `settings diff
 (last_good -> this job)`, plus a hint to run on first_bad for the tight window when that is another job.
+Test commits that touch a file under `tests/` named like one of this job's failed modules (`<module>.pm|py`, any
+directory: failed module names carry no category) start with `[failed module <module>]`, those touching or
+renaming into `lib/` with `[lib]`; they come first, counted from the files as `failed_module=` and `lib=` in the
+`test changes:` line (openQA's test log is `git log --stat`). git shortens a long path to `.../<tail>`: such a
+file still counts for a module, never for `lib/`. A module loaded under another `name` is not matched.
 All-empty columns are dropped.
 
     job=6228892 host=https://openqa.opensuse.org scenario=opensuse-Tumbleweed-DVD-aarch64-salt-minion@aarch64

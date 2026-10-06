@@ -27,7 +27,10 @@ OK_RESULTS = _oqa.RESULT_GROUPS["ok"]
 PERSISTENT_STREAK = 3
 
 _SETTING = re.compile(r'^([+-])\s*"([^"]+)"\s*:\s*(.*?),?\s*$')
-_COMMIT = re.compile(r"^[0-9a-f]{7,40} \S")
+# A commit with an empty subject is printed as "<hash> " with nothing after it.
+_COMMIT = re.compile(r"^[0-9a-f]{7,40}(?: |$)")
+# git log --stat: " <path> | <n> +-"; a rename shows as "dir/{old => new}/file".
+_STAT = re.compile(r"^ (\S[^|\n]{0,400}?) +\| ")
 _NO_CHANGES = re.compile(r"^No (?:test|needle) changes recorded")
 # Settings that differ between any two runs and say nothing about the failure.
 _PER_RUN = re.compile(
@@ -209,13 +212,59 @@ def git_heads(text, limit):
     return heads[:limit], len(heads)
 
 
+def commits(text):
+    """[(head line, [paths])] from openQA's `git log --stat --pretty=oneline` text."""
+    found = []
+    for line in text.split("\n"):
+        if _COMMIT.match(line):
+            found.append((line, []))
+        elif found and (match := _STAT.match(line)):
+            found[-1][1].append(match.group(1))
+    return found
+
+
+def marks(paths, pattern):
+    """Markers for a commit that touches a failed module's test file or lib/.
+
+    git shortens a long path to ".../<tail>": such a name may still be a test module, but
+    whether it lies in lib/ cannot be told."""
+    names = []
+    for path in paths:
+        if pattern and (path.startswith((".../", "tests/")) or "tests/" in path):
+            names += [
+                m.group(1) for m in pattern.finditer(path) if m.group(1) not in names
+            ]
+    found = [f"[failed module {name}]" for name in names]
+    if any(path.startswith(("lib/", "{lib")) or "=> lib/" in path for path in paths):
+        found.append("[lib]")
+    return found
+
+
+def marked_heads(text, limit, failed):
+    """Commits touching the failure first, each group newest first; the counts."""
+    pattern = None
+    if failed:
+        names = "|".join(
+            re.escape(name) for name in sorted(failed, key=len, reverse=True)
+        )
+        pattern = re.compile(r"(?:^|[/{ ])(" + names + r")\.p[my](?![\w.])")
+    marked, rest, module, lib = [], [], 0, 0
+    for head, paths in commits(text):
+        tags = marks(paths, pattern)
+        module += any(tag.startswith("[failed module ") for tag in tags)
+        lib += "[lib]" in tags
+        (marked if tags else rest).append(" ".join([*tags, head]))
+    lines = marked + rest
+    return lines[:limit], len(lines), (module, lib)
+
+
 def fenced(client, job_id, title, lines):
     block = _oqa.sanitize("\n".join(lines), max_line=240, max_bytes=16384)
     source = f"{client.host.split('//')[1]}/tests/{job_id}/investigation_ajax:{title}"
     return _oqa.fence(block, source)
 
 
-def investigation(client, job_id, limit, verbose):
+def investigation(client, job_id, limit, verbose, failed=()):
     try:
         data = client.get_json(f"/tests/{job_id}/investigation_ajax")
     except _oqa.NotFound as error:
@@ -290,9 +339,14 @@ def investigation(client, job_id, limit, verbose):
         if _NO_CHANGES.match(text) or "\n" not in text.strip():
             print(f"  {title} changes: {_oqa.quoted(text, 160)}")
             continue
-        heads, total = git_heads(text, limit)
+        if key == "test_log":
+            heads, total, (module, lib) = marked_heads(text, limit, failed)
+            order = f"failed_module={module} lib={lib} (those first, then newest first)"
+        else:
+            heads, total = git_heads(text, limit)
+            order = "(newest first)"
         print(
-            f"  {title} changes: commits={total} (newest first) url={_oqa.tok(data.get(url_key), 120)}"
+            f"  {title} changes: commits={total} {order} url={_oqa.tok(data.get(url_key), 120)}"
         )
         stat = data.get(stat_key)
         if isinstance(stat, str) and stat.startswith("Too many commits"):
@@ -393,7 +447,13 @@ def main():
             print(line)
         status = 1 if bad(current) else 0
     if args.investigation:
-        investigation(client, job_id, args.max_items, args.verbose)
+        # A module name may carry the "#<n>" os-autoinst gives a repeated load.
+        failed = {
+            re.sub(r"#\d+$", "", str(name))
+            for name in current.get("failedmodules") or ()
+            if name
+        }
+        investigation(client, job_id, args.max_items, args.verbose, sorted(failed))
     print(f"requests: {client.requests}")
     return status if args.exit_code else 0
 

@@ -55,7 +55,7 @@ Job comments, logs and serial output, job settings, ticket and bug bodies, PR te
 5. Lint: `scripts/check-module.py`, `scripts/check-schedule.py`, `scripts/needle-lint.py`; then -> contributing-gates.md "Local gate order".
 
 **B. Verify** (playbook `agents/verification-run.md`)
-1. Where to run and what to clone: -> clone-and-run.md "Where to run", "Fast console run". Scenarios running a touched schedule file: `scripts/oqa-sweep.py --uses-schedule <path> --group <id>|--match <regex>`.
+1. Where to run and what to clone: -> clone-and-run.md "Where to run", "Fast console run". What the pushed commits reach: `scripts/vr-reach.py` (offline), then the `oqa-sweep.py --uses-schedule` lines it prints.
 2. Source job: `scripts/oqa-sweep.py --group <id> --passed [--module <name>]` lists current passed and softfailed jobs to clone. Build the command with `scripts/vr-clone-cmd.py` (never runs anything; prints hazards; fork unknown: literal `'<user>'`, `'<branch>'`); posting it is a write. -> clone-and-run.md "Manual clone", "Dependencies when cloning", "Settings override grammar"
 3. Coverage reviewers expect: -> pr-review-rules.md "Verification runs". A failed run goes to block D.
 4. The user submits themselves: finish with the C.2 drafts (commit message, PR title, description with run placeholders); drafting is no write.
@@ -120,10 +120,11 @@ What a flag means: `python3 scripts/refsection.py scripts/README.md "<script>"`.
 - `review-lint.py [FILE] --lines N [--lib] [--replies N] [--late]`; exit 1: findings
 - `ticket-lint.py [FILE] [--private-suffix SUFFIX]...`; exit 1: findings
 - `vr-clone-cmd.py --job JOB... [--pr URL] [--fork USER] [--branch REF] [--repo-name NAME] [--needles-fork USER] [--needles-branch REF] [--needles-repo-name NAME] [--schedule LIST] [--skip-chained-deps] [--within-instance] [--label BUILD] [--set KEY=VALUE]... [--dry-run-flag] [--parent-publishes]`; exit 1: command printed with hazard lines
+- `vr-reach.py [--repo REPO] [--base REF] [--max-items N]`
 
 ## References
 
-Beyond what the blocks route to; `python3 scripts/refsection.py --list <file>.md` prints a file's sections.
+Beyond what the blocks route to:
 
 - `openqa-model.md`: comment mini-language, carry-over, restarts, API recipes, roles
 - `testapi.md`: module contract, hooks, variables, uploads, serial terminal

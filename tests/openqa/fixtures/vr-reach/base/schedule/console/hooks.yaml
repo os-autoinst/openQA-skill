@@ -1,0 +1,5 @@
+---
+name: hooks
+schedule:
+  - console/hooked
+  - console/chained

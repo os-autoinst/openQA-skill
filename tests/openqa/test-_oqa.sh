@@ -46,12 +46,15 @@ print(sorted(name for name, item in inspect.getmembers(_oqa, inspect.isfunction)
 print(sorted(name for name in dir(_oqa.Client) if name.startswith(("post", "put", "delete", "patch", "send", "write"))))
 ')
 check "the client takes no method, body or header parameter and has no write verb" "$(printf '[]\n[]\n[]')" "$actual"
-check "only _oqa.py talks to the network; nothing but check-schedule.py spawns a process or reads the environment" "" \
+check "only _oqa.py talks to the network; nothing but check-schedule.py and vr-reach.py spawns a process or reads the environment" "" \
 	"$(grep -ElI 'urllib\.request|http\.client|import socket|urlopen|subprocess|os\.system|os\.popen|os\.environ|getenv|expanduser|netrc|pickle|\beval\(|\bexec\(' \
-		"$scripts"/*.py | grep -v '/_oqa\.py$' | grep -v '/check-schedule\.py$')"
+		"$scripts"/*.py | grep -v '/_oqa\.py$' | grep -v '/check-schedule\.py$' | grep -v '/vr-reach\.py$')"
 # check-schedule.py asks the local git which schedule files are new; that is its only process.
 check "check-schedule.py: one subprocess call, git with an argument list, no shell, no network" "1 1 0" \
 	"$(grep -c 'subprocess\.run(' "$scripts/check-schedule.py") $(grep -A2 'subprocess\.run(' "$scripts/check-schedule.py" | grep -c '\["git", "-C", repo, "-c", "core.fsmonitor=false", ') $(grep -Ec 'shell=|os\.system|os\.popen|urllib|http\.client|import socket|urlopen|getenv|expanduser|netrc|pickle|\beval\(|\bexec\(' "$scripts/check-schedule.py")"
+# vr-reach.py reads the local git history; git is its only process.
+check "vr-reach.py: one subprocess call, git with an argument list, no shell, no network" "1 1 0" \
+	"$(grep -c 'subprocess\.run(' "$scripts/vr-reach.py") $(grep -A2 'subprocess\.run(' "$scripts/vr-reach.py" | grep -c '\["git", "-C", repo, "-c", "core.fsmonitor=false", ') $(grep -Ec 'shell=|os\.system|os\.popen|urllib|http\.client|import socket|urlopen|getenv|expanduser|netrc|pickle|\beval\(|\bexec\(' "$scripts/vr-reach.py")"
 check "no script reaches into a private name of _oqa or _sanitize" "" \
 	"$(grep -En '(_oqa|_sanitize|client)\._[a-z]|from _(oqa|sanitize) import .*\b_[a-z]' "$scripts"/*.py | grep -v '/_oqa\.py:')"
 check "the Accept header is one of three constants" "OqaError unsupported Accept value: text/plain X-Evil: 1" \

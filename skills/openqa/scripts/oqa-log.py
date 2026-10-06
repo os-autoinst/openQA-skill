@@ -14,9 +14,12 @@ frame, the first outside os-autoinst, instead of the trace.
 """
 
 import argparse
+import bz2
 import calendar
 import html
+import lzma
 import re
+import zlib
 
 import _oqa
 from _sanitize import ArgumentParser
@@ -37,6 +40,18 @@ CUT_MARGIN = 2048  # longer than any credential a bounded redaction rule matches
 _FILE_NAME = re.compile(r"^(?:ulogs/)?[A-Za-z0-9_][A-Za-z0-9._+@=~-]*$")
 # Anchored, so one backtracking pass: "\S+\Z" would be quadratic.
 _UP_TO_LAST_SPACE = re.compile(r".*\s", re.DOTALL)
+# Uploaded tar archives --members and --member may open (y2logs.tar.bz2, *.tar.xz, ...).
+# A zstd one is named here only to be refused by its magic bytes with a clear message.
+_ARCHIVE = re.compile(
+    r"\.(?:tar(?:\.(?:gz|bz2|xz|zst))?|tgz|tbz2?|txz|tzst)$", re.IGNORECASE
+)
+# An archive may expand to this many times --max-bytes before reading stops: a bomb guard.
+ARCHIVE_GROWTH = 8
+MAX_MEMBERS = 20000
+# GNU long names and pax records are a few hundred bytes; more is an attack on memory.
+MAX_HEADER_DATA = 64 * 1024
+BLOCK = 512
+STEP = 1 << 16
 _BINARY = re.compile(
     r"\.(?:webm|ogv|mp4|png|jpe?g|gif|ico|qcow2|raw|iso|img|zip|rpm|pdf"
     r"|(?:tar|tgz|tbz|txz|gz|bz2|xz|zst)(?:\.\w+)?)$",
@@ -238,11 +253,16 @@ def non_negative(value):
     return number
 
 
-def file_path(job_id, name):
+def file_path(job_id, name, archive=False):
     """Validate a user-supplied file name and return its route."""
     if not _FILE_NAME.match(name) or ".." in name:
         raise _oqa.OqaError(f"not a plain log file name: {_oqa.clean(name)}")
-    if _BINARY.search(name):
+    if _ARCHIVE.search(name) and not archive:
+        raise _oqa.OqaError(
+            f"{_oqa.clean(name)} is an archive: list it with --members, "
+            "read one member with --member PATH"
+        )
+    if _BINARY.search(name) and not (archive and _ARCHIVE.search(name)):
         raise _oqa.OqaError(f"refusing a binary file: {_oqa.clean(name)}")
     # Uploaded logs are served by the same route, without the ulogs/ prefix.
     return f"/tests/{job_id}/file/{name.removeprefix('ulogs/')}"
@@ -263,6 +283,253 @@ def to_lines(body, cut=False):
     if lines and not lines[-1]:
         lines.pop()
     return lines
+
+
+_MAGICS = ((b"\x1f\x8b", "gzip"), (b"BZh", "bzip2"), (b"\xfd7zXZ\x00", "xz"))
+
+
+_CUT = "not a readable tar archive: the compressed data ends early"
+
+
+def _stream(kind, body):
+    """Yield the output of one compressed stream; return the input left after it."""
+    if kind == "gzip":
+        decompressor = zlib.decompressobj(16 + zlib.MAX_WBITS)
+    else:
+        decompressor = (
+            bz2.BZ2Decompressor() if kind == "bzip2" else lzma.LZMADecompressor()
+        )
+    position, pending = 0, b""
+    while not decompressor.eof:
+        if kind == "gzip":
+            if not pending:
+                if position >= len(body):
+                    raise _oqa.OqaError(_CUT)
+                pending, position = body[position : position + STEP], position + STEP
+            out = decompressor.decompress(pending, STEP)
+            if not out and decompressor.unconsumed_tail == pending:
+                raise _oqa.OqaError(_CUT)
+            pending = decompressor.unconsumed_tail
+        else:
+            # bz2 and lzma keep unread input themselves; needs_input says when to feed.
+            if decompressor.needs_input:
+                if position >= len(body):
+                    raise _oqa.OqaError(_CUT)
+                data, position = body[position : position + STEP], position + STEP
+            else:
+                data = b""
+            out = decompressor.decompress(data, STEP)
+            if not out and not data and not decompressor.needs_input:
+                raise _oqa.OqaError(_CUT)
+        if out:
+            yield out
+    return decompressor.unused_data + body[position:]
+
+
+def _chunks(body):
+    """Yield the decompressed bytes of a tar, tar.gz, tar.bz2 or tar.xz body, STEP at a
+    time; concatenated streams (pbzip2, cat a.gz b.gz) are read one after the other."""
+    if body[:4] == b"\x28\xb5\x2f\xfd":
+        raise _oqa.OqaError("a zstd-compressed archive: not supported")
+    if body[:4] == b"PK\x03\x04":
+        raise _oqa.OqaError("a zip archive: not supported")
+    kind = next((name for magic, name in _MAGICS if body.startswith(magic)), None)
+    if kind is None:
+        for start in range(0, len(body), STEP):
+            yield body[start : start + STEP]
+        return
+    magic = next(magic for magic, name in _MAGICS if name == kind)
+    while body.startswith(magic):
+        body = yield from _stream(kind, body)
+
+
+class _Budget:
+    """A read()-only stream over decompressed chunks that stops at limit bytes."""
+
+    def __init__(self, chunks, limit):
+        self.chunks, self.limit, self.total, self.buffer = chunks, limit, 0, bytearray()
+
+    def read(self, size):
+        while len(self.buffer) < size:
+            chunk = next(self.chunks, None)
+            if chunk is None:
+                break
+            self.total += len(chunk)
+            if self.total > self.limit:
+                raise _oqa.OqaError(
+                    f"the archive expands beyond {self.limit} bytes "
+                    f"({ARCHIVE_GROWTH} x --max-bytes); raise --max-bytes or download it"
+                )
+            self.buffer += chunk
+        out = bytes(self.buffer[:size])
+        del self.buffer[:size]
+        return out
+
+    def exact(self, size):
+        data = self.read(size)
+        if len(data) != size:
+            raise _oqa.OqaError("not a readable tar archive: it ends inside a member")
+        return data
+
+    def skip(self, size):
+        while size > 0:
+            size -= len(self.exact(min(size, STEP)))
+
+
+def _number(field):
+    """A tar numeric field: octal text, or GNU base-256 when the first byte has 0x80 set."""
+    if field[:1] and field[0] & 0x80:
+        if field[0] & 0x40:
+            raise _oqa.OqaError("not a readable tar archive: a negative size")
+        return int.from_bytes(bytes([field[0] & 0x3F]) + field[1:], "big")
+    text = field.split(b"\0", 1)[0].strip(b" ")
+    if not text:
+        return 0
+    if not re.fullmatch(rb"[0-7]{1,24}", text):
+        raise _oqa.OqaError("not a readable tar archive: a malformed header")
+    return int(text, 8)
+
+
+def _pax(data):
+    """The path and size of a pax extended header; GNU.sparse.* keys mark a sparse file."""
+    found, position = {}, 0
+    while position < len(data):
+        match = re.match(rb"([0-9]{1,8}) ", data[position : position + 9])
+        if not match or int(match.group(1)) < len(match.group(0)) + 2:
+            raise _oqa.OqaError("not a readable tar archive: a malformed pax header")
+        record = data[position + len(match.group(0)) : position + int(match.group(1))]
+        position += int(match.group(1))
+        key, _, value = record.rstrip(b"\n").partition(b"=")
+        if key in (b"path", b"size"):
+            found[key.decode()] = value.decode("utf-8", "replace")
+        elif key.startswith(b"GNU.sparse."):
+            found["sparse"] = "1"
+    return found
+
+
+def _kind(flag, sparse):
+    if sparse or flag == b"S":
+        return "sparse"
+    if flag in (b"0", b"\0", b"7"):
+        return "file"
+    if flag == b"5":
+        return "dir"
+    return "link" if flag in (b"1", b"2") else "other"
+
+
+def members(body, limit, wanted=None, keep=0):
+    """Yield (name, size, kind, data) for each member of a tar archive body.
+
+    The archive is untrusted, so this reads headers itself instead of using tarfile: it
+    decompresses as a stream in memory, refuses a declared size beyond limit, a GNU long
+    name or pax header over MAX_HEADER_DATA bytes and more than MAX_MEMBERS members, and
+    reads data (at most keep + 1 bytes) only for regular files named wanted."""
+    reader = _Budget(_chunks(body), limit)
+    long_name = pax = None
+    count = 0
+    try:
+        while True:
+            header = reader.read(BLOCK)
+            if not header.strip(b"\0"):
+                return
+            if len(header) < BLOCK:
+                raise _oqa.OqaError("not a readable tar archive: a cut header")
+            stored = _number(header[148:156])
+            unsigned = sum(header[:148]) + 8 * 32 + sum(header[156:])
+            signed = unsigned - 256 * sum(
+                byte > 127 for byte in header[:148] + header[156:]
+            )
+            if stored not in (unsigned, signed):
+                raise _oqa.OqaError(
+                    "not a readable tar archive: a header checksum mismatch"
+                )
+            size, flag = _number(header[124:136]), header[156:157]
+            if size > limit:
+                raise _oqa.OqaError(
+                    f"a member declares {size} bytes, more than the archive may expand to"
+                )
+            padded = -size % BLOCK
+            if flag in (b"L", b"K", b"x", b"X", b"g"):
+                if size > MAX_HEADER_DATA:
+                    raise _oqa.OqaError(
+                        f"not a readable tar archive: an extended header over {MAX_HEADER_DATA} bytes"
+                    )
+                data = reader.exact(size)
+                reader.skip(padded)
+                if flag == b"L":
+                    long_name = data.split(b"\0", 1)[0]
+                elif flag in (b"x", b"X"):
+                    pax = _pax(data)
+                continue
+            if flag == b"S":
+                # old GNU sparse: extension blocks follow while their last flag byte is set
+                extended = header[482]
+                while extended:
+                    extended = reader.exact(BLOCK)[504]
+            name = header[:100].split(b"\0", 1)[0]
+            if header[257:262] == b"ustar" and header[345:500].strip(b"\0"):
+                name = header[345:500].split(b"\0", 1)[0] + b"/" + name
+            name = (long_name or name).decode("utf-8", "replace")
+            if pax:
+                name = pax.get("path", name)
+                if "size" in pax:
+                    if not re.fullmatch(r"[0-9]{1,40}", pax["size"]):
+                        raise _oqa.OqaError(
+                            "not a readable tar archive: a malformed pax size"
+                        )
+                    size, padded = int(pax["size"]), -int(pax["size"]) % BLOCK
+                    if size > limit:
+                        raise _oqa.OqaError(
+                            f"a member declares {size} bytes, more than the archive may expand to"
+                        )
+            kind = _kind(flag, pax and "sparse" in pax)
+            long_name = pax = None
+            count += 1
+            if count > MAX_MEMBERS:
+                raise _oqa.OqaError(f"more than {MAX_MEMBERS} members")
+            data = None
+            if (
+                kind == "file"
+                and wanted is not None
+                and _member_name(name) == _member_name(wanted)
+            ):
+                data = reader.exact(min(size, keep + 1))
+                reader.skip(size - len(data))
+            else:
+                reader.skip(size)
+            reader.skip(padded)
+            yield name, size, kind, data
+    except (OSError, EOFError, ValueError, zlib.error, lzma.LZMAError) as error:
+        raise _oqa.OqaError(
+            f"not a readable tar archive: {_oqa.clean(str(error), 120)}"
+        ) from None
+
+
+def _member_name(name):
+    return re.sub(r"^(?:\./|/)+", "", name)
+
+
+def member_lines(body, wanted, limit):
+    """(lines, cut?, matches) of a regular-file member, the last of that name as in tar."""
+    matches, found = 0, None
+    for name, _, kind, data in members(body, ARCHIVE_GROWTH * limit, wanted, limit):
+        if _member_name(name) == _member_name(wanted):
+            matches, found = matches + 1, (kind, data)
+    if found is None:
+        raise _oqa.OqaError(f"no member {_oqa.clean(wanted)}; list them with --members")
+    kind, data = found
+    if kind != "file":
+        raise _oqa.OqaError(f"member {_oqa.clean(wanted)} is a {kind}, not a file")
+    return to_lines(data[:limit], len(data) > limit), len(data) > limit, matches
+
+
+def fetch_archive(client, path, limit):
+    body = client.get_bytes(path, max_bytes=limit + 1)
+    if len(body) > limit:
+        raise _oqa.OqaError(
+            f"the archive is larger than --max-bytes ({limit}); a cut archive cannot be read"
+        )
+    return body
 
 
 def fetch_all(client, path, limit):
@@ -811,6 +1078,18 @@ def main():
         f"and the {SLOWEST} slowest testapi calls: from a call's log line to the next call "
         "or module marker, so a plain sleep in between counts too",
     )
+    modes.add_argument(
+        "--members",
+        action="store_true",
+        help="list the members of the tar archive --file names (size, type, name); read in "
+        "memory as a stream, never unpacked to disk",
+    )
+    parser.add_argument(
+        "--member",
+        metavar="PATH",
+        help="with --grep, --tail, --errors or --around-module: read this regular-file member "
+        "of the tar archive --file names (names from --members)",
+    )
     parser.add_argument(
         "--compare",
         metavar="JOB",
@@ -874,6 +1153,13 @@ def main():
         parser.error("--compare needs --runtimes")
     if args.runtimes and args.file != DEFAULT_FILE:
         parser.error(f"--runtimes reads {DEFAULT_FILE}; drop --file")
+    if (args.members or args.member is not None) and not _ARCHIVE.search(args.file):
+        parser.error(
+            "--members and --member need --file naming a tar archive "
+            "(.tar, .tar.gz, .tgz, .tar.bz2, .tbz2, .tar.xz, .txz)"
+        )
+    if args.member is not None and (args.members or args.list or args.runtimes):
+        parser.error("--member goes with --grep, --tail, --errors or --around-module")
 
     pattern = None
     if args.grep is not None:
@@ -900,9 +1186,54 @@ def main():
         status = show_runtimes(client, args, job_id, head)
         return status if args.exit_code else 0
 
-    path = file_path(job_id, args.file)
+    archive = args.members or args.member is not None
+    path = file_path(job_id, args.file, archive)
+    source = f"{client.host.split('//')[1]}{path}"
     notes, status = [], 0
-    if args.tail:
+    if args.members:
+        body = fetch_archive(client, path, args.max_bytes)
+        # tok() quotes a name and folds its line breaks: a name never opens a line.
+        listed = [
+            f"{size:>10} {kind:6} {_oqa.tok(name, 200)}"
+            for name, size, kind, _ in members(body, ARCHIVE_GROWTH * args.max_bytes)
+        ]
+        print(
+            f"{head} file={_oqa.tok(args.file)} mode=members count={len(listed)} bytes={len(body)}"
+        )
+        # The first members of an archive, not the last, like a directory listing.
+        entries, dropped = cap_entries(
+            [(i + 1, ":", text) for i, text in enumerate(listed)],
+            args.max_lines,
+            args.max_lines - 1,
+        )
+        block = _oqa.sanitize(
+            render(entries, args.max_line_chars, True), max_line=0, max_bytes=131072
+        )
+        print(_oqa.fence(block, source), end="")
+        if dropped:
+            print(f"note: {dropped} members omitted at '--' (--max-lines)")
+        print(f"requests: {client.requests}")
+        return 0
+    if args.member is not None:
+        body = fetch_archive(client, path, args.max_bytes)
+        *member_text, matches = member_lines(body, args.member, args.max_bytes)
+        source += f":{args.member}"
+        # The fence label is cut at 80 characters; the header line names the member.
+        head += f" file={_oqa.tok(args.file)} member={_oqa.tok(args.member, 200)}"
+        if matches > 1:
+            notes.append(
+                f"note: {matches} members of that name; the last one is read, as tar does"
+            )
+    if args.tail and args.member is not None:
+        lines, truncated = member_text
+        wanted = min(args.tail, args.max_lines)
+        entries = mode_tail(lines, False, wanted)
+        mode = f"tail member lines={len(lines)}"
+        if truncated:
+            notes.append(
+                f"warning: only the first {args.max_bytes} bytes of the member were read"
+            )
+    elif args.tail:
         wanted = min(args.tail, args.max_lines)
         lines, from_end, fetched = fetch_tail(client, path, wanted, args.max_bytes)
         entries = mode_tail(lines, from_end, wanted)
@@ -913,7 +1244,10 @@ def main():
                 "long line (try --grep, or --tail with a larger N)"
             )
     else:
-        lines, truncated = fetch_all(client, path, args.max_bytes)
+        if args.member is not None:
+            lines, truncated = member_text
+        else:
+            lines, truncated = fetch_all(client, path, args.max_bytes)
         if truncated:
             notes.append(
                 f"warning: only the first {args.max_bytes} bytes were read (--max-bytes)"
@@ -1004,7 +1338,7 @@ def main():
     block = _oqa.sanitize(
         render(entries, args.max_line_chars, args.verbose), max_line=0, max_bytes=131072
     )
-    print(_oqa.fence(block, f"{client.host.split('//')[1]}{path}"), end="")
+    print(_oqa.fence(block, source), end="")
     for note in notes:
         print(note)
     print(f"requests: {client.requests}")

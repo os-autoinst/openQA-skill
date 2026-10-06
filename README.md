@@ -42,8 +42,8 @@ read from openQA.
 Any harness, with an installer:
 
 ```
-npx skills add plusky/openQA-skill --skill openqa -g
-gh skill install plusky/openQA-skill openqa --scope user
+npx skills add os-autoinst/openQA-skill --skill openqa -g
+gh skill install os-autoinst/openQA-skill openqa --scope user
 ```
 
 Without `-g` / `--scope user` both install into the current project (`./.agents/skills/`), for example into a
@@ -52,7 +52,7 @@ test-repository checkout.
 Manual, tracking the git checkout:
 
 ```
-git clone https://github.com/plusky/openQA-skill.git
+git clone https://github.com/os-autoinst/openQA-skill.git
 mkdir -p ~/.agents/skills ~/.claude/skills
 ln -s "$PWD/openQA-skill/skills/openqa" ~/.agents/skills/openqa
 ln -s ../../.agents/skills/openqa ~/.claude/skills/openqa      # Claude Code

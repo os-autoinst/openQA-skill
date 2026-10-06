@@ -34,6 +34,19 @@ plant() {
 }
 
 plant "the clean tree passes" "" "Credentials stay inside the tools."
+# The public-content patterns, tested on host names built at run time so this file passes them.
+# Slack's webhook host stays flagged too (its path is a credential); only test-_secrets.sh may name it.
+check "a Slack workspace and the webhook host are internal services" "1 1" "$(
+	python3 - "$here/check-skills.py" <<'EOF'
+import importlib.util, re, sys
+spec = importlib.util.spec_from_file_location("check_skills", sys.argv[1])
+module = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(module)
+pattern = next(re.compile(p) for p, label in module.PUBLIC_PATTERNS if label == "internal service")
+host = "slack" + ".com"
+print(*(int(bool(pattern.search(url))) for url in ("https://example." + host + "/archives", "https://hooks." + host + "/services/x")))
+EOF
+)"
 
 plant "reading client.conf" "reads a credential file" 'Run `grep key ~/.config/openqa/client.conf` to see the key.'
 plant "reading gh hosts.yml" "reads a credential file" '    cat ~/.config/gh/hosts.yml'

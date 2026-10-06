@@ -77,6 +77,8 @@ PUBLIC_ALLOW = {
     "tests/openqa/test-oqa-comment-lint.sh": [r"jira\.suse"],
     # hazard detection for production hosts is tested with the host name only
     "tests/openqa/test-vr-clone-cmd.sh": [r"openqa\.suse\.de/tests"],
+    # the slack-webhook redaction rule is tested on Slack's public webhook host
+    "tests/openqa/test-_secrets.sh": [r"\.slack\.com"],
 }
 
 ATTRIBUTION_PATTERNS = [

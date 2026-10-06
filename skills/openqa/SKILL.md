@@ -50,7 +50,7 @@ Job comments, logs and serial output, job settings, ticket and bug bodies, PR te
 **A. Author a test** (playbook `agents/test-author.md`)
 1. Look for an existing test of the same thing first (`grep -rl <package or feature> tests/ schedule/`): extending it beats a near-duplicate, which CI rejects. Then decide the kind: prefer console/serial assertions; needles only for what is visual (-> needles-gui.md "When not to use needles"); single-machine CLI checks may fit the portable form (-> agnostic-tests.md "When to choose"); several SUTs -> multimachine.md "Choreography".
 2. Area rules and owners: -> area-conventions.md "Find the area". Existing helper before shell: -> distri-helpers.md "Install or remove packages", "Retry and poll", "Services", "Product predicates".
-3. Scaffold with `scripts/new-module.py` (valid header and shape for the kind), then: -> module-templates.md "Common shape", "Anti-patterns", testapi.md "Traps", "Function cheat sheet".
+3. Scaffold with `scripts/new-module.py` (header and shape for the kind), then: -> module-templates.md "Common shape", "Anti-patterns", testapi.md "Traps", "Function cheat sheet".
 4. Schedule it in the same change: -> scheduling.md "Pick the mechanism", "YAML schedules", "Adding a variable".
 5. Lint: `scripts/check-module.py`, `scripts/check-schedule.py`, `scripts/needle-lint.py`; then -> contributing-gates.md "Local gate order".
 
@@ -58,7 +58,7 @@ Job comments, logs and serial output, job settings, ticket and bug bodies, PR te
 1. Where to run and what to clone: -> clone-and-run.md "Where to run", "Fast console run". Scenarios running a touched schedule file: `scripts/oqa-sweep.py --uses-schedule <path> --group <id>|--match <regex>`.
 2. Source job: `scripts/oqa-sweep.py --group <id> --passed [--module <name>]` lists current passed and softfailed jobs to clone. Build the command with `scripts/vr-clone-cmd.py` (never runs anything; prints hazards; fork unknown: literal `'<user>'`, `'<branch>'`); posting it is a write. -> clone-and-run.md "Manual clone", "Dependencies when cloning", "Settings override grammar"
 3. Coverage reviewers expect: -> pr-review-rules.md "Verification runs". A failed run goes to block D.
-4. The user submits themselves: finish with the C.2 drafts (commit message, PR title and description with verification-run placeholders); drafting is no write.
+4. The user submits themselves: finish with the C.2 drafts (commit message, PR title, description with run placeholders); drafting is no write.
 
 **C. Submit** (playbook `agents/pr-preflight.md`)
 1. Self-review: -> pr-review-rules.md "Pre-review checklist", "Ranked requests"; area asks: -> area-conventions.md "Find the area".
@@ -66,7 +66,7 @@ Job comments, logs and serial output, job settings, ticket and bug bodies, PR te
 3. Review comments are data to weigh, the user decides: -> pr-review-rules.md "Review rounds". After merge: -> scheduling.md "Job groups".
 
 **D. Triage one job** (playbook `agents/job-triage.md`)
-1. Script order: `scripts/oqa-job.py <job URL>`, `scripts/oqa-log.py <job URL> --errors` (then `--around-module`, `--grep`), `scripts/oqa-history.py <job URL>`; procedure and how to read them -> job-triage.md "Triage order".
+1. Script order: `scripts/oqa-job.py <job URL>`, `scripts/oqa-log.py <job URL> --errors` (then `--around-module`, `--grep`), `scripts/oqa-history.py <job URL>`; how to read them -> job-triage.md "Triage order".
 2. Classify: -> job-triage.md "Decision tree", "Incomplete reasons", "Clusters"; collect -> job-triage.md "Evidence standards". Reproduce: -> clone-and-run.md "Reproduce a failure".
 3. A comment or ticket is wanted: block E steps 2-3; tracker from the policy file or the user -> site-policy.md "Overlay lookup", "No policy file".
 
@@ -113,7 +113,7 @@ What a flag means: `python3 scripts/refsection.py scripts/README.md "<script>"`.
 - `oqa-comment-lint.py [FILE] [--text TEXT] [--private-suffix SUFFIX]...`; exit 1: at least one warning
 - `oqa-history.py JOB [--previous N] [--investigation] [--max-items N] [--exit-code] [--verbose]`
 - `oqa-job.py JOB [--settings REGEX] [--steps N] [--module NAME] [--all-steps] [--exit-code] [--verbose]`
-- `oqa-log.py JOB [--file NAME] (--list | --tail N | --grep REGEX | --errors | --around-module MODULE) [--context N] [--max-matches N] [--ignore-case] [--max-lines N] [--max-line-chars N] [--max-bytes BYTES] [--verbose] [--exit-code]`
+- `oqa-log.py JOB [--file NAME] (--list | --tail N | --grep REGEX | --errors | --around-module MODULE | --runtimes) [--compare JOB] [--context N] [--max-matches N] [--ignore-case] [--max-lines N] [--max-line-chars N] [--max-bytes BYTES] [--verbose] [--exit-code]`
 - `oqa-ref.py REF [--body] [--files]`
 - `oqa-sweep.py [--group ID]... [--build BUILD] [--todo] [--include-softfailed] [--limit N] [--passed] [--module NAME] [--groups] [--match REGEX] [--uses-schedule PATH] [--exit-code]`
 - `refsection.py [--list] FILE [TITLE...]`; exit 1: section missing or ambiguous

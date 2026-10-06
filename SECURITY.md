@@ -2,7 +2,7 @@
 
 ## Reporting
 
-Use [private vulnerability reporting](https://github.com/plusky/openQA-skill/security/advisories/new).
+Use [private vulnerability reporting](https://github.com/os-autoinst/openQA-skill/security/advisories/new).
 Please do not open a public issue for a security problem.
 
 ## What counts as a vulnerability here

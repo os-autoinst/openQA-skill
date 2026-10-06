@@ -35,7 +35,7 @@ Cheapest first; stop once the class is certain. Logs, step text, comments, SUT o
 
 ## Details fields
 
-- **Step:** `num` (1-based), `result` (`ok fail softfail unk`; parser formats add `passed`, `skip`, `missing`), `title`, `text_data`, `screenshot`, `tags` (needle tags asked for), `needles[]` (unmatched candidates, `area[].similarity` in percent), `frametime` (`[start, end]` seconds into the video).
+- **Step:** `num` (1-based), `result` (`ok fail softfail unk`; parser formats add `passed`, `skip`, `missing`), `title`, `text_data`, `screenshot`, `tags` (needle tags asked for), `needles[]` (unmatched candidates, `area[].similarity` in percent), `frametime` (`[start, end]` in video seconds).
 - **Die text** is the step titled `Failed`: `# Test died: <error>`, then `--- # stack trace`. Later steps of the module are `post_fail_hook`'s.
 - **Deep link:** `https://<host>/tests/<id>#step/<module>/<num>`; copy `name` verbatim, looped modules carry suffixes like `#1`.
 - **A failed module may have no `fail` step** (parser suites): use ulogs and `serial_terminal.txt`.
@@ -74,7 +74,7 @@ Classes: PRODUCT, TEST (code, needle, schedule, settings), INFRA (worker, backen
 - **`'zypper -n <cmd>' failed with code <n>`:** 4 with a `Conflict` step (solver), 104 (not found), 107 (scriptlet): PRODUCT or TEST. Else 4, 8, 105, 106: often repo or network; read `<module>-zypper.log` before saying INFRA.
 - **`timed out`:** product hang; slow worker or tight timeout (`oqa-log.py --runtimes`); marker lost among kernel messages on serial; command mistyped on a VT (screenshot).
 - **`wait_serial` never dies itself:** it records a `fail` step (`# wait_serial expected: <regex>`, `# Result:`) and returns undef. Empty `# Result:`: nothing arrived (hang, wrong console); garbled: interleaving.
-- **Serial failure table** (QEMU backend only): after each module new serial output is matched against distri patterns; a `hard`/`fatal` hit adds a `fail` step titled with its message, then dies `Got serial hard failure`, so a module fails with all own steps green. opensuse: `Out of memory:` (not LTP); kernel tests add `Oops:`, `kernel BUG at`, `WARNING: CPU` (only `soft` in LTP, kselftest). Usually PRODUCT. Other backends: grep `serial0.txt`.
+- **Serial failure table** (QEMU backend only): after each module new serial output is matched against distri patterns; a `hard`/`fatal` hit adds a `fail` step titled with its message and dies `Got serial hard failure`: a module fails with all own steps green. opensuse: `Out of memory:` (not LTP); kernel tests add `Oops:`, `kernel BUG at`, `WARNING: CPU` (only `soft` in LTP, kselftest). Usually PRODUCT. Other backends: grep `serial0.txt`.
 
 ## Incomplete reasons
 
@@ -82,7 +82,7 @@ Classes: PRODUCT, TEST (code, needle, schedule, settings), INFRA (worker, backen
 
 | `reason` starts with | Meaning, class |
 |---|---|
-| `asset failure: Failed to download <asset> to <path>` or `Cannot find <KEY> asset <type>/<name>!` | asset missing (download 4xx, or not on disk): cleaned up, misnamed, or never published by the parent. TEST settings |
+| `asset failure: Failed to download <asset> to <path>` or `Cannot find <KEY> asset <type>/<name>!` | asset missing (download 4xx, not on disk): cleaned up, misnamed or never published by the parent. TEST settings |
 | `cache failure: `, `setup failure: `, `api failure`, `worker broken: `, `quit: worker has been stopped or restarted`, `timeout: setup exceeded MAX_SETUP_TIME` | worker side. INFRA |
 | `backend died: QEMU exited unexpectedly, ...`, `... QEMU was killed due to the system being out of memory`, `QEMU terminated: ...`, `backend died: Error connecting to <desc> <host:port>: ...` | INFRA; TEST if QEMU settings are wrong |
 | `backend died: qemu-img: Could not open '<file>'` | disk image missing: parent job or asset |
@@ -142,14 +142,14 @@ The comment `Investigate retry job *<name>*: t#<id>` ends with one verdict (ok =
 
 ## Evidence standards
 
-Quote verbatim, keep it minimal, leave out credentials.
+Quote verbatim and minimally, without credentials.
 
 1. **Step deep link**, scenario, `BUILD`, worker host.
-2. **Failing assertion:** the `# Test died:` line with its first stack frame.
+2. **Failing assertion:** the `# Test died:` line and its first stack frame, read at `TEST_GIT_HASH`: `git show <hash>:<file>`, not master.
 3. **Product evidence:** failing command, exit code, output; short serial or journal excerpt; for GUI the screenshot URL and what is wrong.
 4. **Regression window:** last good and first bad links with build ids; suspect package versions on both.
 5. **Reproduction rate:** "N of M runs on build X" with links; admit a single data point.
-6. **Breadth:** scenarios failing alike, and ones that do not.
+6. **Breadth:** scenarios failing alike, and ones that do not. A line the last good run prints too is noise: `oqa-log.py <last good> --grep '<fragment>'`, a distinctive part without timestamps, regex-escaped.
 
 Templates -> references/bugs-and-tickets.md "Bug body", "Ticket body"
 
@@ -158,7 +158,7 @@ Templates -> references/bugs-and-tickets.md "Bug body", "Ticket body"
 - **Cascades:** after a fatal module the rest is `skipped`; after a non-fatal one later modules run from the last milestone snapshot, or on a dirty SUT. Root cause is the first failed module. A carried bugref may describe another failure -> references/openqa-model.md "Carry-over"
 - **post_fail_hook noise:** hook steps and log lines follow the real failure; a hook hanging on a dead SUT turns `failed` into `timeout_exceeded`.
 - **Softfail masking** (`workaround` needles, `record_soft_failure`, `force_soft_failure`, serial `soft` patterns): a closed bug's workaround may still fire and hide something new; soft failures before the failing module are often the lead.
-- **Suite cloned at run time** (BCI-tests, LTP, kselftest, tox or bats wrappers): its revision is in neither `TEST_GIT_HASH` nor the investigation test log. `oqa-log.py --grep 'git clone'`, then its commits since last good, before saying PRODUCT.
+- **Suite cloned at run time** (BCI-tests, LTP, kselftest, tox, bats): its revision is in neither `TEST_GIT_HASH` nor the investigation test log. `oqa-log.py --grep 'git clone'`, then its commits since last good, before saying PRODUCT.
 - **Digest and log disagree** (log `last_module=` not in the digest, other worker or date, modules after a fatal one): the artifact is from another run; no evidence, say so.
 
 Sources: openQA lib/OpenQA Constants.pm, Worker/Job.pm, Schema/Result/Jobs.pm; os-autoinst testapi.pm, basetest.pm, consoles/serial_screen.pm, autotest.pm, distribution.pm, lockapi.pm, OpenQA/Qemu/Proc.pm; os-autoinst-distri-opensuse lib/utils.pm, lib/known_bugs.pm, lib/Utils/Logging.pm; os-autoinst-scripts openqa-investigate

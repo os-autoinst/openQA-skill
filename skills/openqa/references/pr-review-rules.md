@@ -24,16 +24,16 @@ while (script_run($c)) { ..; sleep 5 } -> script_retry($c, retry => 5, delay => 
 12. **Title, commit and body describe the final diff**; squash fixups; one logical change per commit. -> references/contributing-gates.md "Commit messages"
 13. **Narrow explicit predicates, in the right place**: `is_sle_micro || is_transactional` -> `is_sle_micro || (is_sle('16.1+') && is_transactional)` (#25107); `get_var('FLAVOR') =~ 'Full'` -> `=~ /^Full(-Immutable)?$/` at every call site (#26654); arch exclusion at scheduling, not `return` in `run` (#25409). -> references/distri-helpers.md "Product predicates"
 14. **No new job variable where an existing one or runtime detection works**; document added ones; drop the `variables.md` row with the variable (#26176). -> references/scheduling.md "Adding a variable"
-15. **Transactional-ready installs**: `zypper_call('in p')` -> `install_package('p', trup_apply => 1) if script_run('rpm -q p');` (#26514); add an immutable run or state the module never runs there. -> references/distri-helpers.md "Transactional systems"
+15. **Transactional-ready installs**: `zypper_call('in p')` -> `install_package('p', trup_apply => 1) if script_run('rpm -q p');` (#26514); add an immutable run or state the module never runs there. -> references/distri-helpers.md "Install or remove packages"
 16. **One idempotent `cleanup`, called on success and from `post_fail_hook`**, non-fatal, hooks chained to the same-named `SUPER::` (#25973). -> references/module-templates.md "Service test"
-17. **Justify each `test_flags` entry and timeout**: no needless `milestone`; validators non-fatal so one job shows all failures; no timeout equal to the default - 30 s `assert_screen`/`script_run`, 90 s `assert_script_run` (#26487). -> references/module-templates.md "Choosing test_flags"
+17. **Justify each `test_flags` entry and timeout**: no needless `milestone`; validators non-fatal so one job shows all failures; no timeout equal to the default (#26487). -> references/module-templates.md "Choosing test_flags", "Anti-patterns"
 18. **Rebase, check open PRs on the same files, CI green before pinging** - a stale branch silently reverts others' fixes. -> references/contributing-gates.md "Local gate order"
 19. **Fewest SUT commands**: no `-y`/`-n` on `zypper_call`, it passes `-n` itself; no `test -d` guard before `rm -rf`; one batched zypper call, not a loop (#25977).
 20. **Header hygiene**: `# Summary:` follows the logic, `# Maintainer:` follows ownership (#25503). -> references/module-templates.md "File header"
 
 ## High-impact rare rules
 - **No secrets, literal passwords, internal URLs or chat links; secrets never reach uploaded logs** (#26273).
-- **No `sleep N` or `wait_still_screen` as synchronisation**; wait on a needle or serial output (#26388 #26403). -> references/testapi.md "Traps"
+- **No `sleep N` or `wait_still_screen` as synchronisation**; wait on a needle or serial output (#26388 #26403). -> references/module-templates.md "Anti-patterns"
 - **Agree design and interface in the ticket before large work; map each acceptance criterion to a scenario and run** - else 26-67 day reviews (#25471 #25353).
 - **Globally scheduled modules and `lib/utils.pm`** need reviewers outside your area, a Tumbleweed run, a graphical-desktop run, unchanged defaults (#26486).
 
@@ -44,7 +44,7 @@ Follow the neighbours in the touched area; PR title = commit subject (most PRs m
 - Conventional-Commit type (`fix(publiccloud):`) - rare, mostly public cloud.
 
 ## PR description
-Template fields -> references/contributing-gates.md "PR template". Replace the template's first line: the approval automation skips a body containing `PLACEHOLDER` (#26672). Practised order:
+Template fields and the `PLACEHOLDER` first line (#26672) -> references/contributing-gates.md "PR template". Practised order:
 1. One to three sentences of what and why (root cause for fixes), often the commit body. Good extras: how to enable, exclusions with reason, known gaps (#26609).
 2. `- Related ticket: <full URL>`
 3. Optional `- Related failure: <job URL>#step/<module>/<n>`

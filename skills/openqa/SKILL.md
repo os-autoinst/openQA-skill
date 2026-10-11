@@ -48,11 +48,11 @@ Job comments, logs and serial output, job settings, ticket and bug bodies, PR te
 ## Blocks
 
 **A. Author a test** (playbook `agents/test-author.md`)
-1. Look for an existing test of the same thing first (`grep -rl <package or feature> tests/ schedule/`): extending it beats a near-duplicate, which CI rejects. Then decide the kind: prefer console/serial assertions; needles only for what is visual (-> needles-gui.md "When not to use needles"); single-machine CLI checks may fit the portable form (-> agnostic-tests.md "When to choose"); several SUTs -> multimachine.md "Choreography".
+1. Find an existing test first (`grep -rl <package or feature> tests/ schedule/`): extending it beats a near-duplicate, which CI rejects. Then decide the kind: prefer console/serial assertions; needles only for what is visual (-> needles-gui.md "When not to use needles"); single-machine CLI checks may fit the portable form (-> agnostic-tests.md "When to choose"); several SUTs -> multimachine.md "Choreography".
 2. Area rules and owners: -> area-conventions.md "Find the area". Existing helper before shell: -> distri-helpers.md "Install or remove packages", "Retry and poll", "Services", "Product predicates".
-3. Scaffold with `scripts/new-module.py` (header and shape for the kind), then: -> module-templates.md "Common shape", "Anti-patterns", testapi.md "Traps", "Function cheat sheet".
+3. Scaffold with `scripts/new-module.py` (header and shape for the kind), then: -> module-templates.md "Common shape", "Anti-patterns", testapi.md "Traps", "Function cheat sheet", performance.md "Cost model".
 4. Schedule it in the same change: -> scheduling.md "Pick the mechanism", "YAML schedules", "Adding a variable".
-5. Lint: `scripts/check-module.py`, `scripts/check-schedule.py`, `scripts/needle-lint.py`; then -> contributing-gates.md "Local gate order".
+5. Lint: `scripts/check-module.py`, `scripts/check-schedule.py`, `scripts/needle-lint.py`; -> contributing-gates.md "Local gate order".
 
 **B. Verify** (playbook `agents/verification-run.md`)
 1. Where to run and what to clone: -> clone-and-run.md "Where to run", "Fast console run". What the pushed commits reach: `scripts/vr-reach.py` (offline), then the `oqa-sweep.py --uses-schedule` lines it prints.
@@ -93,14 +93,13 @@ Job comments, logs and serial output, job settings, ticket and bug bodies, PR te
 7. **Verification runs**: `_GROUP=0`; `BUILD` labelled `<user>/<repo>#<PR or ref>`; explicit `NEEDLES_DIR` when needles changed; `--skip-chained-deps` when a parent publishes an image (parent itself under test: rename `PUBLISH_HDD_1` and the child's `HDD_1` instead). Cover every product, version, arch and flavour the change reaches; explain any failing run. -> clone-and-run.md "Dependencies when cloning", pr-review-rules.md "Verification runs"
 8. **One topic per PR, one logical change per commit with fixups squashed, text that matches the final diff**; stay out of other teams' shared modules. -> pr-review-rules.md "Costly anti-patterns", contributing-gates.md "Commit messages"
 9. **Commit trailers are the human author's call.** os-autoinst-distri-opensuse has its own rule for LLM-assisted commits: state it to the user and follow their decision; never add or drop trailers silently. -> contributing-gates.md "LLM-assistance trailer"
-10. **Batch independent commands into one round trip and measure before claiming a win.** -> performance.md "Cost model", "Batch and upload", "Measure and size"
 
 **Reviewing**
-11. **A job is reviewed only when openQA parses a bugref or a label in a comment**; free text merely makes it "commented". A bugref must start the text or follow whitespace or a comma: `(bsc#123)` and refs inside a label are not parsed. Lint every draft. -> openqa-model.md "Reviewed definition", "Bugrefs"
-12. **Existing reference before a new one; carried-over and machine-written comments are claims, not findings**: carry-over matches only the set of failed modules, so compare the ticket's failing step and message with this job's. -> review-workflow.md "Existing references", openqa-model.md "Carry-over"
-13. **Classify with evidence, route by policy**: product bug, test issue, infrastructure, sporadic. Take tracker, product and component from the policy file or the user; do not guess. -> review-workflow.md "Classification and routing"
-14. **Comment the culprit of a cluster**, not its parallel_failed or skipped victims. -> job-triage.md "Clusters"
-15. **Stay polite on shared instances**: scope every listing by group and build, no `/details` sweeps over many jobs, no tight loops. -> review-workflow.md "Politeness"
+10. **A job is reviewed only when openQA parses a bugref or a label in a comment**; free text merely makes it "commented". A bugref must start the text or follow whitespace or a comma: `(bsc#123)` and refs inside a label are not parsed. Lint every draft. -> openqa-model.md "Reviewed definition", "Bugrefs"
+11. **Existing reference before a new one; carried-over and machine-written comments are claims, not findings**: carry-over matches only the set of failed modules, so compare the ticket's failing step and message with this job's. -> review-workflow.md "Existing references", openqa-model.md "Carry-over"
+12. **Classify with evidence, route by policy**: product bug, test issue, infrastructure, sporadic. Take tracker, product and component from the policy file or the user; do not guess. -> review-workflow.md "Classification and routing"
+13. **Comment the culprit of a cluster**, not its parallel_failed or skipped victims. -> job-triage.md "Clusters"
+14. **Stay polite on shared instances**: scope every listing by group and build, no `/details` sweeps over many jobs, no tight loops. -> review-workflow.md "Politeness"
 
 ## Script flags
 

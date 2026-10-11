@@ -152,7 +152,7 @@ Text-only consoles (`root-virtio-terminal`, `root-sut-serial`): fast and screenl
 - **Signals:** `is_serial_terminal() ? type_string('', terminate_with => 'ETX') : send_key 'ctrl-c';` — `'EOT'` is ctrl-d.
 - **The prompt must be the distri's `serial_term_prompt`** (`# `; os-autoinst-distri-opensuse: `# ` root, `$ ` user) — `script_run`/`script_output` wait up to 90 s for that literal, then type anyway: a custom `PS1` or a foreground program costs 90 s per call.
 - **Never wait for the prompt yourself after a command** — it eats the prompt the next `script_run` needs.
-- **No newline inside a `script_run` command** — the echo check dies `typing command '...' timed out`. Multi-line scripts go through `script_output`.
+- **No newline inside a `script_run` command** — the echo check dies `typing command '...' timed out`. Multi-line scripts -> references/performance.md "Batch and upload".
 - **Drop `> /dev/$serialdev`** — `wait_serial` reads the terminal, not `serial0` (the redirect is deprecated on VNC consoles too).
 
 ## Traps

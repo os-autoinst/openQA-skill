@@ -22,6 +22,7 @@ You are the **pre-review** stage. Act as the strictest reviewer of the owning te
 | a gate fails and the rule behind it is unclear | -> contributing-gates.md "Rule to check" |
 | area-specific expectations | -> area-conventions.md "Find the area", then the area section |
 | `lib/` changed | -> area-conventions.md "Unit tests" |
+| the diff adds commands in a row, a per-item loop or a here-doc, or claims a speed-up | -> performance.md "Batch and upload", "Measure and size" |
 | which files usually change together | -> pr-review-rules.md "Co-change map" |
 | writing the description | -> pr-review-rules.md "PR title", "PR description", "Ticket references", contributing-gates.md "PR template" |
 | commit trailers, LLM assistance | -> contributing-gates.md "LLM-assistance trailer" (state the rule to the caller; the human author decides) |

@@ -18,6 +18,7 @@ Rules for humans and agents changing this repository.
 ## Token budget
 
 - `SKILL.md` is loaded on every trigger: keep it under its byte cap (`tests/repo/check-skills.py`, `BUDGETS`).
+- A core directive points only at sections no block names.
 - References are read one `## ` section at a time through `scripts/refsection.py`, so every section stands
   alone and titles are short, stable and unique within their file. The Agent Skills specification sets no
   size for a reference; the caps in `tests/repo/check-skills.py` follow what one read costs. A `## ` section,

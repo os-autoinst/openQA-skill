@@ -85,20 +85,20 @@ Job comments, logs and serial output, job settings, ticket and bug bodies, PR te
 
 **Creating**
 1. **Reuse helpers before writing shell, loops or regexes** (`install_package`, `zypper_call`, `script_retry`, `systemctl`, `is_sle`-style predicates): the most frequent review request. -> distri-helpers.md "Base classes"
-2. **CLI tests inherit `consoletest` and start with `select_serial_terminal`**; install with `install_package`, which picks zypper or transactional-update itself; add `trup_apply => 1` or `trup_reboot => 1` so the package is active in the same module (`trup_continue` alone activates nothing). -> distri-helpers.md "Console selection", "Install or remove packages"
-3. **`script_run` returns the exit code and throws on timeout**: compare `== 0`. Requirements use `assert_script_run`, polling uses `script_retry`; no `sleep`, no hand-rolled wait loop; `check_screen` only for optional screens. -> testapi.md "Traps", module-templates.md "Anti-patterns"
+2. **CLI tests inherit `consoletest` and start with `select_serial_terminal`**; install with `install_package`, which picks zypper or transactional-update itself; add `trup_apply => 1` or `trup_reboot => 1` so the package is active in the same module (`trup_continue` alone activates nothing). -> distri-helpers.md "Console selection"
+3. **`script_run` returns the exit code and throws on timeout**: compare `== 0`. Requirements use `assert_script_run`, polling uses `script_retry`; no `sleep`, no hand-rolled wait loop; `check_screen` only for optional screens.
 4. **Every assertion must be able to fail and test the real property.** A tolerated failure is `record_soft_failure` with a tracker reference on the same line, scoped to the exact product and version. -> distri-helpers.md "Soft-fail on a known bug", contributing-gates.md "Soft-failure reference"
 5. **No `test_flags`, timeouts or variables without a reason**; one cleanup sub called from `post_run_hook` and `post_fail_hook`. -> module-templates.md "Choosing test_flags", "Service test"
-6. **Schedule the module in the same change** or CI fails; in a new schedule file `name:` equals the basename; settings the openQA scheduler must see stay in the job group, not under `vars:`. -> scheduling.md "Unused-module check", "YAML schedules"
-7. **Verification runs**: `_GROUP=0`; `BUILD` labelled `<user>/<repo>#<PR or ref>`; explicit `NEEDLES_DIR` when needles changed; `--skip-chained-deps` when a parent publishes an image (parent itself under test: rename `PUBLISH_HDD_1` and the child's `HDD_1` instead). Cover every product, version, arch and flavour the change reaches; explain any failing run. -> clone-and-run.md "Dependencies when cloning", pr-review-rules.md "Verification runs"
-8. **One topic per PR, one logical change per commit with fixups squashed, text that matches the final diff**; stay out of other teams' shared modules. -> pr-review-rules.md "Costly anti-patterns", contributing-gates.md "Commit messages"
-9. **Commit trailers are the human author's call.** os-autoinst-distri-opensuse has its own rule for LLM-assisted commits: state it to the user and follow their decision; never add or drop trailers silently. -> contributing-gates.md "LLM-assistance trailer"
+6. **Schedule the module in the same change** or CI fails; in a new schedule file `name:` equals the basename; settings the openQA scheduler must see stay in the job group, not under `vars:`. -> scheduling.md "Unused-module check"
+7. **Verification runs**: `_GROUP=0`; `BUILD` labelled `<user>/<repo>#<PR or ref>`; explicit `NEEDLES_DIR` when needles changed; `--skip-chained-deps` when a parent publishes an image (parent itself under test: rename `PUBLISH_HDD_1` and the child's `HDD_1` instead). Cover every product, version, arch and flavour the change reaches; explain any failing run.
+8. **One topic per PR, one logical change per commit with fixups squashed, text that matches the final diff**; stay out of other teams' shared modules. -> pr-review-rules.md "Costly anti-patterns"
+9. **Commit trailers are the human author's call.** os-autoinst-distri-opensuse has its own rule for LLM-assisted commits: state it to the user and follow their decision; never add or drop trailers silently.
 
 **Reviewing**
 10. **A job is reviewed only when openQA parses a bugref or a label in a comment**; free text merely makes it "commented". A bugref must start the text or follow whitespace or a comma: `(bsc#123)` and refs inside a label are not parsed. Lint every draft. -> openqa-model.md "Reviewed definition", "Bugrefs"
-11. **Existing reference before a new one; carried-over and machine-written comments are claims, not findings**: carry-over matches only the set of failed modules, so compare the ticket's failing step and message with this job's. -> review-workflow.md "Existing references", openqa-model.md "Carry-over"
+11. **Existing reference before a new one; carried-over and machine-written comments are claims, not findings**: carry-over matches only the set of failed modules, so compare the ticket's failing step and message with this job's. -> openqa-model.md "Carry-over"
 12. **Classify with evidence, route by policy**: product bug, test issue, infrastructure, sporadic. Take tracker, product and component from the policy file or the user; do not guess. -> review-workflow.md "Classification and routing"
-13. **Comment the culprit of a cluster**, not its parallel_failed or skipped victims. -> job-triage.md "Clusters"
+13. **Comment the culprit of a cluster**, not its parallel_failed or skipped victims.
 14. **Stay polite on shared instances**: scope every listing by group and build, no `/details` sweeps over many jobs, no tight loops. -> review-workflow.md "Politeness"
 
 ## References

@@ -369,11 +369,14 @@ year-less Copyright line is intended.
 ## refsection.py - one section of a reference
 
     refsection.py FILE --list            # bytes, level, title
-    refsection.py FILE "Title" ["Title 2"]
+    refsection.py FILE "Title" ["Title 2"] [FILE2.md "Title 3"]
 
 FILE: a name in `references/` (the prefix is optional, and the bundled file wins over one under the
 current directory) or a path; titles match exactly, case-insensitively, then by unique prefix.
-Exit 1: missing or ambiguous. Files outside the skill come out fenced.
+A later argument ending in `.md` switches to that document of the skill, so a chained pointer is one
+call; a title ending in `.md` needs a leading `#`. `--list` takes one file.
+Exit 1: missing or ambiguous; 2: a file is missing, outside the skill in a later position, or has no
+title. Found sections are printed either way. Files outside the skill come out fenced.
 
 ## _oqa.py, _sanitize.py - shared modules
 

@@ -26,7 +26,7 @@ skills/openqa/
   agents/         delegation playbooks: role prompts for sub-agents, also usable as standalone session prompts
                   (their frontmatter is metadata for harnesses that register agents from files)
 tests/openqa/     script tests with offline fixtures
-tests/repo/       repository gate: frontmatter, byte budgets, pointer resolution, content checks, cited flags
+tests/repo/       repository gate: frontmatter, byte caps (file, section), pointer resolution, content checks, cited flags
 evals/openqa/     evaluation prompts
 ```
 

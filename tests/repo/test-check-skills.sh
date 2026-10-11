@@ -1,6 +1,6 @@
 #!/bin/bash
 # SPDX-License-Identifier: GPL-2.0-or-later
-# Proves the credentials check of check-skills.py can fail: each case plants one line in a
+# Proves the checks of check-skills.py can fail: each case changes one thing in a
 # throw-away copy of the repository and expects the check to report it, or not to.
 # The backticks and $VAR in the planted text are Markdown, not shell expansion.
 # shellcheck disable=SC2016
@@ -21,13 +21,27 @@ check() {
 	fi
 }
 
-# plant NAME EXPECTED LINE [FILE]: add LINE to FILE (default a reference) of a clean copy, run the check
-plant() {
+fresh() {
 	rm -rf "$work/repo"
 	mkdir -p "$work/repo/tests/repo"
 	cp -r "$root/skills" "$work/repo/"
 	cp "$here/check-skills.py" "$work/repo/tests/repo/"
-	printf '%s\n' "$3" >>"$work/repo/skills/openqa/${4:-references/redaction.md}"
+	skill=$work/repo/skills/openqa
+}
+gate() { timeout 20 python3 "$work/repo/tests/repo/check-skills.py" --only "$1"; }
+# finds NAME CHECK TEXT: the gate exits 1 and CHECK reports a finding that contains TEXT
+finds() {
+	local out rc
+	out=$(gate "$2")
+	rc=$?
+	check "$1" "1 1" "$rc $(grep "^$2: " <<<"$out" | grep -c -F -- "$3" | sed 's/^[1-9][0-9]*$/1/')"
+}
+filler() { head -c "$1" /dev/zero | tr '\0' x | fold -w 100; }
+
+# plant NAME EXPECTED LINE [FILE]: add LINE to FILE (default a reference) of a clean copy, run the check
+plant() {
+	fresh
+	printf '%s\n' "$3" >>"$skill/${4:-references/redaction.md}"
 	out=$(timeout 10 python3 "$work/repo/tests/repo/check-skills.py" --only credentials)
 	[ $? -ne 124 ] || out="credentials: -: timed out: "
 	check "$1" "$2" "$(sed -n 's/^credentials: [^ ]*: \([^:]*\):.*/\1/p' <<<"$out" | head -1)"
@@ -170,5 +184,116 @@ plant "another file in the config directory passes" "" '    cat /etc/openqa/work
 plant "a read after a prompt" "reads a credential file" '    $ cat ~/.netrc'
 plant "declare -x MOJO_CLIENT_DEBUG" "turns on MOJO_CLIENT_DEBUG" '    declare -x MOJO_CLIENT_DEBUG=1'
 plant "MOJO_CLIENT_DEBUG=0 before a command passes" "" 'MOJO_CLIENT_DEBUG=0 openqa-cli api jobs'
+
+fresh
+out=$(gate frontmatter,budget,pointers)
+check "a clean copy passes frontmatter, budget and pointers" "0 ok - all repository checks pass" "$? $out"
+# The gate imports the skill's scripts; python would cache them next to the files it checks.
+find "$work/repo" -name __pycache__ -prune -exec rm -rf {} +
+PYTHONDONTWRITEBYTECODE='' gate budget,pointers >/dev/null
+check "the gate leaves no cache in the tree it checks" "" "$(find "$work/repo" -name __pycache__)"
+
+fresh
+sed -i 's/^license: .*/&\nversion: 1/' "$skill/SKILL.md"
+finds "frontmatter: a key outside the specification" frontmatter "key 'version'"
+fresh
+sed -i 's/^name: .*/name: open_qa/' "$skill/SKILL.md"
+finds "frontmatter: a name that is not the directory name" frontmatter "differs from directory"
+fresh
+sed -i "s/^license: /  $(filler 40)\n&/" "$skill/SKILL.md"
+finds "frontmatter: a description over 1024 characters" frontmatter "description must be 1-1024"
+
+# Sizes are bytes of what one read returns: a section as refsection.py cuts it, or a whole file.
+ref=references/redaction.md
+# line HEADING: where the reference has that heading in the clean tree
+line() { grep -n -x -F -- "$1" "$root/skills/openqa/$ref" | cut -d: -f1; }
+fresh
+printf 'caf\303\251\n' >>"$skill/$ref" # one character of two bytes
+filler 5200 >>"$skill/$ref"
+finds "budget: a section over the section cap" budget \
+	"redaction.md:$(line '## Before you post'): section \"Before you post\" is"
+listed=$(python3 "$skill/scripts/refsection.py" --list redaction.md | awk '/## Before you post$/ { print $1 }')
+check "budget: the size is the one refsection.py --list prints" 1 \
+	"$(gate budget | grep -c -F "section \"Before you post\" is $listed bytes")"
+fresh
+printf '\n### Part\n' >>"$skill/$ref"
+filler 5200 >>"$skill/$ref"
+finds "budget: a ### part counts toward its ## section" budget 'section "Before you post" is'
+fresh
+{
+	printf '# Deep\n\n### Part\n'
+	filler 5200
+} >"$skill/references/deep.md"
+finds "budget: a ### part outside any ## section is capped too" budget 'deep.md:3: section "Part" is'
+fresh
+printf '\n## What it is not\n' >>"$skill/$ref"
+filler 5200 >>"$skill/$ref"
+finds "budget: a section that repeats a title is measured too" budget \
+	"redaction.md:$(($(wc -l <"$root/skills/openqa/$ref") + 2)): section \"What it is not\" is"
+# sized BYTES: a clean copy whose reference ends in a section of exactly BYTES
+sized() {
+	fresh
+	printf '\n## Sized\n' >>"$skill/$ref"
+	head -c $(($1 - 10)) /dev/zero | tr '\0' x >>"$skill/$ref" # the heading line is 9, the last newline 1
+}
+sized 5000
+check "budget: a section exactly at the section cap passes" "ok - all repository checks pass" "$(gate budget)"
+sized 5001
+finds "budget: one byte over the section cap, and by how much" budget \
+	'section "Sized" is 5001 bytes, 1 over the section cap 5000'
+# whole BYTES: a clean copy with a new reference of exactly BYTES, each section under its cap
+whole() {
+	fresh
+	{
+		printf '# Whole\n'
+		for n in 1 2 3 4; do
+			printf '\n## Part %s\n' "$n"
+			filler 4000
+		done
+		head -c $(($1 - 16208)) /dev/zero | tr '\0' x # 8 for the title, 4050 for each part so far
+	} >"$skill/references/whole.md"
+}
+whole 17000
+check "budget: a reference exactly at the file cap passes" "ok - all repository checks pass" "$(gate budget)"
+whole 17001
+check "budget: a reference over the file cap" \
+	"budget: skills/openqa/references/whole.md: 17001 bytes exceeds cap 17000 by 1" "$(gate budget)"
+fresh
+filler 200 >>"$skill/references/untrusted-content.md"
+finds "budget: the reference read whole keeps its own cap" budget "untrusted-content.md: "
+fresh
+filler 1500 >>"$skill/agents/pr-preflight.md"
+finds "budget: a playbook over its cap" budget "agents/pr-preflight.md: "
+# under the cap of a reference, so that only its own cap can report it
+fresh
+size=$(wc -c <"$skill/SKILL.md")
+filler $((16701 - size)) >>"$skill/SKILL.md"
+finds "budget: SKILL.md over its cap" budget "/SKILL.md: "
+
+fresh
+mkdir -p "$work/repo/skills/zz"
+printf -- '---\nname: zz\ndescription: A second skill.\nlicense: GPL-2.0-or-later\n---\n\n# zz\n' >"$work/repo/skills/zz/SKILL.md"
+out=$(gate frontmatter,budget,pointers)
+check "a second skill without references or scripts passes" "0 ok - all repository checks pass" "$? $out"
+mkdir "$work/repo/skills/zz/references"
+printf '# R\n\n## One\n\nText.\n' >"$work/repo/skills/zz/references/r.md"
+finds "budget: references without refsection.py cannot be measured" budget "zz/scripts/refsection.py: missing"
+# The gate imports each skill's refsection.py: nothing the first skill imported may reach the second.
+mkdir "$work/repo/skills/zz/scripts"
+printf 'MARK = []\n' >"$work/repo/skills/zz/scripts/_sanitize.py"
+cat >"$work/repo/skills/zz/scripts/refsection.py" <<'EOF'
+from _sanitize import MARK  # the first skill's _sanitize has no MARK
+
+try:
+    import _secrets as MARK  # only the first skill ships one
+except ImportError:
+    pass
+
+
+def parse(lines):
+    return MARK
+EOF
+out=$(gate budget)
+check "budget: each skill is measured by its own scripts" "0 ok - all repository checks pass" "$? $out"
 
 exit $fail

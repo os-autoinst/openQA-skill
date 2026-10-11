@@ -92,12 +92,13 @@ def closest(sections, wanted, limit=5):
 
 
 def resolve(name):
-    # The skill's own documents, from any working directory: `-> SKILL.md "<Section>"`
-    # pointers, and the per-script flag notes that SKILL.md "Script flags" points at.
+    # The skill's own documents, from any working directory: `-> SKILL.md "<Section>"`, the
+    # per-script notes in scripts/README.md, and `references/<file>.md` as references spell it.
     if name in ("SKILL.md", "scripts/README.md"):
         return os.path.join(SKILL_DIR, name)
-    if os.sep not in name:
-        for candidate in (name, name + ".md"):
+    bare = name.removeprefix("references/")
+    if os.sep not in bare:
+        for candidate in (bare, bare + ".md"):
             path = os.path.join(REFERENCES, candidate)
             if os.path.isfile(path):
                 return path
@@ -122,7 +123,8 @@ def main(argv=None):
     )
     parser.add_argument(
         "file",
-        help="bare name looked up in the skill's references/ (.md optional), or a path",
+        help="name looked up in the skill's references/ (.md and a references/ prefix "
+        "optional), or a path",
     )
     parser.add_argument(
         "titles", nargs="*", metavar="title", help="section title(s) to print"

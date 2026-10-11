@@ -93,7 +93,7 @@ Classes: PRODUCT, TEST (code, needle, schedule, settings), INFRA (worker, backen
 
 - **Suffix ` [Auto-restarting because reason matches ...]`:** follow the clone. **` [Not restarting job despite ...]`:** persistent; ticket, not another restart -> references/openqa-model.md "Automatic restarts"
 - **`Result: done` does not mean passed:** isotovideo exited normally. Plain `failed` jobs have no `reason`.
-- **`timeout: test execution exceeded MAX_JOB_TIME`:** `oqa-log.py <job> --runtimes --compare <last good>`; a call `(running at end)`: triage that step; every module slower: slow worker. Large `||| post fail hooks runtime: <n> s`: the earlier failure is the real one.
+- **`timeout: test execution exceeded MAX_JOB_TIME`:** `oqa-log.py <job> --runtimes --compare <last good>`; a call `(running at end)`: triage that step; every module slower: slow worker; one module slower or new (`-`): triage that module; to size a fix -> references/performance.md "Measure and size". Large `||| post fail hooks runtime: <n> s`: the earlier failure is the real one.
 
 ## Clusters
 

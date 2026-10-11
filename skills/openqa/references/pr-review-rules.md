@@ -28,7 +28,7 @@ while (script_run($c)) { ..; sleep 5 } -> script_retry($c, retry => 5, delay => 
 16. **One idempotent `cleanup`, called on success and from `post_fail_hook`**, non-fatal, hooks chained to the same-named `SUPER::` (#25973). -> references/module-templates.md "Service test"
 17. **Justify each `test_flags` entry and timeout**: no needless `milestone`; validators non-fatal so one job shows all failures; no timeout equal to the default (#26487). -> references/module-templates.md "Choosing test_flags", "Anti-patterns"
 18. **Rebase, check open PRs on the same files, CI green before pinging** - a stale branch silently reverts others' fixes. -> references/contributing-gates.md "Local gate order"
-19. **Fewest SUT commands**: no `-y`/`-n` on `zypper_call`, it passes `-n` itself; no `test -d` guard before `rm -rf`; one batched zypper call, not a loop (#25977).
+19. **Fewest SUT commands**: no `-y`/`-n` on `zypper_call`; no `test -d` guard before `rm -rf`; one batched zypper call, not a loop (#25977). -> references/performance.md "Batch and upload"
 20. **Header hygiene**: `# Summary:` follows the logic, `# Maintainer:` follows ownership (#25503). -> references/module-templates.md "File header"
 
 ## High-impact rare rules

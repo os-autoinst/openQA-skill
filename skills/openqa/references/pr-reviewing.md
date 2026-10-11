@@ -30,7 +30,7 @@ To word a fix: -> pr-review-rules.md "Ranked requests"; it is not a source of ne
 - Stale PR text or commit message, unless it justifies removing coverage or changing behaviour (#26740).
 - A point the author fixed or refuted with evidence. Conceded without a fix, answered without evidence, or open at approval: restate once, as a reply in that thread, as the failing scenario (#26486).
 - Pasted logs or code (link the step or line), whole-comment quotes, a body restating the comments, an overview, praise. The same point on several lines is one comment listing them; a suggestion block may repeat.
-- Optimisation debate: ask for measured before and after (#26785).
+- Optimisation debate: ask for measured before and after (#26785). -> references/performance.md "Measure and size"
 
 ## Form
 - Draft = the JSON for `gh api -X POST repos/<o>/<r>/pulls/<n>/reviews --input <file>`: `commit_id` (the `headRefOid` you checked), `event`, `body`, `comments` with `path`, `line` (`side: LEFT` on a removed line) and `body`. Distri PRs: check it with `scripts/review-lint.py --lines <additions+deletions> [--lib] [--late] [--replies N]` (`--lib`: anything beyond tests/, data/, schedule/). Posting is a write -> SKILL.md "Write gate"; re-read `headRefOid` first and re-draft if it moved.

@@ -577,7 +577,7 @@ def add_common_args(parser):
         help=f"openQA instance: URL, host name or the alias o3 (default: {DEFAULT_HOST})",
     )
     # Answers every request from saved responses in DIR, never the network. A test hook,
-    # so it stays out of --help and out of the flag index in SKILL.md.
+    # so it stays out of --help and out of the flag index in scripts/README.md.
     parser.add_argument("--fixture-dir", metavar="DIR", help=argparse.SUPPRESS)
 
 

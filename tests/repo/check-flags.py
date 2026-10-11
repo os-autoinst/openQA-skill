@@ -6,8 +6,9 @@
 For every skill with scripts/*.py, reads the argparse parser of each script without running the
 script's work, and checks:
 
-  index     the "## Script flags" section of SKILL.md is exactly what the parsers render
-            (--write regenerates it); a skill without public scripts needs no section
+  index     the "## Script flags" section of scripts/README.md is exactly what the parsers render
+            (--write regenerates it); SKILL.md points at it with "->" and has no heading of that
+            title; none of this applies to a skill without public scripts
   meaning   every option appears in that script's section of scripts/README.md; only the flags
             every openQA script shares may be explained once in the preamble instead
   citations every "<script>.py ... --flag" in a code span, fenced or indented block of SKILL.md,
@@ -30,6 +31,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 HEADING = "## Script flags"
+POINTER = 'scripts/README.md "Script flags"'
+# refsection.py finds a title at any level, whatever its case, and by prefix.
+COPY = re.compile(r"(?i) {0,3}#{1,6}[ \t]+script flags")
 SPAN = re.compile(r"`([^`]+)`")
 CALL = re.compile(r"(?:\$\s+)?(?:python3\s+)?(?:\S*/)?([A-Za-z_-]+\.py)\b(.*)")
 COMMANDS = re.compile(r"&&|\|\||;")
@@ -180,10 +184,11 @@ def uses_common(parser, common):
 def render(parsers, common, has_refsection):
     """The body of the "Script flags" section for the public scripts."""
     public = {n: p for n, p in sorted(parsers.items()) if not n.startswith("_")}
-    readme = "scripts/README.md"
+    where = "that script's section below"
     if has_refsection:
-        readme = f'`python3 scripts/refsection.py {readme} "<script>"`'
-    lines = ["", f"What a flag means: {readme}.", ""]
+        where = '`python3 scripts/refsection.py scripts/README.md "<script>"`'
+    intro = "One line per script, generated from the parsers: do not edit it by hand."
+    lines = ["", f"{intro} What a flag means: {where}.", ""]
     users = [n for n, p in public.items() if uses_common(p, common)]
     if users:
         flags = ", ".join(f"`{usage(a)}`" for a in dict.fromkeys(common.values()))
@@ -202,6 +207,17 @@ def section_span(text, heading):
     following = re.search(r"^## ", text[match.end() :], re.MULTILINE)
     end = match.end() + following.start() if following else len(text)
     return match.end(), end
+
+
+def copy_line(text):
+    """Line of a heading that refsection.py would print as "Script flags", or None."""
+    fenced = False
+    for num, line in enumerate(text.splitlines(), 1):
+        if line.lstrip().startswith(("```", "~~~")):
+            fenced = not fenced
+        elif not fenced and COPY.match(line):
+            return num
+    return None
 
 
 def readme_sections(text):
@@ -258,29 +274,35 @@ def check_skill(skill, write, problems):
 
     # index
     skill_md = skill / "SKILL.md"
+    readme = skill / "scripts" / "README.md"
     text = skill_md.read_text(encoding="utf-8")
-    span = section_span(text, HEADING)
+    notes = readme.read_text(encoding="utf-8") if readme.exists() else ""
     common = common_actions(skill)
     if any(not n.startswith("_") for n in scripts):
+        copy = copy_line(text)
+        if copy:
+            problems.append(
+                f'index: {rel(skill_md)}:{copy}: "{HEADING}" belongs in scripts/README.md'
+            )
+        span = section_span(notes, HEADING)
         if span is None:
-            problems.append(f'index: {rel(skill_md)}: no "{HEADING}" section')
+            problems.append(f'index: {rel(readme)}: no "{HEADING}" section')
         else:
             wanted = render(parsers, common, "refsection.py" in scripts)
-            if text[span[0] : span[1]] != wanted:
+            if notes[span[0] : span[1]] != wanted:
                 if write:
-                    text = text[: span[0]] + wanted + text[span[1] :]
-                    skill_md.write_text(text, encoding="utf-8")
+                    notes = notes[: span[0]] + wanted + notes[span[1] :]
+                    readme.write_text(notes, encoding="utf-8")
                 else:
                     problems.append(
-                        f'index: {rel(skill_md)}: "{HEADING}" does not match the parsers; '
+                        f'index: {rel(readme)}: "{HEADING}" does not match the parsers; '
                         "run python3 tests/repo/check-flags.py --write"
                     )
+        if f"-> {POINTER}" not in text:
+            problems.append(f"index: {rel(skill_md)}: no pointer -> {POINTER}")
 
     # meaning
-    readme = skill / "scripts" / "README.md"
-    preamble, sections = readme_sections(
-        readme.read_text(encoding="utf-8") if readme.exists() else ""
-    )
+    preamble, sections = readme_sections(notes)
     for name, parser in parsers.items():
         for action in parser._actions:
             if not (action.option_strings and shown(action)):
@@ -313,7 +335,7 @@ def check_skill(skill, write, problems):
             if (named and HELP.search(line)) or "`--help`" in line:
                 problems.append(
                     f"no-help: {rel(doc)}:{num}: sends the agent to --help; "
-                    f'point at SKILL.md "Script flags" instead'
+                    f"point at {POINTER} instead"
                 )
             for piece in pieces:
                 for command in COMMANDS.split(piece):
@@ -337,7 +359,7 @@ def main(argv=None):
     parser.add_argument(
         "--write",
         action="store_true",
-        help='regenerate the "Script flags" section of each SKILL.md',
+        help='regenerate the "Script flags" section of each scripts/README.md',
     )
     args = parser.parse_args(argv)
     problems, checked = [], 0

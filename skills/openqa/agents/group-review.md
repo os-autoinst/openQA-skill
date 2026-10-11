@@ -40,7 +40,7 @@ Steps:
 4. **Draft** each comment; run `scripts/oqa-comment-lint.py` on it and fix until it reports that the job will count as reviewed and whether it carries over.
 5. **Return drafts**; after the caller has posted approved ones, rerun the sweep to confirm.
 
-Flags used here; others -> SKILL.md "Script flags". Exit 0 = output printed, also for failed jobs (`&&` chains work); 2 = error; the lint exits 1 on findings.
+Flags used here; others -> scripts/README.md "Script flags". Exit 0 = output printed, also for failed jobs (`&&` chains work); 2 = error; the lint exits 1 on findings.
 
 ```
 oqa-sweep.py --host <h> --group <id> [--group <id>] [--todo | --passed] [--build <b>] [--include-softfailed] [--limit N]

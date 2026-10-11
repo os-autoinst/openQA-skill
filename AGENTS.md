@@ -42,8 +42,9 @@ Rules for humans and agents changing this repository.
   1 findings (lint-type scripts only; digest scripts `oqa-job/-log/-history/-sweep.py` exit 0 once the digest is
   printed and return 1 only with `--exit-code`), 2 usage or runtime error.
 - **Agents never need `--help`.** After adding, renaming or removing a flag, run
-  `python3 tests/repo/check-flags.py --write` to regenerate `SKILL.md` "Script flags", and say what the flag
-  does in that script's section of `scripts/README.md`. A test-only flag gets `help=argparse.SUPPRESS`.
+  `python3 tests/repo/check-flags.py --write` to regenerate `scripts/README.md` "Script flags", and say what
+  the flag does in that script's own section of the same file. An argument a block's command cannot run
+  without is also shown in that block of `SKILL.md`. A test-only flag gets `help=argparse.SUPPRESS`.
 - Network scripts go through `scripts/_oqa.py`: GET only, no `Referer`, no credentials, host from `--host`.
   Do not add a code path that can write.
 - Every piece of third-party text printed goes through `scripts/_sanitize.py`, stdout and stderr alike: an

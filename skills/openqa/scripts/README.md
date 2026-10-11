@@ -11,6 +11,27 @@ Output: `key=value`, values bare unless they could read as prose, then `"quoted"
 left out** (no `clone chain` line = never restarted). API scripts start with `job=<id> host=<url>` (sweep:
 `host=<url>`) and end with `requests: N`. `-v` restores what the default leaves out.
 
+## Script flags
+
+One line per script, generated from the parsers: do not edit it by hand. What a flag means: `python3 scripts/refsection.py scripts/README.md "<script>"`.
+
+- `--host HOST` on oqa-history.py, oqa-job.py, oqa-log.py, oqa-sweep.py
+- `check-module.py [FILE...] [--list-rules] [--disable IDS]...`; exit 1: findings
+- `check-schedule.py [--repo REPO] [--module DIR/NAME] [--strict] [--fallback] [--errors-only] [--all-conventions] [--max-findings N] [FILE...]`; exit 1: errors (with --strict: any finding; with --module: no reference found)
+- `needle-lint.py [--strict] [--errors-only] PATH...`; exit 1: errors (with --strict: any finding)
+- `new-module.py --kind {console,container,python,service,transactional,x11,yam-validate} --path PATH --summary SUMMARY --maintainer MAINTAINER [--package PACKAGE] [--repo REPO] [--stdout]`
+- `oqa-comment-lint.py [FILE] [--text TEXT] [--private-suffix SUFFIX]...`; exit 1: at least one warning
+- `oqa-history.py JOB [--previous N] [--investigation] [--max-items N] [--exit-code] [--verbose]`
+- `oqa-job.py JOB [--settings REGEX] [--steps N] [--module NAME] [--all-steps] [--exit-code] [--verbose]`
+- `oqa-log.py JOB [--file NAME] (--list | --tail N | --grep REGEX | --errors | --around-module MODULE | --runtimes | --members) [--member PATH] [--compare JOB] [--context N] [--max-matches N] [--ignore-case] [--max-lines N] [--max-line-chars N] [--max-bytes BYTES] [--verbose] [--exit-code]`
+- `oqa-ref.py REF [--body] [--files]`
+- `oqa-sweep.py [--group ID]... [--build BUILD] [--todo] [--include-softfailed] [--limit N] [--passed] [--module NAME] [--groups] [--match REGEX] [--uses-schedule PATH] [--exit-code]`
+- `refsection.py [--list] FILE [TITLE...]`; exit 1: section missing or ambiguous
+- `review-lint.py [FILE] --lines N [--lib] [--replies N] [--late]`; exit 1: findings
+- `ticket-lint.py [FILE] [--private-suffix SUFFIX]...`; exit 1: findings
+- `vr-clone-cmd.py --job JOB... [--pr URL] [--fork USER] [--branch REF] [--repo-name NAME] [--needles-fork USER] [--needles-branch REF] [--needles-repo-name NAME] [--schedule LIST] [--skip-chained-deps] [--within-instance] [--label BUILD] [--set KEY=VALUE]... [--dry-run-flag] [--parent-publishes]`; exit 1: command printed with hazard lines
+- `vr-reach.py [--repo REPO] [--base REF] [--max-items N]`
+
 ## oqa-sweep.py - what still fails in a build
 
 `jobs?result=failed&latest=1` also lists failures whose restart passed; the overview route does not.

@@ -7,9 +7,13 @@ Exit 0 when every check passes, 1 otherwise. One line per finding: "<check>: <fi
 """
 
 import argparse
+import importlib.util
 import re
 import sys
 from pathlib import Path
+
+# The gate imports the skill's own scripts and must leave no cache in the tree it checks.
+sys.dont_write_bytecode = True
 
 ROOT = Path(__file__).resolve().parents[2]
 SKILLS = ROOT / "skills"
@@ -24,30 +28,19 @@ ALLOWED_KEYS = {
     "allowed-tools",
 }
 
-# Byte caps. SKILL.md is loaded on every trigger; references are read a section at a time.
-DEFAULT_REFERENCE_CAP = 15000
+# Byte caps: what one read may cost an agent. Why these numbers: AGENTS.md "Token budget".
+# A "## " section of a reference with its "### " parts: what one pointer makes an agent read.
+SECTION_CAP = 5000
+# A reference: read whole by mistake, it still fits the 30,000 characters Claude Code returns of
+# a command's output by default (BASH_MAX_OUTPUT_LENGTH).
+FILE_CAP = 17000
+# A playbook, read whole by its sub-agent.
+AGENT_CAP = 5000
+# Files that are read whole, each capped as the one read it is.
 BUDGETS = {
     "SKILL.md": 16700,
     "references/untrusted-content.md": 7900,
-    "references/site-policy.md": 6500,
-    "references/pr-reviewing.md": 7500,
-    "references/custom-distri.md": 8000,
-    "references/agnostic-tests.md": 9000,
-    "references/review-tooling.md": 10500,
-    "references/review-comments-tickets.md": 12000,
-    "references/needles-gui.md": 13000,
-    "references/multimachine.md": 13000,
-    "references/contributing-gates.md": 13000,
-    "references/area-conventions.md": 13000,
-    "references/review-workflow.md": 13000,
-    "references/bugs-and-tickets.md": 16000,
-    "references/openqa-model.md": 14100,
-    "references/clone-and-run.md": 14000,
-    "references/job-triage.md": 15500,
-    "references/distri-helpers.md": 17000,
-    "references/module-templates.md": 16000,
 }
-AGENT_CAP = 5000
 
 # Applied only to lines containing "->"; also catches ', other-file.md "Section"' continuations.
 POINTER_RE = re.compile(
@@ -251,19 +244,60 @@ def check_frontmatter(skill, out):
         )
 
 
+def section_reader(skill):
+    """The skill's own refsection.py: sections are cut and measured as an agent is served them."""
+    script = skill / "scripts" / "refsection.py"
+    if not script.exists():
+        return None
+    path, modules = sys.path[:], set(sys.modules)
+    sys.path[:0] = [str(script.parent)]  # it imports its sibling _sanitize
+    try:
+        spec = importlib.util.spec_from_file_location("refsection", script)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+    finally:
+        sys.path[:] = path
+        siblings = {p.stem for p in script.parent.glob("*.py")}
+        for name in siblings & (set(sys.modules) - modules):
+            del sys.modules[name]  # the next skill imports its own
+    return module
+
+
+def outline(reader, path):
+    """Yield (title, level, first line, bytes) per heading; bytes are what `refsection.py --list` prints."""
+    lines = path.read_text(encoding="utf-8").split("\n")
+    for sec in reader.parse(lines):
+        size = len(reader.body(lines, sec).encode("utf-8"))
+        yield sec.title, sec.level, sec.start + 1, size
+
+
 def check_budget(skill, out):
+    where = f"skills/{skill.name}"
     for path in sorted(skill.rglob("*.md")):
         rel = path.relative_to(skill).as_posix()
         if rel.startswith("scripts/"):
             continue
-        cap = BUDGETS.get(
-            rel, AGENT_CAP if rel.startswith("agents/") else DEFAULT_REFERENCE_CAP
-        )
+        cap = BUDGETS.get(rel, AGENT_CAP if rel.startswith("agents/") else FILE_CAP)
         size = path.stat().st_size
         if size > cap:
             out.append(
-                f"budget: skills/{skill.name}/{rel}: {size} bytes exceeds cap {cap} by {size - cap}"
+                f"budget: {where}/{rel}: {size} bytes exceeds cap {cap} by {size - cap}"
             )
+    if not (skill / "references").is_dir():
+        return
+    reader = section_reader(skill)
+    if reader is None:
+        out.append(
+            f"budget: {where}/scripts/refsection.py: missing, so no section can be measured"
+        )
+        return
+    for path in sorted((skill / "references").glob("*.md")):
+        for title, level, first, size in outline(reader, path):
+            if level >= 2 and size > SECTION_CAP:
+                out.append(
+                    f'budget: {where}/references/{path.name}:{first}: section "{title}" is {size} '
+                    f"bytes, {size - SECTION_CAP} over the section cap {SECTION_CAP}"
+                )
 
 
 def check_pointers(skill, out):

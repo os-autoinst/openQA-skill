@@ -19,7 +19,12 @@ Rules for humans and agents changing this repository.
 
 - `SKILL.md` is loaded on every trigger: keep it under its byte cap (`tests/repo/check-skills.py`, `BUDGETS`).
 - References are read one `## ` section at a time through `scripts/refsection.py`, so every section stands
-  alone, titles are short and stable, and each file stays under its cap.
+  alone and titles are short, stable and unique within their file. The Agent Skills specification sets no
+  size for a reference; the caps in `tests/repo/check-skills.py` follow what one read costs. A `## ` section,
+  its `### ` parts included, is at most 5,000 bytes. A file is at most 17,000 bytes, so that one read whole
+  by mistake still fits the 30,000 characters of command output that one harness returns by default.
+  `untrusted-content.md`, the one reference read whole, keeps its own cap in `BUDGETS`. Over a cap: split the
+  section or drop what another section owns; do not raise the cap.
 - **One owner per rule.** State a rule once, in the file that owns the topic; elsewhere write
   `-> references/<file>.md "<Section>"`. The gate resolves every pointer against real section titles.
 - Playbooks (`agents/`, cap 5000 bytes) are read by sub-agents that have not seen `SKILL.md`: the "read before
@@ -54,8 +59,10 @@ Rules for humans and agents changing this repository.
 1. Create `skills/<name>/SKILL.md`; `<name>` matches `^[a-z0-9]+(-[a-z0-9]+)*$` and equals the frontmatter
    `name`. Frontmatter keys: `name`, `description` (at most 1024 characters, says when to use the skill),
    `license`, and optionally `compatibility`, `metadata`, `allowed-tools`.
-2. Keep the skill self-contained: no path leaves its directory. If it would share much with an existing
-   skill, add a block to that skill instead.
+2. Keep the skill self-contained: no path leaves its directory. A skill with references ships its own
+   `scripts/refsection.py`; the gate imports it to read the sections. If it would share much with an
+   existing skill, add a block to that skill instead.
 3. Put tests under `tests/<name>/`, evaluation prompts under `evals/<name>/`.
-4. Add a row to the table in `README.md` and budgets to `tests/repo/check-skills.py`.
+4. Add a row to the table in `README.md` and, for a file that is read whole, its cap to `BUDGETS` in
+   `tests/repo/check-skills.py`.
 5. Run the script tests, `python3 tests/repo/check-skills.py` and `python3 tests/repo/check-flags.py`.

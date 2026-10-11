@@ -20,7 +20,7 @@ Then decide, one report per defect class:
 | the same defect in N scenarios or packages | one report on the cleanest instance, the others listed by job |
 | nothing new to add | no comment; the job comment carries the ref |
 
-Next -> bugs-and-tickets.md "Bugzilla fields", "Bug body" (progress: "progress fields", "Ticket body"), then "Refute before the ask", "Approval ask", "Filing and read-back"; "Privacy" throughout.
+Next: a bug -> "Bugzilla fields", "Bug body"; a ticket -> "progress fields", "Ticket body"; then -> "Refute before the ask", "Approval ask", "Filing and read-back"; throughout -> "Privacy".
 
 ## Bugzilla fields
 

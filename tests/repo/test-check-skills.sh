@@ -270,11 +270,75 @@ size=$(wc -c <"$skill/SKILL.md")
 filler $((16701 - size)) >>"$skill/SKILL.md"
 finds "budget: SKILL.md over its cap" budget "/SKILL.md: "
 
+# add LINE... to FILE of a clean copy
+add() {
+	fresh
+	local file=$1
+	shift
+	printf '%s\n' "$@" >>"$skill/$file"
+}
+add "$ref" '-> testapi.md "No such section"'
+finds "pointers: a section that does not exist" pointers "'testapi.md' has no section \"No such section\""
+add agents/job-triage.md '-> nosuch.md "Traps"'
+finds "pointers: a file that does not exist" pointers "no such file 'nosuch.md'"
+add "$ref" '-> references/SKILL.md "Write gate"'
+finds "pointers: references/ names a reference only" pointers "no such file 'references/SKILL.md'"
+add "$ref" '-> docs/testapi.md "Traps"'
+finds "pointers: a file is the whole path as written" pointers "no such file 'docs/testapi.md'"
+add "$ref" 'As testapi.md "No such section" says.'
+finds "pointers: a pointer without an arrow is resolved" pointers "'testapi.md' has no section \"No such section\""
+add SKILL.md '-> testapi.md "Traps", module-templates.md "Common shape", scheduling.md "Nope"'
+finds "pointers: the third file of a chain is resolved" pointers "'scheduling.md' has no section \"Nope\""
+add agents/test-author.md '-> module-templates.md "Console smoke test" / "Nope"'
+finds "pointers: a title after a slash is resolved" pointers "'module-templates.md' has no section \"Nope\""
+add "$ref" '-> "Nope"'
+finds "pointers: a same-file pointer is resolved" pointers "'redaction.md' has no section \"Nope\""
+add "$ref" '-> "What it is not" / "Nope"'
+finds "pointers: a same-file title after a slash is resolved" pointers "'redaction.md' has no section \"Nope\""
+add "$ref" '-> "What it is not"' '```' '-> nosuch.md "X"' '## What it is not' '```'
+check "pointers: a same-file pointer that resolves, and fenced text, pass" \
+	"ok - all repository checks pass" "$(gate pointers)"
+add agents/job-triage.md '-> "Rules"'
+finds "pointers: a playbook pointer without its file" pointers "needs its file"
+add "$ref" '-> testapi.md "Traps" and "Hook order"'
+finds "pointers: a section title left outside the pointer" pointers '"Hook order" is a section of'
+add "$ref" '-> testapi.md "Traps" and "Before you post"'
+finds "pointers: a title of the line's own file left outside the pointer" pointers \
+	"\"Before you post\" is a section of 'redaction.md'"
+add "$ref" '-> testapi.md "os-autoinst test API"'
+finds "pointers: a pointer to a whole file" pointers "is the whole of 'testapi.md'"
+add "$ref" '## what it is NOT' '-> "Before you post"'
+finds "pointers: a title that repeats another, whatever the case" pointers \
+	"repeats line $(line '## What it is not')"
+add SKILL.md '## reading this skill'
+printf '## SCRIPTS\n' >>"$skill/scripts/README.md"
+out=$(gate pointers)
+check "pointers: a repeated title in SKILL.md and in scripts/README.md" "1 1" \
+	"$(grep -c '/SKILL.md:.* repeats line' <<<"$out") $(grep -c '/scripts/README.md:.* repeats line 1$' <<<"$out")"
+add "$ref" '## notes.md'
+finds "pointers: a title that refsection.py would read as a file" pointers 'heading "notes.md" ends in .md'
+add SKILL.md '`scripts/missing-script.py`'
+finds "pointers: a script SKILL.md names but does not ship" pointers "script 'missing-script.py' does not exist"
+# refsection.py reads scripts/README.md too, and finds a script's notes by the script's name
+add SKILL.md '-> scripts/README.md "refsection.py", "oqa-job.py - one job, ready to classify"'
+check "pointers: the clean tree resolves, scripts/README.md included" \
+	"ok - all repository checks pass" "$(gate pointers)"
+add SKILL.md '-> scripts/README.md "nosuch.py"'
+finds "pointers: a section scripts/README.md does not have" pointers "'scripts/README.md' has no section \"nosuch.py\""
+add SKILL.md '-> README.md "refsection.py"'
+finds "pointers: scripts/README.md is named with its directory" pointers "no such file 'README.md'"
+add SKILL.md '-> scripts/README.md "refsection.py"'
+printf '## Refsection.py --list - the outline\n' >>"$skill/scripts/README.md"
+finds "pointers: a script name that two sections of scripts/README.md start with, whatever the case" pointers \
+	"'scripts/README.md' has no section \"refsection.py\""
+
 fresh
 mkdir -p "$work/repo/skills/zz"
 printf -- '---\nname: zz\ndescription: A second skill.\nlicense: GPL-2.0-or-later\n---\n\n# zz\n' >"$work/repo/skills/zz/SKILL.md"
 out=$(gate frontmatter,budget,pointers)
 check "a second skill without references or scripts passes" "0 ok - all repository checks pass" "$? $out"
+printf -- '\n-> SKILL.md "zz"\n' >>"$work/repo/skills/zz/SKILL.md"
+finds "pointers: without refsection.py no pointer can be resolved" pointers "zz/scripts/refsection.py: missing"
 mkdir "$work/repo/skills/zz/references"
 printf '# R\n\n## One\n\nText.\n' >"$work/repo/skills/zz/references/r.md"
 finds "budget: references without refsection.py cannot be measured" budget "zz/scripts/refsection.py: missing"

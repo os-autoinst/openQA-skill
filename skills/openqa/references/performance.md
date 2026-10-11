@@ -8,8 +8,8 @@ Runtime is paid once per job per architecture, so a saving is paid back on every
 
 | Cost | Order | Why |
 |---|---|---|
-| one testapi call | ~0.3 s | type the command, run it, wait for the exit marker: a round trip |
-| a long command | ~1 s per 25 characters | the serial terminal types character by character |
+| one testapi call | tenths of a second | send the command, run it, wait for the exit marker: a round trip |
+| a long command on a VT | grows with its length | a VNC console types key by key (`max_interval`); the serial terminal writes the whole string at once |
 | a VGA console start | tens of seconds | wait for the VGA, log in, set up the prompt, install serial markers |
 | `sleep N` | N s | guessed, and paid on every run and architecture |
 | a service restart | seconds | a daemon start/stop, not a function call |
@@ -25,12 +25,14 @@ Independent commands belong in one round trip.
 
 ```perl
 # before: three round trips
-script_run "ip netns add ns0";
-script_run "ip netns add ns1";
-script_run "ip link set veth0 netns ns0";
+assert_script_run "ip netns add ns0";
+assert_script_run "ip netns add ns1";
+assert_script_run "ip link set veth0 netns ns0";
 # after: one
-script_run "ip netns add ns0; ip netns add ns1; ip link set veth0 netns ns0";
+assert_script_run "ip netns add ns0 && ip netns add ns1 && ip link set veth0 netns ns0";
 ```
+
+Join with `&&`, not `;`: after `;` only the last command's exit code is checked.
 
 A loop that calls the test API once per item is the same mistake:
 
@@ -41,7 +43,7 @@ foreach my $timer (@timers) { systemctl("disable --now '$timer'"); }
 systemctl("disable --now @timers");
 ```
 
-Generated content goes in with `write_sut_file` and runs with a short command, because a here-doc or a long `echo` is typed on the serial console -> references/distri-helpers.md "Test data":
+Generated content goes in with `write_sut_file` and runs with a short command, because a here-doc or a long `echo` is typed key by key on a VT -> references/distri-helpers.md "Test data":
 
 ```perl
 write_sut_file('/tmp/setup.sh', "set -ex\n" . join("\n", @cmds) . "\n");
@@ -52,8 +54,8 @@ assert_script_run('bash /tmp/setup.sh', timeout => 120);
 
 ## Measure and size
 
-- Per-module seconds and the slowest calls: `oqa-log.py JOB --runtimes` -> references/job-triage.md "Triage order".
-- A saving is a claim: measure the module on the same product and architecture before and after -> references/clone-and-run.md "Where to run".
+- Per-module seconds and the slowest calls: `scripts/oqa-log.py <job> --runtimes`.
+- A saving is a claim: run the module on the same product and architecture before and after (-> references/clone-and-run.md "Where to run") and compare: `scripts/oqa-log.py <after> --runtimes --compare <before>`.
 - In a multimachine job, measure the whole cluster, not only the parent.
 - To size the yearly win, count how often the scenario runs and multiply. Count production jobs, not your own verification clones.
 
@@ -69,4 +71,4 @@ One idea per change, verified before the next, so a regression is a single rever
 
 ## Sources
 
-os-autoinst-distri-opensuse `lib/utils.pm` (`write_sut_file`), `lib/serial_terminal.pm` (`select_serial_terminal`), `lib/opensusebasetest.pm`, `lib/consoletest.pm`; os-autoinst `distribution.pm` (`script_output` here-doc), `testapi.pm` (`type_string` `max_interval`); openQA docs/WritingTests.md
+os-autoinst-distri-opensuse `lib/utils.pm` (`write_sut_file`), `lib/serial_terminal.pm` (`select_serial_terminal`), `lib/opensusebasetest.pm`, `lib/consoletest.pm`; os-autoinst `distribution.pm` (`script_output` here-doc), `testapi.pm` (`type_string` `max_interval`), `consoles/serial_screen.pm` (`type_string`); openQA docs/WritingTests.md

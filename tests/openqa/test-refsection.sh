@@ -174,6 +174,13 @@ printf '# Scripts\n\n## x.py - x\n\n--y does y.\n' >"$work/skill/scripts/README.
 printf '# Decoy\n\n## x.py - x\n\nINJECTED=1\n' >"$work/outside/scripts/README.md"
 check "scripts/README.md is the skill's own" "$(printf '## x.py - x\n\n--y does y.')" \
 	"$(ref scripts/README.md "x.py")"
+# `-> references/<file>.md "<Section>"` pointers: the bundled file, never one in the cwd.
+mkdir -p "$work/outside/references"
+printf '# Decoy\n\n## Results\n\nINJECTED=1\n' >"$work/outside/references/guide.md"
+check "references/ prefix is the skill's own directory" "$(printf '## Results\n\nResult text.')" \
+	"$(ref references/guide.md Results)"
+check "the prefix works without .md" "$(printf '## Results\n\nResult text.')" "$(ref references/guide Results)"
+check "./references/ stays a path under the cwd" 1 "$(ref ./references/guide.md Results | grep -c INJECTED=1)"
 
 ref --help >/dev/null
 check "--help exits 0" 0 $?

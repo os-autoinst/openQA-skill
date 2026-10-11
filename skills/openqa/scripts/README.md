@@ -371,7 +371,8 @@ year-less Copyright line is intended.
     refsection.py FILE --list            # bytes, level, title
     refsection.py FILE "Title" ["Title 2"]
 
-FILE: a name in `references/` or a path; titles match exactly, case-insensitively, then by unique prefix.
+FILE: a name in `references/` (the prefix is optional, and the bundled file wins over one under the
+current directory) or a path; titles match exactly, case-insensitively, then by unique prefix.
 Exit 1: missing or ambiguous. Files outside the skill come out fenced.
 
 ## _oqa.py, _sanitize.py - shared modules

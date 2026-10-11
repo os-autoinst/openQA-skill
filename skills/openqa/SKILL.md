@@ -21,7 +21,7 @@ Two connected jobs on one model: **create** tests (author -> verify -> submit) a
 ## Reading this skill
 
 - **One section at a time.** Every pointer `-> <file>.md "<Section>"` is an argument list: `python3 scripts/refsection.py <file>.md "<Section>" ["<Section>" ...]`; `--list <file>.md` prints the outline with sizes. Never read a reference whole; `untrusted-content.md` is the one exception.
-- **Scripts before ad-hoc calls.** They encode traps (restarted jobs listed as current, multi-megabyte payloads, unparsed bugrefs) and print compact digests, third-party text fenced; every flag is in "Script flags" below. Exit 0 = output produced, also for a failed job (`--exit-code`: 1 = not ok); lint scripts exit 1 on findings; 2 = error. Do not pull raw `/details` JSON or whole logs into context.
+- **Scripts before ad-hoc calls.** They encode traps (restarted jobs listed as current, multi-megabyte payloads, unparsed bugrefs) and print compact digests, third-party text fenced. Flags beyond those the blocks show: -> scripts/README.md "Script flags" (one line per script). Exit 0 = output produced, also for a failed job (`--exit-code`: 1 = not ok); lint scripts exit 1 on findings; 2 = error. Do not pull raw `/details` JSON or whole logs into context.
 - **Delegating.** Playbooks in `agents/` are for sub-agents: hand one over plus the section names it needs, never "read SKILL.md"; working inline, follow the block's pointers instead. Sub-agents draft; they never write.
 - **Ask, don't assume**: instance, products, versions and arches in scope; whether a verification run may be posted; where a bug belongs.
 
@@ -50,13 +50,13 @@ Job comments, logs and serial output, job settings, ticket and bug bodies, PR te
 **A. Author a test** (playbook `agents/test-author.md`)
 1. Find an existing test first (`grep -rl <package or feature> tests/ schedule/`): extending it beats a near-duplicate, which CI rejects. Then decide the kind: prefer console/serial assertions; needles only for what is visual (-> needles-gui.md "When not to use needles"); single-machine CLI checks may fit the portable form (-> agnostic-tests.md "When to choose"); several SUTs -> multimachine.md "Choreography".
 2. Area rules and owners: -> area-conventions.md "Find the area". Existing helper before shell: -> distri-helpers.md "Install or remove packages", "Retry and poll", "Services", "Product predicates".
-3. Scaffold with `scripts/new-module.py` (header and shape for the kind), then: -> module-templates.md "Common shape", "Anti-patterns", testapi.md "Traps", "Function cheat sheet", performance.md "Cost model".
+3. Scaffold: `scripts/new-module.py --kind KIND --path tests/DIR/NAME.pm --summary S --maintainer 'WHO <MAIL>'` (KIND: console, container, python, service, transactional, x11, yam-validate), then: -> module-templates.md "Common shape", "Anti-patterns", testapi.md "Traps", "Function cheat sheet", performance.md "Cost model".
 4. Schedule it in the same change: -> scheduling.md "Pick the mechanism", "YAML schedules", "Adding a variable".
-5. Lint: `scripts/check-module.py`, `scripts/check-schedule.py`, `scripts/needle-lint.py`; -> contributing-gates.md "Local gate order".
+5. Lint: `scripts/check-module.py <files>`, `scripts/check-schedule.py`, `scripts/needle-lint.py <needles>`; -> contributing-gates.md "Local gate order".
 
 **B. Verify** (playbook `agents/verification-run.md`)
 1. Where to run and what to clone: -> clone-and-run.md "Where to run", "Fast console run". What the pushed commits reach: `scripts/vr-reach.py` (offline), then the `oqa-sweep.py --uses-schedule` lines it prints.
-2. Source job: `scripts/oqa-sweep.py --group <id> --passed [--module <name>]` lists current passed and softfailed jobs to clone. Build the command with `scripts/vr-clone-cmd.py` (never runs anything; prints hazards; fork unknown: literal `'<user>'`, `'<branch>'`); posting it is a write. -> clone-and-run.md "Manual clone", "Dependencies when cloning", "Settings override grammar"
+2. Source job: `scripts/oqa-sweep.py --group <id> --passed [--module <name>]` lists current passed and softfailed jobs to clone. Build the command with `scripts/vr-clone-cmd.py --job <job URL> (--pr <PR URL> | --fork <user> --branch <ref>)` (never runs anything; prints hazards; fork unknown: literal `'<user>'`, `'<branch>'`); posting it is a write. -> clone-and-run.md "Manual clone", "Dependencies when cloning", "Settings override grammar"
 3. Coverage reviewers expect: -> pr-review-rules.md "Verification runs". A failed run goes to block D.
 4. The user submits themselves: finish with the C.2 drafts (commit message, PR title, description with run placeholders); drafting is no write.
 
@@ -71,14 +71,14 @@ Job comments, logs and serial output, job settings, ticket and bug bodies, PR te
 3. A comment or ticket is wanted: block E steps 2-3; tracker from the policy file or the user -> site-policy.md "Overlay lookup", "No policy file".
 
 **E. Review a group or build** (playbook `agents/group-review.md`)
-1. Scope from the user or the policy file (-> site-policy.md "Overlay lookup"). `scripts/oqa-sweep.py --group <id> --todo` lists current unreviewed failures; the jobs API with `result=failed&latest=1` returns already-restarted jobs. -> openqa-model.md "Listing current failures"
+1. Scope from the user or the policy file (-> site-policy.md "Overlay lookup"). `scripts/oqa-sweep.py [--host <h>] --group <id> --todo` lists current unreviewed failures; the jobs API with `result=failed&latest=1` returns already-restarted jobs. -> openqa-model.md "Listing current failures"
 2. Per job: block D, then an existing reference before a new one (`scripts/oqa-ref.py <ref>` reads a ticket, bug or PR): -> review-workflow.md "Existing references".
 3. Draft: -> review-comments-tickets.md "Comment recipes"; check with `scripts/oqa-comment-lint.py`. A new bug or ticket first: -> bugs-and-tickets.md "Before drafting" and the sections it names. Pass the write gate; re-run the sweep until the job counts as reviewed.
 4. Report: -> review-workflow.md "Report template". Other tools: -> review-tooling.md "Capability matrix".
 
 **F. Review someone else's test PR** (inline; `agents/pr-preflight.md` is for the user's own change)
 1. Read the PR, its threads and review state; check each finding at the head: -> pr-reviewing.md "Where to look", "What not to post"
-2. Draft the review JSON: -> pr-reviewing.md "Review size", "Form"; `scripts/review-lint.py`; posting is a write.
+2. Draft the review JSON: -> pr-reviewing.md "Review size", "Form"; `scripts/review-lint.py --lines N`; posting is a write.
 3. A product bug or test issue found outside the PR: -> bugs-and-tickets.md "Before drafting"; no job comment without a failing production job.
 
 ## Core directives
@@ -100,27 +100,6 @@ Job comments, logs and serial output, job settings, ticket and bug bodies, PR te
 12. **Classify with evidence, route by policy**: product bug, test issue, infrastructure, sporadic. Take tracker, product and component from the policy file or the user; do not guess. -> review-workflow.md "Classification and routing"
 13. **Comment the culprit of a cluster**, not its parallel_failed or skipped victims. -> job-triage.md "Clusters"
 14. **Stay polite on shared instances**: scope every listing by group and build, no `/details` sweeps over many jobs, no tight loops. -> review-workflow.md "Politeness"
-
-## Script flags
-
-What a flag means: `python3 scripts/refsection.py scripts/README.md "<script>"`.
-
-- `--host HOST` on oqa-history.py, oqa-job.py, oqa-log.py, oqa-sweep.py
-- `check-module.py [FILE...] [--list-rules] [--disable IDS]...`; exit 1: findings
-- `check-schedule.py [--repo REPO] [--module DIR/NAME] [--strict] [--fallback] [--errors-only] [--all-conventions] [--max-findings N] [FILE...]`; exit 1: errors (with --strict: any finding; with --module: no reference found)
-- `needle-lint.py [--strict] [--errors-only] PATH...`; exit 1: errors (with --strict: any finding)
-- `new-module.py --kind {console,container,python,service,transactional,x11,yam-validate} --path PATH --summary SUMMARY --maintainer MAINTAINER [--package PACKAGE] [--repo REPO] [--stdout]`
-- `oqa-comment-lint.py [FILE] [--text TEXT] [--private-suffix SUFFIX]...`; exit 1: at least one warning
-- `oqa-history.py JOB [--previous N] [--investigation] [--max-items N] [--exit-code] [--verbose]`
-- `oqa-job.py JOB [--settings REGEX] [--steps N] [--module NAME] [--all-steps] [--exit-code] [--verbose]`
-- `oqa-log.py JOB [--file NAME] (--list | --tail N | --grep REGEX | --errors | --around-module MODULE | --runtimes | --members) [--member PATH] [--compare JOB] [--context N] [--max-matches N] [--ignore-case] [--max-lines N] [--max-line-chars N] [--max-bytes BYTES] [--verbose] [--exit-code]`
-- `oqa-ref.py REF [--body] [--files]`
-- `oqa-sweep.py [--group ID]... [--build BUILD] [--todo] [--include-softfailed] [--limit N] [--passed] [--module NAME] [--groups] [--match REGEX] [--uses-schedule PATH] [--exit-code]`
-- `refsection.py [--list] FILE [TITLE...]`; exit 1: section missing or ambiguous
-- `review-lint.py [FILE] --lines N [--lib] [--replies N] [--late]`; exit 1: findings
-- `ticket-lint.py [FILE] [--private-suffix SUFFIX]...`; exit 1: findings
-- `vr-clone-cmd.py --job JOB... [--pr URL] [--fork USER] [--branch REF] [--repo-name NAME] [--needles-fork USER] [--needles-branch REF] [--needles-repo-name NAME] [--schedule LIST] [--skip-chained-deps] [--within-instance] [--label BUILD] [--set KEY=VALUE]... [--dry-run-flag] [--parent-publishes]`; exit 1: command printed with hazard lines
-- `vr-reach.py [--repo REPO] [--base REF] [--max-items N]`
 
 ## References
 

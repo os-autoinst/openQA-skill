@@ -31,7 +31,7 @@ You are the **triage** stage. Goal: a classification that a reviewer can act on,
 | a setting looks wrong: where is it set? | -> openqa-model.md "Read-only API recipes" |
 | it must be reproduced | -> clone-and-run.md "Reproduce a failure" (the caller posts) |
 
-Follow "Triage order" with the bundled scripts, never raw `/details` or whole logs. If the evidence does not decide between two classes, say so and name the one check that would. Flags used here; others -> SKILL.md "Script flags". Exit 0 = output printed, also for a failed job (`&&` chains work); 2 = error; the lint exits 1 on findings.
+Follow "Triage order" with the bundled scripts, never raw `/details` or whole logs. If the evidence does not decide between two classes, say so and name the one check that would. Flags used here; others -> scripts/README.md "Script flags". Exit 0 = output printed, also for a failed job (`&&` chains work); 2 = error; the lint exits 1 on findings.
 
 ```
 oqa-job.py <job URL> [--steps N] [-v]  |  --module <name> --all-steps

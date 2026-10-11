@@ -42,10 +42,15 @@ BUDGETS = {
     "references/untrusted-content.md": 7900,
 }
 
-# Applied only to lines containing "->"; also catches ', other-file.md "Section"' continuations.
+# 'file.md "A", "B" / "C"' names sections of one file, with or without a "->" before it. The
+# file is the whole path as written, because that is the argument refsection.py is given; the
+# lookbehind only keeps the scan linear.
 POINTER_RE = re.compile(
-    r"(?:references/)?([A-Za-z0-9_-]+\.md)((?:\s*,?\s*\"[^\"\n]+\")+)"
+    r"(?<![A-Za-z0-9_./-])([A-Za-z0-9_./-]+\.md)((?:(?:\s*[,/])?\s*\"[^\"\n]+\")+)"
 )
+# '-> "A", "B"' without a file names sections of the file the line is in.
+BARE_RE = re.compile(r"->\s*((?:\"[^\"\n]+\"(?:\s*[,/]\s*)?)+)")
+QUOTED = re.compile(r'"([^"\n]+)"')
 
 # Content that must not reach a public repository.
 PUBLIC_PATTERNS = [
@@ -186,16 +191,6 @@ TEXT_SUFFIXES = {
 }
 
 
-def headings(path):
-    out, fenced = [], False
-    for line in path.read_text(encoding="utf-8").splitlines():
-        if line.lstrip().startswith(("```", "~~~")):
-            fenced = not fenced
-        elif not fenced and (m := re.match(r"^(#{1,6})\s+(.+?)\s*$", line)):
-            out.append(m.group(2))
-    return out
-
-
 def frontmatter(path):
     text = path.read_text(encoding="utf-8")
     if not text.startswith("---\n"):
@@ -300,31 +295,116 @@ def check_budget(skill, out):
                 )
 
 
-def check_pointers(skill, out):
-    heads = {p.name: set(headings(p)) for p in (skill / "references").glob("*.md")}
-    heads["SKILL.md"] = set(headings(skill / "SKILL.md"))
-    for path in [
+def documents(skill):
+    """{path relative to the skill: Path} of the files that hold pointers."""
+    paths = [
         skill / "SKILL.md",
         *sorted((skill / "references").glob("*.md")),
         *sorted((skill / "agents").glob("*.md")),
-    ]:
-        fenced = False
-        for num, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
-            if line.lstrip().startswith(("```", "~~~")):
-                fenced = not fenced
-            if fenced or "->" not in line:
-                continue
-            for m in POINTER_RE.finditer(line):
-                target, sections = m.group(1), re.findall(r'"([^"]+)"', m.group(2))
-                rel = f"skills/{skill.name}/{path.relative_to(skill).as_posix()}:{num}"
-                if target not in heads:
-                    out.append(f"pointers: {rel}: no such file '{target}'")
+    ]
+    return {p.relative_to(skill).as_posix(): p for p in paths}
+
+
+def unfenced_lines(path):
+    fenced = False
+    for num, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+        if line.lstrip().startswith(("```", "~~~")):
+            fenced = not fenced
+        if not fenced:
+            yield num, line
+
+
+def pointers_on(line):
+    """([(file, or None for the file the line is in, [titles])], [other quoted strings after "->"])."""
+
+    def titles(m, part):
+        found = QUOTED.finditer(m.group(part))
+        return {m.start(part) + q.start(): q.group(1) for q in found}
+
+    named = [(m.group(1), titles(m, 2)) for m in POINTER_RE.finditer(line)]
+    bare = [(None, titles(m, 1)) for m in BARE_RE.finditer(line)]
+    taken = {col for _, cols in named + bare for col in cols}
+    found = QUOTED.finditer(line, line.index("->")) if "->" in line else ()
+    return (
+        [(name, list(cols.values())) for name, cols in named + bare],
+        [q.group(1) for q in found if q.start() not in taken],
+    )
+
+
+def check_pointers(skill, out):
+    where = f"skills/{skill.name}"
+    reader = section_reader(skill)
+    docs = documents(skill)
+    targets = {r: p for r, p in docs.items() if not r.startswith("agents/")}
+    if (skill / "scripts" / "README.md").exists():
+        targets["scripts/README.md"] = skill / "scripts" / "README.md"
+    if reader is None and any(
+        pointers_on(line)[0] for p in docs.values() for _, line in unfenced_lines(p)
+    ):
+        out.append(
+            f"pointers: {where}/scripts/refsection.py: missing, so no pointer can be resolved"
+        )
+    # Keyed by every name refsection.py resolves to the file: {title: level}.
+    heads = {}
+    for rel, path in targets.items() if reader else ():
+        found, seen = {}, {}
+        sections = list(outline(reader, path))
+        folded = [title.casefold() for title, *_ in sections]
+        for title, level, first, _ in sections:
+            if title.casefold() in seen:
+                out.append(
+                    f'pointers: {where}/{rel}:{first}: heading "{title}" repeats '
+                    f"line {seen[title.casefold()]}"
+                )
+            seen.setdefault(title.casefold(), first)
+            found.setdefault(title, level)
+            if title.endswith(".md"):
+                out.append(
+                    f'pointers: {where}/{rel}:{first}: heading "{title}" ends in .md, '
+                    "which refsection.py reads as a file"
+                )
+            # refsection.py takes a prefix only one title has: a script's notes by the script's name
+            if rel == "scripts/README.md":
+                short = title.split(" - ")[0]
+                if sum(t.startswith(short.casefold()) for t in folded) == 1:
+                    found.setdefault(short, level)
+        heads[rel] = found
+        if rel.startswith("references/"):
+            heads[path.name] = found
+    for rel, path in docs.items() if reader else ():
+        own = None if rel.startswith("agents/") else path.name
+        for num, line in unfenced_lines(path):
+            at = f"pointers: {where}/{rel}:{num}"
+            groups, loose = pointers_on(line)
+            files = [own] if own else []
+            for target, titles in groups:
+                if target is None and own is None:
+                    out.append(
+                        f'{at}: "{titles[0]}" needs its file: a playbook has no sections'
+                    )
                     continue
-                for sec in sections:
-                    if not sec.startswith("<") and sec not in heads[target]:
+                target = target or own
+                if target not in heads:
+                    out.append(f"{at}: no such file '{target}'")
+                    continue
+                files.append(target)
+                for title in titles:
+                    if title.startswith("<"):
+                        continue
+                    level = heads[target].get(title)
+                    if not level:
+                        out.append(f"{at}: '{target}' has no section \"{title}\"")
+                    elif level == 1:
                         out.append(
-                            f"pointers: {rel}: '{target}' has no section \"{sec}\""
+                            f"{at}: \"{title}\" is the whole of '{target}': name a section"
                         )
+            for title in loose:
+                target = next((f for f in files[::-1] if title in heads[f]), None)
+                if target:
+                    out.append(
+                        f"{at}: \"{title}\" is a section of '{target}' outside a pointer: "
+                        f'join it with a comma or write -> "{title}"'
+                    )
     for m in re.finditer(
         r"`?scripts/([A-Za-z0-9_.-]+\.(?:py|sh))`?",
         (skill / "SKILL.md").read_text(encoding="utf-8"),

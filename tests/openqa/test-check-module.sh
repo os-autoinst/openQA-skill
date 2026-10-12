@@ -255,6 +255,25 @@ EOF
 check "semicolon-chain: silent behind clear, cd home, an echo that writes nothing and an assignment; cd to a directory, an echo with '>', '|' or '&&', a value from \$( ) or backticks, an assignment in front of a command and one command with a status are reported" \
 	"lib/home.pm:6,7,8,9,10,11,12,13: semicolon-chain
 lib/value.pm:4,5,6,7,8,9: semicolon-chain" "$(lint "$chain/lib/home.pm" "$chain/lib/value.pm" | sed "s|$chain/||" | grep -o '^[^ ]* semicolon-chain')"
+cat >"$chain/lib/words.pm" <<'EOF'
+assert_script_run 'grep --ignore-case error /tmp/t/log; ls /tmp/t';
+assert_script_run 'journalctl --until today > /tmp/t/log; ls /tmp/t';
+assert_script_run 'kubectl wait pod t --for condition=Ready; kubectl get pod t';
+assert_script_run 'gfortran -c t.for ; ls t.o';
+assert_script_run 'ovs-vsctl --if-exists del-br br0; ovs-vsctl add-br br0';
+assert_script_run 'crudini --set -e /tmp/t/conf a b c; cat /tmp/t/conf';
+assert_script_run 'ls /tmp/t |while read f; do rm $f; done';
+assert_script_run 'make;if [ -f /tmp/t/a ]; then ls; fi';
+assert_script_run 'make&&for f in a b; do rm $f; done';
+assert_script_run '(for f in a b; do rm $f; done); ls';
+assert_script_run 'echo `for f in a b; do echo $f; done` > /tmp/t/f; ls';
+assert_script_run "sh -c 'until test -e /tmp/t/f; do date; done'; ls";
+assert_script_run 'bash -c "case $1 in a) true;; esac"; ls';
+assert_script_run 'make;set -e; cd /tmp/t; ls';
+assert_script_run 'ls /tmp/t/a; if [ -f /tmp/t/b ]; then ls; fi';
+EOF
+check "semicolon-chain: a keyword or set that starts no word hides no chain ('--ignore-case', '--until', '--for', 'a.for', '--if-exists', '--set -e'); one behind '|', ';', '&', '(', a backtick, a quote or a blank still does" \
+	"lib/words.pm:1,2,3,4,5,6: semicolon-chain" "$(lint "$chain/lib/words.pm" | sed "s|$chain/||" | grep -o '^[^ ]* semicolon-chain')"
 # --- lines built to stall a rule or the reading of the file --------------------------------
 python3 - "$chain" <<'PY'
 import sys

@@ -82,7 +82,7 @@ Classes: PRODUCT, TEST (code, needle, schedule, settings), INFRA (worker, backen
 
 ## Incomplete reasons
 
-`reason` is `<component> <stop reason>: <first message line>`; only the scheduler's (last row) has no prefix.
+`reason` is `<component> <stop reason>: <first message line>`; the last two rows, set by the server, have no prefix.
 
 | `reason` starts with | Meaning, class |
 |---|---|

@@ -212,7 +212,7 @@ assert_script_run("make ; make install", timeout => 600);
 assert_script_run "umount /mnt;dd if=/dev/zero of=/tmp/t bs=512 count=1";
 assert_script_run "yast keyboard set layout=german; echo";
 assert_script_run 'cd /tmp/t; [ a -ef b ]; cd -';
-assert_script_run "cd ~; test -f T.java || wget $url";
+assert_script_run "cd /tmp/t; test -f T.java || wget $url";
 assert_script_run 'rm lock || true; cd /tmp/t; ls';
 assert_script_run 'mkdir /tmp/t; cd /tmp/t;';
 assert_script_run '{ make; make install; }; ls /tmp/t';
@@ -226,6 +226,35 @@ echo "assert_script_run('mkdir /tmp/t; cd /tmp/t')" >"$chain/b.py"
 check "semicolon-chain, also under lib/ and in Python: 'dd if=', 'set layout', a test that is not last, one '||', a ';' at the end as well, a group or a quoted word as a command, one '|', set -x or +e, a stray ')' and 'true &&' hide no chain" \
 	"lib/a.pm:1,2,3,4,5,6,7,8,9,10,11,12,+1: semicolon-chain
 b.py:1: semicolon-chain" "$(lint "$chain/lib/a.pm" "$chain/b.py" | sed "s|$chain/||" | grep -o '^[^ ]* semicolon-chain')"
+cat >"$chain/lib/home.pm" <<'EOF'
+assert_script_run 'clear; make';
+assert_script_run 'cd; rm -rf /tmp/t';
+assert_script_run 'cd ~ ; rm -rf t';
+assert_script_run 'echo "start: $(date)"; make';
+assert_script_run 'clear; cd; echo go; make';
+assert_script_run 'cd /tmp/t; make';
+assert_script_run 'cd ~/t; make';
+assert_script_run 'cdpy; python getParameter.py';
+assert_script_run 'make clear; make';
+assert_script_run 'echo 3 > /proc/sys/vm/drop_caches; sync';
+assert_script_run 'echo go | tee /tmp/t/log; make';
+assert_script_run 'echo go && rm /tmp/t/lock; make';
+assert_script_run 'clear; rm /tmp/t/lock; make';
+EOF
+cat >"$chain/lib/value.pm" <<'EOF'
+assert_script_run 'export PATH=/opt/bin:$PATH; tool';
+assert_script_run "LD=$dir/${type}/exe:\$LD;export LD;$dir/run";
+assert_script_run 'F=/tmp/t/f; N="a b"; touch $F';
+assert_script_run 'TFAIL=$(awk 1 /tmp/t/log); echo $TFAIL';
+assert_script_run 'h=`hostname`; grep -q $h /etc/hosts';
+assert_script_run 'X="$(cat /tmp/t/f)"; make';
+assert_script_run 'F=/tmp/t/f; rm $(cat $F)';
+assert_script_run 'JOBS=4 make; make install';
+assert_script_run 'f=/etc/t; [ ! -f $f ] && f=/usr$f; cat $f';
+EOF
+check "semicolon-chain: silent behind clear, cd home, an echo that writes nothing and an assignment; cd to a directory, an echo with '>', '|' or '&&', a value from \$( ) or backticks, an assignment in front of a command and one command with a status are reported" \
+	"lib/home.pm:6,7,8,9,10,11,12,13: semicolon-chain
+lib/value.pm:4,5,6,7,8,9: semicolon-chain" "$(lint "$chain/lib/home.pm" "$chain/lib/value.pm" | sed "s|$chain/||" | grep -o '^[^ ]* semicolon-chain')"
 # --- lines built to stall a rule or the reading of the file --------------------------------
 python3 - "$chain" <<'PY'
 import sys
@@ -252,14 +281,16 @@ lines = [
     "record_soft_failure '" + "a" * 140000 + "';",
     '"' + '\\"' * 40000 + " 'sleep 5';",
     "'" + "\\'" * 40000 + ' "sleep 5";',
+    "assert_script_run '" + "cd ; A=1 ; " * 20000 + "ls';",
+    "assert_script_run 'echo" + blank + "> /tmp/t; export" + blank + "; ls';",
 ]
 lines += ["<<EOT"] * 20000
 lines += ["# Copyright SUSE LLC", "# Summary: x", "# Maintainer: QE <qe@example.com>", "use Mojo::Base 'consoletest';", "1;"]
 open(f"{sys.argv[1]}/slow.pm", "w").write("\n".join(lines) + "\n")
 PY
 # The file takes a tenth of the limit; put back, each pattern or loop that was replaced takes twice the limit.
-check "no line stalls the script: an open string of backslashes or quotes, deep nesting, a run of spaces behind each call, a call or its argument repeated, here-documents that never end" \
-	"2 semicolon-chain
+check "no line stalls the script: an open string of backslashes or quotes, deep nesting, a run of spaces behind each call, a call or its argument repeated, a chain of 40,000 commands, here-documents that never end" \
+	"2,23 semicolon-chain
 5 spdx-colon
 6,7 script-run-background
 8 zypper-call-noninteractive

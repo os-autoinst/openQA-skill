@@ -493,6 +493,9 @@ _SHELL_CHECKED = re.compile(
     r"|\bset\s+-\w*(?:e|o\s+(?:errexit|pipefail)\b)"
 )
 _STATUS_TEST = re.compile(r"(?:(?:test|\[\[?)\s[^|&]*|true)$")
+# An exit code that says nothing: clear, cd to the home directory, an echo that writes no file, an assignment.
+_NO_STATUS = re.compile(r"(?:clear|cd(?:\s+~)?|echo(?:\s[^|&<>]*)?)$")
+_ASSIGNMENT = re.compile(r"(?:(?:export\s+)?\w+=[^\s|&<>]*|export\s+\w+)$")
 
 
 def _top_level(command):
@@ -528,10 +531,18 @@ def semicolon_chain(module):
             continue
         parts = _top_level(call.group(2)).rstrip("; ").split(";")
         *before, last = [part.strip() for part in parts]
-        # Silent where the last command is the check itself or every other one handles its failure.
-        if not _STATUS_TEST.match(last) and any(
-            part and "||" not in part for part in before
-        ):
+        # Quoted text is a '_' by now, so a value from $( ) or backticks, which can fail, is looked for in the call.
+        computed = "$(" in call.group(2) or "`" in call.group(2)
+        dropped = [
+            part
+            for part in before
+            if part
+            and "||" not in part
+            and not _NO_STATUS.match(part)
+            and (computed or not _ASSIGNMENT.match(part))
+        ]
+        # Silent where the last command is the check itself or no other one drops an exit code that says something.
+        if dropped and not _STATUS_TEST.match(last):
             hits.append(number)
     return hits, (
         "';' joins commands inside assert_script_run: only the last exit code is checked",

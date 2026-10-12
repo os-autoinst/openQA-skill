@@ -424,6 +424,66 @@ def default_timeout(module):
     return hits, ("timeout equals the default", "drop the timeout argument")
 
 
+# Adjacent parts share no character, or a run of backslashes or spaces makes the match backtrack.
+_CHAIN_CALL = re.compile(
+    r"""^\s*assert_script_run\s*(?:\(\s*)?(["'])((?:\\.|(?!\1)[^\\])*)\1"""
+)
+_SHELL_QUOTED = re.compile(r"""'[^']*'|"[^"]*"|`[^`]*`""")
+# $? and PIPESTATUS settle the status; a compound command, a here-document, errexit and pipefail are skipped.
+_SHELL_CHECKED = re.compile(
+    r"\b(?:for|while|until|if|case)[\s(]|\$\?|\bPIPESTATUS\b|<<"
+    r"|\bset\s+-\w*(?:e|o\s+(?:errexit|pipefail)\b)"
+)
+_STATUS_TEST = re.compile(r"(?:(?:test|\[\[?)\s[^|&]*|true)$")
+
+
+def _top_level(command):
+    """The command without escaped ';', with '_' for each quoted text and each ( ) or { } group."""
+    depth, kept = 0, []
+    for char in _SHELL_QUOTED.sub("_", command.replace("\\;", "")):
+        if char in "({":
+            if not depth:
+                kept.append("_")
+            depth += 1
+        elif char in ")}":
+            depth = max(depth - 1, 0)
+        elif not depth:
+            kept.append(char)
+    return "".join(kept)
+
+
+@rule(
+    "semicolon-chain",
+    "review",
+    "all",
+    "after ';' assert_script_run checks only the last exit code",
+)
+def semicolon_chain(module):
+    hits = []
+    for number, line in enumerate(module.raw, 1):
+        call = _CHAIN_CALL.match(line)
+        if (
+            not call
+            or "assert_script_run" not in module.code[number - 1]
+            or _SHELL_CHECKED.search(call.group(2))
+        ):
+            continue
+        parts = _top_level(call.group(2)).rstrip("; ").split(";")
+        *before, last = [part.strip() for part in parts]
+        # Silent where the last command is the check itself or every other one handles its failure.
+        if not _STATUS_TEST.match(last) and any(
+            part and "||" not in part for part in before
+        ):
+            hits.append(number)
+    return hits, (
+        "';' joins commands inside assert_script_run: only the last exit code is checked",
+        (
+            "join with '&&'; a tolerated failure gets '|| true'; a script goes through script_output "
+            "or write_sut_file + 'bash -e' (references/performance.md \"Batch and upload\")"
+        ),
+    )
+
+
 @rule(
     "trailing-true",
     "engine",

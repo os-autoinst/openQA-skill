@@ -31,4 +31,5 @@ sub run {
     zypper_call 'in -y vim';
     type_string "ls\n";
     assert_script_run 'make', timeout => 90;
+    assert_script_run 'mkdir /tmp/t; cd /tmp/t';
 }

@@ -172,7 +172,8 @@ that flag with this skill.
 
 Codex has no file-read tool: everything goes through its shell, so the two files guard that.
 - `openqa-credentials.rules`: `forbidden` rules for `gh auth token`, `gh auth status`,
-  `--apikey` right after an `openqa-cli` subcommand or its `--o3`/`--osd`, `env
+  `--apikey` right after an `openqa-cli` subcommand or its `--o3`/`--osd`/`--odn`, or right
+  after `openqa-clone-job`, `openqa-load-templates` or `openqa-dump-templates`, `env
   MOJO_CLIENT_DEBUG=1`, the tools that print their own secrets (osc's abbreviated options
   included) and common readers of the exact credential files.
   Checked on 0.154.0 with `codex execpolicy check --rules`; `forbidden` holds even with

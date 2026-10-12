@@ -2,6 +2,8 @@
 
 Owns: how a module in os-autoinst-distri-opensuse is scheduled and configured: directory, YAML schedules, Perl loaders, test data, `data/` files, variables, job groups. Other distributions -> references/custom-distri.md "main.pm contract".
 
+Contents: Where a module goes; Pick the mechanism; Unused-module check; YAML schedules; Conditional schedule; Includes and flows; Test data; Files from data; Legacy loaders; Settings precedence; Adding a variable; Variable catalogue; Job groups
+
 ## Where a module goes
 
 No document prescribes a layout; copy the nearest sibling. `.github/CODEOWNERS` gives an area's `tests/`, `schedule/`, `data/` and `test_data/` subdirectories the same owners, so keep a change inside one area.

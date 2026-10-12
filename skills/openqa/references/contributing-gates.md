@@ -2,6 +2,8 @@
 
 Owns: os-autoinst-distri-opensuse contribution rules, the check enforcing each, local gates, commit/PR mechanics, merge process.
 
+Contents: Setup; Rule to check; Local gate order; Forbidden strings; Soft-failure reference; Duplication and unused modules; Checks that do not fire; Commit messages; LLM-assistance trailer; PR template; Merge process
+
 ## Setup
 
 **Work from the repo root with `origin/master` = freshly fetched upstream master** — the diff-based gates compare against it; with a fork as `origin` they inspect the wrong files.

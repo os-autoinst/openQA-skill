@@ -1,5 +1,7 @@
 # Review comments and tickets
 
+Contents: Comment recipes; Forcing a result; acceptable_for marker; Do and do not; Good examples; Poor examples; auto_review subjects
+
 ## Comment recipes
 
 Posting is a write -> SKILL.md "Write gate"; command to show the user: `openqa-cli api --host <host> -X POST jobs/<id>/comments text="$(cat comment.md)"` -> references/review-tooling.md "openqa-cli". **One form for every class:** `<module>: <ref> <symptom, 10 words at most>`. The ref makes the job reviewed and carries over; module and symptom expose a wrong carry-over without opening the ticket. Class decides the tracker -> references/review-workflow.md "Classification and routing".

@@ -2,6 +2,8 @@
 
 Owns the openQA model shared by test creation and result review. Sources: openQA `lib/OpenQA`, os-autoinst-scripts `openqa-investigate`.
 
+Contents: Instances; Vocabulary; States and results; Reviewed definition; Bugrefs; Labels and flags; Group comments; Carry-over; Automatic restarts; Clone chain; Read-only API recipes; Listing current failures; Step deep link; Auth and roles
+
 ## Instances
 
 - **`https://openqa.opensuse.org` (o3)**: public; every GET in this file works anonymously.

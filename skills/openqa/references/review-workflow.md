@@ -2,6 +2,8 @@
 
 From a defined scope to a build where every current failure carries a verified reference, and a report.
 
+Contents: Scope; Sweep; Order of work; Existing references; Classification and routing; Retrigger or comment; Clusters in review; Machine-written comments; Closing a job; Fix the test; Report template; Politeness; Update gating
+
 ## Scope
 
 **Fix instance, job groups and builds before the first request**: an unscoped job listing can time out a large instance.

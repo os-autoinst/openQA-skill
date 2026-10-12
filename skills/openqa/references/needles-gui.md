@@ -2,6 +2,8 @@
 
 Owns: needle format, naming, tags, workflow; screen-matching idioms; x11 helpers; libyui-REST page objects; Agama tests.
 
+Contents: When not to use needles; Needle JSON; Needle naming and CI; Tags and ENV tags; Needle workflow; GUI idioms; x11 tests; libyui-REST page objects; Agama
+
 ## When not to use needles
 
 - **Needles only where the rendered UI is the thing under test.** Anything checkable as text goes through a console; a font change invalidates needles -> references/distri-helpers.md "Console selection".

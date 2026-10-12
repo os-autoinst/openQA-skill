@@ -280,6 +280,16 @@ check "budget: a reference exactly at the file cap passes" "ok - all repository 
 whole 17001
 check "budget: a reference over the file cap" \
 	"budget: skills/openqa/references/whole.md: 17001 bytes exceeds cap 17000 by 1" "$(gate budget)"
+# The contents line is returned by no read of a section: it takes no room from the sections.
+whole 17000
+sed -i '1a Contents: Part 1; Part 2; Part 3; Part 4' "$skill/references/whole.md"
+check "budget: a reference at the file cap may carry its contents line on top" \
+	"ok - all repository checks pass" "$(gate budget,contents)"
+whole 17001
+sed -i '1a Contents: Part 1; Part 2; Part 3; Part 4' "$skill/references/whole.md"
+check "budget: one byte over the file cap, the contents line not counted" \
+	"budget: skills/openqa/references/whole.md: 17001 bytes exceeds cap 17000 by 1, the contents line not counted" \
+	"$(gate budget)"
 fresh
 filler 200 >>"$skill/references/untrusted-content.md"
 finds "budget: the reference read whole keeps its own cap" budget "untrusted-content.md: "
@@ -513,6 +523,47 @@ printf '%s\n' '<!-- Playbook `agents/orphan.md`. -->' >>"$skill/$ref"
 finds "pointers: a playbook named inside an HTML comment of a reference" pointers "$unnamed"
 printf '%s\n' 'Playbook `agents/orphan.md`.' >>"$skill/$ref"
 check "pointers: a reference names a playbook" "ok - all repository checks pass" "$(gate pointers)"
+
+# A reference of more than 100 lines lists its "## " titles above the first of them.
+fresh
+check "contents: the clean tree passes" "ok - all repository checks pass" "$(gate contents)"
+# long LINES [TEXT...]: a clean copy with a reference of LINES lines, TEXT above its sections One and Two
+long() {
+	fresh
+	local file=$skill/references/long.md have
+	printf '%s\n' '# Long' '' "${@:2}" '## One' '### Part' '## Two' >"$file"
+	have=$(wc -l <"$file")
+	yes x | head -n $(($1 - have)) >>"$file"
+}
+long 100
+check "contents: a reference of 100 lines needs no contents line" "ok - all repository checks pass" "$(gate contents)"
+long 101
+check "contents: one of 101 lines does, and the finding ends in the line to add" \
+	"contents: skills/openqa/references/long.md:3: more than 100 lines: add above this section: Contents: One; Two" \
+	"$(gate contents)"
+long 101 'Contents: One; Two' ''
+check "contents: the line lists the ## titles in order, without the ### parts" \
+	"ok - all repository checks pass" "$(gate contents)"
+long 101 'Contents: Two; One' ''
+finds "contents: titles in another order" contents "long.md:3: must read: Contents: One; Two"
+long 101 'Contents: One; Two; Three' ''
+finds "contents: a title too many at the end" contents "long.md:3: must read: Contents: One; Two"
+long 50 'Contents: One' ''
+finds "contents: a short reference that has the line is checked too" contents \
+	"long.md:3: must read: Contents: One; Two"
+long 101 'Contents: One; Two' 'Contents: One; Two'
+finds "contents: a second contents line" contents "long.md:4: repeats the contents line of line 3"
+long 100
+printf 'Contents: One; Two\n' >>"$skill/references/long.md"
+finds "contents: a line below the first section is none" contents "long.md:3: more than 100 lines"
+long 101 '<!--' 'Contents: One; Two' '-->' ''
+finds "contents: nor is a line inside an HTML comment" contents "long.md:7: more than 100 lines"
+long 101 '```' 'Contents: One; Two' '```' ''
+finds "contents: nor one inside a code fence" contents "long.md:7: more than 100 lines"
+long 101 'Contents: One; Two; Three; more' ''
+printf '## Three; more\n' >>"$skill/references/long.md"
+finds "contents: a title that contains the separator" contents \
+	"long.md:$(wc -l <"$skill/references/long.md"): title \"Three; more\" contains \"; \""
 
 # References and playbooks sit one level deep: that is where refsection.py and the pointer check look.
 fresh

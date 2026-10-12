@@ -2,6 +2,8 @@
 
 Which tool does what in review work, and what each helper writes.
 
+Contents: Default toolchain; Capability matrix; openqa-cli; Optional MCP servers; os-autoinst-scripts; Known-issue dry run; Review profiles; openqa-review reports; openQA-python-client
+
 ## Default toolchain
 
 - **Reads: bundled scripts.** Anonymous GET only; capped `key=value` digests (empty fields left out), third-party text fenced. Flags -> scripts/README.md "Script flags".

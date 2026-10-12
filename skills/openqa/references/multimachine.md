@@ -1,5 +1,7 @@
 # Multi-machine tests and backend variables
 
+Contents: Dependency settings; Cluster job settings; lockapi; mmapi; Choreography; Deadlocks; MM network; Support server; Backend variables; Backend predicates
+
 ## Dependency settings
 
 **Declare on the child, naming parent test suites** (comma list), resolved within one `isos post`.

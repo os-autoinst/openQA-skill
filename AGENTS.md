@@ -25,11 +25,13 @@ Rules for humans and agents changing this repository.
   cap only after a new measurement.
 - A core directive points only at sections no block names.
 - References are read one `## ` section at a time through `scripts/refsection.py`, so every section stands
-  alone and titles are short, stable and unique within their file. The Agent Skills specification sets no
-  size for a reference; the caps in `tests/repo/check-skills.py` follow what one read costs. A `## ` section,
-  its `### ` parts included, is at most 5,000 bytes. A pointer is one call and one tool output: the sections
-  it joins by `,`, of those joined by `/` the largest, are at most 10,000 bytes together. A file is at most
-  17,000 bytes, so that one read whole by mistake still fits the 30,000 characters of command output that one
+  alone and titles are short, stable and unique within their file. A reference of more than 100 lines lists
+  its `## ` titles in order on one line above the first of them, `Contents: <title>; <title>`, which the gate
+  prints ready to paste. The Agent Skills specification sets no size for a reference; the caps in
+  `tests/repo/check-skills.py` follow what one read costs. A `## ` section, its `### ` parts included, is at
+  most 5,000 bytes. A pointer is one call and one tool output: the sections it joins by `,`, of those joined
+  by `/` the largest, are at most 10,000 bytes together. A file is at most 17,000 bytes, its contents line
+  not counted, so that one read whole by mistake still fits the 30,000 characters of command output that one
   harness returns by default. `untrusted-content.md`, the one reference read whole, keeps its own cap in
   `BUDGETS`. Over a cap: split the section or the pointer, or drop what another section owns; do not raise
   the cap.

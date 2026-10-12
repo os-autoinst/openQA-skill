@@ -363,9 +363,13 @@ One line per file and rule; `message -> fix` only on the first finding of a rule
 with `;`, because only the last exit code is checked. It stays silent where the `;` drops no exit code or
 the command decides the status itself: as `\;`, at the end; with `$?` or `PIPESTATUS` anywhere in the
 command; before a last command that is `test`, `[`, `[[` or `true`; and when every command before the last
-has its own `||`. Not inspected, so a chain there passes and none of these is a fix: text inside quotes,
-backticks, `( )` or `{ }`; a command that contains `for`, `while`, `until`, `if`, `case`, a here-document,
-`set -e` or `set -o pipefail`. `set -e` typed into the SUT's shell ends that shell at the first failure.
+has its own `||` or an exit code that says nothing. Those are `clear`; `cd` without argument or to `~`
+(`cd <dir>` is reported: a failure runs the next command in the wrong directory); an `echo` without `|`,
+`&`, `<` or `>`; and `NAME=value`, `export NAME=value` or `export NAME`, unless the command contains `$(`
+or a backtick, because a value that a command computes can fail. Not inspected, so a chain there passes
+and none of these is a fix: text inside quotes, backticks, `( )` or `{ }`; a command that contains `for`,
+`while`, `until`, `if`, `case`, a here-document, `set -e` or `set -o pipefail`. `set -e` typed into the
+SUT's shell ends that shell at the first failure.
 
 ## check-schedule.py - lint YAML schedules, find who schedules a module (offline)
 

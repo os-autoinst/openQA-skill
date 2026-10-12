@@ -272,8 +272,9 @@ def check_screen_timeout(module):
     "Makefile test-soft_failure-no-reference: reference on the same line",
 )
 def soft_failure_reference(module):
+    # The Makefile's pattern, with the dots of the host escaped.
     accepted = re.compile(
-        r"(^use |[a-zA-Z]#[a-zA-Z-]*[0-9]|fate.suse.com/[0-9]+|\$(reference|bsc))"
+        r"(^use |[a-zA-Z]#[a-zA-Z-]*[0-9]|fate\.suse\.com/[0-9]+|\$(reference|bsc))"
     )
     # 'record_soft_failure\b.*;' of the Makefile: the call is in front of the last ';'.
     ended = [line[: line.rfind(";") + 1] for line in module.raw]

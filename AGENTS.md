@@ -26,10 +26,12 @@ Rules for humans and agents changing this repository.
   by mistake still fits the 30,000 characters of command output that one harness returns by default.
   `untrusted-content.md`, the one reference read whole, keeps its own cap in `BUDGETS`. Over a cap: split the
   section or drop what another section owns; do not raise the cap.
-- **One owner per rule.** State a rule once, in the file that owns the topic; elsewhere write
-  `-> references/<file>.md "<Section>"`. `-> "<Section>"` stays inside the file; titles are joined by `,`
-  (read all) or `/` (pick one); several files may follow one `->`. The gate resolves every title that
-  follows a file name or a `->`; a title quoted in prose without either is not checked.
+- **One owner per rule.** The section that owns the topic states the rule in full. A section that is read
+  alone and cannot be acted on without the rule may keep at most one clause of it, followed by
+  `-> references/<file>.md "<Section>"`; elsewhere write the pointer alone. `-> "<Section>"` stays inside
+  the file; titles are joined by `,` (read all) or `/` (pick one); several files may follow one `->`. The
+  gate resolves every title that follows a file name or a `->`; a title quoted in prose without either is
+  not checked.
 - Playbooks (`agents/`, cap 5000 bytes) are read by sub-agents that have not seen `SKILL.md`: the "read before
   you start" list holds exactly the sections every run needs, everything conditional goes in the trigger table,
   and any playbook that meets third-party text names the policy sections to read.

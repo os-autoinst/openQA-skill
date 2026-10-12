@@ -9,7 +9,7 @@ No block (most of `tests/console`, `tests/x11`, all of `tests/virt_autotest`, `l
 
 ## Console and CLI
 - **Shape**: `consoletest`, `select_serial_terminal;` first in `run`. -> references/module-templates.md "Console smoke test"
-- **Packages**: `install_package('pkg', trup_apply => 1) if script_run('rpm -q pkg');` - reviewers ask for an immutable run; plain `zypper_call('in ..')` needs a stated "not for immutable". `trup_apply` only for end-user applications and services (POD warning), never kernel or system libraries; dies combined with `trup_reboot`.
+- **Packages**: `install_package('pkg', trup_apply => 1) if script_run('rpm -q pkg');` - reviewers ask for an immutable run; plain `zypper_call('in ..')` needs a stated "not for immutable". Which `trup_*` option -> references/distri-helpers.md "Install or remove packages"
 - **Schedule in every list that applies** (#26514):
 
 | Product | File |
@@ -20,8 +20,7 @@ No block (most of `tests/console`, `tests/x11`, all of `tests/virt_autotest`, `l
 | Maintenance | `schedule/qam/common/mau-extratests{1,2}.yaml` (2 repeats its list per `VERSION` key); `schedule/qam/16/mau-extra-tests.yaml` |
 | SL Micro | `loadtest` in `load_common_tests`, `lib/main_micro_alp.pm` |
 
-- **File name** never starts with a digit (`sevenzip.pm`): the basename becomes the Perl package name.
-- **Asks**: `systemctl('is-active x')` (`Utils::Systemd`) over raw shell (#25973); `zypper_version_cmp`/`package_version_cmp` over regex on `--version` (#25850); no `-y` in `zypper_call` (already `-n`); `milestone => 1` gets questioned (#24987).
+- **Asks**: `systemctl('is-active x')` (`Utils::Systemd`) over raw shell (#25973); `zypper_version_cmp`/`package_version_cmp` over regex on `--version` (#25850); `milestone => 1` gets questioned (#24987).
 
 ## Security
 - **New CLI checks are agnostic tests**: wrapper `tests/security/oqa_agnostic/<x>.pm` + own `schedule/security/<x>.yaml`. -> references/agnostic-tests.md "Wrapper skeleton", "Review pitfalls"

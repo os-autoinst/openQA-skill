@@ -37,7 +37,7 @@ Owns: file header, per-kind skeletons, `test_flags` choice, anti-pattern table a
 - **`sub run {`**; `my ($self) = @_;` only when `$self` is used (CONTRIBUTING); run_args: `my ($self, $args) = @_;`. Signatures only via `use Mojo::Base '<base>', -signatures;` where the directory already uses them.
 - **Select the console first in `run`** -> references/distri-helpers.md "Console selection".
 - **Import explicit names** (`use utils 'systemctl';`), end with `1;`, run `make tidy` -> references/contributing-gates.md "Local gate order".
-- **Schedule the module in the same PR**, or `make test-unused-modules-changed` fails -> references/scheduling.md "Where a module goes".
+- **Schedule the module in the same PR**, or `make test-unused-modules-changed` fails -> references/scheduling.md "Unused-module check".
 
 ## Console smoke test
 
@@ -60,7 +60,7 @@ sub run {
 1;
 ```
 
-- **`install_package`, never `zypper_call 'in'`**: it uses `transactional-update` on immutable systems. `trup_apply` for leaf tools; `trup_reboot` only when a reboot is needed (the SUT reboots inside the call, so install before creating shell state); `trup_continue` for chained installs. `trup_apply` with `trup_reboot` dies -> references/distri-helpers.md "Install or remove packages".
+- **`install_package`, never `zypper_call 'in'`**: it uses `transactional-update` on immutable systems. With `trup_reboot` the SUT reboots inside the call, so install before creating shell state. Which `trup_*` option -> references/distri-helpers.md "Install or remove packages".
 - **Redirect, then grep the file**: a pipe hides the producer's exit code unless `consoletest_setup` (sets `pipefail`) ran earlier.
 - **Write only under `/var`, `/etc`, `/root`, `/tmp`**: `/` is read-only on transactional systems.
 - `consoletest::post_run_hook` runs `cd` and clears the console: end `run` at a root shell prompt.
@@ -232,10 +232,9 @@ def run(self):
     assert_script_run('PKG-cmd --version', 'timeout', 120)
 ```
 
-- **Perl named arguments become positional `'key', value` pairs**; `tests/ha/check_hae_active.py` passes `trup_apply=1`: do not copy.
 - **Schedule with the extension**: `- x11/doom.py`, `loadtest 'x11/doom.py'`; run_args die.
 - `check_metadata` and perlcritic never see `*.py`: self-review the header.
-- Binding rules -> references/custom-distri.md "Python modules".
+- **No keyword arguments**: Perl named arguments are `'key', value` pairs, as above. Binding rules -> references/custom-distri.md "Python modules".
 
 ## Choosing test_flags
 

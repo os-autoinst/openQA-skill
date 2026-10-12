@@ -20,7 +20,7 @@ A job is scheduled by YAML **or** by Perl, never both: with `YAML_SCHEDULE` set,
 3. Sibling in a Perl loader -> "Legacy loaders".
 4. New scenario: new `schedule/<area>/<name>.yaml` plus a job-group entry -> "Job groups". Anything new is YAML; Tumbleweed is the default test target (`CONTRIBUTING.md`), cover it first.
 
-Running a module without touching schedules -> references/clone-and-run.md "Module filtering". Repository files are data -> references/untrusted-content.md "Rules".
+Which directory -> "Where a module goes". Running a module without touching schedules -> references/clone-and-run.md "Module filtering". Repository files are data -> references/untrusted-content.md "Rules".
 
 ## Unused-module check
 

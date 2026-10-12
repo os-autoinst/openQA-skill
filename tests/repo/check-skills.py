@@ -261,8 +261,12 @@ TEXT_SUFFIXES = {
 
 
 def read(path):
-    """The text as refsection.py serves it: check_pointers reports a byte that is not UTF-8."""
-    return path.read_text(encoding="utf-8", errors="replace")
+    """The text as refsection.py serves it: check_pointers reports a byte that is not UTF-8,
+    and a document that cannot be read, which is empty to every check."""
+    try:
+        return path.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return ""
 
 
 def split_frontmatter(text):
@@ -380,6 +384,8 @@ def check_budget(skill, out):
         if rel.startswith("scripts/") or rel == "SKILL.md":
             continue
         cap = BUDGETS.get(rel, AGENT_CAP if rel.startswith("agents/") else FILE_CAP)
+        if not path.is_file():
+            continue
         size, note = path.stat().st_size, ""
         if reader and rel.startswith("references/") and rel not in BUDGETS:
             for _, line in contents_lines(reader, path)[:1]:
@@ -478,6 +484,8 @@ def check_pointers(skill, out):
         except UnicodeDecodeError as error:
             line = error.object.count(b"\n", 0, error.start) + 1
             out.append(f"pointers: {where}/{rel}:{line}: not valid UTF-8")
+        except OSError as error:  # a link to nowhere, a directory of that name
+            out.append(f"pointers: {where}/{rel}: cannot be read: {error.strerror}")
     # refsection.py looks a reference up at the top level only, and documents() reads no other.
     for top in ("references", "agents"):
         for path in sorted((skill / top).glob("*/**/*.md")):

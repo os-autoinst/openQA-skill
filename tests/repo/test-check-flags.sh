@@ -219,4 +219,20 @@ printf '\n## known.py - k\n' >>"$skill/scripts/README.md"
 gate --write >/dev/null
 check "parse_known_args stops the script before its work" 0 "$(find "$skill/scripts" -name SIDE_EFFECT | wc -l)"
 
+# A document the gate cannot decode or read is a finding or no document, never a traceback.
+fresh
+printf 'caf\351\n' >>"$skill/scripts/README.md"
+check "citations: a scripts/README.md that is not UTF-8 is a finding with its line" 1 \
+	"$(gate | grep -c -x "citations: skills/openqa/scripts/README.md:$(wc -l <"$skill/scripts/README.md"): not valid UTF-8")"
+sed -i 's/^    args = parser.parse_args(argv)$/    parser.add_argument("--zz-probe", action="store_true")\n&/' \
+	"$skill/scripts/refsection.py"
+gate --write >/dev/null
+check "and --write hands that byte back as it was" "1 $(printf 'caf\351')" \
+	"$(grep -c -a -- '--zz-probe' "$skill/scripts/README.md") $(tail -n 1 "$skill/scripts/README.md")"
+
+fresh
+mkdir "$skill/references/dir.md"
+gate >/dev/null
+check "citations: a directory named as a document is not read" 0 $?
+
 exit $fail

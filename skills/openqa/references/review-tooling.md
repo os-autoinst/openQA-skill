@@ -73,7 +73,7 @@ Server-side auto-review helpers (github.com/os-autoinst/os-autoinst-scripts). Ba
 | Script | Writes to openQA | Shell + DB on openQA host | Dry run |
 | --- | --- | --- | --- |
 | `openqa-label-known-issues` (`-multi`, `-hook`) | comment, restart | no | `--dry` / `-n`; wrappers: env `dry_run=1` only |
-| `openqa-investigate` (`-multi`) | **at once**: a comment starting "Starting investigation for job <id>", then up to four clones | no | env `dry_run=1`: the Bash revision echoes the calls, the Python one (also `--dry-run`) logs them with `-v` |
+| `openqa-investigate` (`-multi`) | **at once**: a comment starting "Starting investigation for job <id>", then up to four clones, later the verdict comment on the origin job | no | env `dry_run=1`: the Bash revision echoes the calls, the Python one (also `--dry-run`) logs them with `-v` |
 | `openqa-trigger-bisect-jobs` | clones, comment | no | `--dry-run` |
 | `openqa-advanced-retrigger-jobs` | bulk restart | yes, unless env `JOB_IDS="<id> <id>"` is set | env `dry_run=1` |
 | `openqa-query-for-job-label`, `openqa-monitor-incompletes`, `openqa-monitor-investigation-candidates`, `openqa-incompletes-stats` | no | **yes** (`ssh` + `sudo -u geekotest psql`) | - |

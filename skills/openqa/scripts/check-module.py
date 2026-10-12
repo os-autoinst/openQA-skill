@@ -477,7 +477,11 @@ def default_timeout(module):
     hits = []
     for number in module.grep(_TIMEOUT, module.code):
         match = _call_with(module.code[number - 1], _TIMEOUT_CALL, _TIMEOUT)
-        if match and DEFAULT_TIMEOUTS[match[0].group(1)] == int(match[1].group(1)):
+        if not match:
+            continue
+        call, timeout = match
+        # As text: int() refuses more than 4,300 digits.
+        if timeout.group(1).lstrip("0") == str(DEFAULT_TIMEOUTS[call.group(1)]):
             hits.append(number)
     return hits, ("timeout equals the default", "drop the timeout argument")
 

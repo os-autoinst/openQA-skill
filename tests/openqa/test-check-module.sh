@@ -317,6 +317,12 @@ check "no line stalls the script: an open string of backslashes or quotes, deep 
 10,11,12 click-positional-timeout
 13 default-timeout
 19 soft-failure-reference" "$(timeout 20 python3 "$script" "$chain/slow.pm" 2>/dev/null | brief)"
+{
+	printf "script_run 'a', timeout => %05000d;\nscript_run 'a', timeout => 030;\n" 9
+	printf '%s\n' '# Copyright SUSE LLC' '# Summary: x' '# Maintainer: QE <qe@example.com>' "use Mojo::Base 'consoletest';" '1;'
+} >"$chain/digits.pm"
+check "default-timeout: a timeout of 5,000 digits is read, and leading zeros make no other number" \
+	"2 default-timeout" "$(python3 "$script" "$chain/digits.pm" 2>&1 | brief)"
 rm -rf "$chain"
 
 check "the module of the speed-up eval has the two findings its prompt is about, and no other" "26 semicolon-chain

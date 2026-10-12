@@ -25,7 +25,7 @@ fresh() {
 	rm -rf "$work/repo"
 	mkdir -p "$work/repo/tests/repo"
 	cp -r "$root/skills" "$work/repo/"
-	cp "$here/check-skills.py" "$work/repo/tests/repo/"
+	cp "$here/check-skills.py" "$here/_fences.py" "$work/repo/tests/repo/"
 	skill=$work/repo/skills/openqa
 }
 gate() { timeout 20 python3 "$work/repo/tests/repo/check-skills.py" --only "$1"; }
@@ -52,7 +52,8 @@ plant "the clean tree passes" "" "Credentials stay inside the tools."
 # Slack's webhook host stays flagged too (its path is a credential); only test-_secrets.sh may name it.
 check "a Slack workspace and the webhook host are internal services" "1 1" "$(
 	python3 - "$here/check-skills.py" <<'EOF'
-import importlib.util, re, sys
+import importlib.util, os, re, sys
+sys.path.insert(0, os.path.dirname(sys.argv[1]))  # the gate imports its sibling _fences
 spec = importlib.util.spec_from_file_location("check_skills", sys.argv[1])
 module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
@@ -372,6 +373,16 @@ finds "pointers: a same-file title after a slash is resolved" pointers "'redacti
 add "$ref" '-> "What it is not"' '```' '-> nosuch.md "X"' '## What it is not' '```'
 check "pointers: a same-file pointer that resolves, and fenced text, pass" \
 	"ok - all repository checks pass" "$(gate pointers)"
+# Only its own marker closes a fence: the same character, at least as often, alone on its line.
+add "$ref" '```' 'Traceback (most recent call last):' '    ~~~~~~~~~~^^^^^^^^^^^' '```' '-> testapi.md "No such section"'
+finds "pointers: a tilde line inside a backtick fence does not end it" pointers \
+	"$ref:$(wc -l <"$skill/$ref"): 'testapi.md' has no section \"No such section\""
+add "$ref" '````' '```' '-> nosuch.md "X"' '````sh' '```` ' '~~~~' '```' '-> nosuch.md "X"' '~~~' '~~~~~'
+check "pointers: nor does a shorter marker, or one that text follows" \
+	"ok - all repository checks pass" "$(gate pointers)"
+add "$ref" '```sh``` opens no fence.' '-> testapi.md "No such section"'
+finds "pointers: a code span of three backticks at the start of a line opens no fence" pointers \
+	"$ref:$(wc -l <"$skill/$ref"): 'testapi.md' has no section \"No such section\""
 add agents/job-triage.md '-> "Rules"'
 finds "pointers: a playbook pointer without its file" pointers "needs its file"
 add "$ref" '-> testapi.md "Traps" and "Hook order"'

@@ -29,6 +29,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+from _fences import fenced
+
 ROOT = Path(__file__).resolve().parents[2]
 HEADING = "## Script flags"
 POINTER = 'scripts/README.md "Script flags"'
@@ -211,11 +213,9 @@ def section_span(text, heading):
 
 def copy_line(text):
     """Line of a heading that refsection.py would print as "Script flags", or None."""
-    fenced = False
-    for num, line in enumerate(text.splitlines(), 1):
-        if line.lstrip().startswith(("```", "~~~")):
-            fenced = not fenced
-        elif not fenced and COPY.match(line):
+    lines = text.splitlines()
+    for num, (line, inside) in enumerate(zip(lines, fenced(lines)), 1):
+        if inside is False and COPY.match(line):
             return num
     return None
 
@@ -237,12 +237,11 @@ def mentions(text, option):
 
 def code_lines(text):
     """(line number, line, code pieces): code spans, and whole fenced or indented lines."""
-    fenced = False
-    for num, line in enumerate(text.splitlines(), 1):
-        if line.lstrip().startswith(("```", "~~~")):
-            fenced = not fenced
+    lines = text.splitlines()
+    for num, (line, inside) in enumerate(zip(lines, fenced(lines)), 1):
+        if inside is None:
             continue
-        whole = fenced or line.startswith(("    ", "\t"))
+        whole = inside or line.startswith(("    ", "\t"))
         yield num, line, [line.strip()] if whole else SPAN.findall(line)
 
 

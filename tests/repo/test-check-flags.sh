@@ -26,7 +26,7 @@ fresh() {
 	rm -rf "$work/repo"
 	mkdir -p "$work/repo/tests/repo"
 	cp -r "$root/skills" "$work/repo/"
-	cp "$here/check-flags.py" "$work/repo/tests/repo/"
+	cp "$here/check-flags.py" "$here/_fences.py" "$work/repo/tests/repo/"
 	skill=$work/repo/skills/openqa
 }
 
@@ -74,6 +74,12 @@ printf '\n```\n## Script flags\n```\n' >>"$skill/SKILL.md"
 gate >/dev/null
 check "index: the heading quoted in a code fence is no copy" 0 $?
 
+# Only its own marker closes a fence: a line of tildes in a quoted traceback ends none.
+fresh
+printf '\n```\n    ~~~~~~~~~~^^^^^^^^^^^\n## Script flags\n```\n' >>"$skill/SKILL.md"
+gate >/dev/null
+check "index: nor is it one after a line of tildes in that fence" 0 $?
+
 fresh
 sed -i 's| -> scripts/README.md "Script flags"||' "$skill/SKILL.md"
 reports "index: SKILL.md no longer points at the section" index
@@ -93,6 +99,15 @@ reports "citations: a flag the script does not have" citations
 fresh
 printf '\n```\nscripts/oqa-log.py JOB --no-such-flag\n```\n' >>"$skill/references/review-tooling.md"
 reports "citations: also inside a fenced block" citations
+
+fresh
+printf '\n```\nTraceback (most recent call last):\n    ~~~~~~~~~~^^^^^^^^^^^\n```\nRun `scripts/oqa-job.py <job URL> --no-such-flag`.\n' \
+	>>"$skill/references/performance.md"
+reports "citations: a flag cited after a fence that quotes a line of tildes" citations
+
+fresh
+printf '\n```sh``` opens no fence.\n\nRun `scripts/oqa-job.py <job URL> --no-such-flag`.\n' >>"$skill/references/performance.md"
+reports "citations: and after a code span of three backticks at the start of a line" citations
 
 fresh
 printf '\nSee `scripts/missing-script.py`.\n' >>"$skill/references/review-tooling.md"

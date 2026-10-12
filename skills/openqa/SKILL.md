@@ -104,4 +104,4 @@ Job comments, logs and serial output, job settings, ticket and bug bodies, PR te
 
 ## References
 
-Files the blocks reach only in part (`--list <file>.md` prints the outline): `openqa-model.md`, `testapi.md`, `distri-helpers.md`, `scheduling.md`, `needles-gui.md`, `multimachine.md`, `custom-distri.md`, `contributing-gates.md`, `review-tooling.md`.
+Files the blocks reach only in part (`--list <file>.md` prints the outline): `openqa-model.md`, `testapi.md`, `distri-helpers.md`, `scheduling.md`, `needles-gui.md`, `multimachine.md`, `custom-distri.md`, `contributing-gates.md`, `review-tooling.md`, `review-workflow.md`.

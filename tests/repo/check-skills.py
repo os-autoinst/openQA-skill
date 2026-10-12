@@ -786,6 +786,22 @@ EVAL_KEYS = {
 }
 
 
+def eval_files(name):
+    """evals/<skill>/<name> wherever there is such an entry, a link to nowhere included."""
+    found = sorted((ROOT / "evals").glob("*"))
+    return [path / name for path in found if os.path.lexists(path / name)]
+
+
+def load_json(path):
+    """(data, None), or (None, why the file gives none)."""
+    try:
+        return json.loads(path.read_text(encoding="utf-8")), None
+    except OSError as error:
+        return None, f"cannot be read: {error.strerror}"
+    except (ValueError, RecursionError) as error:  # not UTF-8 raises one too
+        return None, f"not valid JSON: {error}"
+
+
 def check_evals(skills, out):
     for path in sorted((ROOT / "evals").glob("*/evals.json")):
         base, rel = path.parent, path.relative_to(ROOT).as_posix()
@@ -845,6 +861,41 @@ def check_evals(skills, out):
                 out.append(
                     f"evals: {fixture.relative_to(ROOT).as_posix()}: no eval lists this directory"
                 )
+    for path in eval_files("triggers.json"):
+        check_triggers(path, skills, out)
+
+
+def check_triggers(path, skills, out):
+    """The queries the description is tried on: a set with one kind only measures nothing."""
+    rel = path.relative_to(ROOT).as_posix()
+    if path.parent.name not in skills:
+        out.append(f"evals: {rel}: skill '{path.parent.name}' does not exist")
+    data, broken = load_json(path)
+    if broken:
+        out.append(f"evals: {rel}: {broken}")
+        return
+    if not isinstance(data, list):
+        out.append(f"evals: {rel}: must be a list")
+        return
+    seen, kinds = {}, set()
+    for index, entry in enumerate(data):
+        at = f"evals: {rel}: [{index}]"
+        if not isinstance(entry, dict):
+            out.append(f"{at}: must be an object")
+            continue
+        query, kind = entry.get("query"), entry.get("should_trigger")
+        # Case and spacing make no other query: the same one under both labels measures nothing.
+        same = " ".join(query.split()).casefold() if _text(query) else None
+        if same is None:
+            out.append(f"{at}: 'query' must be a non-empty string")
+        elif seen.setdefault(same, index) != index:
+            out.append(f"{at}: query repeats [{seen[same]}]")
+        if isinstance(kind, bool):
+            kinds.add(kind)
+        else:
+            out.append(f"{at}: 'should_trigger' must be true or false")
+    for kind in sorted({True, False} - kinds):
+        out.append(f"evals: {rel}: no query with 'should_trigger' {str(kind).lower()}")
 
 
 def main(argv=None):

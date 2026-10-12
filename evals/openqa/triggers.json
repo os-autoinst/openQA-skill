@@ -1,0 +1,82 @@
+[
+  {
+    "query": "our tumbleweed job https://openqa.opensuse.org/tests/5481234 failed in zypper_patch again. can you look at the logs and tell me whether that's a product bug or the test, I need to know before I ping the maintainer",
+    "should_trigger": true
+  },
+  {
+    "query": "I need to add a console test for the fzf package to os-autoinst-distri-opensuse: install it, run a couple of smoke checks and schedule it for Tumbleweed. Where do I put it and how do I run it before I open the PR?",
+    "should_trigger": true
+  },
+  {
+    "query": "assert_screen keeps timing out on the bootloader needle since the theme changed in the last snapshot. How do I create a new needle and make my verification run use it?",
+    "should_trigger": true
+  },
+  {
+    "query": "review duty this week: go through the latest build of the openSUSE Leap 16.0 job group on o3 and tell me which failures are new and which already have a bug",
+    "should_trigger": true
+  },
+  {
+    "query": "this test module calls script_run in a loop with sleep 30 until the service answers. What is the right testapi way to wait for it, and can you rewrite the module?",
+    "should_trigger": true
+  },
+  {
+    "query": "test 4711 on our openQA instance is incomplete with 'backend died: QEMU exited unexpectedly'. Is that infrastructure, or should I file a bug against the product?",
+    "should_trigger": true
+  },
+  {
+    "query": "I want to mark the failed job with the bug we already have so the next builds carry it over. What exactly do I write in the job comment so that the bugref is picked up?",
+    "should_trigger": true
+  },
+  {
+    "query": "give me the openqa-clone-job command to rerun the kde wayland scenario of the latest Tumbleweed build with the branch fix/kwin-needles of my fork, needles included",
+    "should_trigger": true
+  },
+  {
+    "query": "can you review this pull request for me? it adds tests/console/podman_quadlet.pm and changes schedule/containers/tumbleweed.yaml in os-autoinst-distri-opensuse",
+    "should_trigger": true
+  },
+  {
+    "query": "we have a multi-machine test where the client hangs in mutex_wait although the server module already finished. How do I debug the lockapi barriers and mutexes between the two jobs?",
+    "should_trigger": true
+  },
+  {
+    "query": "my package fails to build in OBS for Tumbleweed with 'nothing provides python3-foo'. Here is the tail of the build log, what is wrong with the spec file?",
+    "should_trigger": false
+  },
+  {
+    "query": "I have a maintenance update assigned for SLES 15 SP6. Load it in mtui, install it on the reference hosts and tell me whether the test report can be approved",
+    "should_trigger": false
+  },
+  {
+    "query": "list the open Bugzilla bugs assigned to me for SLES 15 SP6 with priority P1 and summarise what each one is waiting for",
+    "should_trigger": false
+  },
+  {
+    "query": "our GitHub Actions workflow fails in the 'integration tests' job with exit code 137 after about ten minutes. Why does the runner get killed and how do I fix the workflow?",
+    "should_trigger": false
+  },
+  {
+    "query": "why does my Perl sub get the number of elements instead of the first element when I write my $first = @_; ? explain list and scalar context with a short example",
+    "should_trigger": false
+  },
+  {
+    "query": "the Deploy stage of our Jenkins pipeline is flaky. How do I add a retry with backoff to that stage in the Jenkinsfile?",
+    "should_trigger": false
+  },
+  {
+    "query": "write a pytest test that checks our REST API returns 404 for an unknown user, and wire it into tox so it runs with the other unit tests",
+    "should_trigger": false
+  },
+  {
+    "query": "I need to update the jq package in openSUSE:Factory to the latest upstream release, refresh its patches and send the submit request",
+    "should_trigger": false
+  },
+  {
+    "query": "write a kiwi image description for a minimal Tumbleweed VM image with cloud-init enabled and a 10 GB root disk",
+    "should_trigger": false
+  },
+  {
+    "query": "set up a QEMU VM with UEFI firmware and a serial console on my laptop so I can debug why my own kernel build hangs during boot",
+    "should_trigger": false
+  }
+]

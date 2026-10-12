@@ -23,7 +23,7 @@ CI job = `make test TESTS=<job>`; `static` unless noted. The checks outrank CONT
 | Module compiles (`perl -c`, job compile) and evals under os-autoinst without error or warning | `tools/check_os_autoinst_compile` (job compile-os-autoinst) |
 | perlcritic `theme = community`, severity 4 | `make perlcritic` (job unit, with `t/*.t`) |
 | Changed `schedule/` files name only existing modules | `make test-modules-in-yaml-schedule` |
-| Deleted/renamed module or YAML no longer named in `schedule/`, `products/*/main.pm`, `lib/main_common.pm`, `test_data/` | `make test-deleted-renamed-referenced-files` |
+| Deleted/renamed module or YAML no longer named in `schedule/`, `products/*/main.pm`, `lib/main_common.pm`, `test_data/` | `make test-deleted-renamed-referenced-files`: finds a name only at the end of a line, so not in `loadtest "x/y";` - grep the loaders yourself |
 | YAML in `schedule/`, `test_data/` passes `yamllint -c .yamllint` (160 cols; `#` needs a following space); `schedule/` files outside `flows/` match `t/schema/Schedule-1.yaml` (`name`, `schedule` required, unknown top-level keys rejected) -> references/scheduling.md "YAML schedules" | `tools/check_yaml` (needs `yamllint`) |
 | `data/**` `.json`/`.jsonnet`/`.libsonnet` evaluate | `tools/check_jsonnet` |
 | `lib/`: blank line between `=cut` and `sub`; no POD errors (presence unchecked) | `tools/check_pod_*` |

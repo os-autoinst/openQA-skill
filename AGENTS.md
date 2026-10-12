@@ -17,7 +17,12 @@ Rules for humans and agents changing this repository.
 
 ## Token budget
 
-- `SKILL.md` is loaded on every trigger: keep it under its byte cap (`tests/repo/check-skills.py`, `BUDGETS`).
+- The body of `SKILL.md`, the text after its frontmatter, is loaded on every trigger. The Agent Skills
+  specification recommends under 5,000 tokens for it and under 500 lines for the file. The gate caps the
+  file's lines and, as it cannot count tokens, the body's bytes: `BODY_CAP` in `tests/repo/check-skills.py`
+  is derived from a token count of the body, recorded next to it. Of the frontmatter only `name` and
+  `description` are capped. Over the cap: move detail to the reference or script that owns it; raise the
+  cap only after a new measurement.
 - A core directive points only at sections no block names.
 - References are read one `## ` section at a time through `scripts/refsection.py`, so every section stands
   alone and titles are short, stable and unique within their file. The Agent Skills specification sets no
@@ -79,6 +84,6 @@ Rules for humans and agents changing this repository.
    `scripts/refsection.py`; the gate imports it to read the sections. If it would share much with an
    existing skill, add a block to that skill instead.
 3. Put tests under `tests/<name>/`, evaluation prompts under `evals/<name>/`.
-4. Add a row to the table in `README.md` and, for a file that is read whole, its cap to `BUDGETS` in
+4. Add a row to the table in `README.md` and, for a reference that is read whole, its cap to `BUDGETS` in
    `tests/repo/check-skills.py`; its sections then need no pointer.
 5. Run the script tests, `python3 tests/repo/check-skills.py` and `python3 tests/repo/check-flags.py`.

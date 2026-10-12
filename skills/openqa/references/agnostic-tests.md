@@ -26,16 +26,16 @@ Owns the openqa-agnostic architecture in os-autoinst-distri-opensuse: a portable
 
 ## Runner API
 
-`agnosticTestRunner->new({...})`: hashref, `name` and `language` mandatory. Defaults: `domain` `security` (unvalidated, pass it; `security` and `console` exist), `test_dir` `~/<name>`, `result_file` `/tmp/<lc name>_results.xml`; java: `result_format` `TAP` (else `XUnit`) and `.tap`. Methods chain:
+`agnosticTestRunner->new({...})`: hashref, `name` and `language` mandatory. Defaults: `domain` `security` (unvalidated, pass it; `security` and `console` exist), `test_dir` `~/<name>`, `result_file` `/tmp/<lc name>_results.xml`, `run_timeout` 90 (seconds); java: `result_format` `TAP` (else `XUnit`) and `.tap`. Methods chain:
 
 | Method | Does |
 |---|---|
-| `setup` | adds the `phub` product on SLE < 16.0 unless `skip_phub => 1`; installs `go gotestsum`, `python3-pytest` or the highest `java-N-openjdk-devel` via `install_package(..., trup_reboot => 1)`; downloads `helper.sh` to `<test_dir>/../lib/`, `runtest` and the files `./runtest -f` prints |
-| `run_test` | one `assert_script_run`, default 90 s timeout: `cd <test_dir> && ( set -o pipefail; ./runtest 2>&1 \| tee /tmp/<name>_output.log ) && mv results.xml <result_file>` (`results.tap` for TAP) |
-| `parse_results` | `parse_extra_log`, then one `record_info` per testcase (`PASSED: ...`/`FAILED: ...`); `<failure>` or TAP `not ok` sets the module result to `fail`, never dies |
+| `setup` | python older than 3.6: `record_info('skip', ...)`, then every method does nothing and the module passes; else adds the `phub` product on SLE < 16.0 unless `skip_phub => 1`; installs `go gotestsum`, `python3-pytest` (only when `python3 -m pytest --version` fails) or the highest `java-N-openjdk-devel` via `install_package(..., trup_reboot => 1)`; downloads `helper.sh` to `<test_dir>/../lib/`, `runtest` and the files `./runtest -f` prints |
+| `run_test` | one `assert_script_run`, timeout `run_timeout`: `cd <test_dir> && ( set -o pipefail; ./runtest 2>&1 \| tee /tmp/<name>_output.log ) && mv results.xml <result_file>` (`results.tap` for TAP) |
+| `parse_results` | `parse_extra_log`, then one `record_info` per testcase (`PASSED: ...`/`FAILED: ...`/`SKIPPED: ...`); `<failure>`, `<error>` or TAP `not ok` sets the module result to `fail`, never dies |
 | `cleanup` | `rm -rf <test_dir>`, nothing else |
 
-- **`<error>` and `<skipped>` count as passed**: a pytest fixture, import or collection failure is recorded `PASSED`, the wrapper module stays green and only the `parse_extra_log` result shows it. Assert preconditions in the test body.
+- **`<error>` fails like `<failure>`** (a pytest fixture, import or collection failure); **`<skipped>` passes**, recorded `SKIPPED: ...` with result `ok`.
 
 ## Result contract
 
@@ -129,7 +129,7 @@ cp -r data/console/openqa_agnostic/python/testSudo /tmp/agn/ && cd /tmp/agn/test
 |---|---|
 | Negative test passes on any non-zero exit, even `command not found`; `.strip()` before checking the property under test | also assert the state did not change; assert on the raw value |
 | Wrapped upstream suite: runner exit code ignored, subtests without result skipped, so a crash goes green (as in `testGlibNetworking`) | fail on non-zero runner exit or missing subtest result |
-| Suite longer than `run_test`'s 90 s | `timeout=` on every subprocess; split the artifact or give the runner a timeout attribute in the same PR |
+| Suite longer than `run_test`'s default 90 s | `timeout=` on every subprocess; pass `run_timeout => <seconds>` to `new` or split the artifact |
 | Reads only `/etc/<file>`; hardcoded `/tmp/...` | fall back to `/usr/etc`; pytest `tmp_path` |
 | Conversion drops diagnostics the old job showed | `pytest -s` and `record_testsuite_property` |
 | Verified on Tumbleweed only | add the oldest SLE SP in scope (Python 3.6) and a transactional image; say why a product is excluded |

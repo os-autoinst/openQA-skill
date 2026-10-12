@@ -67,3 +67,7 @@ api_v1_jobs_941.json
     GET /api/v1/jobs/941
 api_v1_jobs_942.json
     GET /api/v1/jobs/942
+api_v1_jobs_850_details.json
+    GET /api/v1/jobs/850/details (post_fail_hook that died: steps "Post-fail" and "Failed\n(post)")
+api_v1_jobs_850_comments.json
+    GET /api/v1/jobs/850/comments

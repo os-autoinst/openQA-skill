@@ -116,7 +116,9 @@ comments.
 When set: `reason="..."`, `state=` (not done), `clone chain: 470:incomplete -> [500:failed]`, `SUPERSEDED:
 restarted, newest=ID result=...`, `culprit=ID (...)` for victims, needle steps with `shot=<host>/tests/<id>/images/<screenshot>`,
 `tags=` and `candidates=N best=name:91% (worst area each)`, `SUSPECT_BUGREF=` (module name parsed as bugref),
-`force_result_not_applied=<r>`. `frame=`: first stack frame outside os-autoinst. `ulogs[<module>]=a,b`: that
+`force_result_not_applied=<r>`, `; the hook died at step=N` after `post_fail_hook steps not shown` (the hook
+itself died: logs it would have uploaded may be missing; its message is the `post_fail_hook failed: ` line of
+`autoinst-log.txt`). `frame=`: first stack frame outside os-autoinst. `ulogs[<module>]=a,b`: that
 module's uploaded logs (`oqa-log.py --file ulogs/<module>-a`). `class=`: human, bot (first non-heading line),
 automated, carried-over.
 

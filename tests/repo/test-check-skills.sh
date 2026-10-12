@@ -192,6 +192,13 @@ check "a clean copy passes frontmatter, budget and pointers" "0 ok - all reposit
 find "$work/repo" -name __pycache__ -prune -exec rm -rf {} +
 PYTHONDONTWRITEBYTECODE='' gate budget,pointers >/dev/null
 check "the gate leaves no cache in the tree it checks" "" "$(find "$work/repo" -name __pycache__)"
+out=$(gate budget,nosuch, 2>&1)
+check "a name that is no check is a usage error, an empty one too" \
+	"2 check-skills.py: no such check: '', 'nosuch'" "$? $out"
+out=$(timeout 20 python3 "$work/repo/tests/repo/check-skills.py" --only nosuch --only budget 2>&1)
+check "so is such a name in the first --only of two" "2 check-skills.py: no such check: 'nosuch'" "$? $out"
+out=$(timeout 20 python3 "$work/repo/tests/repo/check-skills.py" --only budget --only nosuch 2>&1)
+check "and in the second" "2 check-skills.py: no such check: 'nosuch'" "$? $out"
 
 fresh
 sed -i 's/^license: .*/&\nversion: 1/' "$skill/SKILL.md"

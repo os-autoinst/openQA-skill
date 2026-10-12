@@ -864,4 +864,67 @@ evals
 touch "$work/repo/evals/openqa/files/unused"
 check "evals: a file directly in files/ needs no eval" "ok - all repository checks pass" "$(gate evals)"
 
+# The trigger queries are edited by hand as well; edit then changes them.
+triggers() {
+	evals
+	json=$work/repo/evals/openqa/triggers.json
+}
+triggers
+printf '[{"query": \n' >"$json"
+finds "evals: a triggers.json that does not parse" evals "evals/openqa/triggers.json: not valid JSON: "
+triggers
+python3 -c 'print("[" * 200000 + "]" * 200000)' >"$json"
+finds "evals: a triggers.json nested too deep to parse" evals "evals/openqa/triggers.json: not valid JSON: "
+triggers
+rm "$json"
+mkdir "$json"
+finds "evals: a directory named triggers.json" evals \
+	"evals/openqa/triggers.json: cannot be read: Is a directory"
+triggers
+ln -sf nosuch "$json"
+finds "evals: a triggers.json that is a link to nowhere" evals \
+	"evals/openqa/triggers.json: cannot be read: No such file or directory"
+triggers
+rm "$work/repo/evals/openqa/evals.json"
+edit 'data[0]["query"] = " "'
+finds "evals: triggers are read without an evals.json beside them" evals \
+	"triggers.json: [0]: 'query' must be a non-empty string"
+triggers
+mkdir "$work/repo/evals/zz"
+cp "$json" "$work/repo/evals/zz/"
+finds "evals: triggers of a skill that does not exist" evals "evals/zz/triggers.json: skill 'zz' does not exist"
+triggers
+edit 'data = {"queries": data}'
+finds "evals: a triggers.json that is an object" evals "evals/openqa/triggers.json: must be a list"
+triggers
+edit 'data[0] = data[0]["query"]'
+finds "evals: a trigger that is not an object" evals "triggers.json: [0]: must be an object"
+triggers
+edit 'data[0]["query"] = " "' 'del data[1]["query"]' 'data[2]["query"] = 3'
+check "evals: a query that is blank, missing or a number" 3 \
+	"$(gate evals | grep -c "triggers.json: \[[012]\]: 'query' must be a non-empty string")"
+triggers
+edit 'data[1]["query"] = data[0]["query"]'
+finds "evals: a query that two triggers share" evals "triggers.json: [1]: query repeats [0]"
+triggers
+edit 'data[-1].update(query="  " + data[0]["query"].upper().replace(" ", "  "), should_trigger=not data[0]["should_trigger"])'
+finds "evals: one query under both labels, whatever its case and spacing" evals "]: query repeats [0]"
+triggers
+edit 'data[0]["should_trigger"] = "true"' 'del data[1]["should_trigger"]'
+check "evals: a should_trigger that is a string or missing" 2 \
+	"$(gate evals | grep -c "triggers.json: \[[01]\]: 'should_trigger' must be true or false")"
+triggers
+edit 'data = [dict(entry, should_trigger=int(entry["should_trigger"])) for entry in data]'
+out=$(gate evals)
+check "evals: 1 and 0 are no booleans and stand for neither kind" "1 1" \
+	"$(grep -c "no query with 'should_trigger' false" <<<"$out") $(grep -c "no query with 'should_trigger' true" <<<"$out")"
+triggers
+edit 'data = [entry for entry in data if entry["should_trigger"]]'
+finds "evals: triggers without a query that should not trigger" evals \
+	"evals/openqa/triggers.json: no query with 'should_trigger' false"
+triggers
+edit 'data = [entry for entry in data if not entry["should_trigger"]]'
+finds "evals: triggers without a query that should trigger" evals \
+	"evals/openqa/triggers.json: no query with 'should_trigger' true"
+
 exit $fail

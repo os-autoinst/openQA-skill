@@ -44,7 +44,7 @@ scripts/oqa-sweep.py --host o3 --group 1 --todo
 2. **`incomplete`, `timeout_exceeded`**: done jobs count as failed; one cancelled while still scheduled counts as skipped. Read `reason` first. -> references/job-triage.md "Incomplete reasons"
 3. **`parallel_failed`** only to find the culprit. -> "Clusters in review"
 4. **Carried-over references** in a full review or when one looks stale: carry-over never checks that the ticket is still open.
-5. **`softfailed`** only if policy or the user asks. A soft failure carrying `label:force_result:softfailed` is a real failure someone overrode: check that its reference still holds.
+5. **`softfailed`** only if policy or the user asks. A soft failure carrying `label:force_result:softfailed` is a real failure someone, or `openqa-investigate` after an ok retry, overrode: check that its reference still holds.
 
 Skip tests named `*:investigate:*`: diagnostic clones, not part of the verdict.
 

@@ -775,6 +775,17 @@ finds "evals: an evals.json that does not parse" evals "evals/openqa/evals.json:
 evals
 printf '{"skill_name": "openqa", "notes": "caf\351", "evals": []}\n' >"$json"
 finds "evals: an evals.json that is not UTF-8" evals "evals/openqa/evals.json: not valid JSON: "
+evals
+python3 -c 'print("[" * 200000 + "]" * 200000)' >"$json"
+finds "evals: an evals.json nested too deep to parse" evals "evals/openqa/evals.json: not valid JSON: "
+evals
+rm "$json"
+mkdir "$json"
+finds "evals: a directory named evals.json" evals "evals/openqa/evals.json: cannot be read: Is a directory"
+evals
+ln -sf nosuch "$json"
+finds "evals: an evals.json that is a link to nowhere" evals \
+	"evals/openqa/evals.json: cannot be read: No such file or directory"
 shape="evals/openqa/evals.json: must be an object with a non-empty list 'evals'"
 evals
 edit 'data = data["evals"]'

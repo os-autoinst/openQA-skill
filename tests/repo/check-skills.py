@@ -803,12 +803,11 @@ def load_json(path):
 
 
 def check_evals(skills, out):
-    for path in sorted((ROOT / "evals").glob("*/evals.json")):
+    for path in eval_files("evals.json"):
         base, rel = path.parent, path.relative_to(ROOT).as_posix()
-        try:
-            data = json.loads(path.read_text(encoding="utf-8"))
-        except ValueError as error:  # bytes that are not UTF-8 raise one too
-            out.append(f"evals: {rel}: not valid JSON: {error}")
+        data, broken = load_json(path)
+        if broken:
+            out.append(f"evals: {rel}: {broken}")
             continue
         cases = data.get("evals") if isinstance(data, dict) else None
         if not isinstance(cases, list) or not cases:

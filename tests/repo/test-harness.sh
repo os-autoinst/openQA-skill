@@ -416,6 +416,7 @@ if command -v codex >/dev/null; then
 	check "codex rules: osc -Hq" forbidden "$(decide osc -Hq ls)"
 	check "codex rules: secret-tool lookup" forbidden "$(decide secret-tool lookup service gh:github.com)"
 	check "codex rules: --apikey after --osd" forbidden "$(decide openqa-cli api --osd --apikey K jobs)"
+	check "codex rules: --apisecret on a reservation" forbidden "$(decide openqa-cli reservation --apisecret S 7)"
 	check "codex rules: cat of osc's cookie jar" forbidden "$(decide cat /home/USER/.local/state/osc/cookiejar)"
 	check "codex rules: osc token" forbidden "$(decide osc token --create)"
 	check "codex rules: tea login e" forbidden "$(decide tea login e)"

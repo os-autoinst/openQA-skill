@@ -251,10 +251,14 @@ assert_script_run 'X="$(cat /tmp/t/f)"; make';
 assert_script_run 'F=/tmp/t/f; rm $(cat $F)';
 assert_script_run 'JOBS=4 make; make install';
 assert_script_run 'f=/etc/t; [ ! -f $f ] && f=/usr$f; cat $f';
+assert_script_run '[ -f /tmp/t/lock ] && rm /tmp/t/lock; make';
+assert_script_run 'test -f /etc/t && f=$(cat /etc/t); make';
+assert_script_run '[[ -d /usr/etc ]] && export D=/usr/etc; make';
+assert_script_run 'test -e /etc/t && f=/etc/t; cat $f';
 EOF
-check "semicolon-chain: silent behind clear, cd home, an echo that writes nothing and an assignment; cd to a directory, an echo with '>', '|' or '&&', a value from \$( ) or backticks, an assignment in front of a command and one command with a status are reported" \
+check "semicolon-chain: silent behind clear, cd home, an echo that writes nothing and an assignment, also one behind a test ('[', '[[' or 'test') and '&&'; cd to a directory, an echo with '>', '|' or '&&', a value from \$( ) or backticks, behind a test as well, an assignment in front of a command and a command behind a test are reported" \
 	"lib/home.pm:6,7,8,9,10,11,12,13: semicolon-chain
-lib/value.pm:4,5,6,7,8,9: semicolon-chain" "$(lint "$chain/lib/home.pm" "$chain/lib/value.pm" | sed "s|$chain/||" | grep -o '^[^ ]* semicolon-chain')"
+lib/value.pm:4,5,6,7,8,10,11: semicolon-chain" "$(lint "$chain/lib/home.pm" "$chain/lib/value.pm" | sed "s|$chain/||" | grep -o '^[^ ]* semicolon-chain')"
 cat >"$chain/lib/words.pm" <<'EOF'
 assert_script_run 'grep --ignore-case error /tmp/t/log; ls /tmp/t';
 assert_script_run 'journalctl --until today > /tmp/t/log; ls /tmp/t';
@@ -365,14 +369,16 @@ lines = [
     "assert_script_run 'make'" + blank + "." + blank + "'; ls';",
     "assert_script_run 'make' . f" + "(" * 50000 + "x" * 60000,
     "assert_script_run 'make' . f(\"" + '\\"' * 40000,
+    "assert_script_run 'test -f a" + blank + "& make; ls';",
+    "assert_script_run '[ -f a ]" + blank + "&&" + blank + "x=1" + blank + "; make';",
 ]
 lines += ["<<EOT"] * 20000
 lines += ["# Copyright SUSE LLC", "# Summary: x", "# Maintainer: QE <qe@example.com>", "use Mojo::Base 'consoletest';", "1;"]
 open(f"{sys.argv[1]}/slow.pm", "w").write("\n".join(lines) + "\n")
 PY
-# The file takes a tenth of the limit; put back, each pattern or loop that was replaced takes twice the limit.
-check "no line stalls the script: an open string of backslashes or quotes, deep nesting, a run of spaces behind each call, a call or its argument repeated, a chain of 40,000 commands, a run of spaces behind a ';', 'time', '-p', '!' and '<<', 20,000 keywords behind a closing quote, 40,000 joined strings and terms, a run of spaces around '.', a call and a string in a call behind '.' that never close, here-documents that never end" \
-	"2,23,24,25,26,27,28 semicolon-chain
+# The file takes a fifth of the limit; put back, each pattern or loop that was replaced takes twice the limit.
+check "no line stalls the script: an open string of backslashes or quotes, deep nesting, a run of spaces behind each call, a call or its argument repeated, a chain of 40,000 commands, a run of spaces behind a ';', 'time', '-p', '!' and '<<', 20,000 keywords behind a closing quote, 40,000 joined strings and terms, a run of spaces around '.', a call and a string in a call behind '.' that never close, a run of spaces behind a test and around its '&&', here-documents that never end" \
+	"2,23,24,25,26,27,28,31 semicolon-chain
 5 spdx-colon
 6,7 script-run-background
 8 zypper-call-noninteractive

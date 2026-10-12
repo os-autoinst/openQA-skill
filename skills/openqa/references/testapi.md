@@ -165,4 +165,4 @@ Text-only consoles (`root-virtio-terminal`, `root-sut-serial`): fast and screenl
 - **`type_string` presses no Enter, `enter_cmd` does; neither waits nor checks** — follow with `wait_serial(qr/READY/, timeout => 30) or die 'not ready';` or use the `script_run` family.
 - **Named args only:** `assert_and_click`, `assert_and_dclick`, `click_lastmatch`, `mouse_drag`. `assert_and_click('tag', 60)` dies `Odd name/value argument`; write `timeout => 60`.
 - **`wait_screen_change` with a timeout:** `wait_screen_change(sub { send_key 'alt-n' }, 20)`; `0` becomes 10. The triggering action goes inside the block or the change is missed.
-- **`record_info ..., result => 'fail'` leaves the module green** — to fail, `die`.
+- **`record_info ..., result => 'fail'` leaves the module green** — to fail, `die` -> "Result recording".

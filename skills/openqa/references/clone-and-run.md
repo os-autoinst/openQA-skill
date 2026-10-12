@@ -11,7 +11,7 @@
 
 - **Source job:** recent, passed, in the scenario the change touches; `scripts/oqa-sweep.py --group <id> --passed [--module <name>]` (passed and softfailed, `result=`): `hdd=` image booted, `publishes=` image overwritten, `parents=`. `--within-instance` skips the asset check: a deleted qcow makes the clone incomplete.
 - **Product not on the named instance** (SLE on o3): say so first, then give the commands with `<host>`, `<JOB_ID>` placeholders and the lookups.
-- **Bare isotovideo yields no job URL**, so it cannot be a PR's VR link. What a VR must cover -> references/pr-review-rules.md "Pre-review checklist"
+- **Bare isotovideo yields no job URL**, so it cannot be a PR's VR link. What a VR must cover -> references/pr-review-rules.md "Verification runs"
 
 ## Writes and auth
 

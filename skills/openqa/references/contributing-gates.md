@@ -88,9 +88,9 @@ Prose-only, policed by reviewers: no `sleep`, no `is_tumbleweed()` (exclude olde
 (^use |[a-zA-Z]+#[a-zA-Z-]*[0-9]+|fate.suse.com/[0-9]+|\$(reference|bsc))
 ```
 
-- **Accepted**: `bsc#1`, `poo#1`, `jsc#SLE-1`, `gh#org/repo#1`, a variable named `$reference` or `$bsc`. **Rejected**: plain text; a bare tracker URL.
+- **Accepted**: `bsc#1`, `boo#1`, `poo#1`, `jsc#SLE-1`, `gh#org/repo#1`, a variable named `$reference` or `$bsc`. **Rejected**: plain text; a bare tracker URL.
 - **Line-based**: a call split over lines escapes the grep (no `;` on that line) — still keep call and reference on one line.
-- **No ticket**: `record_info('Title', 'text', result => 'softfail');`. Bugref semantics -> references/openqa-model.md "Bugrefs".
+- **No ticket** -> references/distri-helpers.md "Soft-fail on a known bug". Bugref semantics -> references/openqa-model.md "Bugrefs".
 
 ## Duplication and unused modules
 
@@ -101,7 +101,7 @@ Prose-only, policed by reviewers: no `sleep`, no `is_tumbleweed()` (exclude olde
 (- <dir>/<name>|loadtest.*<name>|load_testdir.*<dir>|^use (base )?"?<name>"?)
 ```
 
-  else `<path> module is not used in any schedule`, exit 1. **A new or modified module must be scheduled in the same PR** -> references/scheduling.md "Where a module goes". CI also checks modules whose `loadtest "x/y"` / `- "x/y"` line the PR removed: removing the last user means deleting the module.
+  else `<path> module is not used in any schedule`, exit 1. **A new or modified module must be scheduled in the same PR** -> references/scheduling.md "Unused-module check". CI also checks modules whose `loadtest "x/y"` / `- "x/y"` line the PR removed: removing the last user means deleting the module.
 - **A pass proves little**: paths containing `containers`, `qa_automation`, `hpc`, `wicked`, `sles4sap`, `s390x_tests`, `slepos` are skipped; `loadtest.*<name>` matches the basename only, so a same-named module masks a miss; a commented-out line counts as a hit.
 
 ## Checks that do not fire
@@ -128,7 +128,7 @@ Prose-only, policed by reviewers: no `sleep`, no `is_tumbleweed()` (exclude olde
 - **One logical change per commit; an unrelated file or component gets its own commit.**
 - **Branch commits land in master as they are — squash yourself**: amend or rebase review fixes, `git push --force-with-lease`, rewrite the body after squashing.
 - **Linear history is a merge condition**: rebase on master, never merge master in.
-- **Subject** imperative, PR title = commit subject, body says why (the PR description is not in the git log). Kernel-owned paths (`docs/KERNEL_README.md`) require a component prefix and reject Conventional Commits `type(scope):` although gitlint accepts them -> references/area-conventions.md "Kernel"
+- **Subject** imperative, body says why (the PR description is not in the git log). Kernel-owned paths (`docs/KERNEL_README.md`) require a component prefix and reject Conventional Commits `type(scope):` although gitlint accepts them -> references/area-conventions.md "Kernel"
 
 ## LLM-assistance trailer
 

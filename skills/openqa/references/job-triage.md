@@ -79,7 +79,7 @@ Classes: PRODUCT, TEST (code, needle, schedule, settings), INFRA (worker, backen
 
 ## Incomplete reasons
 
-`reason` is `<component> <stop reason>: <first message line>`.
+`reason` is `<component> <stop reason>: <first message line>`; only the scheduler's (last row) has no prefix.
 
 | `reason` starts with | Meaning, class |
 |---|---|
@@ -91,6 +91,7 @@ Classes: PRODUCT, TEST (code, needle, schedule, settings), INFRA (worker, backen
 | `isotovideo died: Unable to clone Git repository "<url>" specified via CASEDIR ...` | git ref gone. TEST settings |
 | `died: terminated prematurely, ...`, `terminated prematurely: Encountered corrupted state file` | mostly INFRA (`No space left on device`); log tail, `worker-log.txt` |
 | `no test modules scheduled/uploaded` | empty schedule or early crash. TEST |
+| `scheduled for more than <n> days` | never ran (state `cancelled`): no logs. The scheduler gave up after `max_job_scheduled_time` days (7): usually no worker offers the job's `WORKER_CLASS`, none online or all reserved -> references/openqa-model.md "Auth and roles". INFRA; TEST settings if the class is wrong |
 
 - **Suffix ` [Auto-restarting because reason matches ...]`:** follow the clone. **` [Not restarting job despite ...]`:** persistent; ticket, not another restart -> references/openqa-model.md "Automatic restarts"
 - **`Result: done` does not mean passed:** isotovideo exited normally. Plain `failed` jobs have no `reason`.
@@ -162,4 +163,4 @@ Templates -> references/bugs-and-tickets.md "Bug body", "Ticket body"
 - **Suite cloned at run time** (BCI-tests, LTP, kselftest, tox, bats): its revision is in neither `TEST_GIT_HASH` nor the investigation test log. `oqa-log.py --grep 'git clone'`, then its commits since last good, before saying PRODUCT.
 - **Digest and log disagree** (log `last_module=` not in the digest, other worker or date, modules after a fatal one): the artifact is from another run; no evidence, say so.
 
-Sources: openQA lib/OpenQA Constants.pm, Worker/Job.pm, Schema/Result/Jobs.pm; os-autoinst testapi.pm, basetest.pm, consoles/serial_screen.pm, autotest.pm, distribution.pm, lockapi.pm, OpenQA/Qemu/Proc.pm; os-autoinst-distri-opensuse lib/utils.pm, lib/known_bugs.pm, lib/Utils/Logging.pm; os-autoinst-scripts openqa-investigate
+Sources: openQA lib/OpenQA Constants.pm, Worker/Job.pm, Schema/Result/Jobs.pm, Scheduler/Model/Jobs.pm; os-autoinst testapi.pm, basetest.pm, consoles/serial_screen.pm, autotest.pm, distribution.pm, lockapi.pm, OpenQA/Qemu/Proc.pm; os-autoinst-distri-opensuse lib/utils.pm, lib/known_bugs.pm, lib/Utils/Logging.pm; os-autoinst-scripts openqa-investigate

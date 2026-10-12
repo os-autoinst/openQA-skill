@@ -237,6 +237,11 @@ TEXT_SUFFIXES = {
 }
 
 
+def read(path):
+    """The text as refsection.py serves it: check_pointers reports a byte that is not UTF-8."""
+    return path.read_text(encoding="utf-8", errors="replace")
+
+
 def split_frontmatter(text):
     """(frontmatter, body), delimited as scripts/refsection.py reads it; none closed: (None, text)."""
     lines = text.split("\n")
@@ -248,7 +253,7 @@ def split_frontmatter(text):
 
 
 def frontmatter(path):
-    block, _ = split_frontmatter(path.read_text(encoding="utf-8"))
+    block, _ = split_frontmatter(read(path))
     if block is None:
         return None
     data, key = {}, None
@@ -316,7 +321,7 @@ def section_reader(skill):
 def outline(reader, path):
     """Yield (title, level, first line, last line, bytes) per heading; bytes are what
     `refsection.py --list` prints."""
-    lines = path.read_text(encoding="utf-8").split("\n")
+    lines = read(path).split("\n")
     for sec in reader.parse(lines):
         size = len(reader.body(lines, sec).encode("utf-8"))
         yield sec.title, sec.level, sec.start + 1, sec.end, size
@@ -325,7 +330,7 @@ def outline(reader, path):
 def check_budget(skill, out):
     where = f"skills/{skill.name}"
     # Bytes as on disk: read_text() drops the "\r" of a CRLF file.
-    text = (skill / "SKILL.md").read_bytes().decode("utf-8")
+    text = (skill / "SKILL.md").read_bytes().decode("utf-8", errors="replace")
     size = len(split_frontmatter(text)[1].encode("utf-8"))
     if size > BODY_CAP:
         out.append(
@@ -376,7 +381,7 @@ def documents(skill):
 def unfenced_lines(path):
     fenced = False
     # Split as refsection.py does, so that a line has one number everywhere.
-    for num, line in enumerate(path.read_text(encoding="utf-8").split("\n"), 1):
+    for num, line in enumerate(read(path).split("\n"), 1):
         if line.lstrip().startswith(("```", "~~~")):
             fenced = not fenced
         if not fenced:
@@ -404,6 +409,12 @@ def check_pointers(skill, out):
     where = f"skills/{skill.name}"
     reader = section_reader(skill)
     docs = documents(skill)
+    for rel, path in docs.items():
+        try:
+            path.read_bytes().decode("utf-8")
+        except UnicodeDecodeError as error:
+            line = error.object.count(b"\n", 0, error.start) + 1
+            out.append(f"pointers: {where}/{rel}:{line}: not valid UTF-8")
     # refsection.py looks a reference up at the top level only, and documents() reads no other.
     for top in ("references", "agents"):
         for path in sorted((skill / top).glob("*/**/*.md")):
@@ -563,7 +574,7 @@ def check_pointers(skill, out):
             )
     for m in re.finditer(
         r"`?scripts/([A-Za-z0-9_.-]+\.(?:py|sh))`?",
-        (skill / "SKILL.md").read_text(encoding="utf-8"),
+        read(skill / "SKILL.md"),
     ):
         if not (skill / "scripts" / m.group(1)).exists():
             out.append(
@@ -623,7 +634,7 @@ def check_credentials(out):
     patterns = [(re.compile(p), what) for p, what in CREDENTIAL_PATTERNS]
     for path in docs:
         rel = path.relative_to(ROOT).as_posix()
-        for num, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+        for num, line in enumerate(read(path).splitlines(), 1):
             for pattern, what in patterns:
                 if m := pattern.search(line):
                     out.append(f"credentials: {rel}:{num}: {what}: '{m.group(0)[:60]}'")

@@ -444,6 +444,34 @@ printf '# Deep\n' | tee "$skill/references/sub/deep.txt" >"$skill/scripts/sub/de
 check "pointers: another kind of file below references/ and a .md below scripts/ pass" \
 	"ok - all repository checks pass" "$(gate budget,pointers)"
 
+# A byte that is not UTF-8 is one finding, and every check reads on as refsection.py serves the file.
+fresh
+printf 'caf\351\n' >>"$skill/$ref"
+check "pointers: a reference that is not UTF-8 is one finding, whatever the checks" \
+	"pointers: skills/openqa/$ref:$(($(wc -l <"$root/skills/openqa/$ref") + 1)): not valid UTF-8" \
+	"$(gate frontmatter,budget,pointers,public,attribution,credentials)"
+fresh
+printf 'caf\351\n-> testapi.md "No such section"\n' >>"$skill/agents/job-triage.md"
+lines=$(wc -l <"$root/skills/openqa/agents/job-triage.md")
+check "pointers: a playbook that is not UTF-8 is read on" \
+	"pointers: skills/openqa/agents/job-triage.md:$((lines + 1)): not valid UTF-8
+pointers: skills/openqa/agents/job-triage.md:$((lines + 2)): 'testapi.md' has no section \"No such section\"" \
+	"$(gate budget,pointers,credentials)"
+fresh
+printf 'caf\351\n' >>"$skill/SKILL.md"
+check "pointers: a SKILL.md that is not UTF-8" \
+	"pointers: skills/openqa/SKILL.md:$(($(wc -l <"$root/skills/openqa/SKILL.md") + 1)): not valid UTF-8" \
+	"$(gate frontmatter,budget,pointers,credentials)"
+fresh
+printf '\n## Odd\n\ncaf\351\n' >>"$skill/$ref"
+filler 5200 >>"$skill/$ref"
+listed=$(python3 "$skill/scripts/refsection.py" --list redaction.md | awk '/## Odd$/ { print $1 }')
+check "budget: such a byte is measured as refsection.py --list prints it" 1 \
+	"$(gate budget | grep -c -F "section \"Odd\" is $listed bytes")"
+fresh
+printf 'na\303\257ve\n' >>"$skill/$ref"
+check "pointers: a character of two bytes is valid UTF-8" "ok - all repository checks pass" "$(gate budget,pointers)"
+
 # A "## " section of a reference needs a chain of pointers that starts in SKILL.md, a playbook
 # or the reference read whole, or an entry in UNROUTED.
 last=$(wc -l <"$root/skills/openqa/$ref")

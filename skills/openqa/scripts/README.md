@@ -370,9 +370,11 @@ has its own `||` or an exit code that says nothing. Those are `clear`; `cd` with
 `&`, `<` or `>`; and `NAME=value`, `export NAME=value` or `export NAME`, unless the command contains `$(`
 or a backtick, because a value that a command computes can fail. Not inspected, so a chain there passes
 and none of these is a fix: text inside quotes, backticks, `( )` or `{ }`; a command with a here-document,
-or with `for`, `while`, `until`, `if`, `case`, `set -e` or `set -o pipefail` at the start of a word, in
-quotes as well. The `case` of `grep --ignore-case` and the `for` of `a.for` start no word and hide no
-chain. `set -e` typed into the SUT's shell ends that shell at the first failure.
+or with `for`, `while`, `until`, `if`, `case`, `set -e` or `set -o pipefail` where a command starts: first
+in the command or behind `;`, `|`, `&`, `(`, a quote, a backtick or `{` and a blank, with `time` or `!` in
+between or not. Elsewhere they hide no chain: the `for` of `echo wait for it` and of `echo "wait" for it`,
+the `case` of `grep --ignore-case`. `set -e` typed into the SUT's shell ends that shell at the first
+failure.
 
 ## check-schedule.py - lint YAML schedules, find who schedules a module (offline)
 

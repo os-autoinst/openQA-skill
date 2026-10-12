@@ -493,15 +493,24 @@ _CHAIN_CALL = re.compile(
 )
 _SHELL_QUOTED = re.compile(r"""'[^']*'|"[^"]*"|`[^`]*`""")
 # $? and PIPESTATUS settle the status; a compound command, a here-document, errexit and pipefail are skipped.
-# A keyword or set starts a word: the 'case' of 'grep --ignore-case' and the 'for' of 'a.for' are none.
+# A keyword or set starts a command, behind 'time' or '!' at most: the 'for' of 'echo wait for it' is an argument.
 _SHELL_CHECKED = re.compile(
-    r"""(?<![^\s;|&("'`])(?:(?:for|while|until|if|case)[\s(]|set\s+-\w*(?:e|o\s+(?:errexit|pipefail)\b))"""
+    r"""(?:^|[;|&("'`]|\{\s)\s*(?:time\s+(?:-p\s+)?)?(?:!\s+)?"""
+    r"""(?:(?:for|while|until|if|case)[\s(]|set\s+-\w*(?:e|o\s+(?:errexit|pipefail)\b))"""
     r"|\$\?|\bPIPESTATUS\b|<<"
 )
 _STATUS_TEST = re.compile(r"(?:(?:test|\[\[?)\s[^|&]*|true)$")
 # An exit code that says nothing: clear, cd to the home directory, an echo that writes no file, an assignment.
 _NO_STATUS = re.compile(r"(?:clear|cd(?:\s+~)?|echo(?:\s[^|&<>]*)?)$")
 _ASSIGNMENT = re.compile(r"(?:(?:export\s+)?\w+=[^\s|&<>]*|export\s+\w+)$")
+
+
+def _shell_checked(command):
+    """Whether _SHELL_CHECKED matches anywhere but behind the quote that closes a quoted text."""
+    closing = {quoted.end() - 1 for quoted in _SHELL_QUOTED.finditer(command)}
+    return any(
+        found.start() not in closing for found in _SHELL_CHECKED.finditer(command)
+    )
 
 
 def _top_level(command):
@@ -532,7 +541,7 @@ def semicolon_chain(module):
         if (
             not call
             or "assert_script_run" not in module.code[number - 1]
-            or _SHELL_CHECKED.search(call.group(2))
+            or _shell_checked(call.group(2))
         ):
             continue
         parts = _top_level(call.group(2)).rstrip("; ").split(";")

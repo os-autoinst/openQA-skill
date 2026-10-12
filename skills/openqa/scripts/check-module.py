@@ -488,9 +488,10 @@ _CHAIN_CALL = re.compile(
 )
 _SHELL_QUOTED = re.compile(r"""'[^']*'|"[^"]*"|`[^`]*`""")
 # $? and PIPESTATUS settle the status; a compound command, a here-document, errexit and pipefail are skipped.
+# A keyword or set starts a word: the 'case' of 'grep --ignore-case' and the 'for' of 'a.for' are none.
 _SHELL_CHECKED = re.compile(
-    r"\b(?:for|while|until|if|case)[\s(]|\$\?|\bPIPESTATUS\b|<<"
-    r"|\bset\s+-\w*(?:e|o\s+(?:errexit|pipefail)\b)"
+    r"""(?<![^\s;|&("'`])(?:(?:for|while|until|if|case)[\s(]|set\s+-\w*(?:e|o\s+(?:errexit|pipefail)\b))"""
+    r"|\$\?|\bPIPESTATUS\b|<<"
 )
 _STATUS_TEST = re.compile(r"(?:(?:test|\[\[?)\s[^|&]*|true)$")
 # An exit code that says nothing: clear, cd to the home directory, an echo that writes no file, an assignment.

@@ -66,12 +66,12 @@ Comment text -> references/review-comments-tickets.md "Comment recipes". Restart
 
 ## os-autoinst-scripts
 
-Server-side auto-review helpers (github.com/os-autoinst/os-autoinst-scripts). Bash ones exit unless `jq`, `retry`, `osc`, `openqa-cli` are on PATH; `openqa-label-known-issues` is Python (`typer`, `httpx`) and shells out to `openqa-cli`.
+Server-side auto-review helpers (github.com/os-autoinst/os-autoinst-scripts). Bash ones exit unless `jq`, `retry`, `osc`, `openqa-cli` are on PATH; `openqa-label-known-issues` and, since its rewrite, `openqa-investigate` are Python 3.12+ (`typer`, `httpx`, `tenacity`) and shell out to `openqa-cli`.
 
 | Script | Writes to openQA | Shell + DB on openQA host | Dry run |
 | --- | --- | --- | --- |
 | `openqa-label-known-issues` (`-multi`, `-hook`) | comment, restart | no | `--dry` / `-n`; wrappers: env `dry_run=1` only |
-| `openqa-investigate` (`-multi`) | **at once**: a "Starting investigation for job <id>" comment, then up to four clones | no | env `dry_run=1` echoes the calls |
+| `openqa-investigate` (`-multi`) | **at once**: a comment starting "Starting investigation for job <id>", then up to four clones | no | env `dry_run=1`: the Bash revision echoes the calls, the Python one (also `--dry-run`) logs them with `-v` |
 | `openqa-trigger-bisect-jobs` | clones, comment | no | `--dry-run` |
 | `openqa-advanced-retrigger-jobs` | bulk restart | yes, unless env `JOB_IDS="<id> <id>"` is set | env `dry_run=1` |
 | `openqa-query-for-job-label`, `openqa-monitor-incompletes`, `openqa-monitor-investigation-candidates`, `openqa-incompletes-stats` | no | **yes** (`ssh` + `sudo -u geekotest psql`) | - |
@@ -131,4 +131,4 @@ openqa-review --host https://openqa.opensuse.org -j '<Parent> / <Group>' \
 
 `openqa_client` (github.com/os-autoinst/openQA-python-client) suits longer custom scripts; same `client.conf`. (unverified) `get_latest_build(<group id>)` defaults to `all_passed=True` (newest all-green build); review needs `all_passed=False`.
 
-Sources: openQA public/openqa-cli.yaml, lib/OpenQA/Command.pm, lib/OpenQA/WebAPI/Plugin/MCP.pm; os-autoinst-scripts _common, openqa-label-known-issues, openqa-investigate, openqa-advanced-retrigger-jobs; openqa_review openqa_review/openqa_review.py, browser.py; openqa-mon cmd/openqa-revtui/*.go; ruoqa-mcp README.md, src/tools/read.rs
+Sources: openQA public/openqa-cli.yaml, lib/OpenQA/Command.pm, lib/OpenQA/WebAPI/Plugin/MCP.pm; os-autoinst-scripts _common, pyproject.toml, openqa-label-known-issues, openqa-investigate, openqa-advanced-retrigger-jobs; openqa_review openqa_review/openqa_review.py, browser.py; openqa-mon cmd/openqa-revtui/*.go; ruoqa-mcp README.md, src/tools/read.rs

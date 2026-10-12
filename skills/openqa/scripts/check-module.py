@@ -508,7 +508,10 @@ _SHELL_CHECKED = re.compile(
 _STATUS_TEST = re.compile(r"(?:(?:test|\[\[?)\s[^|&]*|true)$")
 # An exit code that says nothing: clear, cd to the home directory, an echo that writes no file, an assignment.
 _NO_STATUS = re.compile(r"(?:clear|cd(?:\s+~)?|echo(?:\s[^|&<>]*)?)$")
-_ASSIGNMENT = re.compile(r"(?:(?:export\s+)?\w+=[^\s|&<>]*|export\s+\w+)$")
+# A test in front of an assignment is its condition: 1 is no failure, and '&&' in place of the next ';' would stop there.
+_ASSIGNMENT = re.compile(
+    r"(?:(?:test|\[\[?)\s[^|&]*&&\s*)?(?:(?:export\s+)?\w+=[^\s|&<>]*|export\s+\w+)$"
+)
 
 
 def _command(line, call):

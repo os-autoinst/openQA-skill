@@ -370,7 +370,8 @@ the command decides the status itself: as `\;`, at the end; with `$?` or `PIPEST
 command; before a last command that is `test`, `[`, `[[` or `true`; and when every command before the last
 has its own `||` or an exit code that says nothing. Those are `clear`; `cd` without argument or to `~`
 (`cd <dir>` is reported: a failure runs the next command in the wrong directory); an `echo` without `|`,
-`&`, `<` or `>`; and `NAME=value`, `export NAME=value` or `export NAME`, unless the command contains `$(`
+`&`, `<` or `>`; and `NAME=value`, `export NAME=value` or `export NAME`, also behind a `test`, `[` or `[[`
+and `&&`, whose 1 is the answer of a condition and no failure; all of them unless the command contains `$(`
 or a backtick, because a value that a command computes can fail. Not inspected, so a chain there passes
 and none of these is a fix: text inside quotes, backticks, `( )` or `{ }`; a command with a here-document
 (`<<` in front of a tag: `<<<` and the `<<` of `$((1<<4))` open none), or with `for`, `while`, `until`,

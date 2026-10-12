@@ -271,9 +271,29 @@ assert_script_run "sh -c 'until test -e /tmp/t/f; do date; done'; ls";
 assert_script_run 'bash -c "case $1 in a) true;; esac"; ls';
 assert_script_run 'make;set -e; cd /tmp/t; ls';
 assert_script_run 'ls /tmp/t/a; if [ -f /tmp/t/b ]; then ls; fi';
+assert_script_run 'echo wait for it > /tmp/t/log; make';
+assert_script_run 'echo wait on it > /tmp/t/log; make';
+assert_script_run 'git commit -m "fix for boo#1"; git push';
+assert_script_run 'git commit -m "fix of boo#1"; git push';
+assert_script_run 'mount /dev/vdb /mnt; grep -c for /mnt/t; make';
+assert_script_run 'mount /dev/vdb /mnt; grep -c four /mnt/t; make';
+assert_script_run '{ for f in a b; do rm $f; done; }; ls';
+assert_script_run '! for f in a b; do test -e /tmp/t/$f; done';
+assert_script_run 'time while pgrep make; do date; done';
+assert_script_run 'make; time -p ! until test -e /tmp/t/f; do date; done';
 EOF
-check "semicolon-chain: a keyword or set that starts no word hides no chain ('--ignore-case', '--until', '--for', 'a.for', '--if-exists', '--set -e'); one behind '|', ';', '&', '(', a backtick, a quote or a blank still does" \
-	"lib/words.pm:1,2,3,4,5,6: semicolon-chain" "$(lint "$chain/lib/words.pm" | sed "s|$chain/||" | grep -o '^[^ ]* semicolon-chain')"
+check "semicolon-chain: a keyword or set that starts no command hides no chain ('--ignore-case', '--until', '--for', 'a.for', '--if-exists', '--set -e', 'for' behind a word, in quotes or not, each next to the same command with another word); one behind '|', ';', '&', '(', '{ ', a backtick or a quote still does, with blanks, 'time' or '!' in between or not" \
+	"lib/words.pm:1,2,3,4,5,6,16,17,18,19,20,21: semicolon-chain" "$(lint "$chain/lib/words.pm" | sed "s|$chain/||" | grep -o '^[^ ]* semicolon-chain')"
+cat >"$chain/lib/quotes.pm" <<'EOF'
+assert_script_run 'echo set -e > /tmp/t/run.sh; chmod +x /tmp/t/run.sh';
+assert_script_run 'echo "wait" for it > /tmp/t/log; make';
+assert_script_run 'echo `date` if any > /tmp/t/log; make';
+assert_script_run "awk '{if (\$2) print \$2}' /tmp/t/a > /tmp/t/b; make";
+assert_script_run "bash -c ' for f in a b; do rm \$f; done'; ls";
+assert_script_run "bash -c 'for f in a b; do " . $rm . "; done'";
+EOF
+check "semicolon-chain: 'set -e' behind a word, a keyword behind the quote or backtick that closes a text and one behind a '{' without a blank hide no chain; a keyword behind the quote that opens a text, or that never closes on the line, still does" \
+	"lib/quotes.pm:1,2,3,4: semicolon-chain" "$(lint "$chain/lib/quotes.pm" | sed "s|$chain/||" | grep -o '^[^ ]* semicolon-chain')"
 # --- lines built to stall a rule or the reading of the file --------------------------------
 python3 - "$chain" <<'PY'
 import sys
@@ -302,14 +322,16 @@ lines = [
     "'" + "\\'" * 40000 + ' "sleep 5";',
     "assert_script_run '" + "cd ; A=1 ; " * 20000 + "ls';",
     "assert_script_run 'echo" + blank + "> /tmp/t; export" + blank + "; ls';",
+    "assert_script_run 'make;" + blank + "time" + blank + "-p" + blank + "!" + blank + "ls';",
+    "assert_script_run '" + 'make "a" for b; ' * 20000 + "ls';",
 ]
 lines += ["<<EOT"] * 20000
 lines += ["# Copyright SUSE LLC", "# Summary: x", "# Maintainer: QE <qe@example.com>", "use Mojo::Base 'consoletest';", "1;"]
 open(f"{sys.argv[1]}/slow.pm", "w").write("\n".join(lines) + "\n")
 PY
 # The file takes a tenth of the limit; put back, each pattern or loop that was replaced takes twice the limit.
-check "no line stalls the script: an open string of backslashes or quotes, deep nesting, a run of spaces behind each call, a call or its argument repeated, a chain of 40,000 commands, here-documents that never end" \
-	"2,23 semicolon-chain
+check "no line stalls the script: an open string of backslashes or quotes, deep nesting, a run of spaces behind each call, a call or its argument repeated, a chain of 40,000 commands, a run of spaces behind a ';', 'time', '-p' and '!', 20,000 keywords behind a closing quote, here-documents that never end" \
+	"2,23,24,25 semicolon-chain
 5 spdx-colon
 6,7 script-run-background
 8 zypper-call-noninteractive

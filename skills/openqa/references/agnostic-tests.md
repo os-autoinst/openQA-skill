@@ -91,7 +91,7 @@ sub run {
 ```
 
 - **Not applicable**: `record_info('SKIP', '<why>'); return;` behind `is_sle(...)` or `package_version_cmp`, not a soft-failure.
-- **Known product bug**: `eval {}` around the chain, `record_soft_failure("bsc#N: ...: $@")` on `$@` (`openssl_pqc.pm`). That catches only a `die` (`setup`, non-zero `runtest`); test failures from a contract-conforming `runtest` still fail the module.
+- **Known product bug**: `eval {}` around the chain, `record_soft_failure("bsc#N: ...: $@")` on `$@`. That catches only a `die` (`setup`, non-zero `runtest`); test failures from a contract-conforming `runtest` still fail the module.
 - **`test_flags`**: most merged wrappers define none -> references/module-templates.md "Choosing test_flags".
 - **Do not copy** `go_post_quantum.pm` or `apachessl_pqc.pm`: they bypass the runner or `install_package`.
 
@@ -105,7 +105,7 @@ sub run {
 
 ## Python 3.6 rule
 
-SLE 15 ships Python 3.6 as `python3`: no 3.7+ features (f-strings are fine). Pass `subprocess.run` `stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True`, not `capture_output=True, text=True` as the security python artifacts do.
+SLE 15 ships Python 3.6 as `python3`: no 3.7+ features (f-strings are fine). Pass `subprocess.run` `stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True`, not `capture_output=True, text=True` as `testApacheSSLPQC` and `yama` do.
 
 ## Scheduling
 

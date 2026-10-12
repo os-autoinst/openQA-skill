@@ -205,6 +205,18 @@ finds "frontmatter: a description over 1024 characters" frontmatter "description
 fresh
 sed -i '2,$s/^---$/--/' "$skill/SKILL.md"
 finds "frontmatter: a frontmatter that is never closed" frontmatter "missing frontmatter"
+fresh
+sed -i 's/^license: .*/&\nallowed_tools: Bash\nrev2: 1/' "$skill/SKILL.md"
+finds "frontmatter: a key with an underscore outside the specification" frontmatter "key 'allowed_tools'"
+finds "frontmatter: a key with a digit outside the specification" frontmatter "key 'rev2'"
+fresh
+sed -i "s/^license: /when_to_use: >-\n  $(filler 40)\n&/" "$skill/SKILL.md"
+check "frontmatter: the folded value of such a key is not added to the description before it" \
+	"frontmatter: skills/openqa/SKILL.md: key 'when_to_use' is not in the Agent Skills specification" \
+	"$(gate frontmatter)"
+fresh
+sed -i 's/^license: .*/&\nmetadata:\n  short_name: oqa/' "$skill/SKILL.md"
+check "frontmatter: an underscore in a key below metadata passes" "ok - all repository checks pass" "$(gate frontmatter)"
 
 # Sizes are bytes of what one read returns: a section as refsection.py cuts it, or a whole file.
 ref=references/redaction.md

@@ -253,7 +253,7 @@ def frontmatter(path):
         return None
     data, key = {}, None
     for line in block.splitlines():
-        if m := re.match(r"^([A-Za-z-]+):\s*(.*)$", line):
+        if m := re.match(r"^([\w-]+):\s*(.*)$", line):
             key, val = m.group(1), m.group(2)
             data[key] = "" if val in (">-", ">", "|", "|-") else val
         elif key and line.startswith(" "):

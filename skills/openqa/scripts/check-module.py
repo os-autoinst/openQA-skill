@@ -8,6 +8,7 @@ Rule classes: "ci" ports a grep gate of the distri (Makefile, tools/check_*, t/0
 Line based: calls split over several lines are not inspected.
 """
 
+import bisect
 import os
 import re
 import sys
@@ -25,6 +26,29 @@ def rule(ident, kind, scope, summary):
         return function
 
     return register
+
+
+def _string(quote):
+    return rf"{quote}(?:[^{quote}\\]|\\.)*({quote})?"
+
+
+# A string that never closes is matched to the end of the line: a failed match would restart at each later quote.
+_STRINGS = {
+    kinds: re.compile("|".join(map(_string, kinds))) for kinds in ("\"'", '"', "'")
+}
+
+
+def _empty_strings(text, kinds="\"'"):
+    """text with "" for each string literal that starts with one of the quote kinds."""
+
+    def empty(string):
+        if string.lastindex:
+            return '""'
+        # No quote of this kind closes behind an open one, the other kind still can.
+        quote, rest = string.group()[0], string.group()[1:]
+        return quote + _empty_strings(rest, kinds.replace(quote, ""))
+
+    return _STRINGS[kinds].sub(empty, text) if kinds else text
 
 
 class Module:
@@ -45,6 +69,10 @@ class Module:
         """Blank POD, here-document bodies and everything after __END__ (Perl only)."""
         if self.python:
             return self.raw
+        # Looked up per tag: reading on to the closing line would read a file of open tags once per tag.
+        where = {}
+        for index, line in enumerate(self.raw):
+            where.setdefault(line.strip(), []).append(index)
         lines = []
         in_pod = ended = False
         heredoc_end = 0
@@ -62,19 +90,15 @@ class Module:
             lines.append("" if in_pod or ended else line)
             tag = re.search(r"""<<~?(["']?)([A-Za-z_]\w*)\1""", lines[-1])
             if tag:
-                closing = [
-                    later
-                    for later in range(index + 1, len(self.raw))
-                    if self.raw[later].strip() == tag.group(2)
-                ]
-                heredoc_end = closing[0] + 1 if closing else 0
+                closing = where.get(tag.group(2), [])
+                later = bisect.bisect(closing, index)
+                heredoc_end = closing[later] + 1 if later < len(closing) else 0
         return lines
 
     @staticmethod
     def _code(line):
         """Empty the string literals, then drop the comment."""
-        line = re.sub(r'"(?:[^"\\]|\\.)*"|\'(?:[^\'\\]|\\.)*\'', '""', line)
-        return re.sub(r"(^|\s)#.*$", "", line)
+        return re.sub(r"(^|\s)#.*$", "", _empty_strings(line))
 
     def grep(self, pattern, lines=None):
         regex = re.compile(pattern)
@@ -112,7 +136,12 @@ def header_summary(module):
     "tools/check_metadata: '# Maintainer: .+(@| at ).+'",
 )
 def header_maintainer(module):
-    return _header(module, r"# Maintainer: .+(@| at ).+"), (
+    # Tried behind the first '# Maintainer: ' only: a later one has less of the line left.
+    found = any(
+        re.match(r".+(@| at ).+", line.partition("# Maintainer: ")[2])
+        for line in module.raw
+    )
+    return [] if found else [1], (
         "no '# Maintainer:' line with an address",
         "add '# Maintainer: <team> <address@...>' in the owning team's spelling",
     )
@@ -138,7 +167,8 @@ def licence_text(module):
     "spdx-colon", "ci", "all", "t/01_style.t: 'SPDX-License-Identifier' needs a colon"
 )
 def spdx_colon(module):
-    return module.grep(r"[#/ ]*SPDX-License-Identifier "), (
+    # The '[#/ ]*' that leads the CI pattern matches nothing more and rescans each run of spaces.
+    return module.grep(r"SPDX-License-Identifier "), (
         "SPDX-License-Identifier is not followed by ':'",
         "write 'SPDX-License-Identifier: <id>'",
     )
@@ -210,6 +240,13 @@ def wait_idle(module):
     )
 
 
+def _ci_check_screen(line):
+    """'check_screen.*00(?!.*nocheck:)', which as a regex rescans the line from every call and every '00'."""
+    call = line.find("check_screen")
+    last = max(call + len("check_screen"), line.rfind("nocheck:"))
+    return call >= 0 and "00" in line[last:]
+
+
 @rule(
     "check-screen-timeout",
     "ci",
@@ -217,7 +254,12 @@ def wait_idle(module):
     "tools/check_code_style: 'check_screen.*00(?!.*nocheck:)'",
 )
 def check_screen_timeout(module):
-    return module.grep(r"check_screen.*00(?!.*nocheck:)"), (
+    lines = [
+        number
+        for number in module.grep("check_screen")
+        if _ci_check_screen(module.raw[number - 1])
+    ]
+    return lines, (
         "check_screen with a timeout that CI rejects ('check_screen.*00')",
         "assert_screen([qw(tag-a tag-b)], <timeout>) then branch with match_has_tag",
     )
@@ -231,11 +273,13 @@ def check_screen_timeout(module):
 )
 def soft_failure_reference(module):
     accepted = re.compile(
-        r"(^use |[a-zA-Z]+#[a-zA-Z-]*[0-9]+|fate.suse.com/[0-9]+|\$(reference|bsc))"
+        r"(^use |[a-zA-Z]#[a-zA-Z-]*[0-9]|fate.suse.com/[0-9]+|\$(reference|bsc))"
     )
+    # 'record_soft_failure\b.*;' of the Makefile: the call is in front of the last ';'.
+    ended = [line[: line.rfind(";") + 1] for line in module.raw]
     hits = [
         number
-        for number in module.grep(r"record_soft_failure\b.*;")
+        for number in module.grep(r"record_soft_failure\b", ended)
         if not accepted.search(module.raw[number - 1])
     ]
     return hits, (
@@ -273,11 +317,11 @@ def is_leap_major(module):
     "distribution.pm script_run dies on a trailing '&'",
 )
 def script_run_background(module):
-    no_wait = re.compile(r",\s*(timeout\s*=>\s*)?0\s*\)?\s*;")
+    no_wait = re.compile(r",\s*(timeout\s*=>\s*)?0\s*(?:\)\s*)?;")
     hits = [
         number
         for number in module.grep(
-            r"""\b(assert_)?script_run\s*\(?\s*(["'])(?:(?!\2).)*(?<!\\)&\2\s*[,);]"""
+            r"""\b(assert_)?script_run\s*(?:\(\s*)?(["'])(?:(?!\2).)*(?<!\\)&\2\s*[,);]"""
         )
         if not no_wait.search(module.raw[number - 1])
     ]
@@ -294,10 +338,15 @@ def script_run_background(module):
     "testapi assert_and_click/assert_and_dclick/click_lastmatch take named arguments only",
 )
 def click_positional_timeout(module):
-    lines = module.grep(
-        r"\b(assert_and_d?click\s*\(?\s*[^,;]+,|click_lastmatch\s*\(?)\s*\d+\s*\)?\s*;",
-        module.code,
-    )
+    # A call takes the text up to its ',' or ';' with it, timeout or not, so that a later call does not rescan it.
+    click = re.compile(r"\bassert_and_d?click[^,;]+(,\s*\d+\s*(?:\)\s*)?;)?")
+    lastmatch = re.compile(r"\bclick_lastmatch\s*(?:\(\s*)?\d+\s*(?:\)\s*)?;")
+    lines = [
+        number
+        for number in module.grep("click", module.code)
+        if lastmatch.search(module.code[number - 1])
+        or any(call.group(1) for call in click.finditer(module.code[number - 1]))
+    ]
     return lines, (
         "positional timeout, the signature takes key => value pairs only",
         "timeout => <seconds>",
@@ -321,7 +370,21 @@ def sleep(module):
     )
 
 
-_CI_CHECK_SCREEN = re.compile(r"check_screen.*00(?!.*nocheck:)")
+def _call_with(line, call, argument):
+    """Both matches in the leftmost statement closed by ';' where argument follows the first call.
+
+    The regex '<call>[^;]*?<argument>[^;]*;' finds the same and rescans the statement from every later call.
+    """
+    for statement in line.split(";")[:-1]:
+        first = call.search(statement)
+        found = first and argument.search(statement, first.end())
+        if found:
+            return first, found
+    return None
+
+
+_SCREEN_CALL = re.compile(r"\bcheck_screen\b")
+_SCREEN_WAIT = re.compile(r",\s*(timeout\s*=>\s*)?[1-9]")
 
 
 @rule(
@@ -333,11 +396,9 @@ _CI_CHECK_SCREEN = re.compile(r"check_screen.*00(?!.*nocheck:)")
 def check_screen_wait(module):
     hits = [
         number
-        for number in module.grep(
-            r"\bcheck_screen\b[^;]*?,\s*(timeout\s*=>\s*)?[1-9]\d*\s*[,)]?[^;]*;",
-            module.code,
-        )
-        if not _CI_CHECK_SCREEN.search(module.raw[number - 1])
+        for number in module.grep(_SCREEN_CALL, module.code)
+        if _call_with(module.code[number - 1], _SCREEN_CALL, _SCREEN_WAIT)
+        and not _ci_check_screen(module.raw[number - 1])
         and "nocheck:" not in module.raw[number - 1]
     ]
     return hits, (
@@ -357,7 +418,7 @@ def raw_zypper(module):
     hits = [
         number
         for number in module.grep(
-            rf"""^\s*(assert_script_run|script_run|assert_script_sudo|script_sudo)\s*\(?\s*["'](sudo )?zypper (-\S+ )*({verbs}) """
+            rf"""^\s*(assert_script_run|script_run|assert_script_sudo|script_sudo)\s*(?:\(\s*)?["'](sudo )?zypper (-\S+ )*({verbs}) """
         )
         if not re.search(r"\|\s*grep", module.raw[number - 1])
     ]
@@ -378,7 +439,7 @@ def raw_zypper(module):
 )
 def zypper_call_noninteractive(module):
     return module.grep(
-        r"""\bzypper_call\s*\(?\s*["'](-n |--non-interactive |(?:[^"']* )?(-y|--no-confirm)[ "'])"""
+        r"""\bzypper_call\s*(?:\(\s*)?["'](-n |--non-interactive |(?:[^"']* )?(-y|--no-confirm)[ "'])"""
     ), (
         "-n/-y passed to zypper_call, which already runs 'zypper -n'",
         "drop the option",
@@ -389,7 +450,7 @@ def zypper_call_noninteractive(module):
     "type-string-newline", "review", "perl", 'enter_cmd replaces type_string "...\\n"'
 )
 def type_string_newline(module):
-    return module.grep(r'\btype_string\s*\(?\s*"(?:[^"\\]|\\.)*\\n"\s*[,);]'), (
+    return module.grep(r'\btype_string\s*(?:\(\s*)?"(?:[^"\\]|\\.)*\\n"\s*[,);]'), (
         "type_string with a trailing newline",
         'enter_cmd "<cmd>"; or assert_script_run when the exit code matters',
     )
@@ -407,19 +468,16 @@ DEFAULT_TIMEOUTS = {
     "script_retry": 30,
     "zypper_call": 700,
 }
-_TIMEOUT_CALL = re.compile(
-    r"\b({})\b(?!\s*=>)[^;]*?\btimeout\s*=>\s*(\d+)\s*[,)]?[^;]*;".format(
-        "|".join(DEFAULT_TIMEOUTS)
-    )
-)
+_TIMEOUT_CALL = re.compile(r"\b({})\b(?!\s*=>)".format("|".join(DEFAULT_TIMEOUTS)))
+_TIMEOUT = re.compile(r"\btimeout\s*=>\s*(\d+)")
 
 
 @rule("default-timeout", "review", "perl", "timeout equal to the function's default")
 def default_timeout(module):
     hits = []
-    for number, line in enumerate(module.code, 1):
-        match = _TIMEOUT_CALL.search(line)
-        if match and DEFAULT_TIMEOUTS[match.group(1)] == int(match.group(2)):
+    for number in module.grep(_TIMEOUT, module.code):
+        match = _call_with(module.code[number - 1], _TIMEOUT_CALL, _TIMEOUT)
+        if match and DEFAULT_TIMEOUTS[match[0].group(1)] == int(match[1].group(1)):
             hits.append(number)
     return hits, ("timeout equals the default", "drop the timeout argument")
 

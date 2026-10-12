@@ -22,9 +22,9 @@ lint() {
 	python3 "$script" "$@"
 }
 
-# "<file>:<line>: <id> ..." -> "<line> <id>"; the summary line is checked on its own
+# "<file>:<line>[,<line>...]: <id> ..." -> "<lines> <id>"; the summary line is checked on its own
 brief() {
-	sed -E '/^summary: /d; s/^[^:]+:([0-9]+): ([a-z-]+) .*$/\1 \2/'
+	sed -E '/^summary: /d; s/^[^:]+:([0-9,+]+): ([a-z-]+) .*$/\1 \2/'
 }
 
 actual=$(lint tests/console/bad.pm)
@@ -98,6 +98,68 @@ sed "s/check_screen 'desktop', 100;/check_screen 'desktop', 100;    # nocheck: o
 check "'# nocheck:' silences check_screen as in CI" "" \
 	"$(lint "$work/tests/console/nocheck.pm" | grep ':22:')"
 
+# --- rules that no longer run one regex over the line report what that regex did ------------
+cat >"$work/tests/console/calls.pm" <<'EOF'
+# Copyright SUSE LLC
+# Summary: x
+# Maintainer: QE <qe@example.com> # Maintainer: none
+use Mojo::Base 'consoletest';
+use testapi;
+my $t = 100; check_screen 'desktop', $t;
+check_screen 'desktop', $t;    # nocheck: 100 nocheck: old
+check_screen 'desktop', $t;    # nocheck: old, 100 tries
+$n++; record_soft_failure 'no ticket';
+record_soft_failure 'no ticket'
+  if $n;
+$n++; record_soft_failure 'no ticket'
+  if $n;
+script_run( "daemon &" );
+script_run "daemon &", 0 ;
+script_run("daemon &", timeout => 0 ) ;
+assert_script_run( 'zypper in vim' );
+zypper_call( 'in -y vim' );
+type_string( "ls\n" );
+assert_and_click 'a'; assert_and_click 'b', 5;
+assert_and_click 'a' and click_lastmatch 5;
+click_lastmatch( 5 ) ;
+assert_and_click( 'a', 5 ) ;
+click_lastmatch timeout => 5;
+check_screen('desktop', 30)
+  or die;
+my @a = (1, 2) if check_screen 'desktop';
+check_screen 'a', 0; check_screen 'desktop', 30;
+retry(timeout => 30, sub { script_run 'ls' });
+script_run 'ls', timeout => 30
+  if $n;
+assert_script_run 'a' unless script_run 'b', timeout => 90;
+script_run 'a', timeout => 5; script_run 'b', timeout => 30;
+$out =~ s/'//g; script_run "sleep 2";
+$out =~ s/"//g; sleep 2;
+my $a = <<EOT;
+sleep 3
+EOT
+my $b = <<EOT;
+sleep 3
+EOT
+sleep 4;
+1;
+print <<EOT;
+text
+EOT
+EOF
+check "as the regexes did: the first '# Maintainer: ', the last 'nocheck:' and the last ';' of a line decide, '( ' opens a call, every click call and every statement is tried, the first call of a statement and what follows it count, a quote that never closes hides nothing and the other kind still closes, a here-document ends at the next line with its tag" \
+	"8 check-screen-timeout
+9 soft-failure-reference
+14 script-run-background
+17 raw-zypper
+18 zypper-call-noninteractive
+19 type-string-newline
+20,21,22,23 click-positional-timeout
+28 check-screen-wait
+32 default-timeout
+35,42 sleep
+44 trailing-true" "$(lint "$work/tests/console/calls.pm" | brief)"
+
 lint --disable no-such-rule tests/console/clean.pm >/dev/null 2>&1
 check "unknown rule id exits 2" 2 $?
 actual=$(lint tests/console/clean.pm tests/console/missing.pm 2>/dev/null)
@@ -142,7 +204,7 @@ b.pm:7,8: sleep
 summary: 2 file(s), 4 finding(s)" "$actual"
 rm -rf "$compact"
 
-# --- semicolon-chain: look-alikes of the silent forms, and lines built to stall it ---------
+# --- semicolon-chain: look-alikes of the silent forms ---------------------------------------
 chain=$(mktemp -d)
 mkdir "$chain/lib"
 cat >"$chain/lib/a.pm" <<'EOF'
@@ -164,18 +226,47 @@ echo "assert_script_run('mkdir /tmp/t; cd /tmp/t')" >"$chain/b.py"
 check "semicolon-chain, also under lib/ and in Python: 'dd if=', 'set layout', a test that is not last, one '||', a ';' at the end as well, a group or a quoted word as a command, one '|', set -x or +e, a stray ')' and 'true &&' hide no chain" \
 	"lib/a.pm:1,2,3,4,5,6,7,8,9,10,11,12,+1: semicolon-chain
 b.py:1: semicolon-chain" "$(lint "$chain/lib/a.pm" "$chain/b.py" | sed "s|$chain/||" | grep -o '^[^ ]* semicolon-chain')"
+# --- lines built to stall a rule or the reading of the file --------------------------------
 python3 - "$chain" <<'PY'
 import sys
+blank = " " * 60000
 lines = [
     'assert_script_run "' + "\\" * 5000,
     'assert_script_run "' + "(" * 50000 + "a; b" + ")" * 50000 + '; c";',
-    "assert_script_run" + " " * 60000,
+    "assert_script_run" + blank,
+    "# Maintainer: " * 16000,
+    " " * 150000 + "x SPDX-License-Identifier FSFAP",
+    "script_run" + blank + 'x; script_run "top -b &";',
+    'script_run "top -b &", 0' + " " * 100000,
+    "zypper_call" + blank + 'x; zypper_call "in -y vim";',
+    "type_string" + " " * 120000 + 'x; type_string "ls\\n";',
+    "assert_and_click" + " " * 20000 + "; assert_and_click 'button', 60;",
+    "click_lastmatch" + blank + "x; click_lastmatch 60;",
+    "click_lastmatch 60" + " " * 90000 + "x; click_lastmatch 60;",
+    "assert_and_click " * 12000 + "; assert_and_click 'button', timeout => 30;",
+    "check_screen " * 20000,
+    "check_screen" + ",1" * 120000,
+    "check_screen 00 " * 3000 + "# nocheck:",
+    "script_run 'a', timeout => 30 " * 2000,
+    "record_soft_failure " * 46000,
+    "record_soft_failure '" + "a" * 140000 + "';",
+    '"' + '\\"' * 40000 + " 'sleep 5';",
+    "'" + "\\'" * 40000 + ' "sleep 5";',
 ]
+lines += ["<<EOT"] * 20000
+lines += ["# Copyright SUSE LLC", "# Summary: x", "# Maintainer: QE <qe@example.com>", "use Mojo::Base 'consoletest';", "1;"]
 open(f"{sys.argv[1]}/slow.pm", "w").write("\n".join(lines) + "\n")
 PY
-# Three older rules are quadratic in a run of spaces: they are off, so that the limit measures this rule.
-check "semicolon-chain: an open string of backslashes, deep nesting and a run of spaces cost no extra time" "2 semicolon-chain" \
-	"$(timeout 20 python3 "$script" --disable spdx-colon,script-run-background,raw-zypper "$chain/slow.pm" 2>/dev/null | brief | grep chain)"
+# The file takes a tenth of the limit; put back, each pattern or loop that was replaced takes twice the limit.
+check "no line stalls the script: an open string of backslashes or quotes, deep nesting, a run of spaces behind each call, a call or its argument repeated, here-documents that never end" \
+	"2 semicolon-chain
+5 spdx-colon
+6,7 script-run-background
+8 zypper-call-noninteractive
+9 type-string-newline
+10,11,12 click-positional-timeout
+13 default-timeout
+19 soft-failure-reference" "$(timeout 20 python3 "$script" "$chain/slow.pm" 2>/dev/null | brief)"
 rm -rf "$chain"
 
 check "the module of the speed-up eval has the two findings its prompt is about, and no other" "26 semicolon-chain

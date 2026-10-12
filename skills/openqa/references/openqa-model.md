@@ -171,8 +171,8 @@ Reads need nothing. Writes need the user's API key and secret (web UI `/api_keys
 
 | Role | Writes (routes under `/api/v1`) |
 |---|---|
-| user | comment `POST jobs/<id>/comments text=` (also `groups/<g>/`, `parent_groups/<p>/`); many jobs `POST comments text= job_id= job_id=`; edit own `PUT .../comments/<cid>` |
+| user | comment `POST jobs/<id>/comments text=` (also `groups/<g>/`, `parent_groups/<p>/`); many jobs `POST comments text= job_id= job_id=`; edit own `PUT .../comments/<cid>`; delete own `DELETE .../comments/<cid>` |
 | operator | `label:force_result` in a comment; `POST jobs/<id>/restart`, `jobs/<id>/cancel`, bulk `POST jobs/restart jobs=`; create/clone `POST jobs`; schedule `POST isos` |
-| admin | delete comments `DELETE .../comments/<cid>`, `DELETE comments`; job groups |
+| admin | delete anyone's comment `DELETE .../comments/<cid>`, bulk `DELETE comments`; job groups |
 
 - Every write needs approval first -> SKILL.md "Write gate". Choosing -> references/review-workflow.md "Retrigger or comment".

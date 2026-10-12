@@ -492,7 +492,10 @@ printf '%s\n' '<!-- a --> Read `references/orphan.md` in full. <!-- b -->' >>"$s
 check "pointers: a name between two comments names the reference" "ok - all repository checks pass" "$(gate pointers)"
 orphan
 printf '%s\n' 'A `<!--` opens a comment. Read `references/orphan.md` in full.' >>"$skill/SKILL.md"
-check "pointers: a comment that is never closed hides no name" "ok - all repository checks pass" "$(gate pointers)"
+check "pointers: a <!-- in a code span opens no comment" "ok - all repository checks pass" "$(gate pointers)"
+orphan
+printf '%s\n' '<!-- not routed yet' 'Read `references/orphan.md` in full.' >>"$skill/SKILL.md"
+finds "pointers: a comment that is never closed hides every name after it" pointers "$unnamed"
 orphan
 cp "$skill/agents/job-triage.md" "$skill/agents/orphan.md"
 printf '%s\n' 'Playbook `agents/orphan.md`.' >>"$skill/SKILL.md"
@@ -580,6 +583,36 @@ finds "pointers: a pointer above the first section of a reference reaches nothin
 add "$ref" '## New topic'
 sed -i '2a -> redaction.md "New topic"' "$skill/references/untrusted-content.md"
 check "pointers: any line of the reference read whole reaches" "ok - all repository checks pass" "$(gate pointers)"
+add "$ref" '## New topic'
+printf '%s\n' '<!-- -> redaction.md "New topic" -->' >>"$skill/SKILL.md"
+finds "pointers: a pointer inside an HTML comment reaches nothing" pointers "$(unreached 'New topic')"
+add "$ref" '## New topic'
+printf '%s\n' '<!-- Not routed yet:' '-> redaction.md "New topic"' '-->' >>"$skill/agents/job-triage.md"
+finds "pointers: nor does a pointer inside a comment of several lines" pointers "$(unreached 'New topic')"
+add "$ref" '## New topic'
+printf '%s\n' '<!-- a --> -> redaction.md "New topic" <!-- b -->' >>"$skill/SKILL.md"
+check "pointers: a pointer between two comments reaches" "ok - all repository checks pass" "$(gate pointers)"
+add "$ref" '<!-- -> "New topic" -->' '## New topic'
+finds "pointers: nor does a pointer inside a comment in a section of a reference" pointers \
+	"$(unreached 'New topic')"
+add "$ref" '## New topic'
+printf '%s\n' '<!-- -> redaction.md "New topic"' >>"$skill/SKILL.md"
+finds "pointers: nor one inside a comment that is never closed" pointers "$(unreached 'New topic')"
+add "$ref" '## New topic'
+printf '%s\n' 'A `<!--` opens a comment.' '-> redaction.md "New topic"' >>"$skill/SKILL.md"
+check "pointers: a pointer after a <!-- in a code span reaches" "ok - all repository checks pass" "$(gate pointers)"
+add "$ref" '## New topic'
+printf '%s\n' '<!-- a' 'b -->' '-> redaction.md "New topic", testapi.md "No such section"' >>"$skill/SKILL.md"
+check "pointers: the line after a comment of several lines reaches and keeps its number" \
+	"pointers: skills/openqa/SKILL.md:$(wc -l <"$skill/SKILL.md"): 'testapi.md' has no section \"No such section\"" \
+	"$(gate pointers)"
+add SKILL.md "$(printf '<!--%.0s' {1..20000})"
+check "pointers: 20,000 comments that are never closed are read in linear time" \
+	"ok - all repository checks pass" "$(gate pointers)"
+add SKILL.md '<!-- -> testapi.md "No such section", nosuch.md "Traps" -->'
+out=$(gate pointers)
+check "pointers: a section or a file that does not exist is reported inside a comment too" "1 1" \
+	"$(grep -c -F "'testapi.md' has no section \"No such section\"" <<<"$out") $(grep -c -F "no such file 'nosuch.md'" <<<"$out")"
 add references/untrusted-content.md '## New topic'
 check "pointers: a section of the reference read whole needs no pointer" \
 	"ok - all repository checks pass" "$(gate pointers)"

@@ -34,7 +34,7 @@ Which tool does what in review work, and what each helper writes.
 
 ## openqa-cli
 
-- **Path is relative to `/api/v1`, parameters are `key=value` words, method defaults to GET.** Host: `--o3` or `--host openqa.example.com` (no scheme = `https://`; default `http://localhost`). `--links` prints pagination links on STDERR; `--retries N` covers only 502, 503 and connection errors.
+- **Path is relative to `/api/v1`, parameters are `key=value` words, method defaults to GET.** Host: `--o3` or `--host openqa.example.com` (no scheme = `https://`; default `http://localhost`). `--links` prints pagination links on STDERR; `--retries N` covers only 408, 429, 500, 502, 503, 504 and connection errors, and waits the `Retry-After` a response carries.
 - **Non-API routes need `--apibase ''`** (or a full URL as path); a relative path always gets the prefix.
 - **Credentials:** -> references/untrusted-content.md "Rules"; where they live -> references/openqa-model.md "Auth and roles".
 

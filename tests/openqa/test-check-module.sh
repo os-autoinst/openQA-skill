@@ -294,6 +294,20 @@ assert_script_run "bash -c 'for f in a b; do " . $rm . "; done'";
 EOF
 check "semicolon-chain: 'set -e' behind a word, a keyword behind the quote or backtick that closes a text and one behind a '{' without a blank hide no chain; a keyword behind the quote that opens a text, or that never closes on the line, still does" \
 	"lib/quotes.pm:1,2,3,4: semicolon-chain" "$(lint "$chain/lib/quotes.pm" | sed "s|$chain/||" | grep -o '^[^ ]* semicolon-chain')"
+cat >"$chain/lib/joined.pm" <<'EOF'
+assert_script_run "curl -f " . autoinst_url . "/data/t.sh -o /tmp/t/t.sh; chmod +x /tmp/t/t.sh";
+assert_script_run('D=`dirname ' . $self->key . '`; mkdir -p $D');
+assert_script_run "tar xf " . data_url("t/a.tar") . " -C /tmp/t" . "; make", 600;
+assert_script_run "cd " . $dir . "; make";
+assert_script_run "curl -f " . autoinst_url . "/data/t.sh -o /tmp/t/t.sh";
+assert_script_run "bash -c 'cd " . $dir . "; make'";
+assert_script_run "make " . $target, 600, 'no target; see the log';
+assert_script_run "ls " . shell_quote("a; b");
+assert_script_run "make " . $target if $log eq $dir . "/a; b";
+EOF
+echo "assert_script_run('umount {}; true'.format(mnt))" >"$chain/c.py"
+check "semicolon-chain: a ';' in a string that '.' joins to the first one is a chain, behind a word, a method or a call with a string of its own, each of them one word ('cd' with one is no 'cd' home); no chain are strings joined without ';', a ';' inside quotes that open in an earlier string, a string behind ',', inside a call or behind 'if', and '.' in Python" \
+	"lib/joined.pm:1,2,3,4: semicolon-chain" "$(lint "$chain/lib/joined.pm" "$chain/c.py" | sed "s|$chain/||" | grep -o '^[^ ]* semicolon-chain')"
 cat >"$chain/lib/heredoc.pm" <<'EOF'
 assert_script_run 'rm -f /tmp/t/out; grep -q x <<< "$v"';
 assert_script_run 'rm -f /tmp/t/out; grep -q x < "$v"';
@@ -347,14 +361,18 @@ lines = [
     "assert_script_run 'make;" + blank + "time" + blank + "-p" + blank + "!" + blank + "ls';",
     "assert_script_run '" + 'make "a" for b; ' * 20000 + "ls';",
     "assert_script_run 'make; cat <<" + blank + "; ls';",
+    "assert_script_run 'make'" + " . $x . 'a'" * 20000 + " . '; ls';",
+    "assert_script_run 'make'" + blank + "." + blank + "'; ls';",
+    "assert_script_run 'make' . f" + "(" * 50000 + "x" * 60000,
+    "assert_script_run 'make' . f(\"" + '\\"' * 40000,
 ]
 lines += ["<<EOT"] * 20000
 lines += ["# Copyright SUSE LLC", "# Summary: x", "# Maintainer: QE <qe@example.com>", "use Mojo::Base 'consoletest';", "1;"]
 open(f"{sys.argv[1]}/slow.pm", "w").write("\n".join(lines) + "\n")
 PY
 # The file takes a tenth of the limit; put back, each pattern or loop that was replaced takes twice the limit.
-check "no line stalls the script: an open string of backslashes or quotes, deep nesting, a run of spaces behind each call, a call or its argument repeated, a chain of 40,000 commands, a run of spaces behind a ';', 'time', '-p', '!' and '<<', 20,000 keywords behind a closing quote, here-documents that never end" \
-	"2,23,24,25,26 semicolon-chain
+check "no line stalls the script: an open string of backslashes or quotes, deep nesting, a run of spaces behind each call, a call or its argument repeated, a chain of 40,000 commands, a run of spaces behind a ';', 'time', '-p', '!' and '<<', 20,000 keywords behind a closing quote, 40,000 joined strings and terms, a run of spaces around '.', a call and a string in a call behind '.' that never close, here-documents that never end" \
+	"2,23,24,25,26,27,28 semicolon-chain
 5 spdx-colon
 6,7 script-run-background
 8 zypper-call-noninteractive

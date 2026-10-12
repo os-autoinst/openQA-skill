@@ -178,6 +178,9 @@ check "semicolon-chain: an open string of backslashes, deep nesting and a run of
 	"$(timeout 20 python3 "$script" --disable spdx-colon,script-run-background,raw-zypper "$chain/slow.pm" 2>/dev/null | brief | grep chain)"
 rm -rf "$chain"
 
+check "the module of the speed-up eval has the two findings its prompt is about, and no other" "26 semicolon-chain
+29 sleep" "$(lint "$here/../../evals/openqa/files/slow-module/tests/console/netns_veth.pm" | brief)"
+
 lint --help >/dev/null
 check "--help exits 0" 0 $?
 

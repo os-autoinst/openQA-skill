@@ -90,7 +90,7 @@ Rules for humans and agents changing this repository.
 3. Put tests under `tests/<name>/`, evaluation prompts under `evals/<name>/`. No CI job runs the evals, so
    the gate reads `evals.json`: `skill_name` is the directory name; each eval has an `id` and a `name` no
    other eval has, a `prompt`, an `expected_output`, `assertions` and `files`, which may be empty; every
-   entry of `files` exists, and an eval lists every directory under `files/`.
+   entry of `files` exists below `files/`, and an eval lists every directory under `files/`.
 4. Add a row to the table in `README.md` and, for a reference that is read whole, its cap to `BUDGETS` in
    `tests/repo/check-skills.py`; its sections then need no pointer.
 5. Run the script tests, `python3 tests/repo/check-skills.py` and `python3 tests/repo/check-flags.py`.

@@ -734,6 +734,31 @@ finds "evals: an eval that is not an object" evals "evals[0]: must be an object"
 evals
 edit 'data["evals"][0]["files"] = ["files/nosuch/"]'
 finds "evals: a files entry that does not exist" evals "evals[0]: 'files' entry 'files/nosuch/' does not exist"
+# An entry of 'files' is a fixture: wherever ".." or a root leads, it ends below files/.
+for entry in ../../skills/openqa/SKILL.md /usr . files/../../../skills; do
+	evals
+	edit "data['evals'][0]['files'] = ['$entry']"
+	finds "evals: the files entry $entry, which exists, is outside files/" evals \
+		"evals[0]: 'files' entry '$entry' is outside files/"
+done
+evals
+ln -s ../../../skills "$work/repo/evals/openqa/files/out"
+edit 'data["evals"][0]["files"] = ["files/out/openqa/SKILL.md"]'
+finds "evals: a link inside files/ that leads out of it" evals \
+	"evals[0]: 'files' entry 'files/out/openqa/SKILL.md' is outside files/"
+evals
+mv "$work/repo/evals/openqa/files" "$work/repo/evals/openqa/files.real"
+ln -s ../../skills "$work/repo/evals/openqa/files"
+edit 'data["evals"][0]["files"] = ["files/openqa/SKILL.md"]'
+finds "evals: files/ itself a link to another place" evals \
+	"evals[0]: 'files' entry 'files/openqa/SKILL.md' is outside files/"
+# A path the system refuses, or one that cannot be printed, is a finding like any other.
+evals
+edit 'data["evals"][0]["files"] = ["files/" + 300 * "a", "/root/x", "files/\ud800"]'
+name=$(printf 'a%.0s' {1..300})
+out=$(gate evals)
+check "evals: a name too long, a path that may not be read and a lone surrogate do not exist" "1 3" \
+	"$? $(grep -c -F -e "entry 'files/$name' does not exist" -e "entry '/root/x' does not exist" -e "entry 'files/\\ud800' does not exist" <<<"$out")"
 unused="evals/openqa/files/unused: no eval lists this directory"
 evals
 mkdir "$work/repo/evals/openqa/files/unused"
@@ -745,6 +770,12 @@ evals
 mkdir "$work/repo/evals/openqa/files/unused"
 edit 'data["evals"][0]["files"] = ["files/"]'
 check "evals: files/ as a whole lists every fixture directory" "ok - all repository checks pass" "$(gate evals)"
+evals
+mkdir "$work/repo/evals/openqa/files/unused"
+edit 'data["evals"][0]["files"] = ["files/unused/../hostile-job/"]'
+finds "evals: a path through a fixture directory and out of it does not list it" evals "$unused"
+edit 'data["evals"][0]["files"] = ["files/hostile-job/../unused/"]'
+check "evals: nor is the path wrong that comes to it through another" "ok - all repository checks pass" "$(gate evals)"
 evals
 touch "$work/repo/evals/openqa/files/unused"
 check "evals: a file directly in files/ needs no eval" "ok - all repository checks pass" "$(gate evals)"

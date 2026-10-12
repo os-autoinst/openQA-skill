@@ -10,6 +10,7 @@ One line per finding: "<check>: <file>[:<line>]: <message>".
 import argparse
 import importlib.util
 import json
+import os
 import re
 import sys
 from pathlib import Path
@@ -738,6 +739,9 @@ def check_evals(skills, out):
         if base.name not in skills:
             out.append(f"evals: {rel}: skill '{base.name}' does not exist")
         seen, used = {}, []
+        fixtures = base / "files"
+        # Not resolved itself: as a link it would make any place the fixture directory.
+        inside = base.resolve() / "files"
         for index, case in enumerate(cases):
             at = f"evals: {rel}: evals[{index}]"
             if not isinstance(case, dict):
@@ -753,15 +757,24 @@ def check_evals(skills, out):
                         out.append(f"{at}: {key} {value!r} repeats evals[{first}]")
                 elif key == "files":
                     for entry in value:
-                        used.append(base / entry)
-                        if not used[-1].exists():
+                        # os.path.exists() is false for a path the system refuses, too.
+                        if not os.path.exists(base / entry):
                             out.append(f"{at}: 'files' entry '{entry}' does not exist")
+                            continue
+                        # Resolved, as ".." or a link may lead anywhere from a path below files/.
+                        target = (base / entry).resolve()
+                        if target.is_relative_to(inside):
+                            used.append(target)
+                        else:
+                            out.append(
+                                f"{at}: 'files' entry '{entry}' is outside files/"
+                            )
         # A fixture is listed by its directory, by a file in it or by a directory above it.
-        fixtures = base / "files"
         for fixture in sorted(fixtures.iterdir()) if fixtures.is_dir() else ():
-            if fixture.is_dir() and not any(
-                p.is_relative_to(fixture) or fixture.is_relative_to(p) for p in used
-            ):
+            if not fixture.is_dir():
+                continue
+            real = fixture.resolve()
+            if not any(p.is_relative_to(real) or real.is_relative_to(p) for p in used):
                 out.append(
                     f"evals: {fixture.relative_to(ROOT).as_posix()}: no eval lists this directory"
                 )
@@ -813,6 +826,8 @@ def main(argv=None):
         check_credentials(out)
     if "evals" in only:
         check_evals({skill.name for skill in skills}, out)
+    # A finding quotes what it found: text that cannot be encoded must not end the run.
+    sys.stdout.reconfigure(errors="backslashreplace")
     print("\n".join(out) if out else "ok - all repository checks pass")
     return 1 if out else 0
 

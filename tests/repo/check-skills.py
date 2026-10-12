@@ -63,6 +63,8 @@ POINTER_RE = re.compile(_FILE + r"((?:(?:\s*[,/])?\s*\"[^\"\n]+\")+)")
 # The path alone names a reference or a playbook: one read whole has no section to point at.
 # A longer name ("x.md.bak", "x.md5") is another file.
 NAMED_RE = re.compile(_FILE + r"(?![A-Za-z0-9_-]|[./][A-Za-z0-9_])")
+# An HTML comment, on one line or several, is not rendered: it shows a name to no reader.
+COMMENT_RE = re.compile(r"<!--.*?-->", re.DOTALL)
 # '-> "A", "B"' without a file names sections of the file the line is in.
 BARE_RE = re.compile(r"->\s*((?:\"[^\"\n]+\"(?:\s*[,/]\s*)?)+)")
 QUOTED = re.compile(r'"([^"\n]+)"')
@@ -507,7 +509,8 @@ def check_pointers(skill, out):
     # by whoever read SKILL.md or a reference: a file none of them names is never opened.
     entry, callers = set(), set()
     for rel, path in docs.items():
-        names = {n for _, line in unfenced_lines(path) for n in NAMED_RE.findall(line)}
+        text = "\n".join(line for _, line in unfenced_lines(path))
+        names = set(NAMED_RE.findall(COMMENT_RE.sub("", text)))
         if not rel.startswith("references/"):
             entry |= names
         if not rel.startswith("agents/"):

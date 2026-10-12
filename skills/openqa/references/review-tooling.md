@@ -11,7 +11,7 @@ Which tool does what in review work, and what each helper writes.
 
 ## Capability matrix
 
-`W` = gated write, `-` = not covered, MCP = ruoqa-mcp tool names unless a server is named.
+`W` = gated write, `-` = not covered, MCP = ruoqa-mcp tool names unless a server is named -> "Optional MCP servers".
 
 | Task | Bundled | CLI | MCP |
 | --- | --- | --- | --- |

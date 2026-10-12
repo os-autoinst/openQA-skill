@@ -88,7 +88,7 @@ class Module:
             elif re.match(r"^=[a-zA-Z]", line):
                 in_pod = True
             lines.append("" if in_pod or ended else line)
-            tag = re.search(r"""<<~?(["']?)([A-Za-z_]\w*)\1""", lines[-1])
+            tag = re.search(r"""(?<!<)<<~?(["']?)([A-Za-z_]\w*)\1""", lines[-1])
             if tag:
                 closing = where.get(tag.group(2), [])
                 later = bisect.bisect(closing, index)
@@ -494,10 +494,11 @@ _CHAIN_CALL = re.compile(
 _SHELL_QUOTED = re.compile(r"""'[^']*'|"[^"]*"|`[^`]*`""")
 # $? and PIPESTATUS settle the status; a compound command, a here-document, errexit and pipefail are skipped.
 # A keyword or set starts a command, behind 'time' or '!' at most: the 'for' of 'echo wait for it' is an argument.
+# A here-document has its tag behind '<<', be it \"EOF\" or a Perl variable: '<<<' and '$((1<<4))' have none.
 _SHELL_CHECKED = re.compile(
     r"""(?:^|[;|&("'`]|\{\s)\s*(?:time\s+(?:-p\s+)?)?(?:!\s+)?"""
     r"""(?:(?:for|while|until|if|case)[\s(]|set\s+-\w*(?:e|o\s+(?:errexit|pipefail)\b))"""
-    r"|\$\?|\bPIPESTATUS\b|<<"
+    r"""|\$\?|\bPIPESTATUS\b|(?<!<)<<[-~]?\s*["'\\]{0,2}[A-Za-z_$]"""
 )
 _STATUS_TEST = re.compile(r"(?:(?:test|\[\[?)\s[^|&]*|true)$")
 # An exit code that says nothing: clear, cd to the home directory, an echo that writes no file, an assignment.

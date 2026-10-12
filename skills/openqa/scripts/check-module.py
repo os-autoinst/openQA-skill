@@ -491,6 +491,11 @@ def default_timeout(module):
 _CHAIN_CALL = re.compile(
     r"""^\s*assert_script_run\s*(?:\(\s*)?(["'])((?:\\.|(?!\1)[^\\])*)\1"""
 )
+# A literal that never closes takes the rest of the line: tried again at each later quote, it reads the line per quote.
+_PERL_TOKEN = re.compile(
+    r"""(?P<text>(?P<quote>["'])(?:\\.|(?!(?P=quote))[^\\])*(?P=quote))|(?P<open>[(\[{])|(?P<close>[)\]}])"""
+    r"""|(?P<dot>\.)|(?P<blank>\s+)|(?P<word>[\w$@%:>-]+)|(?P<rest>["'].*|.)"""
+)
 _SHELL_QUOTED = re.compile(r"""'[^']*'|"[^"]*"|`[^`]*`""")
 # $? and PIPESTATUS settle the status; a compound command, a here-document, errexit and pipefail are skipped.
 # A keyword or set starts a command, behind 'time' or '!' at most: the 'for' of 'echo wait for it' is an argument.
@@ -504,6 +509,30 @@ _STATUS_TEST = re.compile(r"(?:(?:test|\[\[?)\s[^|&]*|true)$")
 # An exit code that says nothing: clear, cd to the home directory, an echo that writes no file, an assignment.
 _NO_STATUS = re.compile(r"(?:clear|cd(?:\s+~)?|echo(?:\s[^|&<>]*)?)$")
 _ASSIGNMENT = re.compile(r"(?:(?:export\s+)?\w+=[^\s|&<>]*|export\s+\w+)$")
+
+
+def _command(line, call):
+    """The first literal of the call and each literal that '.' joins to it, with '_' for a term in between."""
+    parts, depth, state = [call.group(2)], 0, "operand"
+    for token in _PERL_TOKEN.finditer(line, call.end()):
+        kind = token.lastgroup
+        if depth:
+            depth += (kind == "open") - (kind == "close")
+        elif kind == "blank":
+            state = "operand" if state == "term" else state
+        elif kind == "dot" and state != "dot":
+            state = "dot"
+        elif kind == "text" and state == "dot":
+            parts.append(token.group()[1:-1])
+            state = "operand"
+        elif kind in ("word", "open") and state != "operand":
+            if state == "dot":
+                parts.append("_")
+            state, depth = "term", int(kind == "open")
+        else:
+            # A ',' starts the next argument, a word such as 'if' or 'x' what is no part of the command.
+            break
+    return "".join(parts)
 
 
 def _shell_checked(command):
@@ -539,16 +568,16 @@ def semicolon_chain(module):
     hits = []
     for number, line in enumerate(module.raw, 1):
         call = _CHAIN_CALL.match(line)
-        if (
-            not call
-            or "assert_script_run" not in module.code[number - 1]
-            or _shell_checked(call.group(2))
-        ):
+        if not call or "assert_script_run" not in module.code[number - 1]:
             continue
-        parts = _top_level(call.group(2)).rstrip("; ").split(";")
+        # '.' joins strings in Perl only.
+        command = call.group(2) if module.python else _command(line, call)
+        if _shell_checked(command):
+            continue
+        parts = _top_level(command).rstrip("; ").split(";")
         *before, last = [part.strip() for part in parts]
         # Quoted text is a '_' by now, so a value from $( ) or backticks, which can fail, is looked for in the call.
-        computed = "$(" in call.group(2) or "`" in call.group(2)
+        computed = "$(" in command or "`" in command
         dropped = [
             part
             for part in before

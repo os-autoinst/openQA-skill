@@ -363,7 +363,9 @@ One line per file and rule; `message -> fix` only on the first finding of a rule
     summary: 2 file(s), 4 finding(s)
 
 `semicolon-chain` reports an `assert_script_run` at the start of a line whose quoted command joins commands
-with `;`, because only the last exit code is checked. It stays silent where the `;` drops no exit code or
+with `;`, because only the last exit code is checked. In Perl the command is the first string and each
+string that `.` joins to it on that line, with one word for a variable or call in between; a string behind
+a `,` is another argument. It stays silent where the `;` drops no exit code or
 the command decides the status itself: as `\;`, at the end; with `$?` or `PIPESTATUS` anywhere in the
 command; before a last command that is `test`, `[`, `[[` or `true`; and when every command before the last
 has its own `||` or an exit code that says nothing. Those are `clear`; `cd` without argument or to `~`

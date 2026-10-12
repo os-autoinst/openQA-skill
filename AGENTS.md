@@ -32,6 +32,9 @@ Rules for humans and agents changing this repository.
   the file; titles are joined by `,` (read all) or `/` (pick one); several files may follow one `->`. The
   gate resolves every title that follows a file name or a `->`; a title quoted in prose without either is
   not checked.
+- **No orphans.** The gate fails on a reference that neither `SKILL.md` nor a playbook names (`<file>.md` or
+  `references/<file>.md`) and on a playbook whose path `agents/<name>.md` is in neither `SKILL.md` nor a
+  reference; a name inside a code fence does not count.
 - Playbooks (`agents/`, cap 5000 bytes) are read by sub-agents that have not seen `SKILL.md`: the "read before
   you start" list holds exactly the sections every run needs, everything conditional goes in the trigger table,
   and any playbook that meets third-party text names the policy sections to read.

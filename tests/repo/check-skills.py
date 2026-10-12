@@ -42,12 +42,14 @@ BUDGETS = {
     "references/untrusted-content.md": 7900,
 }
 
-# 'file.md "A", "B" / "C"' names sections of one file, with or without a "->" before it. The
-# file is the whole path as written, because that is the argument refsection.py is given; the
-# lookbehind only keeps the scan linear.
-POINTER_RE = re.compile(
-    r"(?<![A-Za-z0-9_./-])([A-Za-z0-9_./-]+\.md)((?:(?:\s*[,/])?\s*\"[^\"\n]+\")+)"
-)
+# A document is the whole path as written, because that is the argument refsection.py is
+# given; the lookbehind only keeps the scan linear.
+_FILE = r"(?<![A-Za-z0-9_./-])([A-Za-z0-9_./-]+\.md)"
+# 'file.md "A", "B" / "C"' names sections of one file, with or without a "->" before it.
+POINTER_RE = re.compile(_FILE + r"((?:(?:\s*[,/])?\s*\"[^\"\n]+\")+)")
+# The path alone names a reference or a playbook: one read whole has no section to point at.
+# A longer name ("x.md.bak", "x.md5") is another file.
+NAMED_RE = re.compile(_FILE + r"(?![A-Za-z0-9_-]|[./][A-Za-z0-9_])")
 # '-> "A", "B"' without a file names sections of the file the line is in.
 BARE_RE = re.compile(r"->\s*((?:\"[^\"\n]+\"(?:\s*[,/]\s*)?)+)")
 QUOTED = re.compile(r'"([^"\n]+)"')
@@ -405,6 +407,24 @@ def check_pointers(skill, out):
                         f"{at}: \"{title}\" is a section of '{target}' outside a pointer: "
                         f'join it with a comma or write -> "{title}"'
                     )
+    # An agent starts at SKILL.md, a sub-agent at its playbook, and a playbook is handed over
+    # by whoever read SKILL.md or a reference: a file none of them names is never opened.
+    entry, callers = set(), set()
+    for rel, path in docs.items():
+        names = {n for _, line in unfenced_lines(path) for n in NAMED_RE.findall(line)}
+        if not rel.startswith("references/"):
+            entry |= names
+        if not rel.startswith("agents/"):
+            callers |= names
+    for rel, path in docs.items():
+        if rel.startswith("references/") and not {rel, path.name} & entry:
+            out.append(
+                f"pointers: {where}/{rel}: neither SKILL.md nor a playbook points here"
+            )
+        if rel.startswith("agents/") and rel not in callers:
+            out.append(
+                f"pointers: {where}/{rel}: neither SKILL.md nor a reference names this playbook"
+            )
     for m in re.finditer(
         r"`?scripts/([A-Za-z0-9_.-]+\.(?:py|sh))`?",
         (skill / "SKILL.md").read_text(encoding="utf-8"),

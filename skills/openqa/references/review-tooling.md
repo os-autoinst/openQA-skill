@@ -15,12 +15,12 @@ Which tool does what in review work, and what each helper writes.
 
 | Task | Bundled | CLI | MCP |
 | --- | --- | --- | --- |
-| Builds of a group; unreviewed failures | `oqa-sweep.py` | `openqa-review` (report), `openqa-revtui` (live view) | `get_job_group_build_results`, `list_jobs_overview` |
+| Builds of a group; unreviewed failures | `oqa-sweep.py` | `openqa-review` (report), `openqa-revtui` (live view) -> "openqa-review reports", "Review profiles" | `get_job_group_build_results`, `list_jobs_overview` |
 | One job: result, failed modules, comments | `oqa-job.py` | `openqa-cli api --o3 jobs/<id>/details` (large) | `get_job`, `get_job_details`, `get_job_comments` |
 | Log tail / grep, archive members | `oqa-log.py` (`--members`) | `openqa-cli archive --o3 -l <max asset bytes> <id> <dir>` (whole job) | `list_job_logs`, `list_job_log_members`, `get_job_log` |
 | Error digest | `oqa-log.py --errors` | - | `get_job_log_errors` |
 | Scenario history, investigation data | `oqa-history.py [--investigation]` | - | - |
-| Does a known ticket match? | - | `openqa-label-known-issues --dry` | - |
+| Does a known ticket match? | - | `openqa-label-known-issues --dry` -> "Known-issue dry run" | - |
 | State of a referenced ticket, bug or PR | `oqa-ref.py` | - | - |
 | Lint a draft comment | `oqa-comment-lint.py` | - | - |
 | Lint a draft bug or ticket | `ticket-lint.py` | - | - |

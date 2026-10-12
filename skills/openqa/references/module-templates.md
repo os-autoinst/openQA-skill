@@ -38,6 +38,7 @@ Owns: file header, per-kind skeletons, `test_flags` choice, anti-pattern table a
 - **Select the console first in `run`** -> references/distri-helpers.md "Console selection".
 - **Import explicit names** (`use utils 'systemctl';`), end with `1;`, run `make tidy` -> references/contributing-gates.md "Local gate order".
 - **Schedule the module in the same PR**, or `make test-unused-modules-changed` fails -> references/scheduling.md "Unused-module check".
+- **Read a merged model before writing** -> "Exemplar modules".
 
 ## Console smoke test
 

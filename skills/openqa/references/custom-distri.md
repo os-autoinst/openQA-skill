@@ -6,11 +6,13 @@ Owns: test distributions other than os-autoinst-distri-opensuse (layout, `main.p
 
 | Topic | Custom distri | os-autoinst-distri-opensuse |
 |---|---|---|
-| Entry point | `main.pm` at repo root | `products/<distri>/main.pm`; never add another |
-| Schedule a module | `autotest::loadtest 'tests/x/foo.pm';` in `main.pm` | `- x/foo` in `schedule/*.yaml` -> references/scheduling.md "YAML schedules" |
+| Entry point | `main.pm` at repo root -> "main.pm contract", "Anatomy" | `products/<distri>/main.pm`; never add another |
+| Schedule a module | `autotest::loadtest 'tests/x/foo.pm';` in `main.pm` -> "Module paths" | `- x/foo` in `schedule/*.yaml` -> references/scheduling.md "YAML schedules" |
 | Needles | same repo, `needles/` | separate repos -> references/needles-gui.md "Needle workflow" |
 | Helpers | bare testapi plus your own `lib/` | -> references/distri-helpers.md "Install or remove packages" |
-| Python/Lua | both, if the worker has the Inline module | 4 `.py`, no `.lua`; default to Perl |
+| Python/Lua | both, if the worker has the Inline module -> "Python modules", "Lua modules" | 4 `.py`, no `.lua`; default to Perl |
+
+Jobs from a CI run, no job templates on the instance -> "Scenario definitions", "Schedule from CI".
 
 ## Anatomy
 

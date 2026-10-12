@@ -137,7 +137,7 @@ When openQA creates jobs from a product (`isos post`), lowest to highest: `[test
 
 ## Adding a variable
 
-**Avoid it** - the recurring review answer: reuse an existing setting (`EXTRABOOTPARAMS`, #26560), detect at runtime (#25977), or use `test_data`. A variable that survives review must:
+**Avoid it** - the recurring review answer: reuse an existing setting (`EXTRABOOTPARAMS`, #26560; lookup -> "Variable catalogue"), detect at runtime (#25977), or use `test_data`. A variable that survives review must:
 
 - **Carry the owning area's prefix** (#26372) and not repurpose an existing setting (#25265).
 - **Get a `variables.md` row in the same PR** - not CI-enforced, but demanded (#25315). Row format, no outer pipes: `MY_AREA_FLAG | boolean | false | What it switches and which module reads it.` Main table roughly alphabetical; domain variables (Public Cloud, Wicked, Agama, ...) have own sections.

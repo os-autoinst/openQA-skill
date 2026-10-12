@@ -63,6 +63,8 @@ CI-equivalent, minutes: `make test TESTS=static` (or `unit`, `compile`, `compile
 
 **Side effects**: `TESTS=check-strict` rewrites files under `tests/` (`--write`) — clean tree first, then read `git diff`. `tools/update_spec --check` replaces the spec with an identical copy even on success (mode becomes 0600).
 
+What CI does not check, and tools never to run -> "Checks that do not fire".
+
 ## Forbidden strings
 
 Plain `git grep` gates: comments, string literals and `data/` files count. Gate = `t/01_style.t` unless named.

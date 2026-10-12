@@ -9,6 +9,7 @@ From a defined scope to a build where every current failure carries a verified r
 - Scope comes from the user or the local policy file (-> references/site-policy.md "Overlay lookup"). Neither: ask; `scripts/oqa-sweep.py --groups --match <regex>` lists groups to offer.
 - Build: newest per group. While `unfinished` is above 0 results still change: say so in the report.
 - Mode: **gating** (every current failure must count as reviewed) or **report-only** (propose no `force_result`). Ask when unclear.
+- Review conventions pinned to the group overview, build tags -> references/openqa-model.md "Group comments".
 
 ## Sweep
 

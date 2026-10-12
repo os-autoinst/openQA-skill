@@ -413,6 +413,18 @@ orphan
 printf '%s\n' '```' 'python3 scripts/refsection.py orphan.md "One"' '```' >>"$skill/SKILL.md"
 finds "pointers: a name inside a code fence names nothing" pointers "$unnamed"
 orphan
+printf '%s\n' '<!-- orphan.md is not routed yet -->' >>"$skill/SKILL.md"
+finds "pointers: a name inside an HTML comment names nothing" pointers "$unnamed"
+orphan
+printf '%s\n' '<!-- Not routed yet:' 'read `references/orphan.md` in full.' '-->' >>"$skill/agents/job-triage.md"
+finds "pointers: nor does a name inside a comment of several lines" pointers "$unnamed"
+orphan
+printf '%s\n' '<!-- a --> Read `references/orphan.md` in full. <!-- b -->' >>"$skill/SKILL.md"
+check "pointers: a name between two comments names the reference" "ok - all repository checks pass" "$(gate pointers)"
+orphan
+printf '%s\n' 'A `<!--` opens a comment. Read `references/orphan.md` in full.' >>"$skill/SKILL.md"
+check "pointers: a comment that is never closed hides no name" "ok - all repository checks pass" "$(gate pointers)"
+orphan
 cp "$skill/agents/job-triage.md" "$skill/agents/orphan.md"
 printf '%s\n' 'Playbook `agents/orphan.md`.' >>"$skill/SKILL.md"
 check "pointers: a playbook's path names the playbook, not the reference of that name" \
@@ -425,6 +437,8 @@ printf '%s\n' 'Then hand over `agents/orphan.md`.' >>"$skill/agents/group-review
 finds "pointers: a playbook only another playbook names" pointers "$unnamed"
 printf '%s\n' 'Playbook `orphan.md`.' >>"$skill/SKILL.md"
 finds "pointers: a playbook is named by its agents/ path only" pointers "$unnamed"
+printf '%s\n' '<!-- Playbook `agents/orphan.md`. -->' >>"$skill/$ref"
+finds "pointers: a playbook named inside an HTML comment of a reference" pointers "$unnamed"
 printf '%s\n' 'Playbook `agents/orphan.md`.' >>"$skill/$ref"
 check "pointers: a reference names a playbook" "ok - all repository checks pass" "$(gate pointers)"
 

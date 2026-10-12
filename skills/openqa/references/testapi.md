@@ -140,7 +140,7 @@ Needle strategy -> references/needles-gui.md "GUI idioms".
 | `autoinst_url([$path])` | `http://<host>:<QEMUPORT+1>/<JOBTOKEN>$path`; host `10.0.2.2` on qemu, else `WORKER_HOSTNAME` |
 
 - **Uploads are `curl` run inside the SUT on the selected console** — they need a shell prompt, `curl` and a route to the worker; with `OFFLINE_SUT=1` they become an info box.
-- Log-collection helpers -> references/distri-helpers.md "Log upload"; `data/` layout -> references/scheduling.md "Test data".
+- Log-collection helpers -> references/distri-helpers.md "Log upload"; `data/` layout -> references/scheduling.md "Files from data".
 
 ## Serial terminal
 

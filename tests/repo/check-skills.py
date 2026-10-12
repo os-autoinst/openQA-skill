@@ -404,6 +404,13 @@ def check_pointers(skill, out):
     where = f"skills/{skill.name}"
     reader = section_reader(skill)
     docs = documents(skill)
+    # refsection.py looks a reference up at the top level only, and documents() reads no other.
+    for top in ("references", "agents"):
+        for path in sorted((skill / top).glob("*/**/*.md")):
+            out.append(
+                f"pointers: {where}/{path.relative_to(skill).as_posix()}: {top}/ is one "
+                "level deep: move this file up"
+            )
     targets = {r: p for r, p in docs.items() if not r.startswith("agents/")}
     if (skill / "scripts" / "README.md").exists():
         targets["scripts/README.md"] = skill / "scripts" / "README.md"

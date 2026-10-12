@@ -31,7 +31,7 @@ States: `scheduled assigned setup running uploading` (pending, result `none`) ->
 | Meta group | Results |
 |---|---|
 | complete | `passed`, `softfailed` (known non-critical issue: workaround needle, `record_soft_failure`, forced), `failed` |
-| not_complete | `incomplete` (worker, backend or setup problem; `reason` key only when set -> references/job-triage.md "Incomplete reasons"), `timeout_exceeded` (`MAX_JOB_TIME` or `MAX_SETUP_TIME`) |
+| not_complete | `incomplete` (worker, backend or setup problem; `reason` key only when set -> references/job-triage.md "Incomplete reasons"), `timeout_exceeded` (`MAX_JOB_TIME` or `MAX_SETUP_TIME`; also a job still `scheduled` more than `max_job_scheduled_time` days, default 7, after its creation: cancelled without a run, `reason` `scheduled for more than <n> days`) |
 | aborted | `skipped obsoleted parallel_failed parallel_restarted user_cancelled user_restarted`: no verdict, check the parent or sibling job |
 | ok / not_ok | `passed softfailed` / everything else above |
 

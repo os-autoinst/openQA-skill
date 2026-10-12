@@ -87,7 +87,8 @@ credential that reached a log.
 
 ## oqa-job.py - one job, ready to classify
 
-A restarted job is history, a `parallel_failed` job is a victim, steps after the die step are post_fail_hook.
+A restarted job is history, a `parallel_failed` job is a victim, steps after the die step are post_fail_hook
+(in a module that failed without dying: from its `Post-fail` step on).
 
     oqa-job.py JOB_URL|ID [--steps N] [--settings REGEX] [-v] [--exit-code]
     oqa-job.py JOB_URL|ID --module NAME --all-steps    # every step of one module: num result title shot

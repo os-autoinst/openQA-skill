@@ -41,7 +41,7 @@ assert_script_run 'ip netns add ns0 && ip netns add ns1 && ip link set veth0 net
 systemctl("disable --now @timers");    # not: foreach my $timer (@timers) { systemctl(...) }
 ```
 
-- **A multi-line script is uploaded, not typed as a here-doc or `echo` lines.** Run once: `script_output($script)` puts it in a file itself and stops at the first failing command -> references/testapi.md "Traps". A file that stays or runs again: `write_sut_file($path, $text)`, then `assert_script_run("bash -e $path")`; without `-e` only the last command counts -> references/distri-helpers.md "Test data". An upload is two or three round trips itself, so a short chain is cheaper; `write_sut_file` needs the SUT to reach the worker.
+- **A multi-line script is uploaded, not typed as a here-doc or `echo` lines.** Run once: `script_output($script)` puts it in a file itself and stops at the first failing command -> references/testapi.md "Traps". A file that stays or runs again: `write_sut_file($path, $text)`, then `assert_script_run("bash -e $path")`; without `-e` only the last command counts -> references/distri-helpers.md "Files on the SUT". An upload is two or three round trips itself, so a short chain is cheaper; `write_sut_file` needs the SUT to reach the worker.
 - **Public cloud**: one remote operation per ssh call, no `&&` chains -> references/area-conventions.md "Public cloud".
 - Faster or not is measured -> "Measure and size". Where else the time goes (typing, fixed waits, waiting nodes) -> "Cost model".
 

@@ -177,7 +177,7 @@ add_suseconnect_product("PackageHub", undef, undef, undef, 300, 1) if is_sle;   
 - `save_ulog($string, $name)` (`Utils::Logging`) writes worker-side without SUT network; `serial_terminal::upload_file($src, $dst)` moves a file over the serial line into `ulogs/`.
 - **Only non-fatal calls inside `post_fail_hook`** (`script_run`, `upload_logs(..., failok => 1)`): a dying `assert_script_run` aborts the remaining collection.
 
-## Test data
+## Files on the SUT
 
 Fixtures live under `data/`; fetch them from the worker, never from the internet at run time. `data_url`, `curl -f`, directory-as-cpio -> references/scheduling.md "Files from data"; YAML test data -> references/scheduling.md "Test data".
 

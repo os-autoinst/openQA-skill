@@ -108,7 +108,7 @@ assert_script_run('curl -f ' . data_url('<area>/<dir>/') . ' | cpio -id');
 
 - **Use `curl -f`** so a 404 fails the step instead of saving an error page. **A directory URL returns a cpio archive**, members prefixed `data/`.
 - **`~/data/...` exists only after `console/prepare_test_data`** (whole tree, as the test user; `PREPARE_TEST_DATA_TIMEOUT`, default 300 s).
-- `download_script`, `write_sut_file`, offline SUTs -> references/distri-helpers.md "Test data"; `get_test_data` (content on the worker side) -> references/testapi.md "Uploads and URLs".
+- `download_script`, `write_sut_file`, offline SUTs -> references/distri-helpers.md "Files on the SUT"; `get_test_data` (content on the worker side) -> references/testapi.md "Uploads and URLs".
 
 ## Legacy loaders
 

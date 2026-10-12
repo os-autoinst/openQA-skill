@@ -732,10 +732,17 @@ def scan(patterns, label, out, allow=None, skip_context=None, skip_files=()):
     for path, rel in tracked_text_files():
         if rel in skip_files:
             continue
+        data = path.read_bytes()
         try:
-            lines = path.read_text(encoding="utf-8").splitlines()
-        except UnicodeDecodeError:
-            continue
+            data.decode("utf-8")
+        except UnicodeDecodeError as error:
+            # Read on all the same: one stray byte must not exempt a file. Named once,
+            # whichever check comes to it first.
+            line = data.count(b"\n", 0, error.start) + 1
+            found = f"{rel}:{line}: not valid UTF-8"
+            if not any(known.endswith(f" {found}") for known in out):
+                out.append(f"{label}: {found}")
+        lines = data.decode("utf-8", errors="replace").splitlines()
         for num, line in enumerate(lines, 1):
             for pattern, what in patterns:
                 for m in re.finditer(pattern, line, re.IGNORECASE):

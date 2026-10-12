@@ -34,7 +34,14 @@ Rules for humans and agents changing this repository.
   not checked.
 - **No orphans.** The gate fails on a reference that neither `SKILL.md` nor a playbook names (`<file>.md` or
   `references/<file>.md`) and on a playbook whose path `agents/<name>.md` is in neither `SKILL.md` nor a
-  reference; a name inside a code fence does not count.
+  reference; a name inside a code fence does not count. It fails as well on a `## ` section of a reference
+  that no chain of pointers reaches from `SKILL.md`, a playbook or a file read whole: a pointer counts only
+  from a section that is reached itself, never from the lines above a file's first `## `, which no read
+  returns. Point to the section from the place that needs it. List it in `UNROUTED`
+  (`tests/repo/check-skills.py`, one key per skill) only when another section already leads to it by name,
+  as an index table does, or it is deliberate background, and say which in a note; a listed section counts
+  as reached. The gate fails on an entry that has a pointer by now, names no `## ` section or names a file
+  read whole.
 - Playbooks (`agents/`, cap 5000 bytes) are read by sub-agents that have not seen `SKILL.md`: the "read before
   you start" list holds exactly the sections every run needs, everything conditional goes in the trigger table,
   and any playbook that meets third-party text names the policy sections to read.
@@ -73,5 +80,5 @@ Rules for humans and agents changing this repository.
    existing skill, add a block to that skill instead.
 3. Put tests under `tests/<name>/`, evaluation prompts under `evals/<name>/`.
 4. Add a row to the table in `README.md` and, for a file that is read whole, its cap to `BUDGETS` in
-   `tests/repo/check-skills.py`.
+   `tests/repo/check-skills.py`; its sections then need no pointer.
 5. Run the script tests, `python3 tests/repo/check-skills.py` and `python3 tests/repo/check-flags.py`.

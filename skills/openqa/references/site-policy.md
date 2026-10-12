@@ -82,6 +82,6 @@ All values are placeholders; ids and names come from the user.
 - **Ask, do not guess:** instance, groups and builds to sweep; where product bugs and test issues go; who besides the user approves writes.
 - **One job URL, read-only triage: proceed** — nothing site-specific until routing. -> references/job-triage.md "Triage order"
 - **Drafts carry no destination until the user names one.** No round trip possible: draft with the instance's public default (o3: test issues `openqatests` on progress.opensuse.org, product bugs bugzilla.opensuse.org), marked as an assumption on top and under open questions.
-- **Offer the template once;** keep the answers for this session only.
+- **Offer the template once** (-> "Template"); keep the answers for this session only.
 
 Sources: openQA lib/OpenQA/{Utils,UserAgent}.pm, Schema/Result/Comments.pm, etc/openqa/openqa.ini; os-autoinst-scripts README.md

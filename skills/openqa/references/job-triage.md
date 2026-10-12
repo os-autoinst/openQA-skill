@@ -128,7 +128,7 @@ Strip ANSI colours (`\x1b\[[0-9;]*m`). Timestamps are UTC (`Z`) or worker-local 
 | `SUT packages diff`, `worker packages diff` | absent: openQA had no diff |
 | `test changes`, `needle changes` | commits since last good, or `No test changes recorded, ...` |
 
-**Reasoning:** only `BUILD` changed and no suite is cloned at run time ("Pitfalls"): PRODUCT regression; name both builds. A test commit marked `[failed module <m>]` or `[lib]` (listed first): TEST, if it changes the failing path. Only worker side changed: INFRA.
+**Reasoning:** only `BUILD` changed and no suite is cloned at run time (-> "Pitfalls"): PRODUCT regression; name both builds. A test commit marked `[failed module <m>]` or `[lib]` (listed first): TEST, if it changes the failing path. Only worker side changed: INFRA.
 
 ## Investigate jobs
 
@@ -144,7 +144,7 @@ The comment `Investigate retry job *<name>*: t#<id>` ends with one verdict (ok =
 
 Quote verbatim and minimally, without credentials.
 
-1. **Step deep link**, scenario, `BUILD`, worker host.
+1. **Step deep link** (-> references/openqa-model.md "Step deep link"), scenario, `BUILD`, worker host.
 2. **Failing assertion:** the `# Test died:` line and its first stack frame, read at `TEST_GIT_HASH`: `git show <hash>:<file>`, not master.
 3. **Product evidence:** failing command, exit code, output; short serial or journal excerpt; for GUI the screenshot URL and what is wrong.
 4. **Regression window:** last good and first bad links with build ids; suspect package versions on both.

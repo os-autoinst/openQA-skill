@@ -13,6 +13,8 @@ Owns the openqa-agnostic architecture in os-autoinst-distri-opensuse: a portable
 | Reboot inside the test logic | a reboot *before* the runner goes in the wrapper (`yama.pm`) |
 | Other language | `new` dies unless `language` matches `^(go\|python\|java)$`; bash is only the launcher |
 
+**Chosen**: artifact -> "Layout and languages", "Runner API", "Result contract", "runtest script"; Python -> "Python 3.6 rule"; wrapper -> "Wrapper skeleton", "Packages and state"; schedule -> "Scheduling"; run without openQA -> "Standalone run"; before the PR -> "Review pitfalls".
+
 ## Layout and languages
 
 | Path | Role |

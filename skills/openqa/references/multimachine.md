@@ -78,6 +78,7 @@ barrier_wait 'MM_SETUP_DONE';
 - **Readiness = `mutex_create` when ready, peers `mutex_wait`;** rendezvous of N jobs = barrier; exclusive access = `mutex_lock`/`mutex_unlock` on a parent-created mutex.
 - **Waiting on a child: pass its id**, so a dead child kills the wait instead of hanging it: `mutex_wait('CURL_DONE', (keys %{get_children()})[0]);`
 - Larger scenarios: one barrier-init module on the parent (`tests/kernel/nfs_barriers.pm`, `tests/ha/barrier_init.pm`). Network-setup and barrier modules are `fatal => 1` -> references/testapi.md "test_flags"
+- Signatures and traps of the calls -> "lockapi", "mmapi"; the network each job configures itself -> "MM network".
 
 ## Deadlocks
 

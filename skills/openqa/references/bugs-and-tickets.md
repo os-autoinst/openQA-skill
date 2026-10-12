@@ -167,7 +167,7 @@ One approval covers the report and the calls "Filing and read-back" lists for it
 ## Privacy
 
 - **Public products and projects** (`openSUSE …`, `PUBLIC SUSE …`, `openqatests`, `openqav3`, `openqa-infrastructure`) take no link their readers cannot open, unless the policy file allows it. The job and step links the templates require stay (openQA's button sets them): make the report stand without them, and describe anything else or attach a linted excerpt. `ticket-lint.py --private-suffix` flags the policy's private domains; for the job and step links that finding is expected.
-- **No credentials:** quoted log lines can carry them; lint, and rotate what leaked -> references/redaction.md "What it is not"
+- **No credentials:** quoted log lines can carry them; lint, and rotate what leaked -> references/redaction.md "What it is not", "Before you post"
 - **Partner data or a security issue:** stop; the user routes it privately.
 
 Sources: openQA `lib/OpenQA/WebAPI/Plugin/IssueReporter/{OpenSuseGenericBug,OpenSuseProgressIssue,OpenSuseBugzillaUtils,Context}.pm`, `docs/UsersGuide.md`; os-autoinst-scripts `openqa-label-known-issues`, `README.md`; progress.opensuse.org wikis of openqav3, openqatests and the qa project (Core, Tools); Redmine REST API (issues, enumerations, versions); openSUSE wiki "Submitting bug reports", "Bug reporting FAQ", "Bug definitions"; Bugzilla `/rest/field/bug`, `/rest/bug?quicksearch`; bugwarden and mcp-redmine tool schemas.

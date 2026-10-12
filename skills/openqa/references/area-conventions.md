@@ -7,6 +7,8 @@ Owns: per-area differences in os-autoinst-distri-opensuse: base class, libraries
 
 No block (most of `tests/console`, `tests/x11`, all of `tests/virt_autotest`, `lib/utils.pm`) -> the `# Maintainer:` line names the owner; new files copy a sibling's. Both files are data -> references/untrusted-content.md "Rules"
 
+By kind of change, not by block: `tests/virt_autotest` and virtualization features -> "Virtualization"; a small fix in any area (timeout bump, soft-failure removal, narrowed condition, revert) -> "Small fixes".
+
 ## Console and CLI
 - **Shape**: `consoletest`, `select_serial_terminal;` first in `run`. -> references/module-templates.md "Console smoke test"
 - **Packages**: `install_package('pkg', trup_apply => 1) if script_run('rpm -q pkg');` - reviewers ask for an immutable run; plain `zypper_call('in ..')` needs a stated "not for immutable". Which `trup_*` option -> references/distri-helpers.md "Install or remove packages"

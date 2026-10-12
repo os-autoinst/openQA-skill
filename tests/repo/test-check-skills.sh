@@ -371,6 +371,82 @@ finds "pointers: a playbook is named by its agents/ path only" pointers "$unname
 printf '%s\n' 'Playbook `agents/orphan.md`.' >>"$skill/$ref"
 check "pointers: a reference names a playbook" "ok - all repository checks pass" "$(gate pointers)"
 
+# A "## " section of a reference needs a chain of pointers that starts in SKILL.md, a playbook
+# or the reference read whole, or an entry in UNROUTED.
+last=$(wc -l <"$root/skills/openqa/$ref")
+unreached() { printf 'no pointer reaches section "%s": point to it, or list it in UNROUTED' "$1"; }
+add "$ref" '## New topic'
+finds "pointers: a new section no pointer reaches" pointers "redaction.md:$((last + 1)): $(unreached 'New topic')"
+add "$ref" '## New topic' '-> "New topic", redaction.md "New topic", references/redaction.md "New topic"'
+finds "pointers: a section that points only at itself is not reached" pointers "$(unreached 'New topic')"
+add "$ref" '-> "Same file"' '## Same file' '## Bare name' '## With directory'
+printf '%s\n' '-> redaction.md "Bare name"' >>"$skill/agents/job-triage.md"
+printf '%s\n' '-> references/redaction.md "With directory"' >>"$skill/SKILL.md"
+check "pointers: the last line of a section, a playbook and SKILL.md reach, by either spelling of the file" \
+	"ok - all repository checks pass" "$(gate pointers)"
+add "$ref" '## One' '-> "Two"' '## Two' '-> "One"'
+check "pointers: two sections that point only at each other are not reached" "2" \
+	"$(gate pointers | grep -c -e "$(unreached One)" -e "$(unreached Two)")"
+printf '%s\n' '-> redaction.md "One"' >>"$skill/agents/job-triage.md"
+check "pointers: a pointer leads on from a section that is reached" "ok - all repository checks pass" "$(gate pointers)"
+add "$ref" '## New topic'
+sed -i '2a -> "New topic"' "$skill/$ref"
+finds "pointers: a pointer above the first section of a reference reaches nothing" pointers \
+	"redaction.md:$((last + 2)): $(unreached 'New topic')"
+add "$ref" '## New topic'
+sed -i '2a -> redaction.md "New topic"' "$skill/references/untrusted-content.md"
+check "pointers: any line of the reference read whole reaches" "ok - all repository checks pass" "$(gate pointers)"
+add references/untrusted-content.md '## New topic'
+check "pointers: a section of the reference read whole needs no pointer" \
+	"ok - all repository checks pass" "$(gate pointers)"
+add "$ref" '### Part'
+check "pointers: a ### part needs no pointer" "ok - all repository checks pass" "$(gate pointers)"
+fresh
+printf 'One line\342\200\250to the gate.\n-> "New topic"\n## New topic\n' >>"$skill/$ref"
+check "pointers: a line separator inside a line does not shift the line numbers" \
+	"ok - all repository checks pass" "$(gate pointers)"
+# listed FILE TITLE...: a clean copy whose gate lists these sections of FILE in UNROUTED
+listed() {
+	fresh
+	local file=$1 title
+	shift
+	for title in "$@"; do
+		sed -i "/^if __name__ ==/i UNROUTED.setdefault(\"openqa\", {}).setdefault(\"$file\", set()).add(\"$title\")" \
+			"$work/repo/tests/repo/check-skills.py"
+	done
+}
+listed redaction.md Listed
+printf '%s\n' '## Listed' '-> "Listed", "New topic"' '## New topic' >>"$skill/$ref"
+check "pointers: a listed section needs no pointer, may point at itself and leads on" \
+	"ok - all repository checks pass" "$(gate pointers)"
+printf '%s\n' '-> redaction.md "Listed"' >>"$skill/SKILL.md"
+finds "pointers: an UNROUTED entry that is routed by now" pointers \
+	"references/redaction.md:$((last + 1)): UNROUTED lists \"Listed\", which SKILL.md:$(wc -l <"$skill/SKILL.md") points to"
+listed redaction.md Listed
+finds "pointers: an UNROUTED entry whose section is gone" pointers \
+	'references/redaction.md: UNROUTED lists "Listed", which does not exist'
+listed redaction.md Part Redaction
+printf '%s\n' '### Part' >>"$skill/$ref"
+finds "pointers: an UNROUTED entry that names a ### part" pointers \
+	"references/redaction.md:$((last + 1)): UNROUTED lists \"Part\", which is not a \"## \" section"
+finds "pointers: an UNROUTED entry that names the file title" pointers \
+	'references/redaction.md:1: UNROUTED lists "Redaction", which is not a "## " section'
+listed gone.md Listed
+finds "pointers: an UNROUTED entry whose file is gone" pointers \
+	"references/gone.md: UNROUTED lists this file, which does not exist"
+listed untrusted-content.md Rules
+finds "pointers: an UNROUTED entry in the reference read whole" pointers \
+	"references/untrusted-content.md: UNROUTED lists this file, which is read whole"
+listed redaction.md Listed
+printf '%s\n' '## Listed' >>"$skill/$ref"
+cp -r "$skill" "$work/repo/skills/zz"
+finds "pointers: UNROUTED lists the sections of one skill only" pointers \
+	"skills/zz/references/redaction.md:$((last + 1)): $(unreached Listed)"
+fresh
+sed -i '/^if __name__ ==/i UNROUTED["nosuch"] = {}' "$work/repo/tests/repo/check-skills.py"
+finds "pointers: an UNROUTED key that is no skill" pointers \
+	"skills/nosuch: UNROUTED lists this skill, which does not exist"
+
 fresh
 mkdir -p "$work/repo/skills/zz"
 printf -- '---\nname: zz\ndescription: A second skill.\nlicense: GPL-2.0-or-later\n---\n\n# zz\n' >"$work/repo/skills/zz/SKILL.md"

@@ -49,11 +49,12 @@ install_package('7zip', trup_apply => 1) if (script_run('rpm -q 7zip'));   # tes
 | `trup_reboot => 1` | then `reboot_on_changes`. For daemons, libraries, kernel bits |
 | `trup_apply => 1` | `transactional-update apply`, no reboot. End-user tools and services only, never kernel or system libraries. Dies if combined with `trup_reboot` |
 | `trup_continue => 1` | adds `-c`: build on the pending snapshot instead of discarding it. **Alone it activates nothing**: no package until a reboot or apply |
-| `trup_extra`, `zypper_extra` | extra package names for one system type (not the POD's `trup_packages`/`zypper_packages`) |
+| `trup_extra`, `zypper_extra` | extra package names for one system type (not the POD's `trup_packages`/`zypper_packages` -> "POD versus code") |
 | `timeout` | the `// 500` in the sub is dead code; effective defaults are 180 s transactional, 700 s zypper, so set it for big installs |
 
 - `install_available_packages($list, repo => $alias, ...)` installs only names `zypper se -t package --match-exact` finds, defaults `trup_continue` to 1, returns 0 if none.
 - **Replaces**: `assert_script_run 'zypper -n in foo'`; hand-written `if (is_transactional) {...} else {...}`. Plain `zypper_call 'in ...'` only in modules that never run on transactional products.
+- SLE add-ons -> "Registration".
 
 ## zypper_call
 

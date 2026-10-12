@@ -54,6 +54,37 @@ NAMED_RE = re.compile(_FILE + r"(?![A-Za-z0-9_-]|[./][A-Za-z0-9_])")
 BARE_RE = re.compile(r"->\s*((?:\"[^\"\n]+\"(?:\s*[,/]\s*)?)+)")
 QUOTED = re.compile(r'"([^"\n]+)"')
 
+# "## " sections of a reference that no pointer leads to, per skill and file: an agent finds
+# them only through `refsection.py --list`. The note says what leads there by name, or that
+# the section is background. A new section gets a pointer, not an entry.
+UNROUTED = {
+    "openqa": {
+        "agnostic-tests.md": {
+            "Converting existing modules",  # background
+        },
+        "area-conventions.md": {
+            "Security",  # "Find the area": the CODEOWNERS block of this name
+        },
+        "openqa-model.md": {
+            "Vocabulary",  # background
+        },
+        "redaction.md": {
+            "Why the skill has to do it",  # background
+        },
+        "review-comments-tickets.md": {
+            "Good examples",  # background
+            "Poor examples",  # background
+        },
+        "review-tooling.md": {
+            "openQA-python-client",  # background
+        },
+        "site-policy.md": {
+            "Generic or site-specific",  # background
+            "Not in this skill",  # background
+        },
+    },
+}
+
 # Content that must not reach a public repository.
 PUBLIC_PATTERNS = [
     (
@@ -261,11 +292,12 @@ def section_reader(skill):
 
 
 def outline(reader, path):
-    """Yield (title, level, first line, bytes) per heading; bytes are what `refsection.py --list` prints."""
+    """Yield (title, level, first line, last line, bytes) per heading; bytes are what
+    `refsection.py --list` prints."""
     lines = path.read_text(encoding="utf-8").split("\n")
     for sec in reader.parse(lines):
         size = len(reader.body(lines, sec).encode("utf-8"))
-        yield sec.title, sec.level, sec.start + 1, size
+        yield sec.title, sec.level, sec.start + 1, sec.end, size
 
 
 def check_budget(skill, out):
@@ -289,7 +321,7 @@ def check_budget(skill, out):
         )
         return
     for path in sorted((skill / "references").glob("*.md")):
-        for title, level, first, size in outline(reader, path):
+        for title, level, first, _, size in outline(reader, path):
             if level >= 2 and size > SECTION_CAP:
                 out.append(
                     f'budget: {where}/references/{path.name}:{first}: section "{title}" is {size} '
@@ -309,7 +341,8 @@ def documents(skill):
 
 def unfenced_lines(path):
     fenced = False
-    for num, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+    # Split as refsection.py does, so that a line has one number everywhere.
+    for num, line in enumerate(path.read_text(encoding="utf-8").split("\n"), 1):
         if line.lstrip().startswith(("```", "~~~")):
             fenced = not fenced
         if not fenced:
@@ -346,20 +379,21 @@ def check_pointers(skill, out):
         out.append(
             f"pointers: {where}/scripts/refsection.py: missing, so no pointer can be resolved"
         )
-    # Keyed by every name refsection.py resolves to the file: {title: level}.
-    heads = {}
+    # Keyed by every name refsection.py resolves to the file:
+    # {title: (level, first line, last line)}.
+    heads, links = {}, []
     for rel, path in targets.items() if reader else ():
         found, seen = {}, {}
         sections = list(outline(reader, path))
         folded = [title.casefold() for title, *_ in sections]
-        for title, level, first, _ in sections:
+        for title, level, first, last, _ in sections:
             if title.casefold() in seen:
                 out.append(
                     f'pointers: {where}/{rel}:{first}: heading "{title}" repeats '
                     f"line {seen[title.casefold()]}"
                 )
             seen.setdefault(title.casefold(), first)
-            found.setdefault(title, level)
+            found.setdefault(title, (level, first, last))
             if title.endswith(".md"):
                 out.append(
                     f'pointers: {where}/{rel}:{first}: heading "{title}" ends in .md, '
@@ -369,12 +403,16 @@ def check_pointers(skill, out):
             if rel == "scripts/README.md":
                 short = title.split(" - ")[0]
                 if sum(t.startswith(short.casefold()) for t in folded) == 1:
-                    found.setdefault(short, level)
+                    found.setdefault(short, (level, first, last))
         heads[rel] = found
         if rel.startswith("references/"):
             heads[path.name] = found
     for rel, path in docs.items() if reader else ():
         own = None if rel.startswith("agents/") else path.name
+        # A reference is served one "## " section at a time: a pointer leads on from the
+        # section it is in, and the lines above the first section are served to no one.
+        whole = not rel.startswith("references/") or rel in BUDGETS
+        spans = [(f, e, t) for t, (lv, f, e) in heads.get(rel, {}).items() if lv == 2]
         for num, line in unfenced_lines(path):
             at = f"pointers: {where}/{rel}:{num}"
             groups, loose = pointers_on(line)
@@ -393,13 +431,19 @@ def check_pointers(skill, out):
                 for title in titles:
                     if title.startswith("<"):
                         continue
-                    level = heads[target].get(title)
+                    level = heads[target].get(title, (0,))[0]
                     if not level:
                         out.append(f"{at}: '{target}' has no section \"{title}\"")
                     elif level == 1:
                         out.append(
                             f"{at}: \"{title}\" is the whole of '{target}': name a section"
                         )
+                    else:
+                        home = target if target in targets else f"references/{target}"
+                        origin = whole or next(
+                            ((rel, t) for f, e, t in spans if f <= num <= e), None
+                        )
+                        links.append((origin, (home, title), f"{rel}:{num}"))
             for title in loose:
                 target = next((f for f in files[::-1] if title in heads[f]), None)
                 if target:
@@ -424,6 +468,57 @@ def check_pointers(skill, out):
         if rel.startswith("agents/") and rel not in callers:
             out.append(
                 f"pointers: {where}/{rel}: neither SKILL.md nor a reference names this playbook"
+            )
+    listed = UNROUTED.get(skill.name, {})
+    # Reach spreads from what is read whole, one pointer at a time. A listed section is
+    # found without a pointer and leads on like a reached one; a section that only points
+    # at itself has no way in.
+    reached = {}
+    served = {True} | {(f"references/{n}", t) for n in listed for t in listed[n]}
+    grown = True
+    while grown:
+        grown = False
+        for origin, dest, at in links:
+            if origin in served and origin != dest and dest not in reached:
+                reached[dest] = at
+                served.add(dest)
+                grown = True
+    for rel in sorted(heads):
+        if not rel.startswith("references/") or rel in BUDGETS:
+            continue
+        titles = listed.get(rel.split("/")[1], set())
+        for title, (level, first, _) in heads[rel].items():
+            source = reached.get((rel, title))
+            if level != 2:
+                if title in titles:
+                    out.append(
+                        f'pointers: {where}/{rel}:{first}: UNROUTED lists "{title}", '
+                        'which is not a "## " section'
+                    )
+            elif not source and title not in titles:
+                out.append(
+                    f'pointers: {where}/{rel}:{first}: no pointer reaches section "{title}": '
+                    "point to it, or list it in UNROUTED"
+                )
+            elif source and title in titles:
+                out.append(
+                    f'pointers: {where}/{rel}:{first}: UNROUTED lists "{title}", '
+                    f"which {source} points to"
+                )
+        for title in sorted(titles - set(heads[rel])):
+            out.append(
+                f'pointers: {where}/{rel}: UNROUTED lists "{title}", which does not exist'
+            )
+    for name in sorted(listed):
+        rel = f"references/{name}"
+        if rel not in docs:
+            out.append(
+                f"pointers: {where}/{rel}: UNROUTED lists this file, which does not exist"
+            )
+        elif rel in BUDGETS:
+            out.append(
+                f"pointers: {where}/{rel}: UNROUTED lists this file, which is read whole: "
+                "its sections need no pointer"
             )
     for m in re.finditer(
         r"`?scripts/([A-Za-z0-9_.-]+\.(?:py|sh))`?",
@@ -516,6 +611,11 @@ def main(argv=None):
             check_budget(skill, out)
         if "pointers" in only:
             check_pointers(skill, out)
+    if "pointers" in only:
+        for name in sorted(set(UNROUTED) - {skill.name for skill in skills}):
+            out.append(
+                f"pointers: skills/{name}: UNROUTED lists this skill, which does not exist"
+            )
     if "public" in only:
         scan(PUBLIC_PATTERNS, "public", out, allow=PUBLIC_ALLOW)
     if "attribution" in only:

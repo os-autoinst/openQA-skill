@@ -202,6 +202,9 @@ finds "frontmatter: a name that is not the directory name" frontmatter "differs 
 fresh
 sed -i "s/^license: /  $(filler 40)\n&/" "$skill/SKILL.md"
 finds "frontmatter: a description over 1024 characters" frontmatter "description must be 1-1024"
+fresh
+sed -i '2,$s/^---$/--/' "$skill/SKILL.md"
+finds "frontmatter: a frontmatter that is never closed" frontmatter "missing frontmatter"
 
 # Sizes are bytes of what one read returns: a section as refsection.py cuts it, or a whole file.
 ref=references/redaction.md
@@ -264,11 +267,53 @@ finds "budget: the reference read whole keeps its own cap" budget "untrusted-con
 fresh
 filler 1500 >>"$skill/agents/pr-preflight.md"
 finds "budget: a playbook over its cap" budget "agents/pr-preflight.md: "
-# under the cap of a reference, so that only its own cap can report it
+# bodied BYTES LINES: a clean copy whose SKILL.md keeps its frontmatter and has a body of BYTES in LINES lines
+bodied() {
+	fresh
+	sed -n '1,/^---$/p' "$root/skills/openqa/SKILL.md" >"$skill/SKILL.md"
+	{
+		head -c $(($1 - $2)) /dev/zero | tr '\0' x
+		yes '' | head -n "$2"
+	} >>"$skill/SKILL.md"
+}
+bodied 12700 1
+check "budget: a SKILL.md body exactly at its cap passes, whatever the frontmatter adds" \
+	"ok - all repository checks pass" "$(gate budget)"
+over="budget: skills/openqa/SKILL.md: body of 12701 bytes exceeds cap 12700 by 1"
+bodied 12701 1
+check "budget: a SKILL.md body one byte over its cap" "$over" "$(gate budget)"
+bodied 12600 1
+printf -- '---\n%096d\n' 0 >>"$skill/SKILL.md"
+check "budget: a rule inside the body does not end the count" "$over" "$(gate budget)"
+awk '/^---$/ && ++n == 2 { $0 = "--- " } 1' "$skill/SKILL.md" >"$work/SKILL.md"
+mv "$work/SKILL.md" "$skill/SKILL.md"
+check "budget: nor does the count start there when the closing line of the frontmatter has a trailing space" \
+	"$over" "$(gate budget)"
 fresh
-size=$(wc -c <"$skill/SKILL.md")
-filler $((16701 - size)) >>"$skill/SKILL.md"
-finds "budget: SKILL.md over its cap" budget "/SKILL.md: "
+{
+	head -c 12696 /dev/zero | tr '\0' x
+	printf '\n---\n'
+} >"$skill/SKILL.md"
+check "budget: a SKILL.md without frontmatter is all body, a rule in it included" "$over" "$(gate budget)"
+bodied 1 1
+yes "$(printf '\303\251')" | head -n 6350 | tr -d '\n' >>"$skill/SKILL.md"
+check "budget: the body is counted in bytes, not characters" "$over" "$(gate budget)"
+bodied 12700 2
+sed -i 's/$/\r/' "$skill/SKILL.md"
+check "budget: the carriage returns of a CRLF body count" \
+	"budget: skills/openqa/SKILL.md: body of 12702 bytes exceeds cap 12700 by 2" "$(gate budget)"
+fresh
+sed -i "s/^license: .*/&\nmetadata: $(filler 5000 | tr -d '\n')/" "$skill/SKILL.md"
+check "budget: the frontmatter of SKILL.md is not counted, even past the cap of a file" \
+	"ok - all repository checks pass" "$(gate budget)"
+front=$(sed -n '1,/^---$/p' "$root/skills/openqa/SKILL.md" | wc -l)
+lines="budget: skills/openqa/SKILL.md: 500 lines exceeds cap 499 by 1"
+bodied 600 $((499 - front))
+check "budget: a SKILL.md of 499 lines passes" "ok - all repository checks pass" "$(gate budget)"
+printf x >>"$skill/SKILL.md"
+check "budget: a last line without a newline is a line" "$lines" "$(gate budget)"
+bodied 600 $((500 - front))
+check "budget: a SKILL.md of 500 lines, frontmatter included" "$lines" "$(gate budget)"
 
 # add LINE... to FILE of a clean copy
 add() {

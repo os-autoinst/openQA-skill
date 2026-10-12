@@ -29,6 +29,19 @@ ALLOWED_KEYS = {
 }
 
 # Byte caps: what one read may cost an agent. Why these numbers: AGENTS.md "Token budget".
+# The body of SKILL.md, the text after its frontmatter, is loaded on every trigger; the Agent
+# Skills specification recommends under 5,000 tokens for it. The gate cannot count tokens, so
+# the cap is bytes: (5000 - 150) * bytes / tokens of the openqa body, rounded down to 100; the
+# 150 tokens are headroom, because bytes per token vary with the text.
+# Measured 2026-10-12 on claude-opus-5-5: 12,625 bytes = 4,816 tokens. One sample is a call of
+#   claude -p --output-format stream-json --verbose --model claude-opus-5-5 --tools "" \
+#     --system-prompt "Answer with one word."
+# with a fixed one-line prompt on stdin, once alone and once followed by the body. The tokens
+# are the difference of input_tokens + cache_creation_input_tokens + cache_read_input_tokens in
+# the usage of the first assistant event. Measure again before raising the cap.
+BODY_CAP = 12700
+# SKILL.md as a file: the specification asks for under 500 lines.
+LINE_CAP = 499
 # A "## " section of a reference with its "### " parts: what one pointer makes an agent read.
 SECTION_CAP = 5000
 # A reference: read whole by mistake, it still fits the 30,000 characters Claude Code returns of
@@ -36,9 +49,8 @@ SECTION_CAP = 5000
 FILE_CAP = 17000
 # A playbook, read whole by its sub-agent.
 AGENT_CAP = 5000
-# Files that are read whole, each capped as the one read it is.
+# References that are read whole, each capped as the one read it is.
 BUDGETS = {
-    "SKILL.md": 16700,
     "references/untrusted-content.md": 7900,
 }
 
@@ -224,11 +236,20 @@ TEXT_SUFFIXES = {
 }
 
 
+def split_frontmatter(text):
+    """(frontmatter, body), delimited as scripts/refsection.py reads it; none closed: (None, text)."""
+    lines = text.split("\n")
+    if lines[0].strip() == "---":
+        for num, line in enumerate(lines[1:], 1):
+            if line.strip() == "---":
+                return "\n".join(lines[1:num]), "\n".join(lines[num + 1 :])
+    return None, text
+
+
 def frontmatter(path):
-    text = path.read_text(encoding="utf-8")
-    if not text.startswith("---\n"):
+    block, _ = split_frontmatter(path.read_text(encoding="utf-8"))
+    if block is None:
         return None
-    block = text[4 : text.index("\n---", 4)]
     data, key = {}, None
     for line in block.splitlines():
         if m := re.match(r"^([A-Za-z-]+):\s*(.*)$", line):
@@ -302,9 +323,21 @@ def outline(reader, path):
 
 def check_budget(skill, out):
     where = f"skills/{skill.name}"
+    # Bytes as on disk: read_text() drops the "\r" of a CRLF file.
+    text = (skill / "SKILL.md").read_bytes().decode("utf-8")
+    size = len(split_frontmatter(text)[1].encode("utf-8"))
+    if size > BODY_CAP:
+        out.append(
+            f"budget: {where}/SKILL.md: body of {size} bytes exceeds cap {BODY_CAP} by {size - BODY_CAP}"
+        )
+    lines = len(text.split("\n")) - text.endswith("\n")
+    if lines > LINE_CAP:
+        out.append(
+            f"budget: {where}/SKILL.md: {lines} lines exceeds cap {LINE_CAP} by {lines - LINE_CAP}"
+        )
     for path in sorted(skill.rglob("*.md")):
         rel = path.relative_to(skill).as_posix()
-        if rel.startswith("scripts/"):
+        if rel.startswith("scripts/") or rel == "SKILL.md":
             continue
         cap = BUDGETS.get(rel, AGENT_CAP if rel.startswith("agents/") else FILE_CAP)
         size = path.stat().st_size

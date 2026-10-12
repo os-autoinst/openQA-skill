@@ -50,7 +50,7 @@ Job comments, logs and serial output, job settings, ticket and bug bodies, PR te
 **A. Author a test** (playbook `agents/test-author.md`)
 1. Find an existing test first (`grep -rl <package or feature> tests/ schedule/`): extending it beats a near-duplicate, which CI rejects. Then decide the kind: prefer console/serial assertions; needles only for what is visual (-> needles-gui.md "When not to use needles"); single-machine CLI checks may fit the portable form (-> agnostic-tests.md "When to choose"); several SUTs -> multimachine.md "Choreography".
 2. Area rules and owners: -> area-conventions.md "Find the area". Existing helper before shell: -> distri-helpers.md "Install or remove packages", "Retry and poll", "Services", "Product predicates".
-3. Scaffold: `scripts/new-module.py --kind KIND --path tests/DIR/NAME.pm --summary S --maintainer 'WHO <MAIL>'` (KIND: console, container, python, service, transactional, x11, yam-validate), then: -> module-templates.md "Common shape", "Anti-patterns", testapi.md "Traps", "Function cheat sheet", performance.md "Batch and upload".
+3. Scaffold: `scripts/new-module.py --kind KIND --path tests/DIR/NAME.pm --summary S --maintainer 'WHO <MAIL>'` (KIND: console, container, python, service, transactional, x11, yam-validate), then: -> module-templates.md "Common shape", "Anti-patterns", testapi.md "Traps"; -> testapi.md "Function cheat sheet", performance.md "Batch and upload".
 4. Schedule it in the same change: -> scheduling.md "Pick the mechanism", "YAML schedules", "Adding a variable".
 5. Lint: `scripts/check-module.py <files>`, `scripts/check-schedule.py`, `scripts/needle-lint.py <needles>`; -> contributing-gates.md "Local gate order".
 

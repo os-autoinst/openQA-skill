@@ -389,6 +389,68 @@ printf '## Refsection.py --list - the outline\n' >>"$skill/scripts/README.md"
 finds "pointers: a script name that two sections of scripts/README.md start with, whatever the case" pointers \
 	"'scripts/README.md' has no section \"refsection.py\""
 
+# One pointer is one call of refsection.py, and what that call prints is capped.
+# grouped BYTES...: a clean copy with a reference whose sections S1, S2, ... are of BYTES each
+grouped() {
+	fresh
+	local n=0 bytes
+	for bytes in "$@"; do
+		n=$((n + 1))
+		printf '\n## S%s\n' "$n"
+		head -c $((bytes - 7)) /dev/zero | tr '\0' x # the heading line is 6, the last newline 1
+		printf '\n'
+	done >"$skill/references/group.md"
+}
+grouped 3332 3333 3333
+printf '%s\n' '-> group.md "S1", "<n>", "S2", "S3"' >>"$skill/SKILL.md"
+check "pointers: a pointer exactly at the group cap passes, a placeholder adding nothing" \
+	"ok - all repository checks pass" "$(gate pointers)"
+grouped 3333 3333 3333
+printf '%s\n' '-> group.md "S1", "S2", "S3"' >>"$skill/SKILL.md"
+finds "pointers: one byte over the group cap, and by how much" pointers \
+	"SKILL.md:$(wc -l <"$skill/SKILL.md"): the pointer that starts with \"S1\" prints 10001 bytes, 1 over the group cap 10000"
+grouped 3333 3333 3333
+printf '%s\n' '-> group.md "S1", "S2", "S3", scripts/README.md "refsection.py", references/redaction.md "Before you post"' >>"$skill/SKILL.md"
+printed=$(python3 "$skill/scripts/refsection.py" group.md S1 S2 S3 scripts/README.md refsection.py \
+	references/redaction.md "Before you post" | wc -c)
+check "pointers: the size of a pointer across files is what one call of refsection.py prints" 1 \
+	"$(gate pointers | grep -c -F "prints $printed bytes")"
+grouped 4000 4000 4000
+printf '%s\n' '-> group.md "S1" / "S2" / "S3"' >>"$skill/SKILL.md"
+check "pointers: of the titles a slash joins only the largest counts" "ok - all repository checks pass" "$(gate pointers)"
+grouped 4000 100 6000
+printf '%s\n' '-> group.md "S1", "S2" / "S3"' >>"$skill/SKILL.md"
+finds "pointers: the largest of them is added to what a comma joins" pointers "prints 10001 bytes"
+grouped 4000 100 6000
+printf '%s\n' '-> group.md "S1", "S3" / "S2"' >>"$skill/SKILL.md"
+finds "pointers: wherever it stands among them" pointers "prints 10001 bytes"
+grouped 4000 4000 4000
+printf '%s\n' '-> group.md "S1", "S2" -> group.md "S3"; then group.md "S1", "S2" and group.md "S3"' >>"$skill/SKILL.md"
+check "pointers: the next arrow or any other text ends a pointer" "ok - all repository checks pass" "$(gate pointers)"
+grouped 3333 3333 3333
+printf '%s\n' 'Read group.md "S1", "S2", "S3" first.' >>"$skill/SKILL.md"
+finds "pointers: a pointer without an arrow is capped too" pointers "prints 10001 bytes"
+grouped 3333 3333 3333
+printf '%s\n' '-> group.md "S1", "S2", "S3"' >>"$skill/$ref"
+finds "pointers: a pointer inside a reference is capped" pointers \
+	"$ref:$(wc -l <"$skill/$ref"): the pointer that starts with \"S1\" prints 10001 bytes"
+grouped 3333 3333 3333
+printf '%s\n' '-> "S1", "S2", "S3"' >>"$skill/references/group.md"
+finds "pointers: one to sections of its own file too" pointers \
+	"references/group.md:$(wc -l <"$skill/references/group.md"): the pointer that starts with \"S1\" prints"
+grouped 3333 3333 3333
+printf '%s\n' '-> group.md "S1", "S2", "S3"' >>"$skill/agents/job-triage.md"
+finds "pointers: a pointer inside a playbook is capped" pointers \
+	"agents/job-triage.md:$(wc -l <"$skill/agents/job-triage.md"): the pointer that starts with \"S1\" prints 10001 bytes"
+# Each line is measured alone: a pointer that goes on in the next one would be measured as two.
+grouped 4900 4900 4900
+printf '%s\n' '-> group.md "S1", "S2",' '   group.md "S3"' '-> group.md "S1" /' '   group.md "S2"' >>"$skill/SKILL.md"
+out=$(gate pointers)
+end=$(wc -l <"$skill/SKILL.md")
+check "pointers: a pointer that ends its line in a comma or a slash" \
+	"pointers: skills/openqa/SKILL.md:$((end - 3)): the pointer that starts with \"S1\" ends in \",\": keep a pointer on one line
+pointers: skills/openqa/SKILL.md:$((end - 1)): the pointer that starts with \"S1\" ends in \"/\": keep a pointer on one line" "$out"
+
 # An agent starts at SKILL.md or a playbook: a file that neither names is never opened.
 # orphan: a clean copy with a new reference that only another reference points to
 orphan() {

@@ -43,8 +43,10 @@ ALLOWED_KEYS = {
 BODY_CAP = 12700
 # SKILL.md as a file: the specification asks for under 500 lines.
 LINE_CAP = 499
-# A "## " section of a reference with its "### " parts: what one pointer makes an agent read.
+# A "## " section of a reference with its "### " parts: the least one pointer makes an agent read.
 SECTION_CAP = 5000
+# All that one pointer joins by ",": two full sections, as one call is one tool output.
+GROUP_CAP = 10000
 # A reference: read whole by mistake, it still fits the 30,000 characters Claude Code returns of
 # a command's output by default (BASH_MAX_OUTPUT_LENGTH).
 FILE_CAP = 17000
@@ -68,6 +70,13 @@ COMMENT_RE = re.compile(r"<!--.*?-->", re.DOTALL)
 # '-> "A", "B"' without a file names sections of the file the line is in.
 BARE_RE = re.compile(r"->\s*((?:\"[^\"\n]+\"(?:\s*[,/]\s*)?)+)")
 QUOTED = re.compile(r'"([^"\n]+)"')
+# One call of refsection.py: a "->", or a file name without one, with the file names and titles
+# that follow it, joined by "," or "/"; any other text ends it. A joiner at the end of the
+# line leaves it open: what the next line adds would be measured as another pointer.
+CHAIN_RE = re.compile(
+    rf'(?:->|(?={_FILE}))((?:\s*(?:[,/]\s*)?(?:{_FILE}|"[^"\n]+"))+)(\s*[,/]\s*$)?'
+)
+LINK_RE = re.compile(rf'([,/])?\s*(?:{_FILE}|"([^"\n]+)")')
 
 # "## " sections of a reference that no pointer leads to, per skill and file: an agent finds
 # them only through `refsection.py --list`. The note says what leads there by name, or that
@@ -407,6 +416,24 @@ def pointers_on(line):
     )
 
 
+def chains_on(line):
+    """Per chain of the line, what one call is asked for: one list per "," of the (file, or
+    None for the file the line is in, title) pairs that "/" leaves to pick from; then the
+    joiner the line ends in, if it leaves the chain open."""
+    for chain in CHAIN_RE.finditer(line):
+        name, parts, joint = None, [], ","
+        for m in LINK_RE.finditer(chain.group(2)):
+            joint = m.group(1) or joint
+            if m.group(2):
+                name = m.group(2)
+                continue
+            if joint == "," or not parts:
+                parts.append([])
+            parts[-1].append((name, m.group(3)))
+            joint = ","
+        yield parts, (chain.group(4) or "").strip()
+
+
 def check_pointers(skill, out):
     where = f"skills/{skill.name}"
     reader = section_reader(skill)
@@ -434,20 +461,20 @@ def check_pointers(skill, out):
             f"pointers: {where}/scripts/refsection.py: missing, so no pointer can be resolved"
         )
     # Keyed by every name refsection.py resolves to the file:
-    # {title: (level, first line, last line)}.
+    # {title: (level, first line, last line, bytes)}.
     heads, links = {}, []
     for rel, path in targets.items() if reader else ():
         found, seen = {}, {}
         sections = list(outline(reader, path))
         folded = [title.casefold() for title, *_ in sections]
-        for title, level, first, last, _ in sections:
+        for title, level, first, last, size in sections:
             if title.casefold() in seen:
                 out.append(
                     f'pointers: {where}/{rel}:{first}: heading "{title}" repeats '
                     f"line {seen[title.casefold()]}"
                 )
             seen.setdefault(title.casefold(), first)
-            found.setdefault(title, (level, first, last))
+            found.setdefault(title, (level, first, last, size))
             if title.endswith(".md"):
                 out.append(
                     f'pointers: {where}/{rel}:{first}: heading "{title}" ends in .md, '
@@ -457,7 +484,7 @@ def check_pointers(skill, out):
             if rel == "scripts/README.md":
                 short = title.split(" - ")[0]
                 if sum(t.startswith(short.casefold()) for t in folded) == 1:
-                    found.setdefault(short, (level, first, last))
+                    found.setdefault(short, (level, first, last, size))
         heads[rel] = found
         if rel.startswith("references/"):
             heads[path.name] = found
@@ -466,7 +493,9 @@ def check_pointers(skill, out):
         # A reference is served one "## " section at a time: a pointer leads on from the
         # section it is in, and the lines above the first section are served to no one.
         whole = not rel.startswith("references/") or rel in BUDGETS
-        spans = [(f, e, t) for t, (lv, f, e) in heads.get(rel, {}).items() if lv == 2]
+        spans = [
+            (f, e, t) for t, (lv, f, e, _) in heads.get(rel, {}).items() if lv == 2
+        ]
         for num, line in unfenced_lines(path):
             at = f"pointers: {where}/{rel}:{num}"
             groups, loose = pointers_on(line)
@@ -505,6 +534,28 @@ def check_pointers(skill, out):
                         f"{at}: \"{title}\" is a section of '{target}' outside a pointer: "
                         f'join it with a comma or write -> "{title}"'
                     )
+            for parts, joiner in chains_on(line):
+                sizes = []
+                for part in parts:
+                    known = [
+                        heads[name or own][title][3]
+                        for name, title in part
+                        if not title.startswith("<")
+                        and title in heads.get(name or own, ())
+                    ]
+                    sizes += [max(known)] if known else []
+                # refsection.py puts a newline between two sections
+                size = sum(sizes) + len(sizes) - 1
+                if size > GROUP_CAP:
+                    out.append(
+                        f'{at}: the pointer that starts with "{parts[0][0][1]}" prints {size} '
+                        f"bytes, {size - GROUP_CAP} over the group cap {GROUP_CAP}: split it"
+                    )
+                if joiner and parts:
+                    out.append(
+                        f'{at}: the pointer that starts with "{parts[0][0][1]}" ends in '
+                        f'"{joiner}": keep a pointer on one line'
+                    )
     # An agent starts at SKILL.md, a sub-agent at its playbook, and a playbook is handed over
     # by whoever read SKILL.md or a reference: a file none of them names is never opened.
     entry, callers = set(), set()
@@ -542,7 +593,7 @@ def check_pointers(skill, out):
         if not rel.startswith("references/") or rel in BUDGETS:
             continue
         titles = listed.get(rel.split("/")[1], set())
-        for title, (level, first, _) in heads[rel].items():
+        for title, (level, first, *_) in heads[rel].items():
             source = reached.get((rel, title))
             if level != 2:
                 if title in titles:

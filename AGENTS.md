@@ -27,10 +27,12 @@ Rules for humans and agents changing this repository.
 - References are read one `## ` section at a time through `scripts/refsection.py`, so every section stands
   alone and titles are short, stable and unique within their file. The Agent Skills specification sets no
   size for a reference; the caps in `tests/repo/check-skills.py` follow what one read costs. A `## ` section,
-  its `### ` parts included, is at most 5,000 bytes. A file is at most 17,000 bytes, so that one read whole
-  by mistake still fits the 30,000 characters of command output that one harness returns by default.
-  `untrusted-content.md`, the one reference read whole, keeps its own cap in `BUDGETS`. Over a cap: split the
-  section or drop what another section owns; do not raise the cap.
+  its `### ` parts included, is at most 5,000 bytes. A pointer is one call and one tool output: the sections
+  it joins by `,`, of those joined by `/` the largest, are at most 10,000 bytes together. A file is at most
+  17,000 bytes, so that one read whole by mistake still fits the 30,000 characters of command output that one
+  harness returns by default. `untrusted-content.md`, the one reference read whole, keeps its own cap in
+  `BUDGETS`. Over a cap: split the section or the pointer, or drop what another section owns; do not raise
+  the cap.
 - **One owner per rule.** The section that owns the topic states the rule in full. A section that cannot
   be acted on without the rule may keep at most one clause of it, followed by
   `-> references/<file>.md "<Section>"`; elsewhere write the pointer alone. `-> "<Section>"` stays inside

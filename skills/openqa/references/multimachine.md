@@ -132,6 +132,7 @@ With `PARALLEL_CANCEL_WHOLE_CLUSTER=0` a dead child no longer cancels the rest: 
 | `BOOT_HDD_IMAGE` < `BOOTFROM` < `PXEBOOT` | the later wins; `PXEBOOT` = 1 or `once` |
 | `VIRTIO_CONSOLE` (1) | 0 (for VNC ttys, e.g. support server): `select_serial_terminal` silently becomes VNC `root-console`, selecting a virtio console croaks -> references/distri-helpers.md "Console selection" |
 | `XRES`/`YRES` (1024/768) | changing them invalidates needles |
+| `NICOFFSET` (64) | NIC `<n>` (from 0) defaults to `tap<instance - 1 + n * NICOFFSET>`: the value has to match the tap devices set up on the worker host, so a job leaves it alone |
 | `PRETTY_SERIAL_MARKER` (1) | persists a prompt hook in the image: set 0 on image publisher *and* consumers if a test parses `serial0.txt` |
 
 **Deprecated — do not add:** `QEMUVGA`, `QEMU_OVERRIDE_VIDEO_DEVICE_AARCH64` (use `QEMU_VIDEO_DEVICE`), `UEFI_PFLASH` (use `UEFI_PFLASH_VARS`), `UEFI_BIOS` (use `UEFI_PFLASH_CODE`).

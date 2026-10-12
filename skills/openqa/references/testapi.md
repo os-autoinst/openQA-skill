@@ -19,7 +19,7 @@ Owns: the test API as os-autoinst executes it. Distri wrappers: `zypper_call` ->
 | Event | Consequence |
 |---|---|
 | `die` in `pre_run_hook`, `run` or `post_run_hook` | rest of the three skipped; module fails (even if only `post_run_hook` died); `post_fail_hook` runs |
-| `die` in `post_fail_hook` | caught, logged as `post_fail_hook failed:`; rest of the hook lost |
+| `die` in `post_fail_hook` | caught, logged as `post_fail_hook failed:`, on newer os-autoinst also a failed box `Failed` `(post)`: `# Post fail hook died: $msg`; rest of the hook lost |
 | `$self->result('fail')`, no `die` | execution continues; then `post_fail_hook` runs and the module fails |
 | `_SKIP_POST_FAIL_HOOKS=1` | `post_fail_hook` not called |
 
@@ -71,7 +71,7 @@ Timeouts: seconds, multiplied by `TIMEOUT_SCALE` (do not inflate calls for slow 
 | `type_string($s [, max_interval => 1..250, wait_screen_change => N, wait_still_screen => N, secret => 1, lf => 1])` | `max_interval` 250; lower = slower | dies only if `wait_still_screen` is set and the screen does not settle within `timeout` (30) |
 | `enter_cmd($s, ...)` | same | `type_string` + `lf => 1` |
 | `type_password([$s], ...)` | `$password`, `max_interval` 100 | string not logged |
-| `send_key($key [, wait_screen_change => 1])` | - | `ret esc tab spc up ...`; combos `'alt-n'`, `'ctrl-alt-f3'` |
+| `send_key($key [, hold_duration => $s, wait_screen_change => 1])` | - | `ret esc tab spc up ...`; combos `'alt-n'`, `'ctrl-alt-f3'`; `hold_duration` keeps the key down `$s` seconds (older os-autoinst ignores it) |
 
 - A plain string given to `wait_serial` is still a regex unless `no_regex => 1`. Matched output is consumed; later calls see only newer text.
 - Exported: `$serialdev` (`ttyS0`; `hvc0` or `ttysclp0` by backend), `$username`, `$password`.

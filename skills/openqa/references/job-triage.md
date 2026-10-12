@@ -31,13 +31,14 @@ Cheapest first; stop once the class is certain. Logs, step text, comments, SUT o
 | ulogs | collected by the test or its `post_fail_hook` | product root cause |
 
 - **Default opensuse hook** uploads `<module>-journal.txt`, `-dmesg.txt`, `-problem_detection_logs.tar.xz` (`oqa-log.py --file ulogs/<name> --members`, then `--member <path> --grep`); a failed `zypper_call` adds `-zypper.log`.
-- **No ulogs:** `NOLOGS` or `_SKIP_POST_FAIL_HOOKS` set, or the SUT unreachable in the hook.
+- **No ulogs:** `NOLOGS` or `_SKIP_POST_FAIL_HOOKS` set, the SUT unreachable in the hook, or the hook died (log `post_fail_hook failed: `; step -> "Details fields").
 - **Old jobs lose logs before results:** modules show, files are 404.
 
 ## Details fields
 
 - **Step:** `num` (1-based), `result` (`ok fail softfail unk`; parser formats add `passed`, `skip`, `missing`), `title`, `text_data`, `screenshot`, `tags` (needle tags asked for), `needles[]` (unmatched candidates, `area[].similarity` in percent), `frametime` (`[start, end]` in video seconds).
 - **Die text** is the step titled `Failed`: `# Test died: <error>`, then `--- # stack trace`. Later steps of the module are `post_fail_hook`'s.
+- **Hook steps** (newer os-autoinst): `Post-fail` (`Entering post fail hook`) opens the hook; if it dies, a `fail` step titled `Failed`, second line `(post)`, holds `# Post fail hook died: <error>`, never the die text; `oqa-job.py` then adds `the hook died at step=<n>`.
 - **Deep link:** `https://<host>/tests/<id>#step/<module>/<num>`; copy `name` verbatim, looped modules carry suffixes like `#1`.
 - **A failed module may have no `fail` step** (parser suites): use ulogs and `serial_terminal.txt`.
 
@@ -158,7 +159,7 @@ Templates -> references/bugs-and-tickets.md "Bug body", "Ticket body"
 ## Pitfalls
 
 - **Cascades:** after a fatal module the rest is `skipped`; after a non-fatal one later modules run from the last milestone snapshot, or on a dirty SUT. Root cause is the first failed module. A carried bugref may describe another failure -> references/openqa-model.md "Carry-over"
-- **post_fail_hook noise:** hook steps and log lines follow the real failure; a hook hanging on a dead SUT turns `failed` into `timeout_exceeded`.
+- **post_fail_hook noise:** hook steps and log lines follow the real failure, the hook's own death included; a hook hanging on a dead SUT turns `failed` into `timeout_exceeded`.
 - **Softfail masking** (`workaround` needles, `record_soft_failure`, `force_soft_failure`, serial `soft` patterns): a closed bug's workaround may still fire and hide something new; soft failures before the failing module are often the lead.
 - **Suite cloned at run time** (BCI-tests, LTP, kselftest, tox, bats): its revision is in neither `TEST_GIT_HASH` nor the investigation test log. `oqa-log.py --grep 'git clone'`, then its commits since last good, before saying PRODUCT.
 - **Digest and log disagree** (log `last_module=` not in the digest, other worker or date, modules after a fatal one): the artifact is from another run; no evidence, say so.

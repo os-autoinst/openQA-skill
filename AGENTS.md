@@ -44,7 +44,8 @@ Rules for humans and agents changing this repository.
   reference; a name inside a code fence or an HTML comment does not count. It fails as well on a `## `
   section of a reference that no chain of pointers reaches from `SKILL.md`, a playbook or a file read
   whole: a pointer counts only from a section that is reached itself, never from the lines above a file's
-  first `## `, which no read returns. Point to the section from the place that needs it. List it in `UNROUTED`
+  first `## `, which no read returns, nor from inside an HTML comment, where the gate still resolves it.
+  Point to the section from the place that needs it. List it in `UNROUTED`
   (`tests/repo/check-skills.py`, one key per skill) only when another section already leads to it by name,
   as an index table does, or it is deliberate background, and say which in a note; a listed section counts
   as reached. The gate fails on an entry that has a pointer by now, names no `## ` section or names a file

@@ -68,8 +68,10 @@ POINTER_RE = re.compile(_FILE + r"((?:(?:\s*[,/])?\s*\"[^\"\n]+\")+)")
 # The path alone names a reference or a playbook: one read whole has no section to point at.
 # A longer name ("x.md.bak", "x.md5") is another file.
 NAMED_RE = re.compile(_FILE + r"(?![A-Za-z0-9_-]|[./][A-Za-z0-9_])")
-# An HTML comment, on one line or several, is not rendered: it shows a name to no reader.
-COMMENT_RE = re.compile(r"<!--.*?-->", re.DOTALL)
+# An HTML comment, on one line or several, is not rendered: it shows a name or a pointer to
+# no reader. One that is never closed runs to the end of the file, which also keeps the scan
+# linear; a "<!--" in a code span opens none.
+COMMENT_RE = re.compile(r"(`[^`\n]*`)|<!--.*?(?:-->|\Z)", re.DOTALL)
 # '-> "A", "B"' without a file names sections of the file the line is in.
 BARE_RE = re.compile(r"->\s*((?:\"[^\"\n]+\"(?:\s*[,/]\s*)?)+)")
 QUOTED = re.compile(r'"([^"\n]+)"')
@@ -402,6 +404,16 @@ def unfenced_lines(path):
             yield num, line
 
 
+def shown_lines(path):
+    """unfenced_lines(), each line with what a reader is shown of it: HTML comments are cut."""
+    lines = list(unfenced_lines(path))
+    text = "\n".join(line for _, line in lines)
+    shown = COMMENT_RE.sub(
+        lambda m: m.group(1) or "\n" * m.group().count("\n"), text
+    ).split("\n")
+    return [(num, line, seen) for (num, line), seen in zip(lines, shown)]
+
+
 def pointers_on(line):
     """([(file, or None for the file the line is in, [titles])], [other quoted strings after "->"])."""
 
@@ -499,9 +511,15 @@ def check_pointers(skill, out):
         spans = [
             (f, e, t) for t, (lv, f, e, _) in heads.get(rel, {}).items() if lv == 2
         ]
-        for num, line in unfenced_lines(path):
+        for num, line, shown in shown_lines(path):
             at = f"pointers: {where}/{rel}:{num}"
             groups, loose = pointers_on(line)
+            # A pointer inside a comment is resolved like any other, and leads no reader on.
+            routes = {
+                (name or own, title)
+                for name, titles in pointers_on(shown)[0]
+                for title in titles
+            }
             files = [own] if own else []
             for target, titles in groups:
                 if target is None and own is None:
@@ -524,7 +542,7 @@ def check_pointers(skill, out):
                         out.append(
                             f"{at}: \"{title}\" is the whole of '{target}': name a section"
                         )
-                    else:
+                    elif (target, title) in routes:
                         home = target if target in targets else f"references/{target}"
                         origin = whole or next(
                             ((rel, t) for f, e, t in spans if f <= num <= e), None
@@ -563,8 +581,8 @@ def check_pointers(skill, out):
     # by whoever read SKILL.md or a reference: a file none of them names is never opened.
     entry, callers = set(), set()
     for rel, path in docs.items():
-        text = "\n".join(line for _, line in unfenced_lines(path))
-        names = set(NAMED_RE.findall(COMMENT_RE.sub("", text)))
+        text = "\n".join(shown for *_, shown in shown_lines(path))
+        names = set(NAMED_RE.findall(text))
         if not rel.startswith("references/"):
             entry |= names
         if not rel.startswith("agents/"):

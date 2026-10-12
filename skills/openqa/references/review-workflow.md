@@ -12,7 +12,7 @@ From a defined scope to a build where every current failure carries a verified r
 
 ## Sweep
 
-**Build the work-list with `scripts/oqa-sweep.py`, not `result=failed&latest=1` on the jobs API**, which also returns jobs whose clone passed. -> references/openqa-model.md "Read-only API recipes"
+**Build the work-list with `scripts/oqa-sweep.py`, not `result=failed&latest=1` on the jobs API**, which also returns jobs whose clone passed. -> references/openqa-model.md "Listing current failures"
 
 ```
 scripts/oqa-sweep.py --host o3 --group 1 --todo
@@ -163,8 +163,7 @@ Entry: `<job URL> <test>@<machine> <module>: <cause> -> <reference|none>`; victi
 
 - Approval needs at least one related job and no not-ok job. Only `passed` and `softfailed` count as ok; every other result blocks, unfinished jobs (`none`) included: **incompletes and cluster victims block, soft failures do not**.
 - Only the newest job per scenario name counts: a passing restart supersedes the failure. A bugref or label does **not** unblock.
-- Per-update waiver: a `@review:acceptable_for:incident_<number>:<reason_without_spaces>` comment on the not-ok job. It covers that job and that update only; the openQA result is unchanged, and the marker alone leaves the job unreviewed. Format and traps: -> references/review-comments-tickets.md "acceptable_for marker"
+- Per-update waiver, drafted only on explicit request: an `@review:acceptable_for` comment on the not-ok job -> references/review-comments-tickets.md "acceptable_for marker"
 - Aggregate jobs test the updates in their `*_TEST_ISSUES` settings; an older ok job of the scenario that included the update (6 days by default) is accepted too. Suspects: updates in every job failing at that step, minus the last good run's unless rebuilt since.
-- A waiver decides a release: draft it only on explicit request. -> SKILL.md "Write gate"
 
 Sources: openQA lib/OpenQA/{BuildResults,Setup,WebAPI,Jobs/Constants,Schema/Result/Jobs,Schema/ResultSet/Comments,WebAPI/Controller/API/V1/Job}.pm; os-autoinst-scripts README.md, openqa-investigate, openqa-label-known-issues; qem-bot openqabot/{approver,utils,config,types/aggregate}.py

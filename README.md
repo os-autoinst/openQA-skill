@@ -114,10 +114,9 @@ ruff check . && ruff format --check .
 shellcheck tests/*/test-*.sh && shfmt -d tests/*/test-*.sh
 ```
 
-The references were checked against these upstream revisions: openQA `61bb066` and
-os-autoinst-distri-opensuse `786e32d` (October 2026); os-autoinst `93a96a0`, os-autoinst-distri-example
-`274346e`, os-autoinst-scripts `ce87f6a` and qem-bot `f8a16d1` (September 2026). Contribution rules are in
-[AGENTS.md](AGENTS.md).
+The references were checked against these upstream revisions in October 2026: openQA `61bb066`,
+os-autoinst `2b02af1`, os-autoinst-distri-opensuse `786e32d`, os-autoinst-distri-example `274346e`,
+os-autoinst-scripts `e86ee5d` and qem-bot `c3b6275`. Contribution rules are in [AGENTS.md](AGENTS.md).
 
 ## Acknowledgements
 

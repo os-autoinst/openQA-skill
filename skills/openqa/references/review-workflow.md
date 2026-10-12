@@ -25,7 +25,7 @@ scripts/oqa-sweep.py --host o3 --group 1 --todo
 
 | Counter | Meaning |
 |---|---|
-| `failed` | result `failed`, `incomplete` or `timeout_exceeded` |
+| `failed` | done jobs with result `failed`, `incomplete` or `timeout_exceeded` |
 | `skipped` | `parallel_failed`, `skipped`, `obsoleted`, `parallel_restarted`, `user_cancelled`, `user_restarted`, cancelled jobs |
 | `labeled` | `failed` jobs with a parsed bugref or `label:` in any comment |
 | `unreviewed` | `failed - labeled`: the number to bring to 0 |
@@ -39,7 +39,7 @@ scripts/oqa-sweep.py --host o3 --group 1 --todo
 ## Order of work
 
 1. **Unreviewed `failed` jobs**, grouped by failed module: one cause usually spans machines and architectures. Triage one, then confirm the same failing step on the others before reusing its reference.
-2. **`incomplete`, `timeout_exceeded`**: they count as failed. Read `reason` first. -> references/job-triage.md "Incomplete reasons"
+2. **`incomplete`, `timeout_exceeded`**: done jobs count as failed; one cancelled while still scheduled counts as skipped. Read `reason` first. -> references/job-triage.md "Incomplete reasons"
 3. **`parallel_failed`** only to find the culprit. -> "Clusters in review"
 4. **Carried-over references** in a full review or when one looks stale: carry-over never checks that the ticket is still open.
 5. **`softfailed`** only if policy or the user asks. A soft failure carrying `label:force_result:softfailed` is a real failure someone overrode: check that its reference still holds.

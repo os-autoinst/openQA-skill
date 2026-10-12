@@ -24,7 +24,8 @@ How to read it:
   - parallel_failed and skipped jobs are victims. The culprit hint names the
     failed/incomplete/timeout_exceeded job of the cluster that finished first.
   - Steps after the "Failed" text step of a module belong to post_fail_hook
-    and are counted, not shown.
+    and are counted, not shown. "the hook died at step=N" on that line: the
+    hook itself died there, so logs it would have uploaded may be missing.
   - Needle candidates are rated by their WORST area: best=<needle>:<pct>% is
     the lowest area "similarity" of that needle as openQA reports it (a needle
     matches only when every area reaches its threshold, 96 % unless the area
@@ -132,6 +133,8 @@ BOT_TEMPLATES = (
 )
 AUTOMATED_MARKS = ("This comment has been AI generated",)
 HOOK_NOTE = "(The hook script will not be executed.)"
+# Title of the step os-autoinst records when post_fail_hook dies (basetest.pm run_post_fail).
+HOOK_DIED = "Failed\n(post)"
 
 SHOT_NAME = re.compile(r"[\w#+-][\w.#+-]{0,120}", re.ASCII)
 HEADING = re.compile(r"\s*(?:#{1,6}\s.*|\*\*[^*]+\*\*:?|__[^_]+__:?)\s*")
@@ -563,7 +566,12 @@ def print_modules(client, job, max_steps, verbose):
         if len(bad) > len(shown):
             print(f"  +{len(bad) - len(shown)} failing steps not shown (--steps N)")
         if died is not None and len(steps) > died + 1:
-            print(f"  +{len(steps) - died - 1} post_fail_hook steps not shown")
+            hook = steps[died + 1 :]
+            line = f"  +{len(hook)} post_fail_hook steps not shown"
+            dead = next((s for s in hook if s.get("title") == HOOK_DIED), None)
+            if dead:
+                line += f"; the hook died at step={tok(dead.get('num'), 10)}"
+            print(line)
         if not bad:
             print(
                 f"  no failing step recorded: read the ulogs {tok(name, 60)}-* and serial0.txt"

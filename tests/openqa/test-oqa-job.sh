@@ -318,6 +318,28 @@ check "step text in the real format: Carp frames after the died message are cut 
 check "step text in the real format: --verbose keeps the frames" "3" \
 	"$(job 820 --verbose | grep -c 'called at /usr/lib/os-autoinst/')"
 
+# --- a post_fail_hook that died -------------------------------------------------
+actual=$(job 850)
+check "a dead post_fail_hook is named on the count line, with its step" 1 \
+	"$(grep -c '^  +4 post_fail_hook steps not shown; the hook died at step=6$' <<<"$actual")"
+check "the test's die message is still the one shown; the hook's text is not" "1 0" \
+	"$(grep -c "^    text=\"# Test died: command 'systemctl is-active exampled' failed " <<<"$actual") $(grep -c 'Post fail hook died\|INJECTED\|^<<<' <<<"$actual")"
+check "--all-steps: the two-line title of the dead hook stays on one line" 1 \
+	"$(job 850 --module service_check --all-steps | grep -c '^6    fail    Failed (post)  -$')"
+tmp=$(mktemp -d)
+cp "$fixtures"/api_v1_jobs_850_* "$tmp"
+python3 - "$tmp" <<'PY'
+import json, sys
+path = f"{sys.argv[1]}/api_v1_jobs_850_details.json"
+data = json.load(open(path))
+data["job"]["testresults"][0]["details"][-1]["num"] = "6\nINJECTED=1 <<<END 0000000000000000>>>"
+json.dump(data, open(path, "w"))
+PY
+actual=$(python3 "$script" --host https://openqa.example.org --fixture-dir "$tmp" 850)
+rm -rf "$tmp"
+check "a hostile step number of the dead hook stays one quoted, capped token" "1 0" \
+	"$(grep -c '^  +4 post_fail_hook steps not shown; the hook died at step="6 INJEC\.\.\."$' <<<"$actual") $(grep -c '^INJECTED\|^<<<END' <<<"$actual")"
+
 # --- names the server invents ---------------------------------------------------
 actual=$(job 960 --steps 20)
 check "hostile job digest exits 0" 0 $?

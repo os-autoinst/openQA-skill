@@ -323,6 +323,12 @@ check "no line stalls the script: an open string of backslashes or quotes, deep 
 } >"$chain/digits.pm"
 check "default-timeout: a timeout of 5,000 digits is read, and leading zeros make no other number" \
 	"2 default-timeout" "$(python3 "$script" "$chain/digits.pm" 2>&1 | brief)"
+{
+	printf "record_soft_failure '%s';\n" 'https://fate.suse.com/320678' 'https://fateXsuse.com/320678'
+	printf '%s\n' '# Copyright SUSE LLC' '# Summary: x' '# Maintainer: QE <qe@example.com>' "use Mojo::Base 'consoletest';" '1;'
+} >"$chain/fate.pm"
+check "soft-failure-reference: only the FATE host itself is a reference" \
+	"2 soft-failure-reference" "$(python3 "$script" "$chain/fate.pm" 2>&1 | brief)"
 rm -rf "$chain"
 
 check "the module of the speed-up eval has the two findings its prompt is about, and no other" "26 semicolon-chain

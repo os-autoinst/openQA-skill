@@ -46,7 +46,8 @@ Rules for humans and agents changing this repository.
   (`tests/repo/check-skills.py`, one key per skill) only when another section already leads to it by name,
   as an index table does, or it is deliberate background, and say which in a note; a listed section counts
   as reached. The gate fails on an entry that has a pointer by now, names no `## ` section or names a file
-  read whole.
+  read whole. It fails on a `.md` file below the top level of `references/` or `agents/` too: references
+  and playbooks sit one level deep, where `scripts/refsection.py` and the gate look for them.
 - Playbooks (`agents/`, cap 5000 bytes) are read by sub-agents that have not seen `SKILL.md`: the "read before
   you start" list holds exactly the sections every run needs, everything conditional goes in the trigger table,
   and any playbook that meets third-party text names the policy sections to read.

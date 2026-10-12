@@ -416,6 +416,22 @@ finds "pointers: a playbook is named by its agents/ path only" pointers "$unname
 printf '%s\n' 'Playbook `agents/orphan.md`.' >>"$skill/$ref"
 check "pointers: a reference names a playbook" "ok - all repository checks pass" "$(gate pointers)"
 
+# References and playbooks sit one level deep: that is where refsection.py and the pointer check look.
+fresh
+mkdir "$skill/references/sub"
+printf '# Deep\n' >"$skill/references/sub/deep.md"
+finds "pointers: a reference below the top level of references/" pointers \
+	"references/sub/deep.md: references/ is one level deep"
+fresh
+mkdir -p "$skill/agents/sub/more"
+cp "$skill/agents/job-triage.md" "$skill/agents/sub/more/deep.md"
+finds "pointers: a playbook two levels below agents/" pointers "agents/sub/more/deep.md: agents/ is one level deep"
+fresh
+mkdir "$skill/references/sub" "$skill/scripts/sub"
+printf '# Deep\n' | tee "$skill/references/sub/deep.txt" >"$skill/scripts/sub/deep.md"
+check "pointers: another kind of file below references/ and a .md below scripts/ pass" \
+	"ok - all repository checks pass" "$(gate budget,pointers)"
+
 # A "## " section of a reference needs a chain of pointers that starts in SKILL.md, a playbook
 # or the reference read whole, or an entry in UNROUTED.
 last=$(wc -l <"$root/skills/openqa/$ref")

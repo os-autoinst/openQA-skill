@@ -19,6 +19,8 @@ from pathlib import Path
 # The gate imports the skill's own scripts and must leave no cache in the tree it checks.
 sys.dont_write_bytecode = True
 
+from _fences import fenced
+
 CHECKS = "frontmatter,budget,pointers,contents,public,attribution,credentials,evals"
 ROOT = Path(__file__).resolve().parents[2]
 SKILLS = ROOT / "skills"
@@ -414,12 +416,10 @@ def documents(skill):
 
 
 def unfenced_lines(path):
-    fenced = False
     # Split as refsection.py does, so that a line has one number everywhere.
-    for num, line in enumerate(read(path).split("\n"), 1):
-        if line.lstrip().startswith(("```", "~~~")):
-            fenced = not fenced
-        if not fenced:
+    lines = read(path).split("\n")
+    for num, (line, inside) in enumerate(zip(lines, fenced(lines)), 1):
+        if inside is False:
             yield num, line
 
 

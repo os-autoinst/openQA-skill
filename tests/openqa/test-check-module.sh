@@ -294,6 +294,28 @@ assert_script_run "bash -c 'for f in a b; do " . $rm . "; done'";
 EOF
 check "semicolon-chain: 'set -e' behind a word, a keyword behind the quote or backtick that closes a text and one behind a '{' without a blank hide no chain; a keyword behind the quote that opens a text, or that never closes on the line, still does" \
 	"lib/quotes.pm:1,2,3,4: semicolon-chain" "$(lint "$chain/lib/quotes.pm" | sed "s|$chain/||" | grep -o '^[^ ]* semicolon-chain')"
+cat >"$chain/lib/heredoc.pm" <<'EOF'
+assert_script_run 'rm -f /tmp/t/out; grep -q x <<< "$v"';
+assert_script_run 'rm -f /tmp/t/out; grep -q x < "$v"';
+assert_script_run 'rm -f /tmp/t/out; n=$((1<<4)); make';
+assert_script_run 'rm -f /tmp/t/out; n=$((1+4)); make';
+assert_script_run "cd /tmp/t; cat > f <<-EOF\n\ta;\n\tEOF";
+assert_script_run "cd /tmp/t; cat > f << 'EOF'\na;\nEOF";
+assert_script_run "cd /tmp/t; cat > f <<\"EOF\"\na;\nEOF";
+assert_script_run "cd /tmp/t; cat > f <<$tag\na;\n$tag";
+EOF
+check "semicolon-chain: a here-string and a shift are no here-document and hide no chain, each next to the same command without '<<'; '<<-', a blank, a quoted tag and a tag from a variable still open one" \
+	"lib/heredoc.pm:1,2,3,4: semicolon-chain" "$(lint "$chain/lib/heredoc.pm" | sed "s|$chain/||" | grep -o '^[^ ]* semicolon-chain')"
+cat >"$chain/lib/herestring.pm" <<'EOF'
+script_run 'tr a b <<<EOT';
+sleep 5;
+my $t = <<EOT;
+sleep 6
+EOT
+1;
+EOF
+check "a here-string in a command blanks no line of the module: the sleep behind '<<<EOT' is found, the one in the here-document is not" \
+	"2 sleep" "$(lint "$chain/lib/herestring.pm" | brief)"
 # --- lines built to stall a rule or the reading of the file --------------------------------
 python3 - "$chain" <<'PY'
 import sys
@@ -324,14 +346,15 @@ lines = [
     "assert_script_run 'echo" + blank + "> /tmp/t; export" + blank + "; ls';",
     "assert_script_run 'make;" + blank + "time" + blank + "-p" + blank + "!" + blank + "ls';",
     "assert_script_run '" + 'make "a" for b; ' * 20000 + "ls';",
+    "assert_script_run 'make; cat <<" + blank + "; ls';",
 ]
 lines += ["<<EOT"] * 20000
 lines += ["# Copyright SUSE LLC", "# Summary: x", "# Maintainer: QE <qe@example.com>", "use Mojo::Base 'consoletest';", "1;"]
 open(f"{sys.argv[1]}/slow.pm", "w").write("\n".join(lines) + "\n")
 PY
 # The file takes a tenth of the limit; put back, each pattern or loop that was replaced takes twice the limit.
-check "no line stalls the script: an open string of backslashes or quotes, deep nesting, a run of spaces behind each call, a call or its argument repeated, a chain of 40,000 commands, a run of spaces behind a ';', 'time', '-p' and '!', 20,000 keywords behind a closing quote, here-documents that never end" \
-	"2,23,24,25 semicolon-chain
+check "no line stalls the script: an open string of backslashes or quotes, deep nesting, a run of spaces behind each call, a call or its argument repeated, a chain of 40,000 commands, a run of spaces behind a ';', 'time', '-p', '!' and '<<', 20,000 keywords behind a closing quote, here-documents that never end" \
+	"2,23,24,25,26 semicolon-chain
 5 spdx-colon
 6,7 script-run-background
 8 zypper-call-noninteractive

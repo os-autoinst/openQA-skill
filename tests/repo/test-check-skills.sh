@@ -632,6 +632,15 @@ check "budget: such a byte is measured as refsection.py --list prints it" 1 \
 fresh
 printf 'na\303\257ve\n' >>"$skill/$ref"
 check "pointers: a character of two bytes is valid UTF-8" "ok - all repository checks pass" "$(gate budget,pointers)"
+# A document that cannot be read is one finding too, and an empty file to every other check.
+fresh
+ln -s nowhere.md "$skill/references/dangling.md"
+mkdir "$skill/agents/dir.md"
+out=$(gate frontmatter,budget,pointers,contents,public,attribution,credentials)
+check "pointers: a link to nowhere and a directory named as a document cannot be read" "1 1 1" \
+	"$? $(grep -c -x -F 'pointers: skills/openqa/references/dangling.md: cannot be read: No such file or directory' <<<"$out") $(grep -c -x -F 'pointers: skills/openqa/agents/dir.md: cannot be read: Is a directory' <<<"$out")"
+out=$(gate frontmatter,budget,contents,public,attribution,credentials)
+check "pointers: and they stop no other check" "0 ok - all repository checks pass" "$? $out"
 
 # A "## " section of a reference needs a chain of pointers that starts in SKILL.md, a playbook
 # or the reference read whole, or an entry in UNROUTED.

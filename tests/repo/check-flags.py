@@ -245,6 +245,11 @@ def code_lines(text):
         yield num, line, [line.strip()] if whole else SPAN.findall(line)
 
 
+def read(path):
+    """The text; a byte that is not UTF-8 stays what it is, so that --write hands it back."""
+    return path.read_text(encoding="utf-8", errors="surrogateescape")
+
+
 def check_skill(skill, write, problems):
     def rel(path):
         return path.relative_to(ROOT).as_posix()
@@ -274,8 +279,8 @@ def check_skill(skill, write, problems):
     # index
     skill_md = skill / "SKILL.md"
     readme = skill / "scripts" / "README.md"
-    text = skill_md.read_text(encoding="utf-8")
-    notes = readme.read_text(encoding="utf-8") if readme.exists() else ""
+    text = read(skill_md)
+    notes = read(readme) if readme.is_file() else ""
     common = common_actions(skill)
     if any(not n.startswith("_") for n in scripts):
         copy = copy_line(text)
@@ -291,7 +296,7 @@ def check_skill(skill, write, problems):
             if notes[span[0] : span[1]] != wanted:
                 if write:
                     notes = notes[: span[0]] + wanted + notes[span[1] :]
-                    readme.write_text(notes, encoding="utf-8")
+                    readme.write_text(notes, encoding="utf-8", errors="surrogateescape")
                 else:
                     problems.append(
                         f'index: {rel(readme)}: "{HEADING}" does not match the parsers; '
@@ -323,8 +328,11 @@ def check_skill(skill, write, problems):
     docs += sorted((skill / "agents").glob("*.md"))
     docs += sorted((skill / "references").glob("*.md"))
     checked = 0
-    for doc in (d for d in docs if d.exists()):
-        text = doc.read_text(encoding="utf-8")
+    for doc in (d for d in docs if d.is_file()):
+        text = read(doc)
+        if bad := re.search("[\udc80-\udcff]", text):
+            line = text.count("\n", 0, bad.start()) + 1
+            problems.append(f"citations: {rel(doc)}:{line}: not valid UTF-8")
         for name in set(re.findall(r"scripts/([A-Za-z_-]+\.py)", text)) - set(scripts):
             problems.append(f"citations: {rel(doc)}: mentions missing script {name}")
         for num, line, pieces in code_lines(text):

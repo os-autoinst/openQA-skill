@@ -121,7 +121,8 @@ Prose-only, policed by reviewers: no `sleep`, no `is_tumbleweed()` (exclude olde
 
 **Enforced** by `.gitlint` on every commit of the PR (`gitlint --commits origin/<base>..HEAD`):
 
-- Subject <= 72 chars (`Revert...` exempt).
+- Subject <= 72 chars.
+- **Exempt from every rule** (`ignore=all`): a subject starting with `Revert`, `git subrepo pull`, `chore(deps): bump` or `build(deps): bump` (also `deps-dev`).
 - Subject matches `^([A-Z]|\S+:|git subrepo (clone|pull)).*(?<!\.)$`: capital letter **or** `tag:` first. `fix: thing` passes, `fix thing` fails.
 - gitlint defaults stay on: subject must not end in any of `?:!.,;` nor contain `WIP`; second line blank; body lines <= 80 except a line that is only a URL; no tabs or trailing whitespace. Body optional.
 

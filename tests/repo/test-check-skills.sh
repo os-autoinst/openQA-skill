@@ -520,4 +520,94 @@ EOF
 out=$(gate budget)
 check "budget: each skill is measured by its own scripts" "0 ok - all repository checks pass" "$? $out"
 
+# No CI job runs the evals, so the gate reads evals.json, which is edited by hand.
+# evals: a clean copy with the evals, which fresh leaves out
+evals() {
+	fresh
+	cp -r "$root/evals" "$work/repo/"
+	json=$work/repo/evals/openqa/evals.json
+}
+# edit STATEMENT...: run each Python STATEMENT on data, the parsed evals.json of the copy
+edit() {
+	python3 - "$json" "$@" <<'EOF'
+import json
+import sys
+
+with open(sys.argv[1], encoding="utf-8") as handle:
+    data = json.load(handle)
+for statement in sys.argv[2:]:
+    exec(statement)
+with open(sys.argv[1], "w", encoding="utf-8") as handle:
+    json.dump(data, handle)
+EOF
+}
+evals
+out=$(gate evals)
+check "evals: the clean tree passes, with evals that list no files" "0 ok - all repository checks pass" "$? $out"
+fresh
+check "evals: a skill without evals passes" "ok - all repository checks pass" "$(gate evals)"
+evals
+printf '{"skill_name": "openqa", "evals": [\n' >"$json"
+finds "evals: an evals.json that does not parse" evals "evals/openqa/evals.json: not valid JSON: "
+evals
+printf '{"skill_name": "openqa", "notes": "caf\351", "evals": []}\n' >"$json"
+finds "evals: an evals.json that is not UTF-8" evals "evals/openqa/evals.json: not valid JSON: "
+shape="evals/openqa/evals.json: must be an object with a non-empty list 'evals'"
+evals
+edit 'data = data["evals"]'
+finds "evals: an evals.json that is a list" evals "$shape"
+evals
+edit 'data["evals"] = []'
+finds "evals: an evals.json without evals" evals "$shape"
+evals
+edit 'data["skill_name"] = "open-qa"'
+finds "evals: a skill_name that is not the directory name" evals "skill_name 'open-qa' differs from directory 'openqa'"
+evals
+cp -r "$work/repo/evals/openqa" "$work/repo/evals/zz"
+finds "evals: evals of a skill that does not exist" evals "evals/zz/evals.json: skill 'zz' does not exist"
+evals
+edit 'data["evals"][0]["id"] = data["evals"][1]["id"] = 99'
+finds "evals: an id that two evals share" evals "evals[1]: id 99 repeats evals[0]"
+evals
+edit 'data["evals"][0]["name"] = data["evals"][1]["name"] = "twice"'
+finds "evals: a name that two evals share" evals "evals[1]: name 'twice' repeats evals[0]"
+evals
+edit 'data["evals"][0]["id"] = "99"' 'data["evals"][1]["id"] = True'
+check "evals: an id that is a string or true" 2 "$(gate evals | grep -c "evals\[[01]\]: 'id' must be an integer")"
+evals
+edit 'del data["evals"][0]["prompt"]'
+finds "evals: an eval without a prompt" evals "evals[0]: 'prompt' must be a non-empty string"
+evals
+edit 'data["evals"][0]["expected_output"] = " "'
+finds "evals: an expected output of blanks" evals "evals[0]: 'expected_output' must be a non-empty string"
+evals
+edit 'data["evals"][0]["assertions"] = []'
+finds "evals: an eval without assertions" evals "evals[0]: 'assertions' must be a non-empty list of strings"
+evals
+edit 'data["evals"][0]["assertions"].append(1)'
+finds "evals: an assertion that is not a string" evals "evals[0]: 'assertions' must be a non-empty list of strings"
+evals
+edit 'data["evals"][0]["files"] = "files/hostile-job/"'
+finds "evals: files that are not a list" evals "evals[0]: 'files' must be a list of paths"
+evals
+edit 'data["evals"].insert(0, "prompt")'
+finds "evals: an eval that is not an object" evals "evals[0]: must be an object"
+evals
+edit 'data["evals"][0]["files"] = ["files/nosuch/"]'
+finds "evals: a files entry that does not exist" evals "evals[0]: 'files' entry 'files/nosuch/' does not exist"
+unused="evals/openqa/files/unused: no eval lists this directory"
+evals
+mkdir "$work/repo/evals/openqa/files/unused"
+finds "evals: a fixture directory no eval lists" evals "$unused"
+touch "$work/repo/evals/openqa/files/unused/log.txt"
+edit 'data["evals"][0]["files"] = ["files/unused/log.txt"]'
+check "evals: one file of a fixture directory lists the directory" "ok - all repository checks pass" "$(gate evals)"
+evals
+mkdir "$work/repo/evals/openqa/files/unused"
+edit 'data["evals"][0]["files"] = ["files/"]'
+check "evals: files/ as a whole lists every fixture directory" "ok - all repository checks pass" "$(gate evals)"
+evals
+touch "$work/repo/evals/openqa/files/unused"
+check "evals: a file directly in files/ needs no eval" "ok - all repository checks pass" "$(gate evals)"
+
 exit $fail

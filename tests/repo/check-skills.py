@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: GPL-2.0-or-later
 # Repository gate: frontmatter, byte budgets, pointer resolution, public-content and attribution checks.
-"""Usage: check-skills.py [--only frontmatter,budget,pointers,public,attribution,credentials]
+"""Usage: check-skills.py [--only frontmatter,budget,pointers,public,attribution,credentials,evals]
 
 Exit 0 when every check passes, 1 otherwise. One line per finding: "<check>: <file>[:<line>]: <message>".
 """
 
 import argparse
 import importlib.util
+import json
 import re
 import sys
 from pathlib import Path
@@ -621,12 +622,84 @@ def check_credentials(out):
                     out.append(f"credentials: {rel}:{num}: {what}: '{m.group(0)[:60]}'")
 
 
+def _text(value):
+    return isinstance(value, str) and bool(value.strip())
+
+
+def _texts(value):
+    return isinstance(value, list) and all(map(_text, value))
+
+
+# What every eval holds today. No CI job runs the evals: a hand edit that breaks one shows here.
+EVAL_KEYS = {
+    "id": ("an integer", lambda value: type(value) is int),
+    "name": ("a non-empty string", _text),
+    "prompt": ("a non-empty string", _text),
+    "expected_output": ("a non-empty string", _text),
+    "files": ("a list of paths", _texts),
+    "assertions": (
+        "a non-empty list of strings",
+        lambda value: bool(value) and _texts(value),
+    ),
+}
+
+
+def check_evals(skills, out):
+    for path in sorted((ROOT / "evals").glob("*/evals.json")):
+        base, rel = path.parent, path.relative_to(ROOT).as_posix()
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except ValueError as error:  # bytes that are not UTF-8 raise one too
+            out.append(f"evals: {rel}: not valid JSON: {error}")
+            continue
+        cases = data.get("evals") if isinstance(data, dict) else None
+        if not isinstance(cases, list) or not cases:
+            out.append(f"evals: {rel}: must be an object with a non-empty list 'evals'")
+            continue
+        if data.get("skill_name") != base.name:
+            out.append(
+                f"evals: {rel}: skill_name {data.get('skill_name')!r} differs from "
+                f"directory '{base.name}'"
+            )
+        if base.name not in skills:
+            out.append(f"evals: {rel}: skill '{base.name}' does not exist")
+        seen, used = {}, []
+        for index, case in enumerate(cases):
+            at = f"evals: {rel}: evals[{index}]"
+            if not isinstance(case, dict):
+                out.append(f"{at}: must be an object")
+                continue
+            for key, (what, valid) in EVAL_KEYS.items():
+                value = case.get(key)
+                if not valid(value):
+                    out.append(f"{at}: '{key}' must be {what}")
+                elif key in ("id", "name"):
+                    first = seen.setdefault((key, value), index)
+                    if first != index:
+                        out.append(f"{at}: {key} {value!r} repeats evals[{first}]")
+                elif key == "files":
+                    for entry in value:
+                        used.append(base / entry)
+                        if not used[-1].exists():
+                            out.append(f"{at}: 'files' entry '{entry}' does not exist")
+        # A fixture is listed by its directory, by a file in it or by a directory above it.
+        fixtures = base / "files"
+        for fixture in sorted(fixtures.iterdir()) if fixtures.is_dir() else ():
+            if fixture.is_dir() and not any(
+                p.is_relative_to(fixture) or fixture.is_relative_to(p) for p in used
+            ):
+                out.append(
+                    f"evals: {fixture.relative_to(ROOT).as_posix()}: no eval lists this directory"
+                )
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
     )
     parser.add_argument(
-        "--only", default="frontmatter,budget,pointers,public,attribution,credentials"
+        "--only",
+        default="frontmatter,budget,pointers,public,attribution,credentials,evals",
     )
     only = set(parser.parse_args(argv).only.split(","))
     out = []
@@ -661,6 +734,8 @@ def main(argv=None):
         )
     if "credentials" in only:
         check_credentials(out)
+    if "evals" in only:
+        check_evals({skill.name for skill in skills}, out)
     print("\n".join(out) if out else "ok - all repository checks pass")
     return 1 if out else 0
 

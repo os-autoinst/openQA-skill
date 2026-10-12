@@ -32,6 +32,32 @@ EOT
     my $sleeper = $testapi::distri->sleep_helper;
     enter_cmd "exit" unless check_screen('desktop', 0);
     assert_and_click 'button', timeout => 60;
+    assert_script_run 'for f in a b; do test -e /tmp/$f; done';
+    assert_script_run 'while pgrep -f fixture; do pkill -f fixture; done';
+    assert_script_run 'until test -e /tmp/ready; do touch /tmp/ready; done';
+    assert_script_run 'if [ -d /tmp/fixture ]; then ls /tmp/fixture; fi';
+    assert_script_run 'case $(uname -m) in x86_64) true;; *) false;; esac';
+    assert_script_run "find /tmp/fixture -name '*.tmp' -exec md5sum {} \\; > /tmp/fixture.sums";
+    assert_script_run "sed -i 's/a/b/; s/c/d/' /tmp/fixture/conf";
+    assert_script_run 'bash -c "cd /tmp/fixture; ls"';
+    assert_script_run "echo \"include $script;\" >> /tmp/fixture/conf";
+    assert_script_run 'echo `cd /tmp; pwd`';
+    assert_script_run '(cd /tmp; ls) | grep -q fixture';
+    assert_script_run '{ echo secret; echo secret; } | smbpasswd -a -s fixture';
+    assert_script_run 'set -e; cd /tmp; ls';
+    assert_script_run 'set -xo errexit; cd /tmp; ls';
+    assert_script_run 'set -o pipefail; ls /tmp/fixture | tee /tmp/fixture.log';
+    assert_script_run "cat > /tmp/fixture/dhcpd.conf <<EOF\ndefault-lease-time 600;\nmax-lease-time 7200;\nEOF";
+    assert_script_run 'grep -q zfs /proc/filesystems; test "$?" == "1"';
+    assert_script_run 'ls /tmp/absent; test $? -eq 2 && touch /tmp/fixture/ok';
+    assert_script_run 'ls /tmp/fixture | cat -v; ( exit ${PIPESTATUS[0]} )';
+    assert_script_run 'touch /etc/fixture; test ! -f /etc/fixture';
+    assert_script_run 'touch /etc/fixture; [ ! -f /etc/fixture ]';
+    assert_script_run 'touch /etc/fixture; [[ ! -f /etc/fixture ]]';
+    assert_script_run 'umount /mnt/fixture; true';
+    assert_script_run 'rm /tmp/fixture/lock || true; ls /tmp/fixture';
+    assert_script_run 'ls /tmp/fixture;';
+    assert_script_run 'ls /tmp/fixture ; ';
 }
 
 1;
@@ -40,5 +66,6 @@ EOT
 
 sleep 5;
 use base 'x';
+assert_script_run 'cd /tmp; ls';
 
 =cut

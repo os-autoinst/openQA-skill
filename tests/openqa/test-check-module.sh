@@ -50,15 +50,21 @@ check "bad.pm: one finding per rule, ordered by line" "1 header-maintainer
 31 zypper-call-noninteractive
 32 type-string-newline
 33 default-timeout
-34 trailing-true" "$(brief <<<"$actual")"
+34 semicolon-chain
+35 trailing-true" "$(brief <<<"$actual")"
 
-check "findings: the last line is the summary" "summary: 1 file(s), 22 finding(s)" "$(tail -n 1 <<<"$actual")"
+check "findings: the last line is the summary" "summary: 1 file(s), 23 finding(s)" "$(tail -n 1 <<<"$actual")"
 check "raw-zypper names both install_package modes" 1 \
 	"$(grep -c " raw-zypper .*trup_apply => 1 | trup_reboot => 1" <<<"$actual")"
 
 check "finding format is <file>:<line>: <id> <message> -> <fix>" \
 	"tests/console/bad.pm:19: egrep-fgrep deprecated egrep/fgrep -> grep -E / grep -F" \
 	"$(grep ' egrep-fgrep ' <<<"$actual")"
+
+# The pointer gate does not read scripts, so the section a fix sends the reader to is resolved here.
+pointer=$(grep ' semicolon-chain ' <<<"$actual" | grep -o 'references/[a-z-]*\.md "[^"]*"')
+python3 "$here/../../skills/openqa/scripts/refsection.py" "${pointer%% *}" "$(cut -d'"' -f2 <<<"$pointer")" >/dev/null 2>&1
+check "the fix names a section that exists" 0 $?
 
 check "bad_header.pm: rules that exclude the ones in bad.pm" "1 header-copyright
 1 header-summary
@@ -70,7 +76,7 @@ check "every listed rule fires exactly once over the two bad fixtures" \
 
 actual=$(lint tests/console/clean.pm tests/console/clean.py)
 check "clean fixtures exit 0" 0 $?
-check "clean fixtures print the summary only (heredoc, POD, comment, string, timeout 0, '| grep'-free pipe)" \
+check "clean fixtures print the summary only (heredoc, POD, comment, string, timeout 0, '| grep'-free pipe; ';' in a loop, find -exec, quotes, a group or a here-document, after set -e, before a final test or with \$?)" \
 	"summary: 2 file(s), 0 finding(s)" "$actual"
 
 check "python: header, time.sleep and check_var with double quotes" "1 header-copyright
@@ -135,6 +141,42 @@ check "same rule twice in a file: one line; second file: id without the explanat
 b.pm:7,8: sleep
 summary: 2 file(s), 4 finding(s)" "$actual"
 rm -rf "$compact"
+
+# --- semicolon-chain: look-alikes of the silent forms, and lines built to stall it ---------
+chain=$(mktemp -d)
+mkdir "$chain/lib"
+cat >"$chain/lib/a.pm" <<'EOF'
+assert_script_run("make ; make install", timeout => 600);
+assert_script_run "umount /mnt;dd if=/dev/zero of=/tmp/t bs=512 count=1";
+assert_script_run "yast keyboard set layout=german; echo";
+assert_script_run 'cd /tmp/t; [ a -ef b ]; cd -';
+assert_script_run "cd ~; test -f T.java || wget $url";
+assert_script_run 'rm lock || true; cd /tmp/t; ls';
+assert_script_run 'mkdir /tmp/t; cd /tmp/t;';
+assert_script_run '{ make; make install; }; ls /tmp/t';
+assert_script_run 'cd /tmp/t; "./my script"';
+assert_script_run 'dmesg | grep -i error; ls /tmp/t';
+assert_script_run 'set -x; set +e; make';
+assert_script_run 'echo \) > /tmp/t/f; cat /tmp/t/f';
+assert_script_run 'umount /mnt; true && ls /mnt';
+EOF
+echo "assert_script_run('mkdir /tmp/t; cd /tmp/t')" >"$chain/b.py"
+check "semicolon-chain, also under lib/ and in Python: 'dd if=', 'set layout', a test that is not last, one '||', a ';' at the end as well, a group or a quoted word as a command, one '|', set -x or +e, a stray ')' and 'true &&' hide no chain" \
+	"lib/a.pm:1,2,3,4,5,6,7,8,9,10,11,12,+1: semicolon-chain
+b.py:1: semicolon-chain" "$(lint "$chain/lib/a.pm" "$chain/b.py" | sed "s|$chain/||" | grep -o '^[^ ]* semicolon-chain')"
+python3 - "$chain" <<'PY'
+import sys
+lines = [
+    'assert_script_run "' + "\\" * 5000,
+    'assert_script_run "' + "(" * 50000 + "a; b" + ")" * 50000 + '; c";',
+    "assert_script_run" + " " * 60000,
+]
+open(f"{sys.argv[1]}/slow.pm", "w").write("\n".join(lines) + "\n")
+PY
+# Three older rules are quadratic in a run of spaces: they are off, so that the limit measures this rule.
+check "semicolon-chain: an open string of backslashes, deep nesting and a run of spaces cost no extra time" "2 semicolon-chain" \
+	"$(timeout 20 python3 "$script" --disable spdx-colon,script-run-background,raw-zypper "$chain/slow.pm" 2>/dev/null | brief | grep chain)"
+rm -rf "$chain"
 
 lint --help >/dev/null
 check "--help exits 0" 0 $?

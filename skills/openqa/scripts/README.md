@@ -359,6 +359,14 @@ One line per file and rule; `message -> fix` only on the first finding of a rule
     tests/console/zypper_in.pm:12: sleep
     summary: 2 file(s), 4 finding(s)
 
+`semicolon-chain` reports an `assert_script_run` at the start of a line whose quoted command joins commands
+with `;`, because only the last exit code is checked. It stays silent where the `;` drops no exit code or
+the command decides the status itself: as `\;`, at the end; with `$?` or `PIPESTATUS` anywhere in the
+command; before a last command that is `test`, `[`, `[[` or `true`; and when every command before the last
+has its own `||`. Not inspected, so a chain there passes and none of these is a fix: text inside quotes,
+backticks, `( )` or `{ }`; a command that contains `for`, `while`, `until`, `if`, `case`, a here-document,
+`set -e` or `set -o pipefail`. `set -e` typed into the SUT's shell ends that shell at the first failure.
+
 ## check-schedule.py - lint YAML schedules, find who schedules a module (offline)
 
     check-schedule.py --repo CHECKOUT [FILE...] [--strict] [--errors-only] [--max-findings N]

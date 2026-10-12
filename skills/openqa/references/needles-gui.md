@@ -51,7 +51,7 @@ Repository `os-autoinst/os-autoinst-needles-opensuse`, needles in the repo root 
 1. Add the asserts with the new tags and start a run that will fail on them -> references/clone-and-run.md "Helper script clone"; `_SKIP_POST_FAIL_HOOKS=1` skips the log collection.
 2. **Developer mode** ("Live View" tab, registered users only): set "Pause on screen mismatch" to "assert_screen timeout", wait for the pause ("Skip timeout" shortens it), save the needle in the editor, resume. Resuming reloads needles and retries the same assert, so one run collects many needles. Without a live job the editor opens from any screenshot in the "Details" tab.
 3. Saving writes into the instance's needles directory (pushed only with `git_auto_commit` and `do_push` in `[scm git]`); on a personal instance copy the pair out of there. Saving on a shared instance is a write -> SKILL.md "Write gate".
-4. Put the pairs on a fork branch of the needles repo and lint them -> references/needles-gui.md "Needle naming and CI".
+4. Put the pairs (fields -> "Needle JSON") on a fork branch of the needles repo and lint them -> references/needles-gui.md "Needle naming and CI".
 5. **Prove them:** a custom `CASEDIR` does not bring needles along and the clone helper never sets `NEEDLES_DIR`; append `NEEDLES_DIR='https://github.com/<user>/os-autoinst-needles-opensuse.git#<branch>'` -> references/clone-and-run.md "Manual clone".
 6. Open the needles PR and **cross-link** it on the `- Needles:` line of the test PR -> references/pr-review-rules.md "Needles and drafts".
 

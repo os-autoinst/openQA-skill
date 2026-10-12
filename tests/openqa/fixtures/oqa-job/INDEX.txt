@@ -71,3 +71,7 @@ api_v1_jobs_850_details.json
     GET /api/v1/jobs/850/details (post_fail_hook that died: steps "Post-fail" and "Failed\n(post)")
 api_v1_jobs_850_comments.json
     GET /api/v1/jobs/850/comments
+api_v1_jobs_860_details.json
+    GET /api/v1/jobs/860/details (modules failed without dying, so no "Failed" step: the hook starts at "Post-fail" and died)
+api_v1_jobs_860_comments.json
+    GET /api/v1/jobs/860/comments

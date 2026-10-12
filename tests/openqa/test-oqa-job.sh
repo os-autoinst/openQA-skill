@@ -340,6 +340,31 @@ rm -rf "$tmp"
 check "a hostile step number of the dead hook stays one quoted, capped token" "1 0" \
 	"$(grep -c '^  +4 post_fail_hook steps not shown; the hook died at step="6 INJEC\.\.\."$' <<<"$actual") $(grep -c '^INJECTED\|^<<<END' <<<"$actual")"
 
+# --- a module that failed without dying: the hook starts at "Post-fail" -------------
+actual=$(job 860)
+check "no \"Failed\" step: the hook is counted from \"Post-fail\" on, its death named" \
+	"  +4 post_fail_hook steps not shown; the hook died at step=6" \
+	"$(sed -n '/^module=service_check /,/^module=suite_results /p' <<<"$actual" | grep 'post_fail_hook')"
+check "no \"Failed\" step: hook steps are no failing steps of the test" "2 0" \
+	"$(grep -c '^  step=[12] kind=step-failed title="check [ab]" ' <<<"$actual") $(grep -c 'failing steps not shown\|title="Failed (post)"\|Post fail hook died\|INJECTED\|^<<<' <<<"$actual")"
+check "no failing step before the hook: the module says so and still names the dead hook" \
+	"  +2 post_fail_hook steps not shown; the hook died at step=3|  no failing step recorded: read the ulogs suite_results-* and serial0.txt" \
+	"$(sed -n '/^module=suite_results /,/^logs=/p' <<<"$actual" | grep '^  ' | paste -sd'|')"
+tmp=$(mktemp -d)
+cp "$fixtures"/api_v1_jobs_860_* "$tmp"
+python3 - "$tmp" <<'PY'
+import json, sys
+path = f"{sys.argv[1]}/api_v1_jobs_860_details.json"
+data = json.load(open(path))
+del data["job"]["testresults"][0]["details"][-1]
+json.dump(data, open(path, "w"))
+PY
+actual=$(python3 "$script" --host https://openqa.example.org --fixture-dir "$tmp" 860)
+rm -rf "$tmp"
+check "no \"Failed\" step, hook alive: the count line has no suffix, a failed hook step is not counted" \
+	"  +3 post_fail_hook steps not shown" \
+	"$(sed -n '/^module=service_check /,/^module=suite_results /p' <<<"$actual" | grep 'not shown')"
+
 # --- investigation comments that name their mode ----------------------------------
 tmp=$(mktemp -d)
 cp "$fixtures"/api_v1_jobs_850_* "$tmp"

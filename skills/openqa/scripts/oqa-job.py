@@ -24,8 +24,10 @@ How to read it:
   - parallel_failed and skipped jobs are victims. The culprit hint names the
     failed/incomplete/timeout_exceeded job of the cluster that finished first.
   - Steps after the "Failed" text step of a module belong to post_fail_hook
-    and are counted, not shown. "the hook died at step=N" on that line: the
-    hook itself died there, so logs it would have uploaded may be missing.
+    and are counted, not shown; in a module that failed without dying the
+    hook starts at its "Post-fail" step. "the hook died at step=N" on that
+    line: the hook itself died there, so logs it would have uploaded may be
+    missing.
   - Needle candidates are rated by their WORST area: best=<needle>:<pct>% is
     the lowest area "similarity" of that needle as openQA reports it (a needle
     matches only when every area reaches its threshold, 96 % unless the area
@@ -133,7 +135,9 @@ BOT_TEMPLATES = (
 )
 AUTOMATED_MARKS = ("This comment has been AI generated",)
 HOOK_NOTE = "(The hook script will not be executed.)"
-# Title of the step os-autoinst records when post_fail_hook dies (basetest.pm run_post_fail).
+# Titles of the steps os-autoinst records when post_fail_hook starts and when it dies
+# (basetest.pm run_post_fail).
+HOOK_START = "Post-fail"
 HOOK_DIED = "Failed\n(post)"
 
 SHOT_NAME = re.compile(r"[\w#+-][\w.#+-]{0,120}", re.ASCII)
@@ -553,7 +557,15 @@ def print_modules(client, job, max_steps, verbose):
         died = next(
             (i for i, step in enumerate(steps) if step.get("title") == "Failed"), None
         )
-        body = steps if died is None else steps[: died + 1]
+        if died is not None:
+            start = died + 1
+        else:
+            # A module that failed without dying has no die step to end its own steps.
+            start = next(
+                (i for i, step in enumerate(steps) if step.get("title") == HOOK_START),
+                len(steps),
+            )
+        body, hook = steps[:start], steps[start:]
         bad = [step for step in body if step.get("result") in BAD_STEPS[:2]] or [
             step for step in body if step.get("result") in BAD_STEPS
         ]
@@ -565,8 +577,7 @@ def print_modules(client, job, max_steps, verbose):
             print_step(client, job["id"], name, step, source, verbose)
         if len(bad) > len(shown):
             print(f"  +{len(bad) - len(shown)} failing steps not shown (--steps N)")
-        if died is not None and len(steps) > died + 1:
-            hook = steps[died + 1 :]
+        if hook:
             line = f"  +{len(hook)} post_fail_hook steps not shown"
             dead = next((s for s in hook if s.get("title") == HOOK_DIED), None)
             if dead:

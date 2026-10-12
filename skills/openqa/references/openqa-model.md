@@ -172,7 +172,8 @@ Reads need nothing. Writes need the user's API key and secret (web UI `/api_keys
 | Role | Writes (routes under `/api/v1`) |
 |---|---|
 | user | comment `POST jobs/<id>/comments text=` (also `groups/<g>/`, `parent_groups/<p>/`); many jobs `POST comments text= job_id= job_id=`; edit own `PUT .../comments/<cid>`; delete own `DELETE .../comments/<cid>` |
-| operator | `label:force_result` in a comment; `POST jobs/<id>/restart`, `jobs/<id>/cancel`, bulk `POST jobs/restart jobs=`; create/clone `POST jobs`; schedule `POST isos` |
+| operator | `label:force_result` in a comment; `POST jobs/<id>/restart`, `jobs/<id>/cancel`, bulk `POST jobs/restart jobs=`; create/clone `POST jobs`; schedule `POST isos`; reserve a worker `POST workers/<id>/reservation comment= duration=` (`DELETE` releases; whole host: `worker_hosts/<host>/reservation`) |
 | admin | delete anyone's comment `DELETE .../comments/<cid>`, bulk `DELETE comments`; job groups |
 
 - Every write needs approval first -> SKILL.md "Write gate". Choosing -> references/review-workflow.md "Retrigger or comment".
+- **A reserved worker gets no new job**; reserved with `worker_class=<c>`, only jobs that ask for `<c>`. `GET workers?reserved=1` lists them, an idle one with `status` `reserved`. CLI: `openqa-cli reservation`.

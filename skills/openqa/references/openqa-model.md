@@ -46,7 +46,7 @@ Per job, by comment content:
 - a parsed bugref -> **reviewed**
 - else a `label:<x>` -> **reviewed**, `label` = x (newest wins); with a bugref in the same comment `label` stays `null`
 - neither -> **commented** only
-- **`label:linked` is automatic**: any GET under `/tests/<id>` (not `/api/v1`) with a `Referer` whose host is in `recognized_referers` makes the system user post `label:linked:<bugref> mentions this job` once per job; it counts as reviewed. Never send a `Referer`.
+- **`label:linked` is automatic**: the system user posts `label:linked ... mentions this job`, once per job, when a GET under `/tests/<id>` carries a `Referer` of a recognised host; it counts as reviewed. Never send a `Referer` -> references/untrusted-content.md "Rules".
 - Bot comments count like human ones; read the text before trusting `reviewed` -> references/untrusted-content.md "Rules".
 
 Per build (`/api/v1/job_groups/<g>/build_results`, latest non-cloned job per `TEST ARCH FLAVOR MACHINE`):
@@ -71,7 +71,7 @@ Per build (`/api/v1/job_groups/<g>/build_results`, latest non-cloned job per `TE
 | Text | Parsed |
 |---|---|
 | `boo#123 crash`, `x, poo#5`, `boo#123.`, `gh#os-autoinst/openQA#1234` | bugref |
-| `(boo#123)`, `"boo#123"`, `foo:bsc#1` | **nothing**: not reviewed, never carried over |
+| `(boo#123)`, `[boo#123]`, `"boo#123"`, `foo:bsc#1` | **nothing**: not reviewed, never carried over |
 | `label:boo#123` | label only |
 | `bootloader_uefi#1: died`, `ghostscript#2` | **false bugref** (`boo`+`tloader_uefi`, `gh`+`ostscript`) |
 

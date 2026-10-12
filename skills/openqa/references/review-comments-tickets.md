@@ -20,7 +20,7 @@ generic-753: bsc#1244684
 
 - **All refs in one comment:** carry-over copies only the newest comment that holds a bugref or `flag:carryover`.
 - **Same text on every sibling job** failing the same way.
-- **Comment the root-cause job only**; a `parallel_failed` victim gets nothing.
+- **Comment the root-cause job only**, never its victims -> references/review-workflow.md "Clusters in review".
 - **Look before adding:** the ref may already be there, typed or carried -> references/review-workflow.md "Existing references".
 - **Lint every draft:** `scripts/oqa-comment-lint.py <file>` (`-`: stdin) or `--text '<draft>'`; show the predicted bugrefs, labels and flags with it.
 
@@ -55,17 +55,17 @@ bsc#1234567
 
 ## Do and do not
 
-Full position rule and parse table -> references/openqa-model.md "Bugrefs".
+Parser rules behind each row -> references/openqa-model.md "Reviewed definition", "Bugrefs", "Labels and flags", "Carry-over".
 
-| Do / do not | Parser behaviour behind it |
+| Do / do not | Why |
 |---|---|
-| Put the ref at text start or after whitespace or a comma | anywhere else (`see (boo#123)`, `yast2_lan:poo#123`, `[boo#123]`, quotes, backticks) it yields no bugref: job unreviewed, nothing carries over. Trailing `.` `,` `:` `)` are harmless, a trailing `"` is not |
+| Put the ref at text start or after whitespace or a comma | anywhere else (parentheses, brackets, quotes, backticks, `module:ref` without a space) it yields no bugref: job unreviewed, nothing carries over |
 | Separate refs with a space or comma, never `/` | `boo#123/poo#5` parses as one bogus ref (`repo` swallows the rest) |
-| No label alone, no plain text alone | a label marks the job reviewed but is never carried over (`label:boo#123` is a label, not a bugref); plain text only increments `comments`: commented, not reviewed |
+| No label alone, no plain text alone | a label is never carried over; plain text makes the job commented, not reviewed |
 | No URL of another host as the reference | only built-in tracker URLs are shortened to refs on save; any other stays a plain link: not reviewed |
-| Never write `<word>#<n>` when the word starts with a tracker prefix | `bootloader_uefi#1`, `ghostscript#2` parse as bugrefs. Rerun module names look like this: use backticks or `installation/bootloader_uefi#1` |
+| Never write `<word>#<n>` when the word starts with a tracker prefix | it parses as a bugref. Rerun module names look like this: use backticks or `installation/bootloader_uefi#1` |
 | No pasted logs or long prose | carry-over copies the whole comment to every later job; link the step instead |
-| Re-check a carried ref before keeping it | carry-over never looks at the ticket state. To retire a ref, replace it with e.g. `label:wontfix:boo1234` (no `#`) |
+| Re-check a carried ref before keeping it | its ticket may be closed by now. To retire a ref, replace it with e.g. `label:wontfix:boo1234` (no `#`) |
 
 ## Good examples
 

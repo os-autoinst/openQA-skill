@@ -598,6 +598,19 @@ printf 'caf\351\n' >>"$skill/$ref"
 check "pointers: a reference that is not UTF-8 is one finding, whatever the checks" \
 	"pointers: skills/openqa/$ref:$(($(wc -l <"$root/skills/openqa/$ref") + 1)): not valid UTF-8" \
 	"$(gate frontmatter,budget,pointers,public,attribution,credentials)"
+# The public and attribution scans read such a file on as well, wherever it is in the tree.
+fresh
+host="gitlab.suse"".de"
+printf 'Thanks to Ren\351.\nSee https://%s/qa/private\nCo-authored''-by: someone\n' "$host" >"$work/repo/README.md"
+out=$(gate public,attribution)
+check "public: a file that is not UTF-8 is scanned all the same, and its line named once" "1 1 1 1" \
+	"$(grep -c '^public: README.md:1: not valid UTF-8$' <<<"$out") $(grep -c 'not valid UTF-8' <<<"$out") $(grep -c '^public: README.md:2: internal service: ' <<<"$out") $(grep -c '^attribution: README.md:3: co-author trailer: ' <<<"$out")"
+finds "attribution: on its own it names that line too" attribution "README.md:1: not valid UTF-8"
+fresh
+mkdir -p "$work/repo/tests/x/fixtures"
+printf 'caf\351 https://%s/x\n' "$host" | tee "$work/repo/tests/x/fixtures/log.txt" >"$work/repo/logo.png"
+check "public: a fixture and a file that is no text by its suffix stay unread" \
+	"ok - all repository checks pass" "$(gate public,attribution)"
 fresh
 printf 'caf\351\n-> testapi.md "No such section"\n' >>"$skill/agents/job-triage.md"
 lines=$(wc -l <"$root/skills/openqa/agents/job-triage.md")

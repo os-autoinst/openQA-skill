@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: GPL-2.0-or-later
-# Repository gate: frontmatter, byte budgets, pointer resolution, public-content and attribution checks.
+# Repository gate: frontmatter, byte budgets, pointers, public content, attribution, credentials, evals.
 """Usage: check-skills.py [--only frontmatter,budget,pointers,public,attribution,credentials,evals]
 
-Exit 0 when every check passes, 1 otherwise. One line per finding: "<check>: <file>[:<line>]: <message>".
+Exit 0 when every check passes, 1 otherwise; 2 when --only names a check that does not exist.
+One line per finding: "<check>: <file>[:<line>]: <message>".
 """
 
 import argparse
@@ -16,6 +17,7 @@ from pathlib import Path
 # The gate imports the skill's own scripts and must leave no cache in the tree it checks.
 sys.dont_write_bytecode = True
 
+CHECKS = "frontmatter,budget,pointers,public,attribution,credentials,evals"
 ROOT = Path(__file__).resolve().parents[2]
 SKILLS = ROOT / "skills"
 
@@ -769,11 +771,14 @@ def main(argv=None):
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
     )
-    parser.add_argument(
-        "--only",
-        default="frontmatter,budget,pointers,public,attribution,credentials,evals",
-    )
-    only = set(parser.parse_args(argv).only.split(","))
+    parser.add_argument("--only", action="append")
+    given = parser.parse_args(argv).only or [CHECKS]
+    only = {name for names in given for name in names.split(",")}
+    # A misspelt name would run nothing and report that every check passes.
+    if unknown := sorted(only - set(CHECKS.split(","))):
+        names = ", ".join(map(repr, unknown))
+        print(f"check-skills.py: no such check: {names}", file=sys.stderr)
+        return 2
     out = []
     skills = sorted(p for p in SKILLS.iterdir() if (p / "SKILL.md").exists())
     if not skills:

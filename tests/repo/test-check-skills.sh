@@ -332,6 +332,45 @@ printf '## Refsection.py --list - the outline\n' >>"$skill/scripts/README.md"
 finds "pointers: a script name that two sections of scripts/README.md start with, whatever the case" pointers \
 	"'scripts/README.md' has no section \"refsection.py\""
 
+# An agent starts at SKILL.md or a playbook: a file that neither names is never opened.
+# orphan: a clean copy with a new reference that only another reference points to
+orphan() {
+	fresh
+	printf '# Orphan\n\n## One\n\n-> "Two"\n\n## Two\n\nText.\n' >"$skill/references/orphan.md"
+	printf '%s\n' '-> orphan.md "One"' >>"$skill/$ref"
+}
+unnamed="references/orphan.md: neither SKILL.md nor a playbook points here"
+orphan
+finds "pointers: a reference only another reference points to" pointers "$unnamed"
+orphan
+printf '%s\n' '-> orphan.md "One"' >>"$skill/agents/job-triage.md"
+check "pointers: a playbook names a reference" "ok - all repository checks pass" "$(gate pointers)"
+orphan
+printf '%s\n' 'Read `references/orphan.md` in full.' >>"$skill/SKILL.md"
+check "pointers: a reference read whole is named by its path, with references/ too" \
+	"ok - all repository checks pass" "$(gate pointers)"
+orphan
+printf '%s\n' 'Keep `orphan.md.bak`, `orphan.md5` and `references/orphan.md-old`.' >>"$skill/SKILL.md"
+finds "pointers: a longer file name does not name the reference" pointers "$unnamed"
+orphan
+printf '%s\n' '```' 'python3 scripts/refsection.py orphan.md "One"' '```' >>"$skill/SKILL.md"
+finds "pointers: a name inside a code fence names nothing" pointers "$unnamed"
+orphan
+cp "$skill/agents/job-triage.md" "$skill/agents/orphan.md"
+printf '%s\n' 'Playbook `agents/orphan.md`.' >>"$skill/SKILL.md"
+check "pointers: a playbook's path names the playbook, not the reference of that name" \
+	"pointers: skills/openqa/$unnamed" "$(gate pointers)"
+unnamed="agents/orphan.md: neither SKILL.md nor a reference names this playbook"
+fresh
+cp "$skill/agents/job-triage.md" "$skill/agents/orphan.md"
+finds "pointers: a playbook nothing names" pointers "$unnamed"
+printf '%s\n' 'Then hand over `agents/orphan.md`.' >>"$skill/agents/group-review.md"
+finds "pointers: a playbook only another playbook names" pointers "$unnamed"
+printf '%s\n' 'Playbook `orphan.md`.' >>"$skill/SKILL.md"
+finds "pointers: a playbook is named by its agents/ path only" pointers "$unnamed"
+printf '%s\n' 'Playbook `agents/orphan.md`.' >>"$skill/$ref"
+check "pointers: a reference names a playbook" "ok - all repository checks pass" "$(gate pointers)"
+
 fresh
 mkdir -p "$work/repo/skills/zz"
 printf -- '---\nname: zz\ndescription: A second skill.\nlicense: GPL-2.0-or-later\n---\n\n# zz\n' >"$work/repo/skills/zz/SKILL.md"

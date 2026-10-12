@@ -398,6 +398,19 @@ check "default-timeout: a timeout of 5,000 digits is read, and leading zeros mak
 } >"$chain/fate.pm"
 check "soft-failure-reference: only the FATE host itself is a reference" \
 	"2 soft-failure-reference" "$(python3 "$script" "$chain/fate.pm" 2>&1 | brief)"
+# --- one case each for a part of a rule that could change without a check failing -----------
+printf '%s\n' '# Copyright SUSE LLC' '# Summary: x' "use Mojo::Base 'consoletest';" 'my @pkgs = qw(vim);' '1;' >"$chain/packages.pm"
+check "header-maintainer: an '@' in a line without '# Maintainer: ' is no address" \
+	"1 header-maintainer" "$(lint "$chain/packages.pm" | brief)"
+echo "assert_script_run '( (cd /tmp/t; ls) ; make ) && test -f /tmp/t/out';" >"$chain/lib/nested.pm"
+check "semicolon-chain: a group inside a group closes itself only, the ';' behind it is still inside the outer one" \
+	"" "$(lint "$chain/lib/nested.pm" | sed "s|$chain/||" | grep -o '^[^ ]* semicolon-chain')"
+echo "assert_script_run 'for((i=0;i<3;i++)); do make; done';" >"$chain/lib/counted.pm"
+check "semicolon-chain: a keyword with '(' right behind it starts a loop as well" \
+	"" "$(lint "$chain/lib/counted.pm" | sed "s|$chain/||" | grep -o '^[^ ]* semicolon-chain')"
+printf '%s\n' "assert_script_run 'echo; make';" "assert_script_run 'x=a>b; make';" >"$chain/lib/bare.pm"
+check "semicolon-chain: an echo without any text drops no exit code, an assignment with a redirection is a command with one" \
+	"lib/bare.pm:2: semicolon-chain" "$(lint "$chain/lib/bare.pm" | sed "s|$chain/||" | grep -o '^[^ ]* semicolon-chain')"
 rm -rf "$chain"
 
 check "the module of the speed-up eval has the two findings its prompt is about, and no other" "26 semicolon-chain

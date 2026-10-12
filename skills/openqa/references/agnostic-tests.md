@@ -30,7 +30,7 @@ Owns the openqa-agnostic architecture in os-autoinst-distri-opensuse: a portable
 
 | Method | Does |
 |---|---|
-| `setup` | python older than 3.6: `record_info('skip', ...)`, then every method does nothing and the module passes; else adds the `phub` product on SLE < 16.0 unless `skip_phub => 1`; installs `go gotestsum`, `python3-pytest` (only when `python3 -m pytest --version` fails) or the highest `java-N-openjdk-devel` via `install_package(..., trup_reboot => 1)`; downloads `helper.sh` to `<test_dir>/../lib/`, `runtest` and the files `./runtest -f` prints |
+| `setup` | python older than 3.6, or no `python3` at all (probe output not starting with a digit counts as minor 0): `record_info('skip', ...)`, then every method does nothing and the module passes; else adds the `phub` product on SLE < 16.0 unless `skip_phub => 1`; installs `go gotestsum`, `python3-pytest` (only when `python3 -m pytest --version` fails) or the highest `java-N-openjdk-devel` via `install_package(..., trup_reboot => 1)`; downloads `helper.sh` to `<test_dir>/../lib/`, `runtest` and the files `./runtest -f` prints |
 | `run_test` | one `assert_script_run`, timeout `run_timeout`: `cd <test_dir> && ( set -o pipefail; ./runtest 2>&1 \| tee /tmp/<name>_output.log ) && mv results.xml <result_file>` (`results.tap` for TAP) |
 | `parse_results` | `parse_extra_log`, then one `record_info` per testcase (`PASSED: ...`/`FAILED: ...`/`SKIPPED: ...`); `<failure>`, `<error>` or TAP `not ok` sets the module result to `fail`, never dies |
 | `cleanup` | `rm -rf <test_dir>`, nothing else |
@@ -133,6 +133,7 @@ cp -r data/console/openqa_agnostic/python/testSudo /tmp/agn/ && cd /tmp/agn/test
 | Reads only `/etc/<file>`; hardcoded `/tmp/...` | fall back to `/usr/etc`; pytest `tmp_path` |
 | Conversion drops diagnostics the old job showed | `pytest -s` and `record_testsuite_property` |
 | Verified on Tumbleweed only | add the oldest SLE SP in scope (Python 3.6) and a transactional image; say why a product is excluded |
+| Python artifact on an image without `python3`: `setup` skips, the module passes untested | install `python3` in the wrapper before `setup`; in a green run look for the `skip` box |
 
 ## Converting existing modules
 

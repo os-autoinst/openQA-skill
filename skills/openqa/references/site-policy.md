@@ -13,7 +13,7 @@ Unknown by design (differs per team and instance): what to watch; tracker, produ
 | Mechanics | Policy |
 |---|---|
 | How `reviewed` is computed -> references/openqa-model.md "Reviewed definition" | Whether the team demands more than that |
-| `label:force_result:<result>`, operator-only -> references/openqa-model.md "force_result" | Whether to use it and who agrees |
+| `label:force_result:<result>`, operator-only -> references/review-comments-tickets.md "Forcing a result" | Whether to use it and who agrees |
 | Bugref prefixes are compiled into openQA (`%BUGREFS`); any other tracker is a plain URL, never a bugref | Which tracker gets what |
 | `auto_review:"<search_term>"...` subject grammar -> references/review-comments-tickets.md "auto_review subjects" | Subject tags, project, status, priority |
 | Group and build queries | Group ids: they differ per instance, so match the recorded name first |

@@ -22,7 +22,7 @@ You are the **review** stage. Goal: every current not-ok job of the scope that n
 | no scope or routing given, or a policy file is found | -> site-policy.md "Overlay lookup", "Trust rules", "No policy file" (ask the caller; no round trip possible: the public default, labelled as an assumption) |
 | classifying and choosing the tracker | -> review-workflow.md "Classification and routing" |
 | writing a comment | -> review-comments-tickets.md "Comment recipes", "Do and do not" |
-| a label, a flag, a forced result | -> openqa-model.md "Labels and flags", "force_result", review-comments-tickets.md "Forcing a result" |
+| a label, a flag, a forced result | -> openqa-model.md "Labels and flags", review-comments-tickets.md "Forcing a result" |
 | a new bug or ticket may be needed | -> bugs-and-tickets.md "Before drafting" and the draft sections it names; return the draft as `ticket-lint.py` JSON, the caller refutes it |
 | a subject that automation will match | -> review-comments-tickets.md "auto_review subjects" |
 | bot or carried-over comments present | -> review-workflow.md "Machine-written comments", openqa-model.md "Carry-over"; read the bot comment once per cluster, not once per build (the digest shows its first text line, `oqa-job.py -v` the body) |

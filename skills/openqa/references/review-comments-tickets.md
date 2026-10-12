@@ -26,6 +26,8 @@ generic-753: bsc#1244684
 
 ## Forcing a result
 
+`label:force_result:<result>[:<description>]` in a job comment overwrites the job result; module results stay.
+
 ```
 boo#1277443
 Agreed with <second reviewer>: cosmetic, fix submitted.
@@ -34,9 +36,9 @@ label:force_result:softfailed
 ```
 
 - **Ref outside the label:** `label:force_result:softfailed:bsc#1234` parses as a label only, so nothing carries over; with the ref on its own line the comment is carried and the label re-applied to each new job.
-- **Operator role**, finished job, valid result name; else the API answers `force_result labels only allowed for operators`, `force_result only allowed on finished jobs` or `Invalid result '<x>' for force_result`.
-- **Description is `\w*`:** in `label:force_result:<result>:<description>` everything from the first non-word character is dropped (`bsc#1234` becomes `bsc`). An instance may enforce `force_result_regex` on it (`… does not match pattern …`).
-- **Undeletable:** the API refuses (403) to delete a comment holding a `force_result` label.
+- **Operator role**, finished job, valid result name; else HTTP 400: `force_result labels only allowed for operators`, `force_result only allowed on finished jobs` or `Invalid result '<x>' for force_result`.
+- **Description is `\w*`:** the parser is `/^force_result:(\w+):?(\w*)/`, so everything from the first non-word character is dropped (`bsc#1234` becomes `bsc`). An instance may enforce `force_result_regex` on what is left (HTTP 400: `… does not match pattern …`).
+- **Undeletable:** the API refuses (403) to delete a comment holding a `force_result` label, and a bulk delete skips it.
 - **Second person's agreement named in the text** -> SKILL.md "Write gate".
 
 ## acceptable_for marker

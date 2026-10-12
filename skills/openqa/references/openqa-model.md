@@ -83,16 +83,8 @@ Per build (`/api/v1/job_groups/<g>/build_results`, latest non-cloned job per `TE
 
 - **`label:<keyword>`**, keyword `[\w:#/-]+`, vocabulary is local -> references/site-policy.md "Overlay sections". First label of a comment counts.
 - **A label marks reviewed but is never carried over**: `label:boo#123` references a ticket for this job only.
+- **`label:force_result:<result>`** also overwrites the job result -> references/review-comments-tickets.md "Forcing a result".
 - **`flag:carryover`**, the only flag, makes a comment without bugref eligible for carry-over.
-
-## force_result
-
-`label:force_result:<result>[:<description>]` in a job comment overwrites the job result (module results stay), e.g. `label:force_result:softfailed:bsc#1234`.
-
-- **HTTP 400 unless** `<result>` is a real result name, the author is **operator**, the job is final (`force_result only allowed on finished jobs`) and the description matches the instance's `force_result_regex`, if set.
-- **Description capture trap**: parsed by `/^force_result:(\w+):?(\w*)/`, so of `:bsc#1234` only `bsc` reaches `force_result_regex`.
-- **The ref inside the label is no bugref.** To persist, repeat it outside the label after a space; carry-over then re-applies the forced result.
-- **Cannot be deleted** via API (single delete 403, bulk delete skips it) -> SKILL.md "Write gate".
 
 ## Group comments
 

@@ -2,6 +2,8 @@
 
 Owns: the test API as os-autoinst executes it. Distri wrappers: `zypper_call` -> references/distri-helpers.md "zypper_call"; `script_retry` -> references/distri-helpers.md "Retry and poll".
 
+Contents: Module contract; Hook order; test_flags; Function cheat sheet; Variables; Result recording; Uploads and URLs; Serial terminal; Traps
+
 ## Module contract
 
 - **Only `run` is required.** Inherited: `test_flags` `{}`, the three hooks no-ops, `is_applicable` 1 (false = not scheduled).

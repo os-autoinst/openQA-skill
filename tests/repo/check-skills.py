@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: GPL-2.0-or-later
-# Repository gate: frontmatter, byte budgets, pointers, public content, attribution, credentials, evals.
-"""Usage: check-skills.py [--only frontmatter,budget,pointers,public,attribution,credentials,evals]
+# Repository gate: frontmatter, byte budgets, pointers, contents lines, public content, attribution,
+# credentials, evals.
+"""Usage: check-skills.py [--only frontmatter,budget,pointers,contents,public,attribution,credentials,evals]
 
 Exit 0 when every check passes, 1 otherwise; 2 when --only names a check that does not exist.
 One line per finding: "<check>: <file>[:<line>]: <message>".
@@ -18,7 +19,7 @@ from pathlib import Path
 # The gate imports the skill's own scripts and must leave no cache in the tree it checks.
 sys.dont_write_bytecode = True
 
-CHECKS = "frontmatter,budget,pointers,public,attribution,credentials,evals"
+CHECKS = "frontmatter,budget,pointers,contents,public,attribution,credentials,evals"
 ROOT = Path(__file__).resolve().parents[2]
 SKILLS = ROOT / "skills"
 
@@ -51,10 +52,14 @@ SECTION_CAP = 5000
 # All that one pointer joins by ",": two full sections, as one call is one tool output.
 GROUP_CAP = 10000
 # A reference: read whole by mistake, it still fits the 30,000 characters Claude Code returns of
-# a command's output by default (BASH_MAX_OUTPUT_LENGTH).
+# a command's output by default (BASH_MAX_OUTPUT_LENGTH). Its contents line is not counted: no
+# read of a section returns that line, and its bytes must not come out of the room for sections.
 FILE_CAP = 17000
 # A playbook, read whole by its sub-agent.
 AGENT_CAP = 5000
+# A reference of more lines lists its "## " titles above the first of them: whoever opens
+# the file sees in its first lines what it holds.
+CONTENTS_OVER = 100
 # References that are read whole, each capped as the one read it is.
 BUDGETS = {
     "references/untrusted-content.md": 7900,
@@ -343,6 +348,16 @@ def outline(reader, path):
         yield sec.title, sec.level, sec.start + 1, sec.end, size
 
 
+def contents_lines(reader, path):
+    """[(number, line)] of the lines that show a reader "Contents:" above the first "## "."""
+    first = next((f for _, level, f, *_ in outline(reader, path) if level == 2), 0)
+    return [
+        (num, line)
+        for num, line, shown in shown_lines(path)
+        if num < first and shown.startswith("Contents:")
+    ]
+
+
 def check_budget(skill, out):
     where = f"skills/{skill.name}"
     # Bytes as on disk: read_text() drops the "\r" of a CRLF file.
@@ -357,19 +372,23 @@ def check_budget(skill, out):
         out.append(
             f"budget: {where}/SKILL.md: {lines} lines exceeds cap {LINE_CAP} by {lines - LINE_CAP}"
         )
+    reader = section_reader(skill)
     for path in sorted(skill.rglob("*.md")):
         rel = path.relative_to(skill).as_posix()
         if rel.startswith("scripts/") or rel == "SKILL.md":
             continue
         cap = BUDGETS.get(rel, AGENT_CAP if rel.startswith("agents/") else FILE_CAP)
-        size = path.stat().st_size
+        size, note = path.stat().st_size, ""
+        if reader and rel.startswith("references/") and rel not in BUDGETS:
+            for _, line in contents_lines(reader, path)[:1]:
+                size -= len(line.encode("utf-8")) + 1
+                note = ", the contents line not counted"
         if size > cap:
             out.append(
-                f"budget: {where}/{rel}: {size} bytes exceeds cap {cap} by {size - cap}"
+                f"budget: {where}/{rel}: {size} bytes exceeds cap {cap} by {size - cap}{note}"
             )
     if not (skill / "references").is_dir():
         return
-    reader = section_reader(skill)
     if reader is None:
         out.append(
             f"budget: {where}/scripts/refsection.py: missing, so no section can be measured"
@@ -657,6 +676,36 @@ def check_pointers(skill, out):
             )
 
 
+def check_contents(skill, out):
+    reader = section_reader(skill)
+    for path in sorted((skill / "references").glob("*.md")) if reader else ():
+        at = f"contents: skills/{skill.name}/references/{path.name}"
+        heads = [
+            (t, first) for t, level, first, *_ in outline(reader, path) if level == 2
+        ]
+        text = read(path)
+        lines = len(text.split("\n")) - text.endswith("\n")
+        found = contents_lines(reader, path)
+        if not heads or not (found or lines > CONTENTS_OVER):
+            continue
+        expected = "Contents: " + "; ".join(title for title, _ in heads)
+        for title, first in heads:
+            if "; " in title:
+                out.append(
+                    f'{at}:{first}: title "{title}" contains "; ", which separates the titles '
+                    "of a contents line"
+                )
+        if not found:
+            out.append(
+                f"{at}:{heads[0][1]}: more than {CONTENTS_OVER} lines: add above this section: "
+                f"{expected}"
+            )
+        elif found[0][1] != expected:
+            out.append(f"{at}:{found[0][0]}: must read: {expected}")
+        for num, _ in found[1:]:
+            out.append(f"{at}:{num}: repeats the contents line of line {found[0][0]}")
+
+
 def tracked_text_files(base=ROOT):
     for path in sorted(base.rglob("*")):
         rel = path.relative_to(ROOT)
@@ -825,6 +874,8 @@ def main(argv=None):
             check_budget(skill, out)
         if "pointers" in only:
             check_pointers(skill, out)
+        if "contents" in only:
+            check_contents(skill, out)
     if "pointers" in only:
         for name in sorted(set(UNROUTED) - {skill.name for skill in skills}):
             out.append(

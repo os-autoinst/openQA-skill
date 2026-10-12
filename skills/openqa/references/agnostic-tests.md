@@ -2,6 +2,8 @@
 
 Owns the openqa-agnostic architecture in os-autoinst-distri-opensuse: a portable test artifact under `data/` driven by a thin Perl wrapper.
 
+Contents: When to choose; Layout and languages; Runner API; Result contract; runtest script; Wrapper skeleton; Packages and state; Python 3.6 rule; Scheduling; Standalone run; Review pitfalls; Converting existing modules
+
 ## When to choose
 
 **Choose it** when every check is "run a command, inspect exit code, output or files" on one SUT and the body fits python, go or java.

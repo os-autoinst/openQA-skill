@@ -1,5 +1,7 @@
 # Clone and run
 
+Contents: Where to run; Writes and auth; Helper script clone; Manual clone; Dependencies when cloning; Settings override grammar; Module filtering; Fast console run; Iteration switches; PR description trigger; Local isotovideo; Personal instance; Reproduce a failure
+
 ## Where to run
 
 | Target | Needs | Good for |

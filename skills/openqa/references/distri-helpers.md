@@ -2,6 +2,8 @@
 
 os-autoinst-distri-opensuse `lib/` helpers by task: real arguments and defaults (from the `sub` bodies, not the POD) and the raw idiom each replaces.
 
+Contents: Base classes; Console selection; Install or remove packages; zypper_call; Retry and poll; Services; Reboot; Transactional systems; Product predicates; Version specs; Registration; Log upload; Files on the SUT; Soft-fail on a known bug; POD versus code
+
 ## Base classes
 
 Inherit with `use Mojo::Base '<class>';`. All below derive from `opensusebasetest`.

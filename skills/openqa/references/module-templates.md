@@ -2,6 +2,8 @@
 
 Owns: file header, per-kind skeletons, `test_flags` choice, anti-pattern table and exemplars for new os-autoinst-distri-opensuse `tests/**` modules.
 
+Contents: File header; Common shape; Console smoke test; Service test; X11 needle test; Container test; Transactional test; YaM validate module; Python module; Choosing test_flags; Anti-patterns; Exemplar modules
+
 ## File header
 
 ```perl

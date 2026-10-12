@@ -2,6 +2,8 @@
 
 Owns: test distributions other than os-autoinst-distri-opensuse (layout, `main.pm`, scenario definitions, CI scheduling) and Python/Lua test modules in any distribution.
 
+Contents: Custom or distri-opensuse; Anatomy; main.pm contract; Module paths; Python modules; Lua modules; Scenario definitions; Schedule from CI
+
 ## Custom or distri-opensuse
 
 | Topic | Custom distri | os-autoinst-distri-opensuse |

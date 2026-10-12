@@ -116,7 +116,7 @@ Marker `(Automatic carryover from t#<id>)` (old data: `takeover`), plus `(The ho
 | `RETRY=<n>[:<text>]` | `failed`, `incomplete`, `timeout_exceeded`, fewer than n restarts | system comment `Restarting because RETRY is set to <n> ...` |
 | `auto_clone_regex` | `incomplete`/`timeout_exceeded` whose `reason` matches (default: `cache failure: `, `terminated prematurely: `, `api failure: ... 503`, VNC `backend died`, QEMU KVM HPT allocation), at most `auto_clone_limit` (20) times | `reason` ends `[Auto-restarting because reason matches ...]` or `[Not restarting job despite ...]` |
 | job-done hook | instance script; upstream's labels known issues, may restart | -> references/review-comments-tickets.md "auto_review subjects" |
-| investigation jobs | hook `openqa-investigate` clones a failure with empty `BUILD`, by default into no group | comment `Automatic investigation jobs for job <id>:` lists `<test>:investigate:retry`, `:last_good_tests:<hash>`, `:last_good_build:<build>`, `:last_good_tests_and_build:...`; clones set `OPENQA_INVESTIGATE_ORIGIN` |
+| investigation jobs | hook `openqa-investigate` clones a failure with empty `BUILD`, by default into no group | comment starting `Automatic investigation jobs for job <id>` lists `<test>:investigate:retry`, `:last_good_tests:<hash>`, `:last_good_build:<build>`, `:last_good_tests_and_build:...`; clones set `OPENQA_INVESTIGATE_ORIGIN` |
 
 - **A passing retry hides a sporadic failure**: with `restarts > 0` or `origin_id` set, check earlier runs -> references/job-triage.md "History and investigation".
 

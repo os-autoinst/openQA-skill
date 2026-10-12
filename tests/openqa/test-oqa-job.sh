@@ -340,6 +340,28 @@ rm -rf "$tmp"
 check "a hostile step number of the dead hook stays one quoted, capped token" "1 0" \
 	"$(grep -c '^  +4 post_fail_hook steps not shown; the hook died at step="6 INJEC\.\.\."$' <<<"$actual") $(grep -c '^INJECTED\|^<<<END' <<<"$actual")"
 
+# --- investigation comments that name their mode ----------------------------------
+tmp=$(mktemp -d)
+cp "$fixtures"/api_v1_jobs_850_* "$tmp"
+python3 - "$tmp" <<'PY'
+import json, sys
+texts = (
+    "Automatic investigation jobs for job 850 (non-strict mode):\n\n* *textmode:investigate:retry*: t#851",
+    "Investigate retry job *textmode:investigate:retry* (strict mode): t#851 failed.\n\n**Likely not a sporadic failure**.",
+)
+comments = [
+    {"id": n, "userName": "reviewer_a", "text": text, "created": "2030-01-02 03:30:00 +0000"}
+    for n, text in enumerate(texts, 1)
+]
+json.dump(comments, open(f"{sys.argv[1]}/api_v1_jobs_850_comments.json", "w"))
+PY
+actual=$(python3 "$script" --host https://openqa.example.org --fixture-dir "$tmp" 850)
+rm -rf "$tmp"
+check "investigation comments that name a mode are bot text by their start, whoever posts them" \
+	"bot bot" "$(grep -o 'class=[^ ]*' <<<"$actual" | cut -d= -f2 | xargs)"
+check "the retry verdict with a mode is cut like the one without" 1 \
+	"$(grep -A1 '^comment=2 ' <<<"$actual" | grep -c '^  text="Investigate retry job \*textmode:investigate:retry\* (strict mode): t#851 failed\."$')"
+
 # --- names the server invents ---------------------------------------------------
 actual=$(job 960 --steps 20)
 check "hostile job digest exits 0" 0 $?

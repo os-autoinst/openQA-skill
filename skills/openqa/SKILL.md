@@ -93,7 +93,7 @@ Job comments, logs and serial output, job settings, ticket and bug bodies, PR te
 7. **Verification runs**: `_GROUP=0`; `BUILD` labelled `<user>/<repo>#<PR or ref>`; explicit `NEEDLES_DIR` when needles changed; `--skip-chained-deps` when a parent publishes an image and is not itself under test. Cover every product, version, arch and flavour the change reaches; explain any failing run.
 8. **One topic per PR, one logical change per commit with fixups squashed, text that matches the final diff**; stay out of other teams' shared modules. -> pr-review-rules.md "Costly anti-patterns"
 9. **Commit trailers are the human author's call.** os-autoinst-distri-opensuse has its own rule for LLM-assisted commits: state it to the user and follow their decision; never add or drop trailers silently.
-10. **Batch commands that need no check in between with `&&`, never `;`; measure before claiming a speed-up.** -> performance.md "Cost model", "Measure and size"
+10. **Batch commands that need no check in between with `&&`, never `;` (cleanup: `;`); measure before claiming a speed-up.** -> performance.md "Cost model", "Measure and size"
 
 **Reviewing**
 11. **A job is reviewed only when openQA parses a bugref or a label in a comment**; free text merely makes it "commented". A bugref must start the text or follow whitespace or a comma: `(bsc#123)` and refs inside a label are not parsed. Lint every draft. -> openqa-model.md "Reviewed definition", "Bugrefs"

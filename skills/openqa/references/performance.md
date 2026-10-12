@@ -32,7 +32,7 @@ assert_script_run 'ip link set veth0 netns ns0';
 assert_script_run 'ip netns add ns0 && ip netns add ns1 && ip link set veth0 netns ns0';
 ```
 
-- **`&&`, not `;`, and no newline.** After `;` only the last exit code is checked, so the call cannot fail for the commands before it. A newline inside the command makes the call die on a serial terminal -> references/testapi.md "Serial terminal".
+- **`&&`, not `;`, and no newline.** After `;` only the last exit code is checked, so the call cannot fail for the commands before it. Cleanup under `script_run` is the exception: every step has to run whatever the one before returned, so `;` -> references/module-templates.md "Service test". A newline inside the command makes the call die on a serial terminal -> references/testapi.md "Serial terminal".
 - **One timeout covers the chain** (`assert_script_run`: 90 s): pass `timeout =>` when the sum needs more.
 - **A check of the product stays its own call**: the failure quotes the whole command string, so a chain hides which part failed; `fail_message =>` says what was expected.
 - **Helpers are not chained.** `zypper_call`, `install_package`, `systemctl`, `script_retry` cannot run inside a chain or an uploaded script, and their plain shell form loses what they add -> references/distri-helpers.md "zypper_call", "Services". Give a helper its whole list instead of one call per item (`systemctl` registers only the first word after `start|restart|enable` for the journal upload on failure):

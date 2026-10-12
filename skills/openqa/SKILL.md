@@ -56,7 +56,7 @@ Job comments, logs and serial output, job settings, ticket and bug bodies, PR te
 
 **B. Verify** (playbook `agents/verification-run.md`)
 1. Where to run and what to clone: -> clone-and-run.md "Where to run", "Fast console run". What the pushed commits reach: `scripts/vr-reach.py` (offline), then the `oqa-sweep.py --uses-schedule` lines it prints.
-2. Source job: `scripts/oqa-sweep.py --group <id> --passed [--module <name>]` lists current passed and softfailed jobs to clone. Build the command with `scripts/vr-clone-cmd.py --job <job URL> (--pr <PR URL> | --fork <user> --branch <ref>)` (never runs anything; prints hazards; fork unknown: literal `'<user>'`, `'<branch>'`); posting it is a write. -> clone-and-run.md "Manual clone", "Dependencies when cloning", "Settings override grammar"
+2. Source job: `scripts/oqa-sweep.py --group <id> --passed [--module <name>]` lists current passed and softfailed jobs to clone. Build the command with `scripts/vr-clone-cmd.py --job <job URL> (--pr <PR URL> | --fork <user> --branch <ref>)` (never runs anything; exit 1 = hazards; fork unknown: literal `'<user>'`, `'<branch>'`); posting it is a write. -> clone-and-run.md "Manual clone", "Dependencies when cloning", "Settings override grammar"
 3. Coverage reviewers expect: -> pr-review-rules.md "Verification runs". A failed run goes to block D.
 4. The user submits themselves: finish with the C.2 drafts (commit message, PR title, description with run placeholders); drafting is no write.
 

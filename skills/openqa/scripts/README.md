@@ -380,6 +380,17 @@ and none of these is a fix: text inside quotes, backticks, `( )` or `{ }`; a com
 hide no chain: the `for` of `echo wait for it` and of `echo "wait" for it`, the `case` of
 `grep --ignore-case`. `set -e` typed into the SUT's shell ends that shell at the first failure.
 
+`pipe-filter` reports a `script_output`, `assert_script_run` or `validate_script_output` call anywhere in a
+code line whose command, read as for `semicolon-chain` and also from Perl's `q` or `qq` with any delimiter
+(a bracket around nested pairs) or a Python string with a prefix such as `f` or `r`, pipes with `|` or `|&`
+into `grep`, `egrep`, `fgrep`, `awk`, `gawk`, `sed`, `cut`, `head`, `tail` or `wc`, because the log then holds
+only the filter's result, and passes `||`, `cat`, `xargs`, `sort`, `uniq`, `tr` and any other program, a pipe
+inside quotes, backticks, `( )` or `{ }`, a pipeline whose output goes through `tee` or into a file other than
+`/dev/null` (`>`, `>>`, `&>` or `>&`, not `>&2`), a pipeline whose filter answers a test: the condition of
+`if`, `elif`, `while` or `until` and one followed by `||`, a negated pipeline, a command that tests `$?`, a
+call inside a term that `.` joins to an earlier command, a line inside a Python triple-quoted string, and
+`script_run`.
+
 ## check-schedule.py - lint YAML schedules, find who schedules a module (offline)
 
     check-schedule.py --repo CHECKOUT [FILE...] [--strict] [--errors-only] [--max-findings N]

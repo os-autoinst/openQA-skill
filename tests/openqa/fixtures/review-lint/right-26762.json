@@ -1,6 +1,6 @@
 {
  "commit_id": "861aef5091db71879e7848569c0438b41613d253",
  "event": "COMMENT",
- "body": "blocking: all five verification links point at the earlier batch (24515782 -> /tests/24513178, ...), not the jobs that ran the head commit.",
+ "body": "blocking: in all five rows of the verification table, the link opens a job of an earlier batch, not the job its text names. Those jobs ran an older commit, so nothing shows the latest commit of this PR, `861aef5`, passing. Please point each link at the job it names.",
  "comments": []
 }

@@ -1,0 +1,12 @@
+{
+ "commit_id": "9b0e4d7c2a51f6e83d9c0b7a4e2f1d6c8a3b5e90",
+ "event": "COMMENT",
+ "body": "",
+ "comments": [
+  {
+   "path": "tests/console/foo_retry.pm",
+   "line": 40,
+   "body": "On aarch64 this retry hides a product bug: [job 5123457](https://openqa.opensuse.org/tests/5123457) fails in every `*_product_increment*.yaml` schedule. The bug is [bsc#1234567](https://bugzilla.suse.com/show_bug.cgi?id=1234567), and os-autoinst/os-autoinst#3114 changes only the backend. Could the module record the bug as a soft failure instead of retrying?"
+  }
+ ]
+}

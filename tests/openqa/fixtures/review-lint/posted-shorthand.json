@@ -1,0 +1,12 @@
+{
+ "commit_id": "9b0e4d7c2a51f6e83d9c0b7a4e2f1d6c8a3b5e90",
+ "event": "COMMENT",
+ "body": "Inline finding attached.",
+ "comments": [
+  {
+   "path": "tests/console/foo_retry.pm",
+   "line": 40,
+   "body": "VR 24792389/90/91 at head pass on x86_64, but aarch64 job 5123457 still fails in the *_product_increment*.yaml schedules; os-autoinst#3114 has the backend side and bsc#1234567 the product side, so the retry here hides a product bug that this module should report instead of passing over it."
+  }
+ ]
+}

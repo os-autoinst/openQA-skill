@@ -5,7 +5,7 @@ Owns: reviewing someone else's os-autoinst-distri-opensuse PR at the right size;
 ## Review size
 Size follows verified findings, not effort: a reviewer who writes anything leaves one finding (median), and 80% of distri approvals have no text.
 - **Blocking** = merged as is, it passes with the feature broken or fails with it working, dies or hangs on a reachable path, breaks a scenario it reaches, leaks a secret, or no run since its last functional change covers a scenario it changes where pr-review-rules.md "Verification runs" asks for one. Name the job, schedule or scenario. Never dropped for the budget; still one point per comment.
-- **Ceiling for the rest**, first pass, by changed lines (<=20 / 21-100 / 101-300 / >300): comments 3 / 5 / 4 / 4 when only tests/, data/, schedule/ change, else 2 / 4 / 5 / 8; prose 600 / 1000 / 1500 / 1500 chars (fenced code, `>` quotes and URLs not counted). A body counts as a comment. Over it: cut nits, then the least concrete.
+- **Ceiling for the rest**, first pass, by changed lines (<=20 / 21-100 / 101-300 / >300): comments 3 / 5 / 4 / 4 when only tests/, data/, schedule/ change, else 2 / 4 / 5 / 8; prose 600 / 1000 / 1500 / 1500 chars (fenced code, `>` quotes and URLs not counted). A body counts as a comment. Over it: cut nits, then the least concrete; to fit, cut points, not words, and put evidence the author can open behind a link.
 - A comment: the failure and the fix, <=300 chars; up to 600 only for evidence or knowledge the author cannot derive (a product matrix, the failing log line); blocking up to 1000. A body beside comments: <=300, a blocking one <=1000.
 - Nits: at most 2, one line of <=150 chars, only beside an inline change request or a blocking finding.
 - **Late** (merged, or holding the approvals the merge needs: distri 2): blocking only; any push dismisses the approvals (#26762). After merge: a defect with its failing step, saying revert or fix PR.
@@ -22,7 +22,7 @@ Inputs: `gh pr view <n> -R <o>/<r> --json headRefOid,state,latestReviews,additio
 5. A product or worker bug worked around in test code: ask for the ticket (#26469, #26539).
 6. Scope: files or hunks the title does not explain; a removed check, fallback or default (which media needed it? #26143); `git log -L` on a line that undoes earlier work.
 7. Can a failure be read? A line the PR adds that pipes a command's output into a filter leaves only the filter's result in the log: ask to capture the output and match it in Perl (#25497) -> testapi.md "Traps", which lists the filters. Read the command of every call the PR adds: `scripts/check-module.py <changed .pm and .py>` in a checkout of the head reads, never runs, them and reports `pipe-filter` beside the other traps it knows, but sees only a quoted command of `script_output`, `assert_script_run` or `validate_script_output`, not one built in a variable or run by `script_run`; comment only on lines the PR adds.
-To word a fix: -> pr-review-rules.md "Ranked requests"; it is not a source of new comments.
+To word a fix: -> pr-review-rules.md "Ranked requests"; it is not a source of new comments. Its wording and this section's are shorthand for agents; a comment says the point in sentences.
 
 ## What not to post
 - What CI flagged on the head commit; prose typos. Machine-read text is a finding: trigger lines, bugrefs, CODEOWNERS, schedule keys.

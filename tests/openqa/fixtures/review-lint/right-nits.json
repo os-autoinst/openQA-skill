@@ -1,0 +1,12 @@
+{
+ "commit_id": "3f2a9c41d07be5f8a6c2e9d4b1f07a3c5e8d2b6f",
+ "event": "COMMENT",
+ "body": "",
+ "comments": [
+  {
+   "path": "schedule/foo/foo_profile.yaml",
+   "line": 12,
+   "body": "Every arch that loads this schedule now runs `prepare_profile`, which dies when FOO_PROFILE is not set. Do all job groups that load it set FOO_PROFILE? The only verification run, https://openqa.opensuse.org/tests/5123456, is x86_64."
+  }
+ ]
+}

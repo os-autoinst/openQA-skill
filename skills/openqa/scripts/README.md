@@ -248,7 +248,8 @@ parsed, job stays unreviewed). `labels:`, `flags:`, `force_result:` only when pr
 
 ## review-lint.py - size and form of a drafted PR review (offline)
 
-Checks the budget of references/pr-reviewing.md "Review size", not whether a finding is right.
+Checks the budget of references/pr-reviewing.md "Review size" and the wording of "Form", not whether a finding
+is right.
 
     review-lint.py [FILE] --lines N [--lib] [--late] [--replies N]    # FILE: the review JSON
 
@@ -263,12 +264,28 @@ starting `blocking:` count against no budget; `nit:` and unprefixed ones do, and
 leaves out fenced code, `>` quotes and URLs, and counts characters after NFC. Exit 1: findings (` F <id>
 <where>: ...`): `prefix` (`**nit:**`, `nitpick:` and other near misses, or the prefix after a quote), `commit`
 (no `commit_id`), `over-count`, `over-chars`, `long-comment` (600, blocking 1000), `long-body` (300 beside
-comments, unless blocking), `nits` (2), `long-nit` (one line, 150 with the prefix), `lone-nits` (no unprefixed
-inline comment and nothing blocking), `duplicate` (suggestion-only comments may repeat), `unclosed-fence`,
-`pasted-block` (over 10 lines or 800 chars, not a suggestion), `quotes` (over 2 lines or 300 chars), `late`,
-`event` (APPROVE with text, REQUEST_CHANGES without a blocking item, empty COMMENT). Exit 2: not a review JSON
-object (`event` COMMENT, APPROVE or REQUEST_CHANGES; `body` and `commit_id` strings; each comment a non-empty
-`body`, a `path` and an integer `line` or `position`), over 262144 characters.
+comments, unless blocking), `nits` (2), `long-nit` (each nit one line, 150 with the prefix), `lone-nits` (no
+unprefixed inline comment and nothing blocking), `duplicate` (suggestion-only comments may repeat),
+`unclosed-fence`, `pasted-block` (over 10 lines or 800 chars, not a suggestion), `quotes` (over 2 lines or 300
+chars), `late`, `event` (APPROVE with text, REQUEST_CHANGES without a blocking item, empty COMMENT). A `nit:`
+that opens a later paragraph, list item or line is a nit as well: `nits` and `lone-nits` count it, `long-nit`
+names its paragraph, and a comment of nits only is no change request. Wording, in prose with link text and
+without link targets; an HTML anchor and a `[label]` that a reference definition resolves are links, and the
+definitions, which open a paragraph, are no prose: `bare-id` (6 or more digits, not glued to a path, version,
+setting, `#`, `:` or `@`, not a date 20YYMMDD, a size or duration with its unit such as `kB`, `MiB`, `bytes`,
+`ms` or `%`, nor an id that a URL of the same paragraph holds), `id-range` (`5123456/57`), `cross-repo`
+(`name#n`: GitHub resolves no repository from it and links it only when the name is an existing account; write
+`owner/repo#n`, or `#n` for this one; not `owner/repo#n` or an openQA tracker), `plain-ref` (`bsc#`, `boo#`,
+`bnc#`, `poo#`, `jsc#` and the other openQA trackers outside a link, which GitHub leaves plain text), `jargon`
+(`VR`; `at`, `on`, `this` or `the head`), `glob` (a `*` after `_` or `/`, before `.`, `_` or `/`, or between
+letters or digits; not an escaped `\*`), `long-sentence` (over 30 words; a sentence ends at a line break, which
+GitHub keeps in a comment, after `.`, `!` or `?` and a space, though not after `e.g.`, `i.e.` or `vs.`, and with
+its paragraph, list item, heading or table row; a code span is one word, a URL none), `stub-body` (a body beside
+inline comments of at most 8 words naming inline, below, comments or attached). Code spans are not checked, as
+GitHub links nothing in them and they quote code, except one holding only a job id or a range, which reads as
+one. Each check is reported once per item, `jargon` once per word it replaces, with its first hit (the longest
+sentence) and the count. Exit 2: not a review JSON object (`event` COMMENT, APPROVE or REQUEST_CHANGES; `body` and `commit_id`
+strings; each comment a non-empty `body`, a `path` and an integer `line` or `position`), over 262144 characters.
 
 ## ticket-lint.py - shape of a drafted bug or progress ticket (offline)
 

@@ -1,0 +1,6 @@
+{
+ "commit_id": "3f2a9c41d07be5f8a6c2e9d4b1f07a3c5e8d2b6f",
+ "event": "COMMENT",
+ "body": "The placement matches the sibling `foo_extensions` schedules.\n\nnit: `prepare_profile` does `get_required_var('FOO_PROFILE')`, and this schedule is not aarch64-specific. Which scenarios use it, and do they all already set FOO_PROFILE in the job group? If a job-group change is needed, please link it, and add a VR for each arch that uses this schedule.\n\nnit: the commit body repeats the title; it would help to say why the module has to run before the network setup, since that is what anyone reading the schedule later will ask about.",
+ "comments": []
+}

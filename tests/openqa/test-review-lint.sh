@@ -54,7 +54,8 @@ check "--help exits 0" 0 $?
 # --- the review that prompted this ------------------------------------------------
 out=$(lint "$fixtures/posted-26762.json" --lines 331 --late)
 rc=$?
-check "the posted 26762 review: no commit, over budget, one long body, late" "1 commit over-chars long-comment late" "$(result)"
+check "the posted 26762 review: no commit, over budget, one long body, bare ids, shorthand, long sentences, late" \
+	"1 commit over-chars long-comment bare-id jargon long-sentence late" "$(result)"
 out=$(lint "$fixtures/right-26762.json" --lines 331 --late)
 rc=$?
 check "its blocking-only rewrite passes even late" "0" "$(result)"
@@ -199,6 +200,12 @@ check "a 151-char nit is long" "1 long-nit" "$(result)"
 out=$(draft COMMENT "" "fix it" "$(printf 'nit: a\nand b')" | lint --lines 50)
 rc=$?
 check "a two-line nit is long" "1 long-nit" "$(result)"
+out=$(draft COMMENT "" "fix it" "$(printf 'nit: rename a\nnit: rename b')" | lint --lines 50)
+rc=$?
+check "two one-line nits in one nit: comment are not long" "0" "$(result)"
+out=$(draft COMMENT "" "fix it" "$(printf 'nit: a\n\nThe reason is b.')" | lint --lines 50)
+rc=$?
+check "a nit: comment with a paragraph that is no nit is long" "1 long-nit" "$(result)"
 out=$(draft COMMENT "" "fix it" "$(printf 'nit: a\rand b')" | lint --lines 50)
 rc=$?
 check "a lone CR ends a line" "1 long-nit" "$(result)"
@@ -217,6 +224,36 @@ check "a body is not a change request for nits" "1 lone-nits" "$(result)"
 out=$(draft COMMENT "" "blocking: broken" "nit: a" | lint --lines 50)
 rc=$?
 check "a nit beside a blocking finding" "0" "$(result)"
+# A nit: opening a later paragraph, list item or line is a nit as well.
+out=$(lint "$fixtures/posted-nits.json" --lines 1)
+rc=$?
+posted="$(result) $(grep -c '; blocking 0, nit 2,' <<<"$out")"
+out=$(lint "$fixtures/right-nits.json" --lines 1)
+rc=$?
+check "two nits after a remark in the body: counted, long, alone, in shorthand; the rewrite as a change request passes" \
+	"1 long-nit long-nit lone-nits jargon long-sentence 1 / 0" "$posted / $(result)"
+out=$(draft COMMENT "" "fix it" "$(printf 'Rename it.\n\nnit: a\n\nnit: b\n\nnit: c')" | lint --lines 400 --lib)
+rc=$?
+check "3 nits in later paragraphs are too many" "1 nits" "$(result)"
+out=$(draft COMMENT "" "$(printf 'Rename it.\n\nnit: %s' "$(text 145)")" | lint --lines 50)
+rc=$?
+check "a 150-char nit in a later paragraph counts and is short" "0 1" "$rc $(grep -c ', nit 1,' <<<"$out")"
+out=$(draft COMMENT "" "$(printf 'Rename it.\n\nnit: %s' "$(text 146)")" | lint --lines 50)
+rc=$?
+check "a 151-char nit in a later paragraph is long" "1 long-nit" "$(result)"
+out=$(draft COMMENT "" "$(printf 'Rename it.\n\nnit: a\nand b')" | lint --lines 50)
+rc=$?
+check "a two-line nit in a later paragraph is long" "1 long-nit" "$(result)"
+out=$(draft COMMENT "$(printf 'Placement is fine.\n\nnit: a')" | lint --lines 50)
+rc=$?
+check "a nit after a remark in the body is still alone" "1 lone-nits" "$(result)"
+out=$(draft COMMENT "" "$(printf -- '- nit: a\n- nit: b\n\nhttps://example.org/x')" | lint --lines 50)
+rc=$?
+check "a comment of two nit list items and a link is not a change request" "1 lone-nits" "$(result)"
+check "  and holds two nits" 1 "$(grep -c ', nit 2,' <<<"$out")"
+out=$(draft COMMENT "" "$(printf 'Rename it, see the nit: below.\nnit: a')" | lint --lines 50)
+rc=$?
+check "nit: opening a line is a nit, inside a line it is not" "0 1" "$rc $(grep -c ', nit 1,' <<<"$out")"
 
 # --- prefixes -------------------------------------------------------------------------
 out=$(draft COMMENT "" "**nit:** a" | lint --lines 50)
@@ -319,6 +356,115 @@ out=$(lint --lines 50 <<<'{"commit_id": "abc", "event": "APPROVE", "body": null}
 rc=$?
 check "a null body is empty" "0" "$(result)"
 
+# --- wording: prose for the author -------------------------------------------------------
+out=$(lint "$fixtures/posted-shorthand.json" --lines 40)
+rc=$?
+posted=$(result)
+out=$(lint "$fixtures/right-shorthand.json" --lines 40)
+rc=$?
+check "a stub body beside one comment in skill shorthand trips each wording check; the rewrite passes" \
+	"1 stub-body bare-id id-range cross-repo plain-ref jargon jargon glob long-sentence / 0" "$posted / $(result)"
+# beside CONTROL TEXT: the result of CONTROL, which trips one check, and TEXT as the next comment
+beside() {
+	out=$(draft COMMENT "" "$1" "$2" | lint --lines 50)
+	rc=$?
+	result
+}
+# words N: N words, no full stop
+words() {
+	printf "%$(($1 - 1))s" "" | sed 's/ /word /g'
+	printf 'end'
+}
+out=$(draft COMMENT "" "The failure is in job 6230398." | lint --lines 50)
+rc=$?
+check "bare-id: a job id in prose" "1 bare-id" "$(result)"
+check "  says how to write it" 1 "$(grep -c '"6230398" is a bare number; write each job as its full URL' <<<"$out")"
+out=$(draft COMMENT "" 'The failure is in `6230398`.' | lint --lines 50)
+rc=$?
+check "bare-id: a job id alone in a code span" "1 bare-id" "$(result)"
+check "bare-id: a link, a URL, a version, a date, a setting, other code and a 5-digit number are not ids" "1 bare-id" \
+	"$(beside "Job 6230398 fails." "[6230398](https://openqa.opensuse.org/tests/6230398), https://openqa.opensuse.org/tests/6230399, kernel 6.12.0-160000.38, snapshot 20261012, BUILD=1234567, \`sleep 1000000\`, 12345")"
+check "bare-id: a number glued to a host or a user is not an id" "1 bare-id" \
+	"$(beside "Job 6230398 fails." "Ping host:1234567 as user@1234567.")"
+check "bare-id: a size or a duration with its unit is not an id" "1 bare-id" \
+	"$(beside "Job 6230398 fails." "It takes ~0.6% of 2097148 kB, 2097148 MB, 2097148 GB, 2097148 KiB, 1234567 ms, 1234567% and 1234567 bytes.")"
+check "bare-id: an id whose URL the same paragraph holds, in code or not, is not bare" "1 bare-id" \
+	"$(beside "Job 6230398 fails." "Job 24800131 (https://openqa.opensuse.org/tests/24800131) fails, \`24800135\` (https://openqa.opensuse.org/tests/24800135) too.")"
+check "bare-id: a [label] that a definition opening a paragraph resolves, and the definition, are not bare" "1 bare-id" \
+	"$(beside "Job 6230398 fails." "$(printf 'Job [24800133] fails.\n\n[24800133]: https://openqa.opensuse.org/tests/24800133')")"
+check "bare-id: the text of an HTML anchor is link text" "1 bare-id" \
+	"$(beside "Job 6230398 fails." '<a href="https://openqa.opensuse.org/tests/latest?test=boot">job 24800132</a> fails.')"
+check "bare-id: a [label] without a definition and one defined inside a paragraph are not links" "1 bare-id bare-id" \
+	"$(beside "Job 6230398 fails." "$(printf 'Job [24800133] fails.\nnot defined:\n[24800133]: https://openqa.opensuse.org/tests/1')")"
+out=$(draft COMMENT "" "Runs 5123456/57/58/59 pass." | lint --lines 50)
+rc=$?
+check "id-range: shortened job ids, reported once" "1 id-range" "$(result)"
+out=$(draft COMMENT "" 'Jobs `5123456/57` pass.' | lint --lines 50)
+rc=$?
+check "id-range: shortened job ids alone in a code span" "1 id-range" "$(result)"
+check "id-range: a path and a URL with ids are not ranges" "1 id-range" \
+	"$(beside "Jobs 5123456/57 pass." "See data/1234567/1 and https://openqa.opensuse.org/tests/5123456/57.")"
+out=$(draft COMMENT "" "This needs os-autoinst#3114 first." | lint --lines 50)
+rc=$?
+check "cross-repo: a repository without its owner" "1 cross-repo" "$(result)"
+check "  says that GitHub resolves no repository from it" 1 \
+	"$(grep -c '"os-autoinst#3114": GitHub resolves no repository from it; write owner/repo#<n>, or #<n> for this one' <<<"$out")"
+check "cross-repo: owner/repo#n, #n, gh#owner/repo#n, a name GitHub cannot own, a tracker in a link and code are not" "1 cross-repo" \
+	"$(beside "See os-autoinst#3114." "os-autoinst/os-autoinst#3114, #26918, gh#os-autoinst/openQA#5000, case foo_sh#27, [boo#1234](https://bugzilla.opensuse.org/show_bug.cgi?id=1234), \`foo#1\`")"
+out=$(draft COMMENT "" "The soft-failure needs bsc#1234567, the feature jsc#PED-1234." | lint --lines 50)
+rc=$?
+check "plain-ref: bug and ticket references outside a link" "1 plain-ref" "$(result)"
+check "  both of them" 1 "$(grep -c '"bsc#1234567" and 1 more stays plain text on GitHub; write it as a link' <<<"$out")"
+check "plain-ref: a reference as link text, in code or as a URL is not plain" "1 plain-ref" \
+	"$(beside "See poo#123456." "[bsc#1234567](https://bugzilla.suse.com/show_bug.cgi?id=1234567), \`record_soft_failure('poo#123456')\`, https://progress.opensuse.org/issues/123456")"
+out=$(draft COMMENT "" "The VR at head passes." | lint --lines 50)
+rc=$?
+check "jargon: VR and at head, each with its own fix" "1 jargon jargon" "$(result)"
+check "jargon: the words spelled out, code, vr-reach.py, VRAM, ahead and a heading are not" "1 jargon" \
+	"$(beside "Please add a VR." "The verification run of the latest commit of this PR, \`4b81f19\`, passes; \`VR\`, vr-reach.py, VRAM, ahead and the heading stay.")"
+out=$(draft COMMENT "" "$(words 31)." | lint --lines 50)
+rc=$?
+check "long-sentence: 31 words" "1 long-sentence" "$(result)"
+check "long-sentence: 30 words, a code span as one word and a URL as none" "1 long-sentence" \
+	"$(beside "$(words 31)." "$(words 29) \`a b c\` https://openqa.opensuse.org/tests/1. $(words 30)!")"
+check "long-sentence: list items end a sentence" "1 long-sentence" \
+	"$(beside "$(words 31)." "$(printf -- '- %s\n- %s' "$(words 20)" "$(words 20)")")"
+out=$(draft COMMENT "" "$(words 30) \`a b c\`" | lint --lines 50)
+rc=$?
+check "long-sentence: 30 words and a code span" "1 long-sentence" "$(result)"
+check "long-sentence: a line break ends a sentence, as GitHub keeps it" "1 long-sentence" \
+	"$(beside "$(words 31)." "$(for _ in $(seq 11); do echo "SP7 x86_64 passed"; done)")"
+for abbreviation in e.g. i.e. vs.; do
+	out=$(draft COMMENT "" "$(words 15) $abbreviation $(words 15)." | lint --lines 50)
+	rc=$?
+	check "long-sentence: no sentence ends after $abbreviation" "1 long-sentence" "$(result)"
+done
+out=$(draft COMMENT "See inline." "fix it" | lint --lines 50)
+rc=$?
+check "stub-body: a body that only points at the comments" "1 stub-body" "$(result)"
+stub=$(result)
+out=$(draft COMMENT "One point inline; the aarch64 jobs also need a verification run." "fix it" | lint --lines 50)
+rc=$?
+check "stub-body: a body with a point of its own, beside the stub" "0 / 1 stub-body" "$(result) / $stub"
+out=$(draft COMMENT "See inline." | lint --lines 50)
+rc=$?
+check "stub-body: not without inline comments, where the review would be left empty" "0" "$(result)"
+for own in "Please add a comment explaining the sleep." "The new module needs a comment header."; do
+	out=$(draft COMMENT "$own" "fix it" | lint --lines 50)
+	rc=$?
+	check "stub-body: a body that asks for a comment makes a point of its own: $own" "0" "$(result)"
+done
+out=$(draft COMMENT "" "The *_product_increment*.yaml schedules need it." | lint --lines 50)
+rc=$?
+check "glob: a glob in prose" "1 glob" "$(result)"
+out=$(draft COMMENT "" "Wait 2*60 and 3*60 seconds." | lint --lines 50)
+rc=$?
+check "glob: a star between digits" "1 glob" "$(result)"
+check "glob: a glob in code, bold, emphasis, a product, a list bullet and an escaped star are not" "1 glob" \
+	"$(beside "Edit schedule/*.yaml too." "$(printf '`*_product_increment*.yaml`, **Note.** *really*, 2 * 3, tests/\\*.pm:\n* item')")"
+check "fenced code, a suggestion and a quote are not prose" "1 jargon" \
+	"$(beside "Please add a VR." "$(printf '> VR 6230398 at head\n\nAgreed.\n```suggestion\nmy $vr = 6230398;    # bsc#1 os-autoinst#3 *_x*\n```')")"
+
 # --- hostile or broken input ------------------------------------------------------------
 out=$(python3 -c '
 import json
@@ -371,5 +517,21 @@ lint "$work/missing.json" --lines 5 >/dev/null
 check "a missing file exits 2" 2 $?
 out=$(lint "$work/"$'no\nsuch\e[31m.json' --lines 5)
 check "a hostile file name stays on one line without escapes" "1 0" "$(wc -l <<<"$out") $(grep -c $'\e' <<<"$out")"
+
+# Every wording pattern is linear: the largest draft the cap allows, each check firing on every line.
+python3 - "$work/worst.json" <<'PY'
+import json, sys
+unit = "`x` [a](b) 1234567 5123456/57 os#1 bsc#1 jsc#A-1 VR at head *_a*.y " + "w " * 30 + "[(`` ```\n\nnit: c\n- d. e! f?\n"
+unit += "[l] <a href=u>b</a> https://x/2097148 2097148 kB e.g. \\*.y <a x 1234567\n\n[l]: u\n[m]: v\n\n"
+body = unit * (262144 // len(unit))
+while len(json.dumps({"commit_id": "0", "event": "COMMENT", "body": body})) > 262144:
+    body = body[: -len(unit)]
+open(sys.argv[1], "w").write(json.dumps({"commit_id": "0", "event": "COMMENT", "body": body}))
+PY
+out=$(timeout 20 python3 "$src" "$work/worst.json" --lines 5 2>&1)
+rc=$?
+check "the largest draft the cap allows, each wording check firing on every line: done in time, each check reported once" \
+	"1: bare-id id-range cross-repo plain-ref jargon jargon glob long-sentence" \
+	"$rc: $(sed -n 's/^  F \(bare-id\|id-range\|cross-repo\|plain-ref\|jargon\|glob\|long-sentence\) .*/\1/p' <<<"$out" | paste -sd' ')"
 
 exit $fail

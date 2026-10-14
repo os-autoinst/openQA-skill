@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: GPL-2.0-or-later
-# Offline size check of a drafted pull request review against references/pr-reviewing.md "Review size".
+# Offline check of a drafted pull request review against references/pr-reviewing.md "Review size", "Form".
 """Check a drafted review (the JSON for POST /repos/O/R/pulls/N/reviews) for size and form.
 
 No network access. Whether a finding is right is not checked, only whether the
 draft stays inside the budget and the form of references/pr-reviewing.md.
 """
 
+import itertools
 import json
 import os
 import re
@@ -40,6 +41,62 @@ NEAR = re.compile(
 FENCE = re.compile(r" {0,3}(?:(`{3,})([^`]*)|(~{3,})(.*))$")
 URL = re.compile(r"https?://\S+")
 
+# Wording, pr-reviewing.md "Form". A line starting a list item, heading or table row starts a new block.
+BLOCK_START = re.compile(r"\s*(?:[-*+]\s|\d{1,9}[.)]\s|#{1,6}\s|\|)")
+NIT = re.compile(r"\s*(?:[-*+]\s+|\d{1,9}[.)]\s+)?nit:", re.IGNORECASE)
+TICKS = re.compile(r"`+")
+CODE = "\x1a"
+# A link or image, an HTML anchor, or a [label] alone, which links only when a definition names it.
+LINK = re.compile(
+    r"!?\[([^\[\]\n]*)\](\([^()\n]*\)|\[[^\[\]\n]*\])?|<a\s[^<>\n]*>([^<\n]*)</a>",
+    re.IGNORECASE,
+)
+# CommonMark: link reference definitions open a paragraph, and GitHub shows none of them.
+DEFINITION = re.compile(r" {0,3}\[([^\[\]\n]+)\]:[ \t]*\S")
+# A URL without the punctuation that ends the sentence around it.
+URL_TEXT = re.compile(r"https?://\S*[^\s.,;:!?)\]\"']")
+MAX_WORDS = 30
+SENTENCE_END = re.compile(
+    r"(?<=[.!?])(?<!\be\.g\.)(?<!\bi\.e\.)(?<!\bvs\.)[)\]\"']*\s+", re.IGNORECASE
+)
+WORD = re.compile(r"[\w" + CODE + "]")
+DIGITS = re.compile(r"\d{6,}")
+# A number glued to a path, version, setting or reference is not an id, nor is a size or a duration.
+NOT_BEFORE = r"(?<![\w.\-/#:@=])"
+ID_RANGE = re.compile(NOT_BEFORE + r"\d{6,}(?:/\d{1,4})+(?![\w/])")
+BARE_ID = re.compile(
+    NOT_BEFORE + r"\d{6,}(?![\w/\-]|[.,]\w|\s?(?:(?:[kKMGT]i?)?B\b|bytes?\b|ms\b|%))"
+)
+# A build or snapshot date, 20YYMMDD.
+DATE = re.compile(r"20[1-3]\d(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01])")
+ONLY_IDS = re.compile(r"\s*\d{6,}(?:/\d{1,4})*\s*")
+# lib/OpenQA/Utils.pm, %BUGREFS. GitHub links none of them; gh#owner/repo#n and the
+# other project trackers end in a reference GitHub links itself.
+PROJECT_TRACKERS = ("gh", "kdi", "pio", "ggo", "gfs", "ffo")
+TRACKERS = ("bnc", "bsc", "boo", "bgo", "bmo", "brc", "bko", "poo", "kde", "fdo", "jsc")
+TRACKERS += PROJECT_TRACKERS
+PLAIN_REF = re.compile(
+    r"(?<![\w/])(?:"
+    + "|".join(t for t in TRACKERS if t not in PROJECT_TRACKERS)
+    + r")#(?:[A-Z]+-)?\d+",
+    re.IGNORECASE,
+)
+# GitHub resolves no repository from name#n and links it only when name is an existing account, so
+# any name an account could have is reported: letters, digits, hyphens.
+CROSS_REPO = re.compile(r"(?<![\w/.\-#])([A-Za-z0-9][A-Za-z0-9-]*)#\d+\b")
+JARGON = (
+    (re.compile(r"\bVRs?\b"), '"verification run"'),
+    (
+        re.compile(r"\b(?:at|on|this|the)\s+head\b", re.IGNORECASE),
+        '"the latest commit of this PR, `<hash>`"',
+    ),
+)
+# A star touching a path or file-name character, unless escaped; ".*" is left out, as "**Note.**" ends that way.
+GLOB = re.compile(r"[_/]\*|(?<!\\)\*[._/]|\w\*\w")
+WORDING = ("bare-id", "id-range", "cross-repo", "plain-ref", "jargon", "glob")
+STUB_WORDS = 8
+STUB = {"inline", "below", "comments", "attached"}
+
 
 def quoted(text, limit=80):
     # Sanitise before cutting: padding that sanitize() strips must not push a secret past the cut.
@@ -68,8 +125,14 @@ def closes(line, marker):
 
 
 def parts(text):
-    """Return (prose lines, blocks as (info, lines, chars, closed), quoted lines, quoted chars)."""
-    prose, blocks, quote_lines, quote_chars = [], [], 0, 0
+    """Return (prose lines, prose blocks as lists of lines, code blocks as (info, lines, chars,
+    closed), quoted lines, quoted chars).
+
+    A prose block is a paragraph, list item, heading, table row or a line opening with nit:
+    (GitHub keeps the line break); a blank line, a fence or a quote ends it, and a line
+    holding only a URL stays in it.
+    """
+    prose, paragraphs, blocks, quote_lines, quote_chars = [], [[]], [], 0, 0
     fence = None
     for line in text.replace("\r\n", "\n").replace("\r", "\n").split("\n"):
         if fence:
@@ -85,33 +148,202 @@ def parts(text):
             marker = opening.group(1) or opening.group(3)
             info = opening.group(2) if opening.group(1) else opening.group(4)
             fence = (marker, info.strip().lower(), 0, 0)
+            paragraphs.append([])
         elif line.lstrip().startswith(">"):
             content = line.lstrip()[1:].strip()
             if content:
                 quote_lines += 1
                 quote_chars += length(content)
+            paragraphs.append([])
         elif URL.sub("", line).strip():
             prose.append(URL.sub("", line))
+            if BLOCK_START.match(visible(line)) or NIT.match(visible(line)):
+                paragraphs.append([])
+            paragraphs[-1].append(line)
+        elif line.strip():
+            paragraphs[-1].append(line)
+        else:
+            paragraphs.append([])
     if fence:
         blocks.append((fence[1], fence[2], fence[3], False))
-    return prose, blocks, quote_lines, quote_chars
+    paragraphs = [p for p in paragraphs if any(URL.sub("", line).strip() for line in p)]
+    return prose, paragraphs, blocks, quote_lines, quote_chars
 
 
-def item(where, text):
-    prose, blocks, quote_lines, quote_chars = parts(text)
+def code_spans(text):
+    """Return text with each code span replaced by CODE, and the spans' contents.
+
+    CommonMark: a run of n backticks opens a span that the next run of exactly n closes; a run
+    with no such run after it is plain text. Each run is visited once.
+    """
+    runs = [(m.start(), m.end()) for m in TICKS.finditer(text)]
+    by_size = {}
+    for index, (start, end) in enumerate(runs):
+        by_size.setdefault(end - start, []).append(index)
+    seen = dict.fromkeys(by_size, 0)
+    out, contents, done, index = [], [], 0, 0
+    while index < len(runs):
+        start, end = runs[index]
+        same = by_size[end - start]
+        at = seen[end - start]
+        while at < len(same) and same[at] <= index:
+            at += 1
+        seen[end - start] = at
+        if at == len(same):
+            index += 1
+            continue
+        closing = runs[same[at]]
+        out += [text[done:start], CODE]
+        contents.append(text[end : closing[0]])
+        done = closing[1]
+        index = same[at] + 1
+    out.append(text[done:])
+    return "".join(out), contents
+
+
+def sentences(text):
+    """Sentences of a prose block: split at a line break, which GitHub keeps in a comment, and after
+    . ! or ? and a space, not after e.g., i.e. or vs.; a code span is one word."""
+    for line in text.split("\n"):
+        for sentence in SENTENCE_END.split(" ".join(line.split())):
+            words = [w for w in sentence.split() if WORD.search(w)]
+            if words:
+                yield sentence, len(words)
+
+
+def strip_links(text, labels, keep):
+    """text with each link, anchor and defined [label] replaced by its text with keep, else by a blank."""
+
+    def replace(link):
+        if link.group(3) is not None:
+            return link.group(3) if keep else " "
+        if (
+            link.group(2) is None
+            and " ".join(link.group(1).split()).lower() not in labels
+        ):
+            return link.group()
+        return link.group(1) if keep else " "
+
+    return LINK.sub(replace, text)
+
+
+def wording(paragraphs, body):
+    """Return [(finding id, detail)], at most one per id, for pr-reviewing.md "Form"."""
+    hits = {}
+
+    def hit(check, token, fix):
+        if (check, fix) in hits:
+            hits[check, fix][1] += 1
+        else:
+            hits[check, fix] = [token.replace(CODE, "`...`"), 1]
+
+    labels, prose = set(), []
+    for lines in paragraphs:
+        defined = list(
+            itertools.takewhile(bool, (DEFINITION.match(visible(x)) for x in lines))
+        )
+        labels.update(" ".join(d.group(1).split()).lower() for d in defined)
+        prose.append(lines[len(defined) :])
+
+    long, longest, words = 0, None, []
+    for lines in prose:
+        text, contents = code_spans(visible("\n".join(lines)))
+        # An id is linked when a URL of the same paragraph holds it.
+        linked = set(DIGITS.findall(" ".join(URL_TEXT.findall(text))))
+        for content in contents:
+            if ONLY_IDS.fullmatch(content) and content.strip() not in linked:
+                check = "id-range" if "/" in content else "bare-id"
+                hit(check, content.strip(), "")
+        unlinked = URL_TEXT.sub(" ", strip_links(text, labels, False))
+        for match in ID_RANGE.finditer(unlinked):
+            hit("id-range", match.group(), "")
+        for match in BARE_ID.finditer(ID_RANGE.sub(" ", unlinked)):
+            if match.group() not in linked and not (
+                len(match.group()) == 8 and DATE.fullmatch(match.group())
+            ):
+                hit("bare-id", match.group(), "")
+        for match in CROSS_REPO.finditer(unlinked):
+            if match.group(1).lower() not in TRACKERS:
+                hit("cross-repo", match.group(), "")
+        for match in PLAIN_REF.finditer(unlinked):
+            hit("plain-ref", match.group(), "")
+        readable = URL_TEXT.sub("", strip_links(text, labels, True))
+        for pattern, fix in JARGON:
+            for match in pattern.finditer(readable):
+                hit("jargon", match.group(), fix)
+        for token in readable.split():
+            if GLOB.search(token.strip("([{\"'").rstrip(".,;:!?)]}\"'")):
+                hit("glob", token, "")
+        words += readable.lower().split()
+        for sentence, count in sentences(readable):
+            if count > MAX_WORDS:
+                long += 1
+                if not longest or count > longest[1]:
+                    longest = (sentence, count)
+
+    found = []
+    for (check, fix), (token, count) in sorted(
+        hits.items(), key=lambda entry: WORDING.index(entry[0][0])
+    ):
+        more = f" and {count - 1} more" if count > 1 else ""
+        token = quoted(token, 60)
+        detail = {
+            "bare-id": f"{token}{more} is a bare number; write each job as its full URL "
+            "(https://<host>/tests/<id>), a bug or ticket as a link",
+            "id-range": f"{token}{more} shortens job ids; write each job as its full URL",
+            "cross-repo": f"{token}{more}: GitHub resolves no repository from it; "
+            "write owner/repo#<n>, or #<n> for this one",
+            "plain-ref": f"{token}{more} stays plain text on GitHub; write it as a link",
+            "jargon": f"{token}{more} is shorthand; write {fix}",
+            "glob": f"{token}{more} can turn into italics; put file names and globs in backticks",
+        }[check]
+        found.append((check, detail))
+    if long:
+        sample = quoted(longest[0].replace(CODE, "`...`"), 60)
+        detail = (
+            f"{long} sentence{'s' if long > 1 else ''} over {MAX_WORDS} words, "
+            f"the longest {longest[1]} ({sample}); split it, one statement per sentence"
+        )
+        found.append(("long-sentence", detail))
+    plain = re.findall(r"[a-z]+", " ".join(words))
+    if body and 0 < len(plain) <= STUB_WORDS and STUB.intersection(plain):
+        found.append(
+            ("stub-body", "it only points at the inline comments; leave the body empty")
+        )
+    return found
+
+
+def item(where, text, body=False):
+    prose, paragraphs, blocks, quote_lines, quote_chars = parts(text)
     head = visible(text).lstrip()
     prefix = PREFIX.match(head)
     # The prefix after a quote or a code block: GitHub shows it, the budget does not see it.
     later = (
         not prefix and bool(prose) and bool(PREFIX.match(visible(prose[0]).lstrip()))
     )
+    # A nit: opening any prose block is a nit of its own: (block number, chars, lines).
+    nits = []
+    for number, lines in enumerate(paragraphs, 1):
+        if NIT.match(visible(lines[0])):
+            text_lines = [
+                URL.sub("", line) for line in lines if URL.sub("", line).strip()
+            ]
+            nits.append(
+                (
+                    number,
+                    length(" ".join(" ".join(text_lines).split())),
+                    len(text_lines),
+                )
+            )
     return {
         "where": where,
         "text": text,
         "kind": prefix.group(1).lower() if prefix else "",
         "near": not prefix and (later or bool(NEAR.match(head))),
         "prose": length(" ".join(" ".join(prose).split())),
-        "prose_lines": len(prose),
+        "nits": nits,
+        "only_nits": bool(nits) and len(nits) == len(paragraphs),
+        "wording": wording(paragraphs, body),
         "blocks": blocks,
         "quote_lines": quote_lines,
         "quote_chars": quote_chars,
@@ -127,7 +359,7 @@ def lint(review, lines, kind, late, replies=0):
     event = review["event"]
     items = []
     if review["body"].strip():
-        items.append(item("body", review["body"]))
+        items.append(item("body", review["body"], body=bool(review["comments"])))
     for number, comment in enumerate(review["comments"], 1):
         line = comment.get("line", comment.get("position"))
         place = quoted(f"{comment['path']}:{line}", 120)
@@ -135,9 +367,9 @@ def lint(review, lines, kind, late, replies=0):
     body = items[0] if items and items[0]["where"] == "body" else None
     comments = [x for x in items if x is not body]
     counted = [x for x in items if x["kind"] != "blocking"]
-    nits = [x for x in items if x["kind"] == "nit"]
+    nit_count = sum(len(x["nits"]) for x in items)
     blocking = [x for x in items if x["kind"] == "blocking"]
-    requests = [x for x in comments if x["kind"] == ""]
+    requests = [x for x in comments if x["kind"] == "" and not x["only_nits"]]
     prose = sum(x["prose"] for x in counted)
     count = len(counted) + replies
     size = bucket(lines)
@@ -177,15 +409,25 @@ def lint(review, lines, kind, late, replies=0):
                 f"long-comment {x['where']}: {x['prose']} chars of prose, over {PROSE[x['kind']]}; "
                 "one point: the failure and the fix"
             )
-    if len(nits) > MAX_NITS:
-        found.append(f"nits review: {len(nits)} nits, at most {MAX_NITS}")
-    for x in nits:
-        if x["prose"] > PROSE["nit"] or x["prose_lines"] > 1:
-            found.append(
-                f"long-nit {x['where']}: a nit is one line of at most {PROSE['nit']} chars, "
-                "prefix included; a longer one is a change request or nothing"
-            )
-    if nits and not requests and not blocking:
+    if nit_count > MAX_NITS:
+        found.append(f"nits review: {nit_count} nits, at most {MAX_NITS}")
+    long_nit = (
+        f"a nit is one line of at most {PROSE['nit']} chars, prefix included; "
+        "a longer one is a change request or nothing"
+    )
+    for x in items:
+        if x["kind"] == "nit":
+            # Each line opening with nit: is a nit of its own; prose that is no nit lengthens the first.
+            if not x["only_nits"] or any(
+                nit_chars > PROSE["nit"] or nit_lines > 1
+                for _, nit_chars, nit_lines in x["nits"]
+            ):
+                found.append(f"long-nit {x['where']}: {long_nit}")
+            continue
+        for number, nit_chars, nit_lines in x["nits"]:
+            if nit_chars > PROSE["nit"] or nit_lines > 1:
+                found.append(f"long-nit {x['where']} paragraph {number}: {long_nit}")
+    if nit_count and not requests and not blocking:
         found.append(
             "lone-nits review: nits ride along a change request; on their own, drop them"
         )
@@ -219,6 +461,7 @@ def lint(review, lines, kind, late, replies=0):
                 f"quotes {x['where']}: {x['quote_lines']} quoted lines, {x['quote_chars']} chars; "
                 "quote only the line you answer"
             )
+        found += [f"{check} {x['where']}: {detail}" for check, detail in x["wording"]]
     if late:
         for x in items:
             if x["kind"] != "blocking":
@@ -248,7 +491,7 @@ def lint(review, lines, kind, late, replies=0):
         (
             f"draft: {event}, {len(comments)} comment{'' if len(comments) == 1 else 's'}"
             f"{' + body' if body else ''}; "
-            f"blocking {len(blocking)}, nit {len(nits)}, non-blocking prose {prose} chars"
+            f"blocking {len(blocking)}, nit {nit_count}, non-blocking prose {prose} chars"
             f"{f'; replies {replies}' if replies else ''}"
         ),
     ]
@@ -315,7 +558,7 @@ def load(raw):
 def main():
     parser = ArgumentParser(
         prog="review-lint.py",
-        description="Offline size and form check of a DRAFT pull request review: the JSON for "
+        description="Offline size, form and wording check of a DRAFT pull request review: the JSON for "
         "gh api -X POST repos/O/R/pulls/N/reviews --input FILE (commit_id, event, body, comments "
         "with path, line, body). Comments prefixed blocking: count against no budget; nit: and "
         "unprefixed ones do. Whether a finding is right is not checked; posting stays a separate, "

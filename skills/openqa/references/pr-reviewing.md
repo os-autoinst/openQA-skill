@@ -38,8 +38,14 @@ To word a fix: -> pr-review-rules.md "Ranked requests"; it is not a source of ne
 - A reply in an existing thread: `gh api -X POST repos/<o>/<r>/pulls/<n>/comments/<id>/replies -f body=<text>`; it counts against the ceiling (`--replies`) and goes to the user with the payload.
 - One point per comment, at its line; a mechanical fix as a suggestion block (distri: 86% acted on).
 - Start with `blocking:` or `nit:`, exactly; no prefix means please change. Event COMMENT; APPROVE only with no finding, REQUEST_CHANGES only with a blocking comment, both by the user's choice (distri uses REQUEST_CHANGES on ~1% of PRs).
+- `blocking:` is followed by what breaks. `nit:` only for a cosmetic one-liner; anything that can make a run wrong is a change request or `blocking:`.
 - A question when its answer decides whether there is a defect; name the line and the scenario.
-- Neutral wording (#26785: one jab drew a long defensive reply).
+- Write for the PR author, in neutral words (#26785: one jab drew a long defensive reply): full sentences of about 25 words or fewer (`scripts/review-lint.py` flags more than 30), one statement each, one ask per comment. First what goes wrong and for whom, then the evidence, then the ask.
+- No skill shorthand: "verification run", not VR; "the latest commit of this PR, `<hash>`", not head; the versions by name, not `15spx`; `TEST_GIT_HASH` only with what it shows ("it tested `<hash>`, before the fix").
+- Every openQA job as its full URL, never a bare id or a range like `5123456/57`; a PR in another repository as `owner/repo#n`; a bug or ticket as a link; file names and globs in backticks. GitHub may link a bare number to a commit and `repo#n` to this repository; `*` makes italics.
+- No stub body ("See inline."): leave the body empty. Read the draft once for spelling and grammar before it is shown.
+- Before: "nit: VR 5123456 at head is x86_64 only; foo_setup needs FOO_PROFILE, do all groups set it?" After, a change request: "Every arch that loads this schedule now runs `foo_setup`, which dies when FOO_PROFILE is not set. The only verification run, https://openqa.opensuse.org/tests/5123456, is x86_64. Do all job groups that load it set FOO_PROFILE?"
 - One pass. Later rounds check the changes and applied suggestions, no new nits; a blocking finding missed earlier says so. Replies: one per thread, two sentences; declined again, stop.
+- After posting, read the review back (`gh api repos/<o>/<r>/pulls/<n>/reviews`) before any retry: a call that failed may still have posted it.
 
 Sources: os-autoinst testapi.pm (`record_info` results); os-autoinst-scripts openqa-clone-and-monitor-job-from-pr (`openqa: clone`); os-autoinst-distri-opensuse .mergify.yml (two approvals, reviews dismissed on push); GitHub REST pull request reviews and review comments.

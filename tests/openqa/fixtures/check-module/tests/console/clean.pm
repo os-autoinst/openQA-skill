@@ -42,7 +42,7 @@ EOT
     assert_script_run 'bash -c "cd /tmp/fixture; ls"';
     assert_script_run "echo \"include $script;\" >> /tmp/fixture/conf";
     assert_script_run 'echo `cd /tmp; pwd`';
-    assert_script_run '(cd /tmp; ls) | grep -q fixture';
+    assert_script_run '(cd /tmp; ls) | tee /tmp/fixture.list';
     assert_script_run '{ echo secret; echo secret; } | smbpasswd -a -s fixture';
     assert_script_run 'set -e; cd /tmp; ls';
     assert_script_run 'set -xo errexit; cd /tmp; ls';

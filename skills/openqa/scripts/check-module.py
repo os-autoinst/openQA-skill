@@ -38,17 +38,22 @@ _STRINGS = {
 }
 
 
-def _empty_strings(text, kinds="\"'"):
-    """text with "" for each string literal that starts with one of the quote kinds."""
+def _empty_strings(text, kinds="\"'", keep=False):
+    """text with "" for each string literal that starts with one of the quote kinds; with keep, "_" for each
+    character inside, so that an offset in the text is one in the line."""
 
     def empty(string):
         if string.lastindex:
-            return '""'
+            return '"{}"'.format("_" * (len(string.group()) - 2) if keep else "")
         # No quote of this kind closes behind an open one, the other kind still can.
         quote, rest = string.group()[0], string.group()[1:]
-        return quote + _empty_strings(rest, kinds.replace(quote, ""))
+        return quote + _empty_strings(rest, kinds.replace(quote, ""), keep)
 
     return _STRINGS[kinds].sub(empty, text) if kinds else text
+
+
+# A plain string or a comment is read whole, so that a '"""' inside it opens nothing.
+_PYTHON_TOKEN = re.compile(r"""("{3}|'{3})|"(?:[^"\\]|\\.)*"?|'(?:[^'\\]|\\.)*'?|#.*""")
 
 
 class Module:
@@ -65,10 +70,29 @@ class Module:
         self.raw = text.split("\n")
         self.code = [self._code(line) for line in self._without_pod()]
 
+    def _without_docstrings(self):
+        """Blank each line that starts inside a triple-quoted string (Python only)."""
+        lines, inside = [], None
+        for line in self.raw:
+            lines.append("" if inside else line)
+            at = 0
+            while True:
+                if inside:
+                    end = line.find(inside, at)
+                    if end < 0:
+                        break
+                    inside, at = None, end + 3
+                    continue
+                token = _PYTHON_TOKEN.search(line, at)
+                if not token:
+                    break
+                inside, at = token.group(1), token.end()
+        return lines
+
     def _without_pod(self):
-        """Blank POD, here-document bodies and everything after __END__ (Perl only)."""
+        """Blank POD, here-document bodies and everything after __END__; in Python, triple-quoted strings."""
         if self.python:
-            return self.raw
+            return self._without_docstrings()
         # Looked up per tag: reading on to the closing line would read a file of open tags once per tag.
         where = {}
         for index, line in enumerate(self.raw):
@@ -96,9 +120,9 @@ class Module:
         return lines
 
     @staticmethod
-    def _code(line):
-        """Empty the string literals, then drop the comment."""
-        return re.sub(r"(^|\s)#.*$", "", _empty_strings(line))
+    def _code(line, keep=False):
+        """Empty the string literals, then drop the comment; with keep a literal keeps its length."""
+        return re.sub(r"(^|\s)#.*$", "", _empty_strings(line, keep=keep))
 
     def grep(self, pattern, lines=None):
         regex = re.compile(pattern)
@@ -514,10 +538,11 @@ _ASSIGNMENT = re.compile(
 )
 
 
-def _command(line, call):
-    """The first literal of the call and each literal that '.' joins to it, with '_' for a term in between."""
-    parts, depth, state = [call.group(2)], 0, "operand"
-    for token in _PERL_TOKEN.finditer(line, call.end()):
+def _command(line, text, end):
+    """The literal text that ends at end and each literal that '.' joins to it, with '_' for a term in
+    between, and the offset in the line where the reading stopped."""
+    parts, depth, state = [text], 0, "operand"
+    for token in _PERL_TOKEN.finditer(line, end):
         kind = token.lastgroup
         if depth:
             depth += (kind == "open") - (kind == "close")
@@ -534,8 +559,8 @@ def _command(line, call):
             state, depth = "term", int(kind == "open")
         else:
             # A ',' starts the next argument, a word such as 'if' or 'x' what is no part of the command.
-            break
-    return "".join(parts)
+            return "".join(parts), token.start()
+    return "".join(parts), len(line)
 
 
 def _shell_checked(command):
@@ -574,7 +599,11 @@ def semicolon_chain(module):
         if not call or "assert_script_run" not in module.code[number - 1]:
             continue
         # '.' joins strings in Perl only.
-        command = call.group(2) if module.python else _command(line, call)
+        command = (
+            call.group(2)
+            if module.python
+            else _command(line, call.group(2), call.end())[0]
+        )
         if _shell_checked(command):
             continue
         parts = _top_level(command).rstrip("; ").split(";")
@@ -597,6 +626,97 @@ def semicolon_chain(module):
         (
             "join with '&&'; a tolerated failure gets '|| true'; a script goes through script_output "
             "or write_sut_file + 'bash -e' (references/performance.md \"Batch and upload\")"
+        ),
+    )
+
+
+_OUTPUT_CALL = re.compile(
+    r"\b(?:script_output|assert_script_run|validate_script_output)\b"
+)
+# Perl's q and qq take any delimiter, a bracket closed by its partner around nested pairs; Python's
+# prefixes such as f, r and rb come before a quote.
+_LITERAL_OPEN = re.compile(
+    r"""\s*(?:\(\s*)?(?:qq?\s*([^\w\s])|[bfruBFRU]{0,2}(["']))"""
+)
+_PARTNER = {"{": "}", "(": ")", "[": "]", "<": ">"}
+# sort, uniq and tr reorder, merge or rewrite the output: the log still holds what it says.
+_FILTER = re.compile(r"\|&?\s*(?:e?grep|fgrep|g?awk|sed|cut|head|tail|wc)(?![\w.-])")
+_PIPELINE_END = re.compile(r"(\|\||&&|;|\\n|(?<![|>])&(?!>))")
+# The filter answers the condition of a branch or a loop, or a test that '||' acts on.
+_CONDITION = re.compile(r"\s*(?:if|elif|while|until)\s")
+# Output into a file or through tee is kept for a log or a later step; '2>', '>&2' and /dev/null keep nothing.
+_KEPT_OUTPUT = re.compile(
+    r"(?<![02-9=>-])>(?:>|&(?!\s*[\d-]))?\s*(?!&|/dev/null\b)[^\s;&|<>]|\|&?\s*tee\b"
+)
+# '! a | grep b' and 'a | grep b; test $? -eq 1' fail on a match, which grep prints.
+_NEGATED = re.compile(r"\s*!\s")
+
+
+def _literal(line, start):
+    """The text of the string literal that opens at start, None if none does, and the offset behind it;
+    one that does not close on the line takes the rest of it."""
+    opening = _LITERAL_OPEN.match(line, start)
+    if not opening:
+        return None, start
+    delimiter = opening.group(1) or opening.group(2)
+    close, depth = _PARTNER.get(delimiter, delimiter), 0
+    marks = re.compile(rf"\\.|[{re.escape(delimiter + close)}]")
+    for mark in marks.finditer(line, opening.end()):
+        if mark.group() == close and not depth:
+            return line[opening.end() : mark.start()], mark.end()
+        depth += (mark.group() == delimiter) - (mark.group() == close)
+    return None, len(line)
+
+
+def _filtered(command):
+    """Whether a pipeline of the command leaves only a filter's result for the check to see."""
+    pieces = _PIPELINE_END.split(_top_level(command)) + [""]
+    condition = False
+    for pipeline, end in zip(pieces[::2], pieces[1::2]):
+        condition = condition or bool(_CONDITION.match(pipeline))
+        if (
+            not condition
+            and end != "||"
+            and _FILTER.search(pipeline)
+            and not _KEPT_OUTPUT.search(pipeline)
+            and not _NEGATED.match(pipeline)
+        ):
+            return True
+        # '&&' and '||' continue a condition, anything else ends it.
+        condition = condition and end in ("&&", "||")
+    return False
+
+
+@rule(
+    "pipe-filter",
+    "review",
+    "all",
+    "a filter behind '|' leaves its result, not the command's output, in the log",
+)
+def pipe_filter(module):
+    hits = []
+    for number in module.grep(_OUTPUT_CALL, module.code):
+        line, read = module.raw[number - 1], 0
+        for name in _OUTPUT_CALL.finditer(Module._code(line, keep=True)):
+            # A call in a term that '.' joins to an earlier command is skipped: each would read the rest of the line.
+            if name.start() < read:
+                continue
+            text, read = _literal(line, name.end())
+            if text is None:
+                continue
+            # '.' joins strings in Perl only.
+            command, read = (
+                (text, read) if module.python else _command(line, text, read)
+            )
+            if "$?" not in command and _filtered(command):
+                hits.append(number)
+                break
+    return hits, (
+        "a filter behind '|' leaves only its result in the log, so a failure shows no reason",
+        (
+            "capture the command alone with script_output and match its text in the module; in Perl "
+            "validate_script_output(<cmd>, qr/<re>/) records command, pattern and output "
+            '(references/testapi.md "Traps")'
         ),
     )
 

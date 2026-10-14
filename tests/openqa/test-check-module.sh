@@ -37,6 +37,7 @@ check "bad.pm: one finding per rule, ordered by line" "1 header-maintainer
 11 use-strict
 18 check-var-arch
 19 egrep-fgrep
+19 pipe-filter
 21 wait-idle
 22 check-screen-timeout
 23 check-screen-wait
@@ -53,7 +54,7 @@ check "bad.pm: one finding per rule, ordered by line" "1 header-maintainer
 34 semicolon-chain
 35 trailing-true" "$(brief <<<"$actual")"
 
-check "findings: the last line is the summary" "summary: 1 file(s), 23 finding(s)" "$(tail -n 1 <<<"$actual")"
+check "findings: the last line is the summary" "summary: 1 file(s), 24 finding(s)" "$(tail -n 1 <<<"$actual")"
 check "raw-zypper names both install_package modes" 1 \
 	"$(grep -c " raw-zypper .*trup_apply => 1 | trup_reboot => 1" <<<"$actual")"
 
@@ -62,9 +63,11 @@ check "finding format is <file>:<line>: <id> <message> -> <fix>" \
 	"$(grep ' egrep-fgrep ' <<<"$actual")"
 
 # The pointer gate does not read scripts, so the section a fix sends the reader to is resolved here.
-pointer=$(grep ' semicolon-chain ' <<<"$actual" | grep -o 'references/[a-z-]*\.md "[^"]*"')
-python3 "$here/../../skills/openqa/scripts/refsection.py" "${pointer%% *}" "$(cut -d'"' -f2 <<<"$pointer")" >/dev/null 2>&1
-check "the fix names a section that exists" 0 $?
+for ident in semicolon-chain pipe-filter; do
+	pointer=$(grep " $ident " <<<"$actual" | grep -o 'references/[a-z-]*\.md "[^"]*"')
+	python3 "$here/../../skills/openqa/scripts/refsection.py" "${pointer%% *}" "$(cut -d'"' -f2 <<<"$pointer")" >/dev/null 2>&1
+	check "$ident: the fix names a section that exists" 0 $?
+done
 
 check "bad_header.pm: rules that exclude the ones in bad.pm" "1 header-copyright
 1 header-summary
@@ -334,6 +337,131 @@ EOT
 EOF
 check "a here-string in a command blanks no line of the module: the sleep behind '<<<EOT' is found, the one in the here-document is not" \
 	"2 sleep" "$(lint "$chain/lib/herestring.pm" | brief)"
+# --- pipe-filter: a filter behind the command, and what is no filter -------------------------
+cat >"$chain/lib/kinds.pm" <<'EOF'
+my $mac = script_output('ip -o link | grep -i ether');
+assert_script_run "rpm -qa | egrep 'kernel-(default|azure)'";
+assert_script_run 'rpm -qa | fgrep -x vim';
+my $first = script_output("snapper list | awk 'NR == 3 {print \$1}'");
+my $last = script_output 'snapper list | gawk "END {print \$1}"';
+my $ip = script_output("ip -4 addr show eth0 | sed -n 's/.*inet //p'");
+my $addr = script_output('grep IPADDR /etc/sysconfig/network/ifcfg-eth0 | cut -d= -f2');
+record_info('dmesg', script_output('dmesg | head -n 20'));
+my $repo = script_output('zypper lr|tail -1');
+my $count = script_output("ls /tmp/t | wc -l");
+assert_script_run('make 2>&1 |& grep -q done', timeout => 600);
+EOF
+check "pipe-filter: grep, egrep, fgrep, awk, gawk, sed, cut, head, tail and wc behind '|', also without blanks and behind '|&'" \
+	"lib/kinds.pm:1,2,3,4,5,6,7,8,9,10,11: pipe-filter" "$(lint "$chain/lib/kinds.pm" | sed "s|$chain/||" | grep -o '^[^ ]* pipe-filter')"
+cat >"$chain/lib/forms.pm" <<'EOF'
+my ($id) = script_output("snapper --csv list | awk -F, '\$4 == \"yes\" && \$5 == \"no\" {print \$3}'") =~ /(\d+)/;
+if (script_output('ls /tmp/t') ne '' && script_output('ls /tmp/t | wc -l') > 2) {
+assert_script_run('zypper se ' . $pkg . ' | grep -q ' . $pkg);
+validate_script_output('lsblk | grep part', qr/vda1/);
+my $oops = testapi::script_output('journalctl -k | grep -i oops');    # the kernel log
+assert_script_run 'ls /tmp/t > /tmp/t/list; dmesg | grep -q error';
+assert_script_run 'dmesg | grep -q error >/dev/null 2>&1';
+assert_script_run 'wicked show-config 2> /tmp/t/err | grep -q wireless';
+my @n = (script_output('ls /tmp/t | wc -l'), script_output('ls /tmp/u | wc -l'));
+EOF
+printf '%s\n' 'script_output("dmesg | grep -i oops")' 'assert_script_run("ls " + d + " | grep -q x")' >"$chain/forms.py"
+check "pipe-filter: a call behind '=' or inside an expression, its command joined by '.', validate_script_output, a call with its package and a comment behind it, a filter in the second pipeline, output to /dev/null, stderr into a file, two calls on one line as one finding; in Python the first string only" \
+	"lib/forms.pm:1,2,3,4,5,6,7,8,9: pipe-filter
+forms.py:1: pipe-filter" "$(lint "$chain/lib/forms.pm" "$chain/forms.py" | sed "s|$chain/||" | grep -o '^[^ ]* pipe-filter')"
+cat >"$chain/lib/silent.pm" <<'EOF'
+assert_script_run 'test -f /tmp/t/a || grep -q x /tmp/t/b';
+assert_script_run 'zypper lr | tee /tmp/t/repos';
+assert_script_run 'ls /tmp/t | cat -v';
+assert_script_run 'ls /tmp/t | xargs rm -f';
+assert_script_run 'curl -s localhost/t.json | jq -r .name';
+assert_script_run 'echo 2+2 | wcalc';
+assert_script_run "git commit -m 'drop | grep from the check'";
+assert_script_run 'test $(ls /tmp/t | wc -l) -eq 2';
+assert_script_run 'test `ls /tmp/t | wc -l` -eq 2';
+script_run 'dmesg | grep -q error';
+# script_output('dmesg | grep x');
+assert_script_run 'make';    # not script_output('make | tail -1'), which hid the error
+assert_script_run 'ls /tmp/t'; record_info('Hint', "script_output('dmesg | grep x')");
+assert_script_run 'rpm -qa | sort | uniq -c | tr a-z A-Z';
+assert_script_run 'md5sum /tmp/t/f | cut -d" " -f1 > /tmp/t/f.md5';
+assert_script_run 'dmesg | tail -n 50 >> /tmp/t/log';
+assert_script_run 'nft list ruleset | wc -l | tee /tmp/t/rules';
+assert_script_run 'snapper list | tee -a /dev/ttyS0 | grep first';
+assert_script_run '! virsh list --all | grep vm1';
+assert_script_run 'rpm -ql vim | grep zfs; test $? -eq 1';
+my $t = <<EOT;
+script_output('dmesg | grep x');
+EOT
+
+=pod
+
+script_output('dmesg | grep x');
+
+=cut
+
+script_output('dmesg | grep x');
+EOF
+check "pipe-filter: silent on '||', tee, cat, xargs, another program, one whose name starts like a filter, a pipe in quotes, \$( ) or backticks, script_run, a comment or a string, also behind a call, sort, uniq and tr, output into a file, tee in front of the filter, a negated pipeline, a test of \$?, a here-document and POD" \
+	"lib/silent.pm:31: pipe-filter" "$(lint "$chain/lib/silent.pm" | sed "s|$chain/||" | grep -o '^[^ ]* pipe-filter')"
+cat >"$chain/lib/condition.pm" <<'EOF'
+assert_script_run 'until postqueue -p|grep "Mail queue is empty";do sleep 1;done';
+assert_script_run("if ip a | grep br0; then ip link del br0; fi");
+assert_script_run("rpm -qa | grep -q foo || zypper -n in foo");
+assert_script_run 'while ip a | grep -q br0; do sleep 1; done';
+assert_script_run 'if test -f /tmp/t/a; then make; elif ls /tmp/t | grep -q b; then ls; fi';
+assert_script_run 'test -f /tmp/t/a && if ls /tmp/t | grep -q b; then make; fi';
+assert_script_run 'if test -f /tmp/t/a && ls /tmp/t | grep -q b; then make; fi';
+assert_script_run 'if test -f /tmp/t/a; then ls /tmp/t | grep b; fi';
+assert_script_run 'while true; do ls /tmp/t | grep -q b && break; done';
+assert_script_run 'until ip a | grep -q br0; do sleep 1; done; ip a | grep inet';
+assert_script_run 'ls /tmp/t | grep -q b && make';
+assert_script_run 'ifconfig | grep inet';
+assert_script_run 'echo if then | grep -c if';
+EOF
+check "pipe-filter: silent on the condition of until, if, while and elif, also behind '&&' or with '&&' in it, and on a pipeline that '||' follows; reported in the body of a branch or a loop, behind a condition that ';' ends, in front of '&&' and where 'if' is part of a word or an argument" \
+	"lib/condition.pm:8,9,10,11,12,13: pipe-filter" "$(lint "$chain/lib/condition.pm" | sed "s|$chain/||" | grep -o '^[^ ]* pipe-filter')"
+cat >"$chain/lib/literals.pm" <<'EOF'
+assert_script_run qq{systemctl status $service | grep \"active \(running\)\"};
+my $bus = script_output(q(dpdk-devbind.py --status-dev net | grep "unused=.*vfio-pci" | head -n1));
+my $n = script_output q[ls /tmp/t | wc -l];
+my $m = script_output qq <ls /tmp/t | wc -l>;
+validate_script_output q!rpm -qa | grep vim!, qr/vim/;
+my $r = script_output q{awk '{print $1}' /tmp/t/f | grep x};
+assert_script_run q{BG=`ps -U t | awk 'END{print $1}'`};
+my $p = script_output qx{ls /tmp/t | grep x};
+my $q = script_output qq{ls /tmp/t | grep x
+EOF
+printf '%s\n' 'script_output(f"rpm -qa | grep {pkg}")' "assert_script_run(r'ls /tmp/t | wc -l')" \
+	'script_output(Rb"dmesg | head")' 'script_output(x"dmesg | head")' >"$chain/literals.py"
+check "pipe-filter: q and qq with a bracket or another delimiter, a blank in front of it or not, a bracket around nested pairs, and a string with a Python prefix are read; qx, a q string that does not close on the line and a prefix Python does not know are not" \
+	"lib/literals.pm:1,2,3,4,5,6: pipe-filter
+literals.py:1,2,3: pipe-filter" "$(lint "$chain/lib/literals.pm" "$chain/literals.py" | sed "s|$chain/||" | grep -o '^[^ ]* pipe-filter')"
+cat >"$chain/lib/output.pm" <<'EOF'
+assert_script_run 'make |& grep -v warning >& /tmp/t/build.log';
+assert_script_run 'make |& grep -v warning >&2';
+assert_script_run 'make | grep -v warning 1>&2';
+assert_script_run "dmesg > /tmp/t/log\nls /tmp/t | wc -l";
+EOF
+check "pipe-filter: '>&' into a file keeps the output, '>&2' and '1>&2' do not; an escaped newline ends the pipeline whose output goes into a file" \
+	"lib/output.pm:2,3,4: pipe-filter" "$(lint "$chain/lib/output.pm" | sed "s|$chain/||" | grep -o '^[^ ]* pipe-filter')"
+cat >"$chain/docstring.py" <<'EOF'
+def run(self):
+    """Check vim.
+
+    script_output("rpm -qa | grep vim")
+    """
+    note = '''
+    script_output("dmesg | grep x")
+    '''
+    script_output("ls /tmp/t | wc -l")  # """ in a comment
+    script_output("ls /tmp/t | wc -l")
+    quotes = "'''"
+    script_output("ls /tmp/t | wc -l")
+    """One line."""
+    script_output("ls /tmp/t | wc -l")
+EOF
+check "pipe-filter: a line inside a triple-quoted Python string is no code; a triple quote in a comment or in a plain string and a docstring of one line open none" \
+	"docstring.py:9,10,12,14: pipe-filter" "$(lint "$chain/docstring.py" | sed "s|$chain/||" | grep -o '^[^ ]* pipe-filter')"
 # --- lines built to stall a rule or the reading of the file --------------------------------
 python3 - "$chain" <<'PY'
 import sys
@@ -371,13 +499,22 @@ lines = [
     "assert_script_run 'make' . f(\"" + '\\"' * 40000,
     "assert_script_run 'test -f a" + blank + "& make; ls';",
     "assert_script_run '[ -f a ]" + blank + "&&" + blank + "x=1" + blank + "; make';",
+    "script_output('a' . f(" * 20000,
+    "script_output " * 20000 + "script_output" + blank + "x",
+    "assert_script_run 'a |" + blank + "x';",
+    "assert_script_run '" + "a | " * 30000 + "x';",
+    "assert_script_run '" + "a || " * 30000 + "b | grep c';",
+    "assert_script_run 'a | grep x >" + blank + "/dev/null';",
+    "assert_script_run '" + blank + "a | grep x';",
+    "script_output qq{" * 20000,
+    "assert_script_run 'a | grep x >&" + blank + "2';",
 ]
 lines += ["<<EOT"] * 20000
 lines += ["# Copyright SUSE LLC", "# Summary: x", "# Maintainer: QE <qe@example.com>", "use Mojo::Base 'consoletest';", "1;"]
 open(f"{sys.argv[1]}/slow.pm", "w").write("\n".join(lines) + "\n")
 PY
 # The file takes a fifth of the limit; put back, each pattern or loop that was replaced takes twice the limit.
-check "no line stalls the script: an open string of backslashes or quotes, deep nesting, a run of spaces behind each call, a call or its argument repeated, a chain of 40,000 commands, a run of spaces behind a ';', 'time', '-p', '!' and '<<', 20,000 keywords behind a closing quote, 40,000 joined strings and terms, a run of spaces around '.', a call and a string in a call behind '.' that never close, a run of spaces behind a test and around its '&&', here-documents that never end" \
+check "no line stalls the script: an open string of backslashes or quotes, deep nesting, a run of spaces behind each call, a call or its argument repeated, a chain of 40,000 commands, a run of spaces behind a ';', 'time', '-p', '!' and '<<', 20,000 keywords behind a closing quote, 40,000 joined strings and terms, a run of spaces around '.', a call and a string in a call behind '.' that never close, a run of spaces behind a test and around its '&&', here-documents that never end, 20,000 calls in a term behind '.' that never closes, 20,000 calls without a command, a run of spaces behind '|', behind '>' and in front of a pipeline, 30,000 pipes, 30,000 '||' in front of a filter, 20,000 calls whose qq{ never closes, a run of spaces behind '>&'" \
 	"2,23,24,25,26,27,28,31 semicolon-chain
 5 spdx-colon
 6,7 script-run-background
@@ -385,7 +522,16 @@ check "no line stalls the script: an open string of backslashes or quotes, deep 
 9 type-string-newline
 10,11,12 click-positional-timeout
 13 default-timeout
-19 soft-failure-reference" "$(timeout 20 python3 "$script" "$chain/slow.pm" 2>/dev/null | brief)"
+19 soft-failure-reference
+37,38,39,41 pipe-filter" "$(timeout 20 python3 "$script" "$chain/slow.pm" 2>/dev/null | brief)"
+python3 - "$chain" <<'PY'
+import sys
+lines = ['"""' * 60001] + ["script_output('a | grep b')"] * 20000 + ['"""', '"' + "\\'''" * 40000]
+lines += ["'" + '"""' * 40000 + "'", "# " + "'''" * 40000, "script_output('a | grep b')"]
+open(f"{sys.argv[1]}/lib/slow.py", "w").write("\n".join(lines) + "\n")
+PY
+check "no Python line stalls the reading of triple-quoted strings: 60,001 triple quotes in a row, 20,000 lines inside one, 40,000 in a plain string that never closes, in a plain string and in a comment" \
+	"20006 pipe-filter" "$(timeout 20 python3 "$script" "$chain/lib/slow.py" 2>/dev/null | brief)"
 {
 	printf "script_run 'a', timeout => %05000d;\nscript_run 'a', timeout => 030;\n" 9
 	printf '%s\n' '# Copyright SUSE LLC' '# Summary: x' '# Maintainer: QE <qe@example.com>' "use Mojo::Base 'consoletest';" '1;'

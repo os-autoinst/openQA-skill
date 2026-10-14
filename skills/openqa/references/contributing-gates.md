@@ -134,6 +134,7 @@ Prose-only, policed by reviewers: no `sleep`, no `is_tumbleweed()` (exclude olde
 - **Branch commits land in master as they are — squash yourself**: amend or rebase review fixes, `git push --force-with-lease`, rewrite the body after squashing.
 - **Linear history is a merge condition**: rebase on master, never merge master in.
 - **Subject** imperative, body says why (the PR description is not in the git log). Kernel-owned paths (`docs/KERNEL_README.md`) require a component prefix and reject Conventional Commits `type(scope):` although gitlint accepts them -> references/area-conventions.md "Kernel"
+- **Subject and body in plain, correctly spelled English**: no gate checks spelling, and maintainers ask for an amend over a typo (#25987).
 
 ## LLM-assistance trailer
 

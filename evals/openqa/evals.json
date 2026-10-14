@@ -162,7 +162,7 @@
         "For both piped commands, snapper --csv list | awk and grep -oP | awk, the review asks to capture the command's output with script_output and parse it in Perl, or to check it with validate_script_output, instead of piping it into awk",
         "Each comment says what goes wrong, and in which scenario, before what to change",
         "No openQA job is given as a bare id or a shortened range such as 24802374/75, and VR does not appear",
-        "No sentence has more than 30 words",
+        "No sentence has more than 30 words, counted as scripts/review-lint.py counts them (a code span is one word).",
         "nit: is used only for a cosmetic one-line point; nothing that can make a run pass or fail wrongly is a nit",
         "The draft is the JSON for gh api .../pulls/26824/reviews (commit_id, event, body, comments with path and line) and passes scripts/review-lint.py --lines 480 --lib",
         "Nothing was posted, pushed or commented on GitHub; the payload is shown to the user for approval"

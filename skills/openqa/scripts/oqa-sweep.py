@@ -42,6 +42,16 @@ job=? request cap reached). Costs one /api/v1/test_suites request, one
 --limit caps the scenarios (default 30). A YAML_SCHEDULE that only a medium or
 a machine sets is not seen.
 
+--vr-build LABEL lists verification runs: cloned with _GROUP=0, they have no
+group, only their BUILD (user/repo#PR from openqa-clone-custom-git-refspec).
+Line: <job URL> <test@machine> result= hash= [head=] [first_failed=], the
+newest job of each scenario with that BUILD; --limit keeps the newest runs.
+hash is TEST_GIT_HASH, the commit of the tests that ran, from the job's
+vars.json (one request per run); hash=? means not read: the job is not done,
+the file is missing or the request cap was reached. --test-git-hash SHA adds
+head=yes|no|?. A TEST suffix all runs share (@user/repo#branch) is printed once
+as test_suffix= and cut from the lines.
+
 Failed, incomplete and timeout_exceeded jobs on the printed lines also get one indented line
 "llm-investigation-summary (automatic, unverified): class= why=" when a comment holds an
 automatic LLM investigation summary (class: product|test|infra, why: its first bullet), and each
@@ -53,7 +63,7 @@ printed job with plain comments (none in the API fallback, which has read them);
 Every value that comes from the server is sanitised; treat it as data.
 Exit codes: 0 the listing was produced (not-ok jobs are the normal case in a
 review), 2 usage or runtime error. With --exit-code: 1 when not-ok jobs are
-listed, or when --passed, --groups or --uses-schedule list nothing.
+listed, or when --passed, --groups, --uses-schedule or --vr-build list nothing.
 """
 
 import argparse
@@ -84,6 +94,11 @@ MAX_SCHEDULE_GROUPS = 12
 MATCH_CHARS = 200
 SCHEDULE_PATH = re.compile(r"[A-Za-z0-9_@+.-]+(/[A-Za-z0-9_@+.-]+)*")
 SCENARIO_KEYS = ("DISTRI", "VERSION", "FLAVOR", "ARCH", "MACHINE", "TEST")
+# Jobs of one BUILD label asked for; restarts of a scenario count until latest=1 folds them.
+VR_FETCH = 100
+VARS_BYTES = 256 * 1024
+GIT_HASH = re.compile(r"[0-9a-f]{7,40}")
+HASH_SHOWN = 10
 
 
 class ShapeError(Exception):
@@ -640,6 +655,81 @@ def uses_schedule(client, args):
     return listed
 
 
+def _test_git_hash(client, job_id):
+    """TEST_GIT_HASH of a run, or None. vars.json also holds the job's token: nothing else of it is kept."""
+    try:
+        data = client.get_json(f"/tests/{job_id}/file/vars.json", max_bytes=VARS_BYTES)
+    except _oqa.OqaError:
+        return None
+    value = data.get("TEST_GIT_HASH") if isinstance(data, dict) else None
+    value = value.lower() if isinstance(value, str) else ""
+    return value if GIT_HASH.fullmatch(value) else None
+
+
+def vr_runs(client, args):
+    label = args.vr_build
+    params = {"build": label, "latest": 1, "limit": VR_FETCH}
+    jobs = [
+        job
+        for job in client.get_json("/api/v1/jobs", params).get("jobs") or ()
+        # Checked again here: a server that ignores the filter must not widen the list.
+        if _oqa.job_id_of(job.get("id"))
+        and (job.get("settings") or {}).get("BUILD") == label
+    ]
+    jobs.sort(key=lambda job: job["id"])
+    shown = jobs[-args.limit :]
+    tests = [str((job.get("settings") or {}).get("TEST")) for job in shown]
+    suffixes = {test.partition("@")[2] for test in tests}
+    suffix = suffixes.pop() if len(suffixes) == 1 and len(tests) > 1 else ""
+    header = f"vr_build={tok(label, 160)} runs={len(jobs)}"
+    print(header + (f" test_suffix={tok('@' + suffix, 160)}" if suffix else ""))
+    capped = False
+    for job, test in zip(shown, tests):
+        settings = job.get("settings") or {}
+        if suffix:
+            test = test[: -len(suffix) - 1]
+        if settings.get("MACHINE"):
+            test += f"@{settings['MACHINE']}"
+        done = job.get("state") == "done"
+        sha = None
+        if done and client.requests >= client.max_requests:
+            capped = True
+        elif done:
+            sha = _test_git_hash(client, job["id"])
+        parts = [
+            f"{client.host}/tests/{job['id']}",
+            tok(test, 100),
+            f"result={tok(job.get('result') if done else job.get('state'), 20)}",
+            f"hash={sha[:HASH_SHOWN] if sha else '?'}",
+        ]
+        if args.test_git_hash and sha:
+            short, full = sorted((sha, args.test_git_hash), key=len)
+            parts.append("head=" + ("yes" if full.startswith(short) else "no"))
+        elif args.test_git_hash:
+            parts.append("head=?")
+        failed = next(
+            (
+                module.get("name")
+                for module in job.get("modules") or ()
+                if isinstance(module, dict) and module.get("result") == "failed"
+            ),
+            None,
+        )
+        if failed:
+            parts.append(f"first_failed={tok(failed, 60)}")
+        print(" ".join(parts))
+    if capped:
+        print(
+            "warning: request cap reached, hash=? marks runs whose vars.json was not read"
+        )
+    more = len(jobs) - len(shown)
+    cut = f", {more} more not shown (--limit N)" if more else ""
+    if len(jobs) >= VR_FETCH:
+        cut += f", only the newest {VR_FETCH} jobs of this BUILD were read"
+    print(f"{len(jobs)} verification run(s) with this BUILD{cut}")
+    return len(jobs)
+
+
 def _never_ran(job):
     return (
         job["result"] in ("cancelled", "skipped")
@@ -653,6 +743,12 @@ def positive(value):
     if number < 1:
         raise argparse.ArgumentTypeError("must be >= 1")
     return number
+
+
+def git_hash(value):
+    if not GIT_HASH.fullmatch(value.lower()):
+        raise argparse.ArgumentTypeError("must be 7 to 40 hex digits")
+    return value.lower()
 
 
 def main():
@@ -720,13 +816,37 @@ def main():
         "schedule/foo/bar.yaml; needs --group and/or --match",
     )
     parser.add_argument(
+        "--vr-build",
+        metavar="LABEL",
+        help="list the verification runs whose BUILD is LABEL, e.g. "
+        "user/os-autoinst-distri-opensuse#123: they have no group",
+    )
+    parser.add_argument(
+        "--test-git-hash",
+        type=git_hash,
+        metavar="SHA",
+        help="with --vr-build: head=yes when a run's TEST_GIT_HASH is this commit",
+    )
+    parser.add_argument(
         "--exit-code",
         action="store_true",
-        help="exit 1 when not-ok jobs are listed, or when --passed, --groups or "
-        "--uses-schedule list nothing (default: exit 0 whenever the listing was produced)",
+        help="exit 1 when not-ok jobs are listed, or when --passed, --groups, "
+        "--uses-schedule or --vr-build list nothing (default: exit 0 whenever the "
+        "listing was produced)",
     )
     args = parser.parse_args()
-    if args.uses_schedule is not None:
+    if args.vr_build is not None:
+        others = (args.group, args.groups, args.build, args.match, args.passed)
+        others += (args.module, args.todo, args.include_softfailed, args.no_llm)
+        if any(others) or args.uses_schedule is not None:
+            parser.error(
+                "--vr-build goes with --test-git-hash, --limit and --exit-code only"
+            )
+        if not args.vr_build.strip():
+            parser.error("--vr-build needs a BUILD label")
+    elif args.test_git_hash:
+        parser.error("--test-git-hash needs --vr-build")
+    elif args.uses_schedule is not None:
         if args.groups or args.passed or args.todo or args.include_softfailed:
             parser.error("--uses-schedule goes with --group, --match and --limit only")
         if args.build:
@@ -739,6 +859,11 @@ def main():
             parser.error(
                 "--uses-schedule takes a relative path like schedule/foo/bar.yaml"
             )
+    elif args.build is not None and not args.group:
+        parser.error(
+            "--build needs --group ID: find the id with --groups --match REGEX "
+            "(a verification run has no group: --vr-build LABEL)"
+        )
     elif args.groups == bool(args.group):
         parser.error("give either --group ID (repeatable) or --groups")
     elif args.match and not args.groups:
@@ -757,7 +882,9 @@ def main():
     names = ["not_ok", "softfailed"] if args.include_softfailed else ["not_ok"]
     results = _oqa.expand_results(names)
     print(f"host={client.host}")
-    if args.uses_schedule is not None:
+    if args.vr_build is not None:
+        found = vr_runs(client, args)
+    elif args.uses_schedule is not None:
         found = uses_schedule(client, args)
     elif args.passed:
         found = sum(sweep_passed(client, group, args) for group in args.group)

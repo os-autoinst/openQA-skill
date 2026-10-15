@@ -108,12 +108,13 @@ credential that reached a log.
 A restarted job is history, a `parallel_failed` job is a victim, steps after the die step are post_fail_hook
 (in a module that failed without dying: from its `Post-fail` step on).
 
-    oqa-job.py JOB_URL|ID [--steps N] [--settings REGEX] [-v] [--exit-code]
+    oqa-job.py JOB_URL|ID [--steps N] [--settings REGEX] [--module NAME] [-v] [--exit-code]
     oqa-job.py JOB_URL|ID --module NAME --all-steps    # every step of one module: num result title shot
 
 `--steps N` failing steps per module (2); `--settings '^(QEMU|HDD)'` adds settings by key (default: BACKEND,
 CASEDIR, NEEDLES_DIR, YAML_SCHEDULE); `-v` whole traces, ulog names, all settings of the scenario, longer
-comments.
+comments. `--module NAME` alone keeps only that module's lines, whatever its result, and ends them with
+`+N of M steps not shown (--all-steps lists them)`.
 
     job=6228436 host=https://openqa.opensuse.org result=failed worker=worker21:13 started=... duration=6m13s
     scenario=opensuse-Tumbleweed-DVD-x86_64-libssh@uefi build=20260919 group=38
@@ -122,7 +123,7 @@ comments.
       parent/chained job=6228299 result=passed test=create_hdd_textmode
     modules=31 failed=1 passed=30
     module=libssh result=failed category=console flags=important
-      step=37 kind=test-died:command-failure link=https://openqa.opensuse.org/tests/6228436#step/libssh/37
+      step=37 kind=test-died:command-failure link=https://openqa.opensuse.org/tests/6228436#step/libssh/37 last_shot=https://openqa.opensuse.org/tests/6228436/images/libssh-36.png
         text="# Test died: command 'docker build ...' failed"
         frame="testapi::assert_script_run at tests/console/libssh.pm line 99"
       +130 post_fail_hook steps not shown
@@ -133,13 +134,17 @@ comments.
     requests: 4
 
 When set: `reason="..."`, `state=` (not done), `clone chain: 470:incomplete -> [500:failed]`, `SUPERSEDED:
-restarted, newest=ID result=...`, `culprit=ID (...)` for victims, needle steps with `shot=<host>/tests/<id>/images/<screenshot>`,
+restarted, newest=ID result=...`, `culprit=ID (...)` for victims, needle steps with
 `tags=` and `candidates=N best=name:91% (worst area each)`, `SUSPECT_BUGREF=` (module name parsed as bugref),
 `force_result_not_applied=<r>`, `; the hook died at step=N` after `post_fail_hook steps not shown` (the hook
 itself died: logs it would have uploaded may be missing; its message is the `post_fail_hook failed: ` line of
 `autoinst-log.txt`). `frame=`: first stack frame outside os-autoinst. `ulogs[<module>]=a,b`: that
 module's uploaded logs (`oqa-log.py --file ulogs/<module>-a`). `class=`: human, bot (first non-heading line),
 automated, carried-over.
+
+A failing step's line ends with its screenshot, `shot=<host>/tests/<id>/images/<screenshot>`; a step
+without one (a die message, `wait_serial`) has `last_shot=`, the newest screenshot before it in the module,
+the screen it failed on. The same step of a good run: `--module NAME --all-steps` on that run, `shot` column.
 
 ## oqa-log.py - a small part of one log
 

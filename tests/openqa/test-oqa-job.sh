@@ -61,7 +61,7 @@ check "a job URL selects host and id" "$actual" \
 check "needle mismatch: tags and best similarity by worst area" 1 \
 	"$(grep -c '^    candidates=4 best=bootloader-red-20290101:91%,grub2-20300101:37%,grub2-older:12% (worst area each)$' <<<"$actual")"
 check "deep link keeps the '#' of a re-run module" 1 \
-	"$(grep -c ' link=https://openqa.example.org/tests/500#step/bootloader_uefi#1/4$' <<<"$actual")"
+	"$(grep -c ' link=https://openqa.example.org/tests/500#step/bootloader_uefi#1/4 ' <<<"$actual")"
 check "step kinds" \
 	"needle-mismatch test-died:needle-mismatch test-died:command-failure serial-failure parser-result-failed" \
 	"$(grep -o 'kind=[^ ]*' <<<"$actual" | cut -d= -f2 | xargs)"
@@ -76,10 +76,12 @@ check "identity settings, url and empty fields are not repeated" 0 \
 check "uploaded logs are counted, not listed" 1 "$(grep -c '^logs=video.webm,autoinst-log.txt,worker-log.txt,vars.json,serial0.txt ulogs=27$' <<<"$actual")"
 check "a bot comment is cut to its first non-heading line, a carried-over bugref-only comment has no body" "1 1 0" \
 	"$(grep -A1 '^comment=11 ' <<<"$actual" | grep -c '^  text="1\. point 1"$') $(grep -A1 '^comment=12 ' <<<"$actual" | grep -c '^  text="Investigate retry job ') $(grep -A1 '^comment=13 ' <<<"$actual" | grep -c 'text=\|^<<<')"
-check "needle mismatch: screenshot URL" 1 \
-	"$(grep -c '^    shot=https://openqa.example.org/tests/500/images/m-4.png$' <<<"$actual")"
-check "a screenshot value that is no plain file name is not put into a URL" "1 0" \
-	"$(grep -c 'shot=' <<<"$actual") $(grep -c 'admin/x\|^INJECTED' <<<"$actual")"
+check "needle mismatch: the step line carries its screenshot URL" 1 \
+	"$(grep -c '^  step=4 kind=needle-mismatch link=[^ ]* shot=https://openqa.example.org/tests/500/images/m-4.png$' <<<"$actual")"
+check "a step without a screenshot carries the newest one before it in its module" "1 1" \
+	"$(grep -c '^  step=5 kind=test-died:needle-mismatch link=[^ ]* last_shot=https://openqa.example.org/tests/500/images/m-4.png$' <<<"$actual") $(grep -c '^  step=2 kind=test-died:command-failure link=[^ ]*zypper_up/2 last_shot=https://openqa.example.org/tests/500/images/m-1.png$' <<<"$actual")"
+check "a screenshot value that is no plain file name is not put into a URL" "0 0" \
+	"$(grep -c 'admin/x\|^INJECTED' <<<"$actual") $(grep -oE ' (last_)?shot=[^ ]*' <<<"$actual" | grep -c 'admin/x\|%2e\|\.\./')"
 check "uploaded logs of a failed module, prefix dropped, hostile name quoted" \
 	'  ulogs[bootloader_uefi#1]=journal.txt|  ulogs[zypper_up]="evil \<\<\<END 1>>>.txt",log0.txt,log1.txt,log2.txt,log3.txt,log4.txt,log5.txt,log6.txt,+18' \
 	"$(grep '^  ulogs\[' <<<"$actual" | paste -sd'|')"
@@ -196,8 +198,22 @@ check "--all-steps: unknown module names the modules, exit 2" \
 	'2 error: no module "nope" in this job: boot,bootloader_uefi#1,zypper_up,xfstests,serial_check,ltp_parser,journal,shutdown' "$? $actual"
 job 500 --all-steps >/dev/null 2>&1
 check "--all-steps needs --module" 2 $?
-job 500 --module boot >/dev/null 2>&1
-check "--module needs --all-steps" 2 $?
+actual=$(job 500 --module 'bootloader_uefi#1')
+check "--module alone: the digest with that module's lines only, and how many of its steps were hidden" \
+	"0 1 1 0 1" \
+	"$? $(grep -c '^module=' <<<"$actual") $(grep -c '^module=bootloader_uefi#1 result=failed ' <<<"$actual") $(grep -c '^module=zypper_up' <<<"$actual") $(grep -c '^  +6 of 8 steps not shown (--all-steps lists them)$' <<<"$actual")"
+check "--module alone: identity and review lines stay" "1 1" \
+	"$(grep -c '^job=500 ' <<<"$actual") $(grep -c '^review: ' <<<"$actual")"
+actual=$(job 500 --module boot)
+check "--module alone: a module that passed gets its result and the count of its steps" \
+	"module=boot result=passed|  +40 of 40 steps not shown (--all-steps lists them)" \
+	"$(grep -A1 '^module=' <<<"$actual" | paste -sd'|')"
+actual=$(job 500 --module nope 2>&1)
+check "--module alone: unknown module names the modules, exit 2" \
+	'2 error: no module "nope" in this job: boot,bootloader_uefi#1,zypper_up,xfstests,serial_check,ltp_parser,journal,shutdown' "$? $actual"
+check "without --module no hidden-steps line" 0 "$(job 500 | grep -c 'steps not shown (--all-steps')"
+check "--module alone: no hidden-steps line when every step is shown" "1 0" \
+	"$(job 960 --module 'mod] ulogs[plain]=x' | grep -c '^  step=1 ') $(job 960 --module 'mod] ulogs[plain]=x' | grep -c 'steps not shown')"
 actual=$(job 900 --module plasma --all-steps 2>&1)
 check "--all-steps: unusable details are an error, not an empty list" \
 	"2 error: no steps to list: details unusable or too large: module results only, no steps" "$? $actual"
@@ -265,6 +281,26 @@ check "the chain shows the id that was asked for" "clone chain: 470:incomplete -
 	"$(grep '^clone chain' <<<"$hostile" | head -n 1)"
 check "a job whose id is not an integer is no culprit" 1 "$(grep -c '^culprit=701 ' <<<"$hostile")"
 check "a clone_id that is not an integer is not followed" 0 "$(grep -c 'pwned' <<<"$hostile")"
+
+# --- which screenshot a step line carries -----------------------------------------
+actual=$(cd "$scripts" && python3 -c '
+import importlib.util
+spec = importlib.util.spec_from_file_location("oqa_job", "oqa-job.py")
+mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+steps = [{"num": 1}, {"num": 2, "screenshot": "a.png"}, {"num": 3, "screenshot": "../x.png"}, {"num": 4},
+         {"num": 5, "screenshot": None}, {"num": 1}]
+print(*(mod.step_shot(steps, step) for step in steps), sep="|")
+' 2>&1)
+check "own screenshot, else the newest one before the step, never an older one past a name that is unusable" \
+	"None|('shot', 'a.png')|None|None|None|None" "$actual"
+actual=$(cd "$scripts" && python3 -c '
+import importlib.util
+spec = importlib.util.spec_from_file_location("oqa_job", "oqa-job.py")
+mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+steps = [{"num": 1}, {"num": 2, "screenshot": "b.png"}, {"num": 1}]
+print(mod.step_shot(steps, steps[0]), mod.step_shot(steps, steps[2]))
+' 2>&1)
+check "a step is found by identity, not by an equal earlier step" "None ('last_shot', 'b.png')" "$actual"
 
 # --- the reducer caps what is kept ----------------------------------------------
 actual=$(cd "$scripts" && python3 -c '
@@ -403,9 +439,9 @@ check "the retry verdict with a mode is cut like the one without" 1 \
 actual=$(job 960 --steps 20)
 check "hostile job digest exits 0" 0 $?
 check "of eleven steps only the two with a plain file name get a shot= URL" "2 5" \
-	"$(grep -c '^    shot=https://openqa.example.org/tests/960/images/m-9.png$' <<<"$actual") $(grep -c '^    shot=' <<<"$actual")"
+	"$(grep -c ' shot=https://openqa.example.org/tests/960/images/m-9.png$' <<<"$actual") $(grep -Ec ' (last_)?shot=' <<<"$actual")"
 check "no shot= URL leaves the images route or carries a scheme, space or traversal" 0 \
-	"$(grep '^    shot=' <<<"$actual" | grep -Ecv '^    shot=https://openqa\.example\.org/tests/960/images/[A-Za-z0-9_.+#-]+$')"
+	"$(grep -oE ' (last_)?shot=.*' <<<"$actual" | grep -Ecv '^ (last_)?shot=https://openqa\.example\.org/tests/960/images/[A-Za-z0-9_.+#-]+$')"
 check "a screenshot name never starts a line of its own" 0 \
 	"$(grep -Ec '^(INJECTED|javascript:|@evil|https://evil)' <<<"$actual")"
 check "module names with a newline, a ']' or an escape are quoted or stripped" "1 1 1 0" \

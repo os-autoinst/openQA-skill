@@ -238,6 +238,21 @@ check "current_failures row shape" "$(
 EOF
 )" "$actual"
 
+# --- automatic LLM investigation summaries -------------------------------------
+actual=$(py '
+import _oqa
+for verdict in (
+    "**Classification:** Product bug\n**Restart:** NO",
+    "**Classification**: Product bug\n__Restart__: NO",
+    "- **Classification:** Product bug\n- **Automatic restart:** No",
+    "Classification: **Product bug**\nRestart: \x60NO\x60",
+):
+    found = _oqa.llm_summary("**LLM Investigation summary:**\n\n* a\n\n" + verdict)
+    print(found["class"], found["restart"], found["prose"])
+')
+check "emphasis around the label, before or after its colon, or around the value: the verdict is read, not prose" \
+	"$(printf 'product no None\n%.0s' 1 2 3 4)" "$actual"
+
 # --- clone chains -------------------------------------------------------------
 actual=$(oqa --fixture-dir "$fixtures" chain 100)
 check "chain exits 0 when the newest job is ok" 0 $?

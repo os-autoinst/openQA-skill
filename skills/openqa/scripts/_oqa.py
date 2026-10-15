@@ -551,11 +551,11 @@ def toks(values, limit=80, most=8):
 LLM_MARKERS = ("**LLM Investigation summary:**", "**TL;DR:**")
 _LLM_FOOTER = re.compile(r"This comment has been \**AI generated", re.IGNORECASE)
 _LLM_CLASS = re.compile(
-    r"^[\s*_`>-]*Classification:\s*[*_`]*(Product bug|Test issue|Infrastructure problem)\b",
+    r"^[\s*_`>-]*Classification[*_`]*:[\s*_`]*(Product bug|Test issue|Infrastructure problem)\b",
     re.IGNORECASE,
 )
 _LLM_RESTART = re.compile(
-    r"^[\s*_`>-]*(?:Automatic restart|Restart):\s*[*_`]*(YES|NO)\b", re.IGNORECASE
+    r"^[\s*_`>-]*(?:Automatic restart|Restart)[*_`]*:[\s*_`]*(YES|NO)\b", re.IGNORECASE
 )
 _LLM_HEADING = re.compile(r"(?:#{1,6}\s.*|\*\*[^*]+\*\*:?|__[^_]+__:?)")
 _LLM_BULLET = re.compile(r"[*-]\s+(?=\S)")

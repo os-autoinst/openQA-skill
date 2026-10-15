@@ -80,7 +80,8 @@ quiet=$(python3 "$script" --host https://openqa.example.org --fixture-dir "$tmpq
 check "comments that cannot be read are skipped quietly: no summary, no warning, listing intact" "0 0 1" \
 	"$(grep -A1 '^7010 ' <<<"$quiet" | grep -c llm-investigation) $(grep -ci 'warning\|error\|?' <<<"$quiet" | head -1) $(grep -c '^7 current not-ok jobs$' <<<"$quiet")"
 rm -r "$tmpq"
-capped=$(cd "$here/../../skills/openqa/scripts" && python3 - "$fixtures" <<'PY'
+capped=$(
+	cd "$here/../../skills/openqa/scripts" && python3 - "$fixtures" <<'PY'
 import argparse, importlib.util, io, contextlib, sys
 import _oqa
 spec = importlib.util.spec_from_file_location("sweep", "oqa-sweep.py")

@@ -12,6 +12,8 @@ description: >-
   parses. Not for OBS package build failures, maintenance-update validation with mtui, plain bug-tracker work,
   other CI systems or general Perl questions.
 license: GPL-2.0-or-later
+metadata:
+  version: "1.0.0"
 ---
 
 # openQA: write tests, review results

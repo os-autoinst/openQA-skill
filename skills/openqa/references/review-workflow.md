@@ -119,6 +119,7 @@ openqa-cli api --host https://openqa.opensuse.org -X POST jobs/<id>/restart
   - Confirm each cluster on one job from its own artifacts before drafting a reference. A model often calls a needle mismatch `infra`: unconfirmed until the step, screenshot and history say so. -> references/job-triage.md "Decision tree"
   - `Restart: YES` is advisory and nothing acts on it. A restart is a write: propose it per job with the sporadic checks, never copied across a cluster. -> "Retrigger or comment"
   - Two summaries on one job may disagree (`class=a|b`).
+  - In a triage, quote its class and say which evidence agrees or disagrees; a summary is never support on its own ("the bot concurs"). Read the one on the first bad job too.
 - `Unknown test issue, to be reviewed` (hook output or notification mail, not a job comment): no `auto_review` regex matched; the job is unreviewed.
 - A bot-applied ticket reference (`auto_review` match) counts as reviewed; verify the match in a full review.
 

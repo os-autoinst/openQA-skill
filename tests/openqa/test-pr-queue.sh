@@ -66,7 +66,12 @@ case "$*" in
 	;;
 esac
 [ -f "$STUB_DIR/$answer.json" ] || exit 98
-printf '%s\n' "$(<"$STUB_DIR/$answer.json")"
+# Like gh, colour the JSON when a terminal is forced.
+if [ -n "$CLICOLOR_FORCE$GH_FORCE_TTY" ]; then
+	printf '\033[1;37m%s\033[m\n' "$(<"$STUB_DIR/$answer.json")"
+else
+	printf '%s\n' "$(<"$STUB_DIR/$answer.json")"
+fi
 EOF
 chmod +x "$tmp/bin/gh" && [ -x "$tmp/bin/gh" ] || exit 1
 
@@ -146,6 +151,11 @@ check "read-only calls, one argument each: login, requested, reviewed, newest no
 1|1|[pr][list][-R][os-autoinst/os-autoinst-distri-opensuse][--state][open][--search][draft:false][--limit][20]$fields
 EOF
 )" "$(cat "$tmp/log")"
+plain=$(cat "$tmp/out")
+for var in CLICOLOR_FORCE GH_FORCE_TTY; do
+	actual=$(queue "$var=1")
+	check "$var does not reach gh, which would colour its JSON" "0 $plain" "$? $actual"
+done
 
 actual=$(queue --me asmith --repo example/widgets --newest 3)
 check "--me: exit 0, no login lookup, searches and reviews use that login" "0 $(

@@ -29,6 +29,8 @@ _REPO = re.compile(r"[A-Za-z0-9][A-Za-z0-9-]{0,38}/[A-Za-z0-9._-]{1,100}")
 _LOGIN = re.compile(r"[A-Za-z0-9][A-Za-z0-9-]{0,38}")
 _OID = re.compile(r"[0-9a-f]{40}")
 _BARE = re.compile(r"[\w.:#@/+%=-]+", re.ASCII)
+# Either makes gh write its --json output in colour, as for a terminal.
+FORCED_TERMINAL = ("CLICOLOR_FORCE", "GH_FORCE_TTY")
 
 
 class QueueError(Exception):
@@ -36,13 +38,14 @@ class QueueError(Exception):
 
 
 def gh(*args):
+    env = {k: v for k, v in os.environ.items() if k not in FORCED_TERMINAL}
     try:
         done = subprocess.run(
             ["gh", *args],
             capture_output=True,
             check=False,
             timeout=300,
-            env={**os.environ, "GH_PROMPT_DISABLED": "1", "GH_NO_UPDATE_NOTIFIER": "1"},
+            env={**env, "GH_PROMPT_DISABLED": "1", "GH_NO_UPDATE_NOTIFIER": "1"},
         )
     except FileNotFoundError:
         raise QueueError(

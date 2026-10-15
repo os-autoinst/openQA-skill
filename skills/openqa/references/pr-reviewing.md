@@ -49,7 +49,7 @@ To word a fix: -> pr-review-rules.md "Ranked requests"; it is not a source of ne
 - No stub body ("See inline."): leave the body empty. Read the draft once for spelling and grammar before it is shown.
 - Before: "nit: VR 5123456 at head is x86_64 only; foo_setup needs FOO_PROFILE, do all groups set it?" After, a change request: "Every arch that loads this schedule now runs `foo_setup`, which dies when FOO_PROFILE is not set. The only verification run, https://openqa.opensuse.org/tests/5123456, is x86_64. Do all job groups that load it set FOO_PROFILE?"
 - One pass. Later rounds check the changes and applied suggestions, no new nits; a blocking finding missed earlier says so. Replies: one per thread, two sentences; declined again, stop.
-- Withdraw an approval by dismissing it, `gh api -X PUT repos/<o>/<r>/pulls/<n>/reviews/<id>/dismissals -f message=<why>` (needs write access, and the right to dismiss on a protected branch), or with a REQUEST_CHANGES review; a COMMENT review leaves the approval in force.
+- Withdraw an approval by dismissing it, `gh api -X PUT repos/<o>/<r>/pulls/<n>/reviews/<id>/dismissals -f message=<why>` (needs write access, and the right to dismiss on a protected branch), or with a REQUEST_CHANGES review; a COMMENT review leaves the approval in force. Either is a write that waits for the user's approval -> SKILL.md "Write gate"
 - A post that failed or gave no answer may still have landed: read the reviews back (`gh api repos/<o>/<r>/pulls/<n>/reviews`) before any retry, and a retry is a new write that needs fresh approval.
 - End the turn with a list of every draft not yet posted, with its PR and file, so none is lost or posted twice.
 

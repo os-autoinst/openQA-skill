@@ -263,7 +263,8 @@ def check_skill(skill, write, problems):
         else:
             parsers[name] = parser
         done = subprocess.run(
-            [sys.executable, str(path), "--help"],
+            # -I as an agent runs it on downloaded data: the script must find its siblings itself.
+            [sys.executable, "-I", str(path), "--help"],
             capture_output=True,
             text=True,
             stdin=subprocess.DEVNULL,

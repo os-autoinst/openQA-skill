@@ -6,11 +6,14 @@
 Nothing is executed and no network is used; the printed command is for review.
 """
 
+import os
 import re
 import shlex
 import sys
 from urllib.parse import urlsplit
 
+# python3 -I leaves the script's own directory off sys.path; the sibling modules live there.
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 import _secrets
 from _sanitize import ArgumentParser, sanitize
 

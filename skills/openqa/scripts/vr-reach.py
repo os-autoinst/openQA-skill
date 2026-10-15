@@ -28,6 +28,8 @@ import subprocess
 import sys
 from collections import deque
 
+# python3 -I leaves the script's own directory off sys.path; the sibling modules live there.
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from _sanitize import ArgumentParser, one_lines
 
 HERE = os.path.dirname(os.path.abspath(__file__))

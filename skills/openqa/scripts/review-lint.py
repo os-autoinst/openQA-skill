@@ -14,6 +14,8 @@ import re
 import sys
 import unicodedata
 
+# python3 -I leaves the script's own directory off sys.path; the sibling modules live there.
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from _sanitize import ArgumentParser, sanitize
 
 MAX_INPUT = 262144

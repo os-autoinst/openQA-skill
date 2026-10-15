@@ -7,6 +7,8 @@ import os
 import re
 import sys
 
+# python3 -I leaves the script's own directory off sys.path; the sibling modules live there.
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from _sanitize import ArgumentParser, one_lines, sanitize
 
 # Header shape: tests/console/man_pages.pm:1-8 (year-less copyright per CONTRIBUTING.md "Copyright SUSE LLC").

@@ -60,10 +60,14 @@ runtime error; --exit-code: 1 when the job is not ok.
 
 import argparse
 import json
+import os
 import re
+import sys
 from datetime import datetime
 from urllib.parse import quote
 
+# python3 -I leaves the script's own directory off sys.path; the sibling modules live there.
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 import _oqa
 import _secrets
 from _sanitize import ArgumentParser

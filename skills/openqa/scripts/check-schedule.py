@@ -8,6 +8,8 @@ import re
 import subprocess
 import sys
 
+# python3 -I leaves the script's own directory off sys.path; the sibling modules live there.
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from _sanitize import ArgumentParser, one_lines
 
 try:

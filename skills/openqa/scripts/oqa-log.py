@@ -18,9 +18,13 @@ import bz2
 import calendar
 import html
 import lzma
+import os
 import re
+import sys
 import zlib
 
+# python3 -I leaves the script's own directory off sys.path; the sibling modules live there.
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 import _oqa
 from _sanitize import ArgumentParser
 

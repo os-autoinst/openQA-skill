@@ -8,6 +8,8 @@ import os
 import re
 import sys
 
+# python3 -I leaves the script's own directory off sys.path; the sibling modules live there.
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from _sanitize import ArgumentParser, fence, one_lines, sanitize
 
 SKILL_DIR = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))

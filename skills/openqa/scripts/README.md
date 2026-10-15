@@ -26,6 +26,7 @@ One line per script, generated from the parsers: do not edit it by hand. What a 
 - `oqa-log.py JOB [--file NAME] (--list | --tail N | --grep REGEX | --errors | --around-module MODULE | --runtimes | --members) [--member PATH] [--compare JOB] [--context N] [--max-matches N] [--ignore-case] [--max-lines N] [--max-line-chars N] [--max-bytes BYTES] [--verbose] [--exit-code]`
 - `oqa-ref.py REF [--body] [--files] [--notes N]`
 - `oqa-sweep.py [--group ID]... [--build BUILD] [--todo] [--include-softfailed] [--limit N] [--no-llm] [--passed] [--module NAME] [--groups] [--match REGEX] [--uses-schedule PATH] [--vr-build LABEL] [--test-git-hash SHA] [--exit-code]`
+- `pr-queue.py [--repo O/R] [--newest N] [--me LOGIN]`
 - `refsection.py [--list] FILE [TITLE...]`; exit 1: section missing or ambiguous
 - `review-lint.py [FILE] --lines N [--lib] [--replies N] [--late]`; exit 1: findings
 - `ticket-lint.py [FILE] [--private-suffix SUFFIX]...`; exit 1: findings
@@ -315,6 +316,27 @@ GitHub links nothing in them and they quote code, except one holding only a job 
 one. Each check is reported once per item, `jargon` once per word it replaces, with its first hit (the longest
 sentence) and the count. Exit 2: not a review JSON object (`event` COMMENT, APPROVE or REQUEST_CHANGES; `body` and `commit_id`
 strings; each comment a non-empty `body`, a `path` and an integer `line` or `position`), over 262144 characters.
+
+## pr-queue.py - what awaits my review on GitHub
+
+Which open pull requests ask for my review, and which moved since I reviewed them? `latestReviews` carries an
+empty commit, so a filter on it finds nothing; this reads `reviews`.
+
+    pr-queue.py [--repo O/R] [--newest N] [--me LOGIN]
+
+Read-only `gh pr list` calls on the open pull requests of `--repo` (os-autoinst/os-autoinst-distri-opensuse):
+review requested from `--me`, reviewed by `--me` (100 each, a `note:` when a list is full), and the `--newest`
+N non-draft ones (20; 0 = none, at most 100). `--me` defaults to the login gh is authenticated as (`gh api
+user`); gh authenticates itself. One line per pull request, those requested first, then those that moved, then
+by last update. `review=<state>@<commit> reviewed_at=<time>`: my newest submitted review (`@?`: GitHub gave no
+commit; both left out when there is none). `moved=OLD..NEW`, full commits, when the head changed since:
+`git fetch origin OLD`, then `git diff OLD..NEW -- <files>`. Titles and logins are sanitised.
+
+    pr=103 draft=no requested=no author=asmith review=changes_requested@bbbbbbb reviewed_at=2030-01-02T09:00:00Z head=3333333 moved=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb..3333333333333333333333333333333333333333 title="lib/utils: retry the mirror check"
+    summary: repo=os-autoinst/os-autoinst-distri-opensuse me=jdoe prs=6 requested=2 reviewed=4 moved=1 drafts=1
+
+Exit 2: gh missing or failing (its first stderr line, sanitised), an answer that is not the expected JSON, a
+malformed `--repo` or `--me`.
 
 ## ticket-lint.py - shape of a drafted bug or progress ticket (offline)
 

@@ -71,6 +71,7 @@ Rules for humans and agents changing this repository.
   the flag does in that script's own section of the same file. An argument a block's command cannot run
   without is also shown in that block of `SKILL.md`. A test-only flag gets `help=argparse.SUPPRESS`.
 - Network scripts go through `scripts/_oqa.py`: GET only, no `Referer`, no credentials, host from `--host`.
+  `scripts/pr-queue.py` alone reads GitHub through `gh`: read-only calls, `gh` authenticates itself, no token in argv.
   Do not add a code path that can write.
 - Every piece of third-party text printed goes through `scripts/_sanitize.py`, stdout and stderr alike: an
   error message that quotes a path, a file name or an errno is third-party text too. A substring cut out of

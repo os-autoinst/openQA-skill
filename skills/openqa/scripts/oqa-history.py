@@ -13,6 +13,9 @@ the scenario whatever their state (lib/OpenQA/Schema/Result/JobNextPrevious.pm).
 
 Route: GET /tests/<id>/investigation_ajax (Controller/Test.pm "investigate",
 lib/OpenQA/Schema/Result/Jobs.pm "investigate").
+
+Route: GET /api/v1/jobs?ids=<id> (Controller/API/V1/Job.pm "list"): the job's
+modules ordered by id, which is the order they were scheduled in.
 """
 
 import argparse
@@ -223,39 +226,73 @@ def commits(text):
     return found
 
 
-def marks(paths, pattern):
-    """Markers for a commit that touches a failed module's test file or lib/.
+def module_pattern(names):
+    if not names:
+        return None
+    names = "|".join(re.escape(name) for name in sorted(names, key=len, reverse=True))
+    return re.compile(r"(?:^|[/{ ])(" + names + r")\.p[my](?![\w.])")
 
-    git shortens a long path to ".../<tail>": such a name may still be a test module, but
-    whether it lies in lib/ cannot be told."""
+
+def touched(paths, pattern):
     names = []
     for path in paths:
         if pattern and (path.startswith((".../", "tests/")) or "tests/" in path):
             names += [
                 m.group(1) for m in pattern.finditer(path) if m.group(1) not in names
             ]
-    found = [f"[failed module {name}]" for name in names]
+    return names
+
+
+def marks(paths, failed_re, earlier_re=None):
+    """Markers for a commit that touches a failed module's test file, lib/ or the test
+    file of a module that ran before the failed one.
+
+    git shortens a long path to ".../<tail>": such a name may still be a test module, but
+    whether it lies in lib/ cannot be told."""
+    found = [f"[failed module {name}]" for name in touched(paths, failed_re)]
     if any(path.startswith(("lib/", "{lib")) or "=> lib/" in path for path in paths):
         found.append("[lib]")
-    return found
+    return found + [f"[earlier module {name}]" for name in touched(paths, earlier_re)]
 
 
-def marked_heads(text, limit, failed):
-    """Commits touching the failure first, each group newest first; the counts."""
-    pattern = None
-    if failed:
-        names = "|".join(
-            re.escape(name) for name in sorted(failed, key=len, reverse=True)
-        )
-        pattern = re.compile(r"(?:^|[/{ ])(" + names + r")\.p[my](?![\w.])")
-    marked, rest, module, lib = [], [], 0, 0
+def marked_heads(text, limit, failed, earlier=()):
+    """Commits touching the failed module, lib/, an earlier module, then the rest, each
+    group newest first; the counts of the first three."""
+    patterns = module_pattern(failed), module_pattern(earlier)
+    groups, counts = ([], [], [], []), [0, 0, 0]
     for head, paths in commits(text):
-        tags = marks(paths, pattern)
-        module += any(tag.startswith("[failed module ") for tag in tags)
-        lib += "[lib]" in tags
-        (marked if tags else rest).append(" ".join([*tags, head]))
-    lines = marked + rest
-    return lines[:limit], len(lines), (module, lib)
+        tags = marks(paths, *patterns)
+        hits = (
+            any(tag.startswith("[failed module ") for tag in tags),
+            "[lib]" in tags,
+            any(tag.startswith("[earlier module ") for tag in tags),
+        )
+        counts = [count + hit for count, hit in zip(counts, hits)]
+        group = next((i for i, hit in enumerate(hits) if hit), 3)
+        groups[group].append(" ".join([*tags, head]))
+    lines = [line for group in groups for line in group]
+    return lines[:limit], len(lines), tuple(counts)
+
+
+def earlier_modules(client, job_id, failed):
+    """Names of the modules that ran before the first failed one (one request); None
+    when the job's module list cannot be read."""
+    try:
+        data = client.get_json("/api/v1/jobs", {"ids": job_id})
+    except _oqa.OqaError:
+        return None
+    jobs = data.get("jobs") if isinstance(data, dict) else None
+    job = jobs[0] if isinstance(jobs, list) and jobs else {}
+    modules = job.get("modules") if isinstance(job, dict) else None
+    if not isinstance(modules, list):
+        return None
+    names = [
+        re.sub(r"#\d+$", "", str(module.get("name") or ""))
+        for module in modules
+        if isinstance(module, dict)
+    ]
+    first = next((i for i, name in enumerate(names) if name in failed), 0)
+    return sorted({name for name in names[:first] if name and name not in failed})
 
 
 def fenced(client, job_id, title, lines):
@@ -340,8 +377,16 @@ def investigation(client, job_id, limit, verbose, failed=()):
             print(f"  {title} changes: {_oqa.quoted(text, 160)}")
             continue
         if key == "test_log":
-            heads, total, (module, lib) = marked_heads(text, limit, failed)
-            order = f"failed_module={module} lib={lib} (those first, then newest first)"
+            earlier = earlier_modules(client, job_id, failed) if failed else []
+            heads, total, (module, lib, before) = marked_heads(
+                text, limit, failed, earlier or ()
+            )
+            # Unknown, not 0: no earlier-module commit must look ruled out.
+            before = "?" if earlier is None else before
+            order = (
+                f"failed_module={module} lib={lib} earlier_module={before} "
+                "(those first, then newest first)"
+            )
         else:
             heads, total = git_heads(text, limit)
             order = "(newest first)"
@@ -368,7 +413,7 @@ def main():
         prog="oqa-history.py",
         description="Newest-first history of the scenario of one openQA job (same distri, version, "
         "flavor, arch, test and machine), with last good / first bad, the failure rate and a "
-        "one-line classification hint. GET only, two requests at most.",
+        "one-line classification hint. GET only, three requests at most.",
         epilog="Exit codes: 0 the history was produced (a failed job is the normal case), "
         "2 usage or runtime error; --exit-code: 1 when the job is not ok. Aborted runs (obsoleted, cancelled, parallel_failed, ...) "
         "never appear in the history; incomplete and timeout_exceeded runs do and count as "

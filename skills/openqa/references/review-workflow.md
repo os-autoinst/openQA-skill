@@ -36,7 +36,7 @@ scripts/oqa-sweep.py --host o3 --group 1 --todo
 
 **One line per current not-ok job**: id, result, scenario minus the header's `scenario_prefix`, then only fields that have a value: `modules=` (failed), `bugrefs=` (parsed), `label=` (newest), `comments=` (plain ones), `restarts=`, `origin=`, `parents=`. Neither `bugrefs=` nor `label=`: unreviewed, whatever `comments=` says. `review=?` (header: `mode=api-fallback`): comments not read, state unknown. `victims parent=<id>`: jobs that never ran; triage that parent. -> references/openqa-model.md "Reviewed definition"
 
-**Quick LLM review**: under a failed, incomplete or timeout_exceeded job an indented `llm-investigation-summary (automatic, unverified): class=<product|test|infra> restart=<yes|no> why="..."` line, and per build one `llm-investigation-summary clusters` line (classes per failed module). Nothing is printed for a job without such a comment; `--no-llm` skips the extra comments request per failed job. Use it to group and order the work-list, not to close a job -> "Machine-written comments"
+**Quick LLM review**: under a failed, incomplete or timeout_exceeded job an indented `llm-investigation-summary (automatic, unverified): class=<product|test|infra> why="..."` line, and per build one `llm-investigation-summary clusters` line (classes per failed module). Nothing is printed for a job without such a comment; `--no-llm` skips the extra comments request per failed job. Use it to group and order the work-list, not to close a job -> "Machine-written comments"
 
 `warning: the server truncated the overview`: narrow to one group, one build. `N lines shown (--limit N)`: raise `--limit`.
 

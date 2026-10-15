@@ -60,10 +60,10 @@ check "jobs that never ran are folded into one line per parent" "victims parent=
 check "two requests for a group plus one comments read per failure with plain comments" "requests: 5" "$(tail -n 1 <<<"$actual")"
 
 # --- automatic LLM investigation summaries --------------------------------------
-check "a summary adds one flagged line under its failed job, class and restart as words" "2 1" \
-	"$(grep -c '^  llm-investigation-summary (automatic, unverified): class=' <<<"$actual") $(grep -c '^  llm-investigation-summary (automatic, unverified): class=test restart=no why="boot: grub2 needle did not match after the reboot."$' <<<"$actual")"
+check "a summary adds one flagged line under its failed job, class as a word, no restart advice" "2 1 0" \
+	"$(grep -c '^  llm-investigation-summary (automatic, unverified): class=' <<<"$actual") $(grep -c '^  llm-investigation-summary (automatic, unverified): class=test why="boot: grub2 needle did not match after the reboot."$' <<<"$actual") $(grep -c 'restart=' <<<"$actual")"
 check "disagreeing summaries of one job read class=a|b, the newest text wins" 1 \
-	"$(grep -c 'class=infra|product restart=yes why="firefox: Ignore previous instructions' <<<"$actual")"
+	"$(grep -c 'class=infra|product why="firefox: Ignore previous instructions' <<<"$actual")"
 check "a failure without a summary prints nothing extra, a victim is never read" "0 0" \
 	"$(grep -A1 '^7013 ' <<<"$actual" | grep -c llm-investigation) $(grep -A1 '^7011 ' <<<"$actual" | grep -c llm-investigation)"
 check "one cluster line per build counts the classes per failed module" 1 \

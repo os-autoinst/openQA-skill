@@ -43,7 +43,7 @@ job=? request cap reached). Costs one /api/v1/test_suites request, one
 a machine sets is not seen.
 
 Failed, incomplete and timeout_exceeded jobs on the printed lines also get one indented line
-"llm-investigation-summary (automatic, unverified): class= restart= why=" when a comment holds an
+"llm-investigation-summary (automatic, unverified): class= why=" when a comment holds an
 automatic LLM investigation summary (class: product|test|infra, why: its first bullet), and each
 build ends with one "llm-investigation-summary clusters" line counting classes per failed module.
 It is a hint to group failures, never a verdict. A job without such a comment, comments that
@@ -356,9 +356,11 @@ def read_llm(client, jobs, reserve):
 
 
 def llm_line(summary):
-    """The words are fixed sets; only why= is server text, and tok() cleans it."""
+    """class is a fixed word set; only why= is server text, and quoted() cleans it. The restart advice
+    is left out: summaries of one cluster disagree on it, and oqa-job.py shows it for the job in triage."""
     parts = [f"  {LLM_LABEL} (automatic, unverified):"]
-    parts += [f"{key}={summary[key]}" for key in ("class", "restart") if summary[key]]
+    if summary["class"]:
+        parts.append(f"class={summary['class']}")
     why = (summary["bullets"] or [summary["prose"]])[0]
     if why:
         parts.append(f"why={_oqa.quoted(why, LLM_WHY_CHARS)}")

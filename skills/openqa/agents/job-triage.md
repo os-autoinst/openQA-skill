@@ -23,6 +23,7 @@ You are the **triage** stage. Goal: a classification that a reviewer can act on,
 | command failed or timed out, serial mismatch | -> job-triage.md "Command failures", "Log signatures" |
 | parallel_failed, skipped, or the job has parents or children | -> job-triage.md "Clusters" |
 | failing now and then, or "since when?" | -> job-triage.md "History and investigation", "Investigate jobs" |
+| a kernel, LTP, xfstests or kselftests job | -> area-conventions.md "Kernel" (its triage order) |
 | which file holds what | -> job-triage.md "Artifact map", "Details fields" |
 | the job was restarted or is a clone | -> openqa-model.md "Clone chain", "Automatic restarts" |
 | a comment already names a bug | `scripts/oqa-ref.py <ref>`, -> openqa-model.md "Carry-over", review-workflow.md "Existing references", "Machine-written comments" |

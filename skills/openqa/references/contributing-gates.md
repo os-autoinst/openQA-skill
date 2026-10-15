@@ -127,6 +127,7 @@ Prose-only, policed by reviewers: no `sleep`, no `is_tumbleweed()` (exclude olde
 - **Exempt from every rule** (`ignore=all`): a subject starting with `Revert`, `git subrepo pull`, `chore(deps): bump` or `build(deps): bump` (also `deps-dev`).
 - Subject matches `^([A-Z]|\S+:|git subrepo (clone|pull)).*(?<!\.)$`: capital letter **or** `tag:` first. `fix: thing` passes, `fix thing` fails.
 - gitlint defaults stay on: subject must not end in any of `?:!.,;` nor contain `WIP`; second line blank; body lines <= 80 except a line that is only a URL; no tabs or trailing whitespace. Body optional.
+- **Lint a draft before showing it**: wrap the body at 72 columns, save the message to a file and run `gitlint --msg-filename <file>` in the checkout root, which reads `.gitlint` from there (no gitlint installed: `uvx --from gitlint-core gitlint --msg-filename <file>`). Exit 1 lists each broken rule. `--commits` sees only what is committed, so a body paragraph left on one line first fails in CI (#27050).
 
 **Conventions**, not checked:
 

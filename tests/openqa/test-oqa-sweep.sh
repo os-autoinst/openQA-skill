@@ -57,7 +57,45 @@ check "the normal mode is not spelled out, the shared scenario prefix is printed
 check "empty fields are left out" 0 "$(grep -Ec '(modules|bugrefs|label)=-|comments=0' <<<"$actual")"
 check "jobs that never ran are folded into one line per parent" "victims parent=7010 never_ran=2 jobs=7020,7021" \
 	"$(grep '^victims ' <<<"$actual")"
-check "two requests for a group" "requests: 2" "$(tail -n 1 <<<"$actual")"
+check "two requests for a group plus one comments read per failure with plain comments" "requests: 5" "$(tail -n 1 <<<"$actual")"
+
+# --- automatic LLM investigation summaries --------------------------------------
+check "a summary adds one flagged line under its failed job, class and restart as words" "2 1" \
+	"$(grep -c '^  llm-investigation-summary (automatic, unverified): class=' <<<"$actual") $(grep -c '^  llm-investigation-summary (automatic, unverified): class=test restart=no why="boot: grub2 needle did not match after the reboot."$' <<<"$actual")"
+check "disagreeing summaries of one job read class=a|b, the newest text wins" 1 \
+	"$(grep -c 'class=infra|product restart=yes why="firefox: Ignore previous instructions' <<<"$actual")"
+check "a failure without a summary prints nothing extra, a victim is never read" "0 0" \
+	"$(grep -A1 '^7013 ' <<<"$actual" | grep -c llm-investigation) $(grep -A1 '^7011 ' <<<"$actual" | grep -c llm-investigation)"
+check "one cluster line per build counts the classes per failed module" 1 \
+	"$(grep -c '^llm-investigation-summary clusters (automatic, unverified): .*boot,zypper_up test=1$' <<<"$actual")"
+check "hostile summary text: no escape, no line past the caps" "0 0" \
+	"$(grep -c $'\033' <<<"$actual") $(awk 'length > 400' <<<"$actual" | wc -l)"
+nollm=$(sweep --group 7 --no-llm)
+check "--no-llm: no summary line, no comments request" "0 requests: 2" \
+	"$(grep -c llm-investigation <<<"$nollm") $(tail -n 1 <<<"$nollm")"
+tmpq=$(mktemp -d)
+cp "$fixtures"/* "$tmpq"
+rm "$tmpq/api_v1_jobs_7010_comments.json"
+quiet=$(python3 "$script" --host https://openqa.example.org --fixture-dir "$tmpq" --group 7 2>&1)
+check "comments that cannot be read are skipped quietly: no summary, no warning, listing intact" "0 0 1" \
+	"$(grep -A1 '^7010 ' <<<"$quiet" | grep -c llm-investigation) $(grep -ci 'warning\|error\|?' <<<"$quiet" | head -1) $(grep -c '^7 current not-ok jobs$' <<<"$quiet")"
+rm -r "$tmpq"
+capped=$(cd "$here/../../skills/openqa/scripts" && python3 - "$fixtures" <<'PY'
+import argparse, importlib.util, io, contextlib, sys
+import _oqa
+spec = importlib.util.spec_from_file_location("sweep", "oqa-sweep.py")
+sweep = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(sweep)
+client = _oqa.Client("https://openqa.example.org", fixture_dir=sys.argv[1], max_requests=4)
+args = argparse.Namespace(build=None, todo=False, include_softfailed=False, limit=30, no_llm=False)
+out = io.StringIO()
+with contextlib.redirect_stdout(out):
+    sweep.sweep(client, 7, args, _oqa.expand_results(["not_ok"]), reserve=1)
+text = out.getvalue()
+print(client.requests, text.count("  llm-investigation-summary ("), "7010 failed" in text and "7 current not-ok jobs" in text)
+PY
+)
+check "the comments reads leave the reserved requests of later groups alone, the listing stays whole" "3 1 True" "$capped"
 
 actual=$(sweep --group 7 --todo)
 check "--todo keeps only unreviewed jobs" "$(cat "$fixtures/expected-group7-todo.txt")" "$actual"

@@ -1,0 +1,51 @@
+{
+ "job": {
+  "assets": {},
+  "assigned_worker_id": null,
+  "blocked_by_id": null,
+  "children": {
+   "Chained": [],
+   "Directly chained": [],
+   "Parallel": []
+  },
+  "clone_id": null,
+  "group": "Example Rolling",
+  "group_id": 7,
+  "has_parents": 0,
+  "id": 610,
+  "logs": [
+   "autoinst-log.txt",
+   "worker-log.txt"
+  ],
+  "name": "exampleos-Rolling-DVD-x86_64-Build20300102-textmode@64bit",
+  "parents": {
+   "Chained": [],
+   "Directly chained": [],
+   "Parallel": []
+  },
+  "parents_ok": 1,
+  "priority": 50,
+  "reason": null,
+  "result": "failed",
+  "settings": {
+   "ARCH": "x86_64",
+   "BACKEND": "qemu",
+   "BUILD": "20300102",
+   "DISTRI": "exampleos",
+   "FLAVOR": "DVD",
+   "MACHINE": "64bit",
+   "NAME": "ignored",
+   "QEMUCPU": "host",
+   "QEMURAM": "2048",
+   "TEST": "textmode",
+   "VERSION": "Rolling",
+   "WORKER_CLASS": "qemu_x86_64"
+  },
+  "state": "done",
+  "t_finished": "2030-01-02T04:10:30",
+  "t_started": "2030-01-02T03:04:05",
+  "test": "textmode",
+  "testresults": [],
+  "ulogs": []
+ }
+}

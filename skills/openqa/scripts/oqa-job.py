@@ -20,6 +20,9 @@ How to read it:
     --verbose", never "the step said nothing".
   - Comments: a bot comment is cut to its first line that is not a heading,
     a carried-over comment that only holds the bugref has no body line at all.
+    An automatic LLM investigation summary (class=automated or bot) shows llm_class=
+    and llm_restart= as words and its bullets plus first prose line as one capped
+    text line; it is a hint, never a verdict. --verbose shows the whole text.
   - A job with clone_id was restarted: its result is history, look at the newest job.
   - parallel_failed and skipped jobs are victims. The culprit hint names the
     failed/incomplete/timeout_exceeded job of the cluster that finished first.
@@ -133,7 +136,8 @@ BOT_TEMPLATES = (
     "Ignored issue",
     "Ignored failure",
 )
-AUTOMATED_MARKS = ("This comment has been AI generated",)
+AUTOMATED_MARK = re.compile(r"This comment has been \**AI generated")
+LLM_LINE_CHARS = 300
 HOOK_NOTE = "(The hook script will not be executed.)"
 # Titles of the steps os-autoinst records when post_fail_hook starts and when it dies
 # (basetest.pm run_post_fail).
@@ -648,7 +652,7 @@ def author_class(comment, text):
     start = text.lstrip()
     if comment.get("userName") in BOT_ACCOUNTS or start.startswith(BOT_TEMPLATES):
         return "bot"
-    if any(mark in text for mark in AUTOMATED_MARKS):
+    if AUTOMATED_MARK.search(text) or _oqa.llm_summary(text):
         return "automated"
     return "human"
 
@@ -668,6 +672,7 @@ def parse_comment(comment):
         "flags": FLAG.findall(text),
         "carried_from": int(origin.group(1)) if origin else None,
         "author": author_class(comment, text),
+        "llm": _oqa.llm_summary(text),
     }
 
 
@@ -676,6 +681,8 @@ def comment_body(item, verbose):
     text = item["text"]
     if verbose:
         return text
+    if item["llm"]:
+        return _oqa.llm_line(item["llm"], LLM_LINE_CHARS)
     lines = [
         line
         for line in text.split("\n")
@@ -687,6 +694,13 @@ def comment_body(item, verbose):
     if item["author"] != "bot":
         return "\n".join(lines)
     return next((line for line in lines if not HEADING.fullmatch(line)), lines[0])
+
+
+def llm_fields(summary):
+    """class and restart are fixed words; the text follows as the fenced body."""
+    return "".join(
+        f" llm_{key}={summary[key]}" for key in ("class", "restart") if summary[key]
+    )
 
 
 def print_comments(client, job_id, result, verbose):
@@ -739,6 +753,8 @@ def print_comments(client, job_id, result, verbose):
             line += f" flags={toks(item['flags'], 30)}"
         if item["carried_from"]:
             line += f" carried_over_from={item['carried_from']}"
+        if item["llm"]:
+            line += llm_fields(item["llm"])
         if item["suspect"]:
             line += f" SUSPECT_BUGREF={toks(item['suspect'], 60)} (looks like a module name)"
         print(line)

@@ -15,6 +15,10 @@ api_v1_jobs_600_comments.json
     GET /api/v1/jobs/600/comments
 api_v1_jobs_600_details.json
     GET /api/v1/jobs/600/details
+api_v1_jobs_610_comments.json
+    GET /api/v1/jobs/610/comments
+api_v1_jobs_610_details.json
+    GET /api/v1/jobs/610/details
 api_v1_jobs_700_comments.json
     GET /api/v1/jobs/700/comments
 api_v1_jobs_700_details.json

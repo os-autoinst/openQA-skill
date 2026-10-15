@@ -12,6 +12,7 @@ value and loses the name), or a token split across a line wrap. A log known to h
 held a live credential needs that credential rotated, not redacted.
 """
 
+import os
 import re
 import sys
 from collections import Counter
@@ -398,6 +399,8 @@ def summary(found):
 
 def main(argv=None):
     # imported here: _sanitize imports this module
+    # python3 -I leaves the script's own directory off sys.path; _sanitize lives there.
+    sys.path.append(os.path.dirname(os.path.abspath(__file__)))
     from _sanitize import ArgumentParser
 
     parser = ArgumentParser(

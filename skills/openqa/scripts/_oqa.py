@@ -124,6 +124,8 @@ import urllib.error
 import urllib.request
 from urllib.parse import quote, urlencode, urlsplit
 
+# python3 -I leaves the script's own directory off sys.path; the sibling modules live there.
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 import _secrets
 from _sanitize import ArgumentParser, excerpt, fence, sanitize
 

@@ -11,12 +11,15 @@ Typical use from another script in this directory:
 """
 
 import argparse
+import os
 import re
 import secrets
 import sys
 import unicodedata
 import warnings
 
+# python3 -I leaves the script's own directory off sys.path; the sibling modules live there.
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 import _secrets
 
 DEFAULT_MAX_LINE = 2000

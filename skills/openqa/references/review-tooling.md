@@ -74,6 +74,7 @@ Server-side auto-review helpers (github.com/os-autoinst/os-autoinst-scripts). Ba
 | --- | --- | --- | --- |
 | `openqa-label-known-issues` (`-multi`, `-hook`) | comment, restart | no | `--dry` / `-n`; wrappers: env `dry_run=1` only |
 | `openqa-investigate` (`-multi`) | **at once**: a comment starting "Starting investigation for job <id>", then up to four clones, later the verdict comment on the origin job | no | env `dry_run=1`: the Bash revision echoes the calls, the Python one (also `--dry-run`) logs them with `-v` |
+| `openqa-llm-investigate` | one job comment starting `**LLM Investigation summary:**`; run by the hook unless env `llm_investigate=0`; needs an LLM endpoint (`LLM_API_URL`, `LLM_MODEL`, `LLM_API_TOKEN`); job setting `LLM_PROMPT_EXTENSION` is added to its prompt | no | `--dry` prints the comment; never start it to take a look |
 | `openqa-trigger-bisect-jobs` | clones, comment | no | `--dry-run` |
 | `openqa-advanced-retrigger-jobs` | bulk restart | yes, unless env `JOB_IDS="<id> <id>"` is set | env `dry_run=1` |
 | `openqa-query-for-job-label`, `openqa-monitor-incompletes`, `openqa-monitor-investigation-candidates`, `openqa-incompletes-stats` | no | **yes** (`ssh` + `sudo -u geekotest psql`) | - |
@@ -133,4 +134,4 @@ openqa-review --host https://openqa.opensuse.org -j '<Parent> / <Group>' \
 
 `openqa_client` (github.com/os-autoinst/openQA-python-client) suits longer custom scripts; same `client.conf`. (unverified) `get_latest_build(<group id>)` defaults to `all_passed=True` (newest all-green build); review needs `all_passed=False`.
 
-Sources: openQA public/openqa-cli.yaml, lib/OpenQA/Command.pm, lib/OpenQA/WebAPI/Plugin/MCP.pm; os-autoinst-scripts _common, pyproject.toml, openqa-label-known-issues, openqa-investigate, openqa-advanced-retrigger-jobs; openqa_review openqa_review/openqa_review.py, browser.py; openqa-mon cmd/openqa-revtui/*.go; ruoqa-mcp README.md, src/tools/read.rs
+Sources: openQA public/openqa-cli.yaml, lib/OpenQA/Command.pm, lib/OpenQA/WebAPI/Plugin/MCP.pm; os-autoinst-scripts _common, pyproject.toml, openqa-label-known-issues, openqa-investigate, openqa-advanced-retrigger-jobs; openqa_review openqa_review/openqa_review.py, browser.py; openqa-mon cmd/openqa-revtui/*.go; ruoqa-mcp README.md, src/tools/read.rs; os-autoinst-scripts openqa-llm-investigate

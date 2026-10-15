@@ -1,0 +1,20 @@
+[
+ {
+  "bugrefs": [],
+  "created": "2030-01-02 03:04:05 +0000",
+  "renderedMarkdown": null,
+  "updated": "2030-01-02 03:04:05 +0000",
+  "id": 1,
+  "userName": "reviewer_a",
+  "text": "looking at it"
+ },
+ {
+  "bugrefs": [],
+  "created": "2030-01-02 03:04:05 +0000",
+  "renderedMarkdown": null,
+  "updated": "2030-01-02 03:04:05 +0000",
+  "id": 2,
+  "userName": "geekotest",
+  "text": "**LLM Investigation summary:**\n\n* boot: grub2 needle did not match after the reboot.\n* zypper_up: zypper exited with 1.\n\nThe test failed in the bootloader.\n\nClassification: Test issue\nBISECT: NO \u2014 other jobs fail in the same module\nRestart: NO \u2014 the needle does not match"
+ }
+]

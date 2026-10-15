@@ -1,0 +1,82 @@
+{
+ "aggregate_status": "failed",
+ "build": "20300102",
+ "distri": "exampleos",
+ "job_ids": [
+  7010,
+  7011,
+  7020,
+  7021
+ ],
+ "limit_exceeded": 0,
+ "results": {
+  "exampleos": {
+   "Rolling": {
+    "DVD": {
+     "after_textmode_a": {
+      "description": "",
+      "x86_64": {
+       "dep_count": 1,
+       "deps": "{\"children\": {\"Chained\": [], \"Directly chained\": [], \"Parallel\": []}, \"has_parents\": 1, \"parents\": {\"Chained\": [7010], \"Directly chained\": [], \"Parallel\": []}, \"parents_ok\": 0}",
+       "jobid": 7020,
+       "restarts": 0,
+       "state": "cancelled"
+      }
+     },
+     "after_textmode_b": {
+      "description": "",
+      "x86_64": {
+       "dep_count": 1,
+       "deps": "{\"children\": {\"Chained\": [], \"Directly chained\": [], \"Parallel\": []}, \"has_parents\": 1, \"parents\": {\"Chained\": [7010], \"Directly chained\": [], \"Parallel\": []}, \"parents_ok\": 0}",
+       "jobid": 7021,
+       "restarts": 0,
+       "state": "cancelled"
+      }
+     },
+     "mm-client@64bit-2G": {
+      "description": "",
+      "x86_64": {
+       "bugdetails": null,
+       "bugs": null,
+       "comments": 0,
+       "dep_count": 0,
+       "deps": "{\"children\": {\"Chained\": [], \"Directly chained\": [], \"Parallel\": []}, \"has_parents\": 1, \"parents\": {\"Chained\": [7001], \"Directly chained\": [], \"Parallel\": [7010]}, \"parents_ok\": 0}",
+       "failed": 0,
+       "failures": [],
+       "jobid": 7011,
+       "label": null,
+       "overall": "parallel_failed",
+       "passed": 3,
+       "restarts": 0,
+       "state": "done",
+       "unknown": 0
+      }
+     },
+     "textmode": {
+      "description": "Maintainer: nobody",
+      "x86_64": {
+       "bugdetails": null,
+       "bugs": null,
+       "comments": 2,
+       "dep_count": 0,
+       "deps": "{\"children\": {\"Chained\": [], \"Directly chained\": [], \"Parallel\": []}, \"has_parents\": 0, \"parents\": {\"Chained\": [], \"Directly chained\": [], \"Parallel\": []}, \"parents_ok\": 1}",
+       "failed": 2,
+       "failures": [
+        "zypper_up",
+        "boot"
+       ],
+       "jobid": 7010,
+       "label": null,
+       "overall": "failed",
+       "passed": 3,
+       "restarts": 3,
+       "state": "done",
+       "unknown": 0
+      }
+     }
+    }
+   }
+  }
+ },
+ "version": "Rolling"
+}

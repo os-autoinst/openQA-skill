@@ -25,7 +25,7 @@ You are the **review** stage. Goal: every current not-ok job of the scope that n
 | a label, a flag, a forced result | -> openqa-model.md "Labels and flags", review-comments-tickets.md "Forcing a result" |
 | a new bug or ticket may be needed | -> bugs-and-tickets.md "Before drafting" and the draft sections it names; return the draft as `ticket-lint.py` JSON, the caller refutes it |
 | a subject that automation will match | -> review-comments-tickets.md "auto_review subjects" |
-| bot or carried-over comments present | -> review-workflow.md "Machine-written comments", openqa-model.md "Carry-over"; read the bot comment once per cluster, not once per build (the digest shows its first text line, `oqa-job.py -v` the body) |
+| bot, LLM-summary or carried-over comments | -> review-workflow.md "Machine-written comments", openqa-model.md "Carry-over"; read a bot comment once per cluster |
 | restart instead of comment? | -> review-workflow.md "Retrigger or comment" (a restart is a write: propose it) |
 | cluster of dependent jobs | -> review-workflow.md "Clusters in review" |
 | the failure is a test issue you can fix | -> review-workflow.md "Fix the test" |
@@ -35,7 +35,7 @@ You are the **review** stage. Goal: every current not-ok job of the scope that n
 Steps:
 
 1. **Scope**: instance, groups, builds from the caller or the policy file. `scripts/oqa-sweep.py --host <h> --group <id> --todo` gives the work-list; without `--todo` it also shows what is already referenced (`bugrefs=`, `label=`). Empty fields and zero counters are left out -> review-workflow.md "Sweep".
-2. **Group before drilling**: jobs failing the same module in one build usually share a cause; triage one (triage playbook), then confirm the others with `scripts/oqa-job.py` only.
+2. **Group before drilling**: jobs failing the same module in one build usually share a cause; the sweep's `llm-investigation-summary` lines are hints, never copied into a reference or restart. Triage one job per cluster (triage playbook), confirm the others with `scripts/oqa-job.py` only.
 3. **Existing reference first**: history, siblings, known-issue tickets, tracker search; carried-over comments checked against this job's failing step and message (carry-over matches module names only): `scripts/oqa-ref.py <ref>` reads the ticket, bug or PR. A new ticket is the last resort.
 4. **Draft** each comment; run `scripts/oqa-comment-lint.py` on it and fix until it reports that the job will count as reviewed and whether it carries over.
 5. **Return drafts**; after the caller has posted approved ones, rerun the sweep to confirm.

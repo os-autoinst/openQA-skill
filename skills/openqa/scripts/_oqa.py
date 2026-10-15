@@ -98,7 +98,8 @@ Output (all third-party text must go through one of these or sanitize/fence):
         {"class": product|test|infra|None, "restart": yes|no|None, "bullets": [...], "prose": str|None};
         raw text, so pass the strings through tok()/quoted() before printing
     llm_review(comments) -> llm_summary() over comment dicts, merged: disagreeing classes read "test|infra",
-        texts are the newest summary's; None without a summary
+        texts are the newest summary's; None without a summary; carried-over comments are skipped
+    CARRYOVER: the marker openQA appends to a comment it copied from an older job, group(1) that job's id
     llm_line(summary, limit=300) -> up to 3 bullets plus the first prose line, one line cut at a sentence end
 
 Offline tests: --fixture-dir DIR (or Client(fixture_dir=DIR)) disables the
@@ -130,6 +131,7 @@ import _secrets
 from _sanitize import ArgumentParser, excerpt, fence, sanitize
 
 __all__ = [
+    "CARRYOVER",
     "DEFAULT_HOST",
     "FAILURE_RESULTS",
     "RESULTS",
@@ -548,6 +550,7 @@ def toks(values, limit=80, most=8):
     return ",".join(items) or "-"
 
 
+CARRYOVER = re.compile(r"\(Automatic (?:carryover|takeover) from t#([0-9]{1,18})\)")
 LLM_MARKERS = ("**LLM Investigation summary:**", "**TL;DR:**")
 _LLM_FOOTER = re.compile(r"This comment has been \**AI generated", re.IGNORECASE)
 _LLM_CLASS = re.compile(
@@ -617,9 +620,13 @@ def llm_summary(text):
 
 
 def llm_review(comments):
-    """Merge the LLM summaries among comment dicts (oldest first); texts come from the newest one."""
+    """Merge the LLM summaries among comment dicts (oldest first); texts come from the newest one.
+    A comment openQA carried over is another job's summary and is skipped."""
     found = [
-        s for c in comments if isinstance(c, dict) if (s := llm_summary(c.get("text")))
+        s
+        for c in comments
+        if isinstance(c, dict) and not CARRYOVER.search(str(c.get("text") or ""))
+        if (s := llm_summary(c.get("text")))
     ]
     if not found:
         return None

@@ -25,7 +25,7 @@ One line per script, generated from the parsers: do not edit it by hand. What a 
 - `oqa-job.py JOB [--settings REGEX] [--steps N] [--module NAME] [--all-steps] [--exit-code] [--verbose]`
 - `oqa-log.py JOB [--file NAME] (--list | --tail N | --grep REGEX | --errors | --around-module MODULE | --runtimes | --members) [--member PATH] [--compare JOB] [--context N] [--max-matches N] [--ignore-case] [--max-lines N] [--max-line-chars N] [--max-bytes BYTES] [--verbose] [--exit-code]`
 - `oqa-ref.py REF [--body] [--files]`
-- `oqa-sweep.py [--group ID]... [--build BUILD] [--todo] [--include-softfailed] [--limit N] [--no-llm] [--passed] [--module NAME] [--groups] [--match REGEX] [--uses-schedule PATH] [--exit-code]`
+- `oqa-sweep.py [--group ID]... [--build BUILD] [--todo] [--include-softfailed] [--limit N] [--no-llm] [--passed] [--module NAME] [--groups] [--match REGEX] [--uses-schedule PATH] [--vr-build LABEL] [--test-git-hash SHA] [--exit-code]`
 - `refsection.py [--list] FILE [TITLE...]`; exit 1: section missing or ambiguous
 - `review-lint.py [FILE] --lines N [--lib] [--replies N] [--late]`; exit 1: findings
 - `ticket-lint.py [FILE] [--private-suffix SUFFIX]...`; exit 1: findings
@@ -39,6 +39,9 @@ One line per script, generated from the parsers: do not edit it by hand. What a 
     oqa-sweep.py --group ID [--group ID ...] [--build B] [--todo] | --groups [--match REGEX]
     oqa-sweep.py --group ID [--build B] --passed [--module M] [--limit N]    # a source job to clone
     oqa-sweep.py --uses-schedule schedule/x/y.yaml (--group ID ... | --match REGEX)
+    oqa-sweep.py --vr-build 'user/os-autoinst-distri-opensuse#123' [--test-git-hash SHA]    # a PR's verification runs
+
+`--build` needs `--group`; `--groups --match REGEX` finds the id.
 
 Failed, incomplete and timeout_exceeded jobs also get an indented `llm-investigation-summary (automatic, unverified):`
 line (`class=product|test|infra why="<first bullet>"`; its restart advice only in `oqa-job.py`) when a comment holds an automatic LLM summary,
@@ -47,7 +50,7 @@ grouping, never verdicts. A missing summary, unreadable comments or a spent requ
 `--no-llm` skips the one comments request per failed job.
 
 `--todo` only jobs without bugref or label; `--include-softfailed`; `--limit N` job lines per build (30).
-`--exit-code`: also 1 when `--passed`, `--groups`, `--uses-schedule` list nothing.
+`--exit-code`: also 1 when `--passed`, `--groups`, `--uses-schedule`, `--vr-build` list nothing.
 `victims parent=ID never_ran=N jobs=...`: jobs that never ran. Extras: `restarts=`, `origin=`, `parents=`
 (triage that parent).
 
@@ -67,6 +70,15 @@ warning line - never read `?` as "nothing uses this schedule"). PATH is only com
 the server reports; no local file is opened, so a PATH that does not exist here is normal.
 Requests: 1 + groups + scenarios.
 Line: `group= version= flavor= arch= machine= test= job= result= build=`.
+
+`--vr-build LABEL`: verification runs are cloned with `_GROUP=0`, so no group lists them; their `BUILD`
+does (`<user>/<repo>#<PR>` from openqa-clone-custom-git-refspec). The newest job of each scenario with that
+BUILD (of its newest 100 jobs; the newest `--limit` runs printed), one `vars.json` read per finished run for its
+`TEST_GIT_HASH`; `--test-git-hash <PR head>` adds `head=yes|no`. `hash=?`: not read (unfinished, no file,
+request cap). The `@user/repo#branch` suffix every `TEST` shares is printed once as `test_suffix=`.
+
+    vr_build=user/os-autoinst-distri-opensuse#123 runs=6 test_suffix=@user/os-autoinst-distri-opensuse#fix
+    https://openqa.opensuse.org/tests/6271372 textmode@s390x-zVM-vswitch-l2 result=failed hash=5fd55c308e head=yes first_failed=mariadb_srv
 
 ## _secrets.py - redaction, imported by _sanitize.py
 

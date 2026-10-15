@@ -44,6 +44,9 @@ sweep --groups --match '(' >/dev/null 2>&1
 check "broken --match regex exits 2" 2 $?
 python3 "$script" --host http://openqa.example.org --group 7 >/dev/null 2>&1
 check "plain http to a remote host is refused" 2 $?
+actual=$(sweep --build 20300102 2>&1)
+check "--build without --group exits 2 and names the way to the group id and to a verification run" "2 1" \
+	"$? $(grep -c -- 'error: --build needs --group ID: find the id with --groups --match REGEX (a verification run has no group: --vr-build LABEL)$' <<<"$actual")"
 
 # --- rich mode ------------------------------------------------------------------
 actual=$(sweep --group 7)
@@ -267,6 +270,77 @@ check "--uses-schedule: the cap keeps a request for the templates of every later
 	"listed: 5 requests: 4|1|4" \
 	"$(tail -n 1 <<<"$actual")|$(grep -c '^group=8 .* job=?$' <<<"$actual")|$(grep -c ' job=?$' <<<"$actual")"
 
+# --- verification runs: no group, found by their BUILD ------------------------------
+label='example-user/os-autoinst-distri-example#77'
+head=0123456789abcdef0123456789abcdef01234567
+sweep --vr-build "$label" --group 7 >/dev/null 2>&1
+check "--vr-build with --group is a usage error" 2 $?
+sweep --vr-build "$label" --passed >/dev/null 2>&1
+check "--vr-build with --passed is a usage error" 2 $?
+sweep --vr-build ' ' >/dev/null 2>&1
+check "--vr-build without a label is a usage error" 2 $?
+sweep --group 7 --test-git-hash "$head" >/dev/null 2>&1
+check "--test-git-hash without --vr-build is a usage error" 2 $?
+sweep --vr-build "$label" --test-git-hash 'HEAD~1' >/dev/null 2>&1
+check "--test-git-hash takes hex digits only" 2 $?
+vr=$(sweep --vr-build "$label" --test-git-hash "${head:0:12}")
+check "--vr-build: exit 0" 0 $?
+check "--vr-build: newest run per scenario, id order, shared TEST suffix once, hash and head per run" "$(
+	cat <<'EOF'
+host=https://openqa.example.org
+vr_build=example-user/os-autoinst-distri-example#77 runs=5 test_suffix=@example-user/os-autoinst-distri-example#fix-thing
+https://openqa.example.org/tests/9001 textmode@64bit result=passed hash=0123456789 head=yes
+https://openqa.example.org/tests/9002 gnome@uefi result=failed hash=fedcba9876 head=no first_failed=firefox
+https://openqa.example.org/tests/9003 minimal@64bit result=running hash=? head=?
+https://openqa.example.org/tests/9004 kde@64bit result=incomplete hash=? head=? first_failed=boot
+EOF
+)" "$(head -n 6 <<<"$vr")"
+check "--vr-build: a job of another BUILD (filter ignored) or with an id that is no number is not listed" 0 \
+	"$(grep -Ec '9006|9007|someone-else' <<<"$vr")"
+check "--vr-build: vars.json is read once per finished run, never for a running one; its token is never printed" \
+	"requests: 5 0" "$(tail -n 1 <<<"$vr") $(grep -c 'obtokenvalue' <<<"$vr")"
+check "--vr-build: a TEST_GIT_HASH that is no commit id reads hash=?, hostile names are quoted" 1 \
+	"$(grep -c '^https://openqa.example.org/tests/9005 "evil@64bit .*" result=failed hash=? head=? first_failed="rm -rf .*"$' <<<"$vr")"
+actual=$(sweep --vr-build "$label" --limit 2)
+check "--vr-build --limit keeps the newest runs, caps the vars.json reads, says so, no head= without --test-git-hash" \
+	"9004 9005 1 requests: 3 0" \
+	"$(grep -o '^https://[^ ]*' <<<"$actual" | cut -d/ -f5 | xargs) $(grep -c '^5 verification run(s) with this BUILD, 3 more not shown (--limit N)$' <<<"$actual") $(tail -n 1 <<<"$actual") $(grep -c 'head=' <<<"$actual")"
+actual=$(sweep --vr-build 'example-user/empty#1')
+check "--vr-build: no run is exit 0 and said" "0 1" "$? $(grep -c '^0 verification run(s) with this BUILD$' <<<"$actual")"
+sweep --vr-build 'example-user/empty#1' --exit-code >/dev/null
+check "--vr-build --exit-code: no run exits 1" 1 $?
+actual=$(
+	cd "$(dirname "$script")" && python3 - "$fixtures" "$label" <<'PY'
+import argparse, importlib.util, sys
+spec = importlib.util.spec_from_file_location("sweep", "oqa-sweep.py")
+sweep = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(sweep)
+args = argparse.Namespace(vr_build=sys.argv[2], test_git_hash=None, limit=30)
+client = sweep._oqa.Client("https://openqa.example.org", fixture_dir=sys.argv[1], max_requests=2)
+sweep.vr_runs(client, args)
+PY
+)
+check "--vr-build: at the request cap the remaining runs say hash=? and a warning says why" "1 4 1" \
+	"$(grep -c ' hash=0123456789$' <<<"$actual") $(grep -c '^https://.* hash=?' <<<"$actual") $(grep -c "^warning: request cap reached, hash=? marks runs whose vars.json was not read$" <<<"$actual")"
+one=$(
+	cd "$(dirname "$script")" && python3 - <<'PY'
+import argparse, contextlib, importlib.util, io, json, os, tempfile
+spec = importlib.util.spec_from_file_location("sweep", "oqa-sweep.py")
+sweep = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(sweep)
+with tempfile.TemporaryDirectory() as tmp:
+    job = {"id": 5, "state": "done", "result": "passed", "settings": {"BUILD": "u/r#1", "TEST": "t@u/r#b", "MACHINE": "m"}}
+    name = sweep._oqa.fixture_name("/api/v1/jobs", {"build": "u/r#1", "latest": 1, "limit": sweep.VR_FETCH})
+    with open(os.path.join(tmp, name + ".json"), "w") as out:
+        json.dump({"jobs": [job]}, out)
+    args = argparse.Namespace(vr_build="u/r#1", test_git_hash=None, limit=30)
+    with contextlib.redirect_stdout(io.StringIO()) as text:
+        sweep.vr_runs(sweep._oqa.Client("https://openqa.example.org", fixture_dir=tmp), args)
+print(text.getvalue().splitlines()[1])
+PY
+)
+check "--vr-build: a single run keeps its whole TEST" "https://openqa.example.org/tests/5 t@u/r#b@m result=passed hash=?" "$one"
+
 # --- hostile content ------------------------------------------------------------
 all=$(
 	sweep --group 7 --include-softfailed
@@ -274,6 +348,7 @@ all=$(
 	sweep --groups
 	sweep --group 7 --passed
 	echo "$uses"
+	echo "$vr"
 )
 check "no escape or control byte reaches the output" 0 "$(grep -c '[[:cntrl:]]' <<<"$all")"
 check "fence-like markers are defused" 0 "$(grep -Ec '<<<(END|UNTRUSTED)' <<<"$all")"

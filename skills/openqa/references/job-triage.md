@@ -137,7 +137,7 @@ Strip ANSI colours (`\x1b\[[0-9;]*m`). Timestamps are UTC (`Z`) or worker-local 
 
 ## Investigate jobs
 
-openqa-investigate clones a failed job as `<TEST>:investigate<suffix>` outside any job group and comments `Automatic investigation jobs for job <id>:`. Never review the clones. It skips jobs without a group, `Development` parent groups and directly chained clusters: a missing comment proves nothing.
+openqa-investigate clones a failed job as `<TEST>:investigate<suffix>` outside any job group and comments `Automatic investigation jobs for job <id>:`. Never review the clones. With `openqa-llm-investigate` in the hook it runs only after the model answered `BISECT: YES`, so no clones after `BISECT: NO` is normal -> references/review-workflow.md "Machine-written comments". It skips jobs without a group, `Development` parent groups and directly chained clusters: a missing comment proves nothing.
 
 Suffixes: `:retry` (same build and tests); `:last_good_tests:<hash>` (skipped without test changes); `:last_good_build:<BUILD>` (skipped, same `BUILD`); `:last_good_tests_and_build:<hash>+<BUILD>` (skipped when either was).
 
@@ -168,4 +168,4 @@ Templates -> references/bugs-and-tickets.md "Bug body", "Ticket body"
 - **Suite cloned at run time** (BCI-tests, LTP, kselftest, tox, bats): its revision is in neither `TEST_GIT_HASH` nor the investigation test log. `oqa-log.py --grep 'git clone'`, then its commits since last good, before saying PRODUCT.
 - **Digest and log disagree** (log `last_module=` not in the digest, other worker or date, modules after a fatal one): the artifact is from another run; no evidence, say so.
 
-Sources: openQA lib/OpenQA Constants.pm, Worker/Job.pm, Schema/Result/Jobs.pm, Scheduler/Model/Jobs.pm; os-autoinst testapi.pm, basetest.pm, consoles/serial_screen.pm, autotest.pm, distribution.pm, lockapi.pm, OpenQA/Qemu/Proc.pm; os-autoinst-distri-opensuse lib/utils.pm, lib/known_bugs.pm, lib/Utils/Logging.pm; os-autoinst-scripts openqa-investigate
+Sources: openQA lib/OpenQA Constants.pm, Worker/Job.pm, Schema/Result/Jobs.pm, Scheduler/Model/Jobs.pm; os-autoinst testapi.pm, basetest.pm, consoles/serial_screen.pm, autotest.pm, distribution.pm, lockapi.pm, OpenQA/Qemu/Proc.pm; os-autoinst-distri-opensuse lib/utils.pm, lib/known_bugs.pm, lib/Utils/Logging.pm; os-autoinst-scripts openqa-investigate, openqa-llm-investigate

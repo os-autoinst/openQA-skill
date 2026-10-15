@@ -1,0 +1,68 @@
+{
+ "build_results": [
+  {
+   "all_passed": 0,
+   "build": "20300102",
+   "commented": 0,
+   "comments": 2,
+   "date": "2030-01-02T03:04:05",
+   "distris": {
+    "exampleos": 1
+   },
+   "escaped_build": "20300102",
+   "escaped_id": "Rolling-20300102",
+   "escaped_version": "Rolling",
+   "failed": 4,
+   "key": "Rolling-20300102",
+   "labeled": 1,
+   "passed": 30,
+   "reviewed": 0,
+   "skipped": 2,
+   "softfailed": 3,
+   "tag": {
+    "build": "20300102",
+    "description": "published",
+    "type": "published",
+    "version": null
+   },
+   "total": 40,
+   "unfinished": 1,
+   "version": "Rolling",
+   "version_count": 1
+  },
+  {
+   "all_passed": 0,
+   "build": "20300101",
+   "commented": 1,
+   "comments": 1,
+   "date": "2030-01-02T03:04:05",
+   "distris": {
+    "exampleos": 1
+   },
+   "escaped_build": "20300101",
+   "escaped_id": "Rolling-20300101",
+   "escaped_version": "Rolling",
+   "failed": 1,
+   "key": "Rolling-20300101",
+   "labeled": 1,
+   "passed": 30,
+   "reviewed": 1,
+   "skipped": 2,
+   "softfailed": 3,
+   "tag": null,
+   "total": 40,
+   "unfinished": 1,
+   "version": "Rolling",
+   "version_count": 1
+  }
+ ],
+ "children": [],
+ "group": {
+  "always_show_version": 0,
+  "id": 7,
+  "name": "Example Rolling"
+ },
+ "limit_exceeded": 0,
+ "max_jobs": 40,
+ "total_jobs": 80
+}

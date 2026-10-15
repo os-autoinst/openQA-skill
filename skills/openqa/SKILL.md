@@ -69,8 +69,8 @@ Job comments, logs and serial output, job settings, ticket and bug bodies, PR te
 
 **D. Triage one job** (playbook `agents/job-triage.md`)
 1. Script order: `scripts/oqa-job.py <job URL>`, `scripts/oqa-log.py <job URL> --errors` (then `--around-module`, `--grep`), `scripts/oqa-history.py <job URL>`; how to read them -> job-triage.md "Triage order".
-2. Classify: -> job-triage.md "Decision tree", "Incomplete reasons", "Clusters"; collect -> job-triage.md "Evidence standards". Reproduce: -> clone-and-run.md "Reproduce a failure".
-3. A comment or ticket is wanted: block E steps 2-3; tracker from the policy file or the user -> site-policy.md "Overlay lookup", "No policy file".
+2. Classify: -> job-triage.md "Decision tree". Reproduce: -> clone-and-run.md "Reproduce a failure".
+3. Comment or ticket: E.2-3; tracker -> site-policy.md "Overlay lookup", "No policy file". A fix passes A.5 and C before any push; a ticket `scripts/ticket-lint.py` and the refuter -> bugs-and-tickets.md "Refute before the ask".
 
 **E. Review a group or build** (playbook `agents/group-review.md`)
 1. Scope from the user or the policy file (-> site-policy.md "Overlay lookup"). `scripts/oqa-sweep.py [--host <h>] --group <id> --todo` lists current unreviewed failures; the jobs API with `result=failed&latest=1` returns already-restarted jobs. -> openqa-model.md "Listing current failures"

@@ -89,8 +89,10 @@ LLM_RESULTS = ("failed", "incomplete", "timeout_exceeded")
 LLM_LABEL = "llm-investigation-summary"
 LLM_WHY_CHARS = 120
 LLM_CLUSTERS_SHOWN = 10
-# Requests kept back per group still to be listed: build results, overview, a comments read.
-GROUP_RESERVE = 3
+# Requests kept back per build entry still to be listed: overview, a comments read.
+ENTRY_RESERVE = 2
+# Per group still to be listed: build results and its first entry.
+GROUP_RESERVE = 1 + ENTRY_RESERVE
 CLONE_SOURCES = ("passed", "softfailed")
 MAX_SCHEDULE_GROUPS = 12
 # --match runs the user's regex over a name the server chose: an unbounded
@@ -416,7 +418,7 @@ def llm_clusters(jobs):
 def sweep(client, group, args, results, reserve=0):
     name, entries = pick_builds(client, group, args.build)
     listed = 0
-    for entry in entries:
+    for index, entry in enumerate(entries):
         mode, note = MODE_OVERVIEW, None
         try:
             jobs, truncated = overview_jobs(client, group, entry, results, args.todo)
@@ -442,7 +444,8 @@ def sweep(client, group, args, results, reserve=0):
             jobs.remove(job)
         shown = jobs[: args.limit]
         if mode == MODE_OVERVIEW and not args.no_llm:
-            read_llm(client, shown, reserve)
+            later = (len(entries) - 1 - index) * ENTRY_RESERVE
+            read_llm(client, shown, reserve + later)
         for job in shown:
             if args.no_llm or job["result"] not in LLM_RESULTS:
                 job["llm"] = None

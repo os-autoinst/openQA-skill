@@ -100,6 +100,39 @@ print(client.requests, text.count("  llm-investigation-summary ("), "7010 failed
 PY
 )
 check "the comments reads leave the reserved requests of later groups alone, the listing stays whole" "3 1 True" "$capped"
+tmpb=$(mktemp -d)
+python3 - "$tmpb" "$(dirname "$script")" <<'PY'
+import json, os, sys
+
+out = sys.argv[1]
+sys.path.insert(0, sys.argv[2])
+import _oqa
+
+
+def write(path, params, data):
+    with open(os.path.join(out, _oqa.fixture_name(path, params) + ".json"), "w") as file:
+        json.dump(data, file)
+
+
+# One build in three versions, 30 failures each, every one with a plain comment.
+versions = ("1", "2", "3")
+counters = {"build": "B", "failed": 30, "total": 30}
+write("/api/v1/job_groups/50/build_results", {"show_tags": 1},
+      {"group": {"name": "g"}, "build_results": [{**counters, "version": v} for v in versions]})
+text = "**LLM Investigation summary:**\n\n* m: x.\n\nClassification: Test issue"
+for n, version in enumerate(versions):
+    ids = range(1000 + 100 * n, 1030 + 100 * n)
+    tests = {f"t{i}": {"x86_64": {"jobid": i, "overall": "failed", "comments": 1, "failures": ["m"]}} for i in ids}
+    params = [("groupid", 50), ("build", "B"), ("version", version), ("result", _oqa.expand_results(["not_ok"]))]
+    write("/tests/overview.json", params, {"results": {"os": {version: {"DVD": tests}}}, "job_ids": list(ids)})
+    for i in ids:
+        write(f"/api/v1/jobs/{i}/comments", None, [{"id": i, "text": text, "bugrefs": []}])
+PY
+budget=$(python3 "$script" --host https://openqa.example.org --fixture-dir "$tmpb" --group 50 --build B 2>&1)
+check "the comments reads of one version leave the requests of the versions still to list alone" \
+	"0 3 0 requests: 60" \
+	"$? $(grep -c '^30 current not-ok jobs$' <<<"$budget") $(grep -c 'error\|note:' <<<"$budget") $(tail -n 1 <<<"$budget")"
+rm -r "$tmpb"
 
 actual=$(sweep --group 7 --todo)
 check "--todo keeps only unreviewed jobs" "$(cat "$fixtures/expected-group7-todo.txt")" "$actual"

@@ -36,8 +36,13 @@ How to read it:
     matches only when every area reaches its threshold, 96 % unless the area
     sets "match"). The "error" field of the raw details is another measure,
     averaged over all areas.
-  - shot= is the screenshot of a step: GET it to a file and look at it. A PNG
+  - shot= on a step line is that step's screenshot. A step without one (a die
+    message, a wait_serial) has last_shot=, the newest screenshot before it in
+    the module: the screen when it failed. GET it to a file and look at it; the
+    same step of a good run is in --module NAME --all-steps of that run. A PNG
     of a few hundred bytes is a blank screen.
+  - --module NAME alone limits the module lines to that module, whatever its
+    result, and says how many of its steps were not shown.
   - ulogs[<module>]= are the uploaded logs of a failed module, named
     <module>-<name>: oqa-log.py JOB --file ulogs/<module>-<name>.
   - force_result_not_applied=<result>: a force_result label asks for a result
@@ -474,7 +479,22 @@ def shot_name(step):
     return name if isinstance(name, str) and SHOT_NAME.fullmatch(name) else None
 
 
-def print_step(client, job_id, module, step, source, verbose):
+def step_shot(steps, step):
+    """("shot", name) of the step's own screenshot, else ("last_shot", name) of the newest
+    one before it; None when that screenshot is no plain file name or there is none."""
+    key, found = "shot", step
+    if "screenshot" not in step:
+        key, found = "last_shot", {}
+        for other in steps:
+            if other is step:
+                break
+            if "screenshot" in other:
+                found = other
+    name = shot_name(found)
+    return (key, name) if name else None
+
+
+def print_step(client, job_id, module, step, source, verbose, shot=None):
     number = step.get("num")
     line = f"  step={tok(number, 10)} kind={step_kind(step)}"
     title = step.get("title")
@@ -482,10 +502,10 @@ def print_step(client, job_id, module, step, source, verbose):
         line += f" title={_oqa.quoted(title, 60)}"
     if _oqa.job_id_of(number):
         line += f" link={step_link(client, job_id, module, number)}"
-    print(line)
-    shot = shot_name(step)
     if shot:
-        print(f"    shot={client.host}/tests/{job_id}/images/{quote(shot, safe='')}")
+        key, name = shot
+        line += f" {key}={client.host}/tests/{job_id}/images/{quote(name, safe='')}"
+    print(line)
     if step.get("tags"):
         print(f"    tags={toks([str(tag) for tag in step['tags']], 60)}")
     needles = [
@@ -531,13 +551,28 @@ def print_step(client, job_id, module, step, source, verbose):
         print(f"    trace_lines_hidden={hidden} (--verbose)")
 
 
-def print_modules(client, job, max_steps, verbose):
+def find_module(job, wanted):
+    modules = [m for m in job.get("testresults") or () if isinstance(m, dict)]
+    module = next((m for m in modules if str(m.get("name")) == wanted), None)
+    if module is None:
+        names = toks([str(m.get("name")) for m in modules], 60, 60)
+        raise _oqa.OqaError(f"no module {_oqa.quoted(wanted)} in this job: {names}")
+    return module
+
+
+def hidden_steps(steps, shown):
+    return f"  +{len(steps) - shown} of {len(steps)} steps not shown (--all-steps lists them)"
+
+
+def print_modules(client, job, max_steps, verbose, wanted=None):
     modules = [m for m in job.get("testresults") or () if isinstance(m, dict)]
     tally = {}
     for module in modules:
         tally[module.get("result")] = tally.get(module.get("result"), 0) + 1
     counts = "".join(f" {tok(key, 20)}={tally[key]}" for key in sorted(tally, key=str))
     print(f"modules={len(modules)}{counts}")
+    if wanted is not None:
+        modules = [find_module(job, wanted)]
     failed = [m for m in modules if m.get("result") == "failed"]
     soft = [m for m in modules if m.get("result") == "softfailed"]
     url = f"{client.host}/tests/{job['id']}"
@@ -578,7 +613,8 @@ def print_modules(client, job, max_steps, verbose):
         if died is not None and steps[died] not in shown:
             shown = [*shown[: max_steps - 1], steps[died]]
         for step in shown:
-            print_step(client, job["id"], name, step, source, verbose)
+            shot = step_shot(steps, step)
+            print_step(client, job["id"], name, step, source, verbose, shot)
         if len(bad) > len(shown):
             print(f"  +{len(bad) - len(shown)} failing steps not shown (--steps N)")
         if hook:
@@ -587,6 +623,8 @@ def print_modules(client, job, max_steps, verbose):
             if dead:
                 line += f"; the hook died at step={tok(dead.get('num'), 10)}"
             print(line)
+        if wanted is not None and len(steps) > len(shown):
+            print(hidden_steps(steps, len(shown)))
         if not bad:
             print(
                 f"  no failing step recorded: read the ulogs {tok(name, 60)}-* and serial0.txt"
@@ -608,19 +646,23 @@ def print_modules(client, job, max_steps, verbose):
             f"module={tok(module.get('name'), 80)} result=softfailed "
             f"step={tok(first.get('num'), 10)} reason={_oqa.quoted(reason, 160)}"
         )
+        if wanted is not None and steps:
+            print(hidden_steps(steps, 0))
     if len(soft) > MAX_MODULES:
         print(f"+{len(soft) - MAX_MODULES} softfailed modules not shown")
+    if wanted is not None and not (failed or soft):
+        module = modules[0]
+        print(f"module={tok(wanted, 80)} result={tok(module.get('result'), 30)}")
+        steps = [s for s in module.get("details") or () if isinstance(s, dict)]
+        if steps:
+            print(hidden_steps(steps, 0))
 
 
 def print_all_steps(client, job, how, wanted):
     """Every step of one module: num, result, title, screenshot file."""
     if how != "details":
         raise _oqa.OqaError(f"no steps to list: {how}")
-    modules = [m for m in job.get("testresults") or () if isinstance(m, dict)]
-    module = next((m for m in modules if str(m.get("name")) == wanted), None)
-    if module is None:
-        names = toks([str(m.get("name")) for m in modules], 60, 60)
-        raise _oqa.OqaError(f"no module {_oqa.quoted(wanted)} in this job: {names}")
+    module = find_module(job, wanted)
     steps = [s for s in module.get("details") or () if isinstance(s, dict)]
     print(
         f"job={job['id']} host={client.host} module={tok(wanted, 80)} "
@@ -806,7 +848,8 @@ def main():
     parser.add_argument(
         "--module",
         metavar="NAME",
-        help="with --all-steps: the module whose steps are listed (name as in the digest)",
+        help="only this module's lines, whatever its result (name as in the digest); "
+        "with --all-steps: the module whose steps are listed",
     )
     parser.add_argument(
         "--all-steps",
@@ -827,8 +870,8 @@ def main():
         "stack traces, step titles and longer comment bodies",
     )
     args = parser.parse_args()
-    if bool(args.module) != args.all_steps:
-        parser.error("--module NAME and --all-steps go together")
+    if args.all_steps and not args.module:
+        parser.error("--all-steps needs --module NAME")
     args.host, job_id = _oqa.parse_job_url(args.job, args.host)
 
     client = _oqa.client_from_args(args, "oqa-job")
@@ -836,6 +879,8 @@ def main():
     job["id"] = job_id
     ok = job.get("result") in (*_oqa.RESULT_GROUPS["ok"], "none")
     status = 0 if ok or not args.exit_code else 1
+    if args.module:
+        find_module(job, args.module)
     if args.all_steps:
         print_all_steps(client, job, how, args.module)
         print(f"requests: {client.requests}")
@@ -844,7 +889,7 @@ def main():
     print_settings(job, args.settings, args.verbose)
     print_chain(client, job, args.verbose)
     print_dependencies(client, job, args.verbose)
-    print_modules(client, job, args.steps, args.verbose)
+    print_modules(client, job, args.steps, args.verbose, args.module)
     print_files(job, args.verbose)
     print_comments(client, job_id, job.get("result"), args.verbose)
     print(f"requests: {client.requests}")

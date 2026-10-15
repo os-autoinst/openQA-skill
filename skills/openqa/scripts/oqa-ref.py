@@ -36,6 +36,9 @@ MAX_JSON_BYTES = 1024 * 1024
 BODY_BYTES = 4000
 BODY_LINE = 400
 MAX_FILES = 100
+MAX_NOTES = 10
+NOTE_BYTES = 1500
+NOTES_ELSEWHERE = "notes: only progress tickets (poo#) have them here; --notes ignored"
 # An optional extra (a description, a file list) the tracker sent as junk or as too much.
 UNREADABLE = object()
 
@@ -173,8 +176,19 @@ def bugzilla(client, number, want_body):
     return fields, body
 
 
-def redmine(client, number):
-    issue = _fetch(client, f"/issues/{number}.json").get("issue")
+def redmine(client, number, want_notes):
+    """(fields, description, notes): notes are (created, text) of the non-empty
+    journal notes, oldest first, UNREADABLE, or None when not asked for."""
+    path, notes = f"/issues/{number}.json", None
+    if want_notes:
+        try:
+            data = _fetch(client, path, {"include": "journals"}, _oqa.MAX_JSON_BYTES)
+        except _oqa.OqaError:
+            # The notes are an extra: a history too large or broken must not cost the digest.
+            data, notes = _fetch(client, path), UNREADABLE
+    else:
+        data = _fetch(client, path)
+    issue = data.get("issue")
     if not isinstance(issue, dict):
         raise _oqa.OqaError("the tracker answer has an unexpected shape (no issue)")
     closed = _field(issue, "status", "is_closed")
@@ -182,7 +196,31 @@ def redmine(client, number):
     if isinstance(closed, bool):
         fields.append(("open", _yes(not closed)))
     fields += [("updated", issue.get("updated_on")), ("title", issue.get("subject"))]
-    return fields, _text(issue.get("description"))
+    if want_notes and notes is None:
+        journals, notes = issue.get("journals"), UNREADABLE
+        if isinstance(journals, list):
+            notes = [
+                (journal.get("created_on"), journal["notes"])
+                for journal in journals
+                if isinstance(journal, dict) and _text(journal.get("notes")).strip()
+            ]
+    return fields, _text(issue.get("description")), notes
+
+
+def print_notes(notes, wanted, source):
+    """The last notes with their dates, the author left out."""
+    if notes is UNREADABLE:
+        print("notes: not readable (the answer was too large, not JSON or had none)")
+        return
+    if not notes:
+        print("notes: none")
+        return
+    shown = notes[-wanted:]
+    print(f"notes: last {len(shown)} of {len(notes)}, oldest first")
+    for created, text in shown:
+        print(f"note created={_oqa.tok(created, 40)}")
+        text = _oqa.sanitize(text, max_line=BODY_LINE, max_bytes=NOTE_BYTES)
+        print(_oqa.fence(text, source), end="")
 
 
 def pr_files(client, repo, number):
@@ -205,6 +243,13 @@ def pr_files(client, repo, number):
         else ""
     )
     return [f"files={len(rows)}{more}", *rows]
+
+
+def note_count(value):
+    number = int(value)
+    if not 1 <= number <= MAX_NOTES:
+        raise argparse.ArgumentTypeError(f"must be 1 to {MAX_NOTES}")
+    return number
 
 
 def main():
@@ -230,6 +275,13 @@ def main():
         action="store_true",
         help=f"GitHub pull requests: list the changed files, at most {MAX_FILES} (one more request)",
     )
+    parser.add_argument(
+        "--notes",
+        type=note_count,
+        metavar="N",
+        help=f"progress tickets: add the last N notes (1-{MAX_NOTES}) with their dates, "
+        "fenced; same request",
+    )
     # Offline tests only, like _oqa.add_common_args.
     parser.add_argument("--fixture-dir", metavar="DIR", help=argparse.SUPPRESS)
     args = parser.parse_args()
@@ -244,7 +296,7 @@ def main():
         if prefix == "gh":
             fields, body = github(client, repo, number)
         elif prefix == "poo":
-            fields, body = redmine(client, number)
+            fields, body, notes = redmine(client, number, args.notes)
         else:
             fields, body = bugzilla(client, number, args.body)
     except Refused as refused:
@@ -252,6 +304,12 @@ def main():
             f"ref={ref} state=not-accessible http={refused} "
             "(private, missing or rate-limited for anonymous access; final answer, do not retry)"
         )
+        if args.notes and prefix == "poo":
+            login = "is missing or needs" if str(refused) == "404" else "needs"
+            url = web.format(id=number)
+            print(f"notes: the ticket {login} a login; the user can read it at {url}")
+        elif args.notes:
+            print(NOTES_ELSEWHERE)
         print(f"requests: {client.requests}")
         return 0
 
@@ -277,6 +335,10 @@ def main():
             else ["files: only for GitHub pull requests"]
         )
         print("\n".join(lines))
+    if args.notes and prefix == "poo":
+        print_notes(notes, args.notes, url.partition("://")[2])
+    elif args.notes:
+        print(NOTES_ELSEWHERE)
     print(f"requests: {client.requests}")
     return 0
 

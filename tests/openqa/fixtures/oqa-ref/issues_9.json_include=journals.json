@@ -1,0 +1,13 @@
+{
+ "issue": {
+  "id": 9,
+  "subject": "server ignored include",
+  "status": {
+   "id": 1,
+   "name": "New",
+   "is_closed": false
+  },
+  "updated_on": "2030-01-09T08:00:00Z",
+  "description": ""
+ }
+}

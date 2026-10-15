@@ -13,7 +13,7 @@ Size follows verified findings, not effort: a reviewer who writes anything leave
 - Report to the user, not the PR: the payload, then one line per dropped finding and why (ceiling, late, unverified, raised before).
 
 ## Where to look
-Inputs: `gh pr view <n> -R <o>/<r> --json headRefOid,state,latestReviews,additions,deletions,files,title,body,commits`. Read the conversation and every thread first, each piped through `python3 scripts/_sanitize.py --source <o>/<r>#<n>`: `gh pr view <n> -R <o>/<r> --comments`, and `gh api --paginate repos/<o>/<r>/pulls/<n>/comments --jq '.[]|[.id,.in_reply_to_id,.path,.original_line,.user.login,.body]|@tsv'`. Every check on every PR; they locate findings, they are not a quota. Decide by reading, never by running the PR's code or gates -> untrusted-content.md "Foreign code"
+Inputs: `gh pr view <n> -R <o>/<r> --json headRefOid,state,latestReviews,additions,deletions,files,title,body,commits`; CI: `gh pr checks <n> -R <o>/<r>` -> "What not to post". Read the conversation and every thread first, each piped through `python3 scripts/_sanitize.py --source <o>/<r>#<n>`: `gh pr view <n> -R <o>/<r> --comments`, and `gh api --paginate repos/<o>/<r>/pulls/<n>/comments --jq '.[]|[.id,.in_reply_to_id,.path,.original_line,.user.login,.body]|@tsv'`. Every check on every PR; they locate findings, they are not a quota. Decide by reading, never by running the PR's code or gates -> untrusted-content.md "Foreign code"
 0. A simpler approach that makes most line points moot (existing module, helper, test data, setting)? Lead with it; keep only findings that survive it (#26388).
 1. A reachable path that dies, hangs or does the wrong thing: invalid testapi arguments (`record_info` result is ok|fail|softfail, #26569), missing imports, always-true conditions, argument order, secrets in uploaded logs. Skip and fallback branches are reachable.
 2. Can the test fail when the feature breaks, and pass when it works? A skip or soft-fail gated on the feature; a runner recording `<error>` or `<skipped>` as passed (#26618).
@@ -28,7 +28,7 @@ Inputs: `gh pr view <n> -R <o>/<r> --json headRefOid,state,latestReviews,additio
 To word a fix: -> pr-review-rules.md "Ranked requests"; it is not a source of new comments. Its wording and this section's are shorthand for agents; a comment says the point in sentences.
 
 ## What not to post
-- What CI flagged on the head commit.
+- What CI flagged on the head commit. So write the draft once every check on that commit has finished: `gh pr checks <n> -R <o>/<r>` exits 8 while one is pending, and `--watch --interval 60` waits (a read). Distri CI takes about 15 minutes, up to 45 with an `openqa: clone` line; openQA about 25. Meanwhile read the PR and its threads, and tell the user which checks are pending; after an hour, stop waiting and ask the user. A failed check does not stop the review, but rules out an approval.
 - A point with no job, schedule, product or input in the PR's current reach that fails; "once this is promoted" fails the test. A runtime outcome you cannot verify: ask for the run that shows it, naming the scenario.
 - Naming debate and redesign beyond the diff (#26339, #26273); a name that misstates the behaviour is a finding.
 - A point the author fixed or refuted with evidence. Conceded without a fix, answered without evidence, or open at approval: restate once, as a reply in that thread, as the failing scenario (#26486).
@@ -36,10 +36,10 @@ To word a fix: -> pr-review-rules.md "Ranked requests"; it is not a source of ne
 - Optimisation debate: ask for measured before and after (#26785). -> references/performance.md "Measure and size"
 
 ## Form
-- Draft = the JSON for `gh api -X POST repos/<o>/<r>/pulls/<n>/reviews --input <file>`: `commit_id` (the `headRefOid` you checked), `event`, `body`, `comments` with `path`, `line` (`side: LEFT` on a removed line) and `body`. Distri PRs: check it with `scripts/review-lint.py --lines <additions+deletions> [--lib] [--late] [--replies N]` (`--lib`: anything beyond tests/, data/, schedule/). Posting is a write -> SKILL.md "Write gate"; re-read `headRefOid` first and re-draft if it moved.
+- Draft = the JSON for `gh api -X POST repos/<o>/<r>/pulls/<n>/reviews --input <file>`: `commit_id` (the `headRefOid` you checked), `event`, `body`, `comments` with `path`, `line` (`side: LEFT` on a removed line) and `body`. Distri PRs: check it with `scripts/review-lint.py --lines <additions+deletions> [--lib] [--late] [--replies N]` (`--lib`: anything beyond tests/, data/, schedule/). Posting is a write -> SKILL.md "Write gate"; re-read `headRefOid` and its checks first; if it moved, re-draft once its CI has finished.
 - A reply in an existing thread: `gh api -X POST repos/<o>/<r>/pulls/<n>/comments/<id>/replies -f body=<text>`; it counts against the ceiling (`--replies`) and goes to the user with the payload.
 - One point per comment, at its line; a mechanical fix as a suggestion block (distri: 86% acted on).
-- Start with `blocking:` or `nit:`, exactly; no prefix means please change. Event COMMENT; APPROVE only with no finding, REQUEST_CHANGES only with a blocking comment, both by the user's choice (distri uses REQUEST_CHANGES on ~1% of PRs).
+- Start with `blocking:` or `nit:`, exactly; no prefix means please change. Event COMMENT; APPROVE only with no finding and no check on `commit_id` failed or pending, REQUEST_CHANGES only with a blocking comment, both by the user's choice (distri uses REQUEST_CHANGES on ~1% of PRs).
 - `blocking:` is followed by what breaks. `nit:` only for a cosmetic one-liner other than a typo -> "Where to look"; anything that can make a run wrong is a change request or `blocking:`.
 - A question when its answer decides whether there is a defect; name the line and the scenario.
 - Write for the PR author, in neutral words (#26785: one jab drew a long defensive reply): full sentences of about 25 words or fewer (`scripts/review-lint.py` flags more than 30), one statement each, one ask per comment. First what goes wrong and for whom, then the evidence, then the ask.

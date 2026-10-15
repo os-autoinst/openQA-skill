@@ -1,0 +1,334 @@
+[2026-10-14T01:57:16.387914Z] [info] +++ setup notes +++
+[2026-10-14T01:57:16.388080Z] [info] Running on openqaworker21:27 (Linux 6.12.0-160000.38-default #1 SMP PREEMPT_DYNAMIC Mon Sep 14 23:00:16 UTC 2026 (1a5df4e) x86_64)
+[2026-10-14T01:57:16.391658Z] [debug] Found ASSET_256, caching openSUSE-Tumbleweed-Minimal-VM.x86_64-1.0.0-kvm-and-xen-Snapshot20261013.qcow2.sha256
+[2026-10-14T01:57:16.393512Z] [info] Downloading openSUSE-Tumbleweed-Minimal-VM.x86_64-1.0.0-kvm-and-xen-Snapshot20261013.qcow2.sha256, request #978389 sent to Cache Service
+[2026-10-14T01:57:27.024582Z] [info] Download of openSUSE-Tumbleweed-Minimal-VM.x86_64-1.0.0-kvm-and-xen-Snapshot20261013.qcow2.sha256 processed:
+[info] [#978389] Cache size of "/var/lib/openqa/cache" is 396 GiB, with limit 400 GiB
+[info] [#978389] Downloading "openSUSE-Tumbleweed-Minimal-VM.x86_64-1.0.0-kvm-and-xen-Snapshot20261013.qcow2.sha256" from "https://openqa.opensuse.org/tests/6270503/asset/other/openSUSE-Tumbleweed-Minimal-VM.x86_64-1.0.0-kvm-and-xen-Snapshot20261013.qcow2.sha256"
+[info] [#978389] Content of "/var/lib/openqa/cache/openqa.opensuse.org/openSUSE-Tumbleweed-Minimal-VM.x86_64-1.0.0-kvm-and-xen-Snapshot20261013.qcow2.sha256" has not changed, updating last use
+
+[2026-10-14T01:57:27.026471Z] [debug] Found HDD_1, caching openSUSE-Tumbleweed-Minimal-VM.x86_64-1.0.0-kvm-and-xen-Snapshot20261013.qcow2
+[2026-10-14T01:57:27.028246Z] [info] Downloading openSUSE-Tumbleweed-Minimal-VM.x86_64-1.0.0-kvm-and-xen-Snapshot20261013.qcow2, request #978396 sent to Cache Service
+[2026-10-14T01:57:58.618517Z] [info] Download of openSUSE-Tumbleweed-Minimal-VM.x86_64-1.0.0-kvm-and-xen-Snapshot20261013.qcow2 processed:
+[info] [#978394] Cache size of "/var/lib/openqa/cache" is 396 GiB, with limit 400 GiB
+[info] [#978394] Downloading "openSUSE-Tumbleweed-Minimal-VM.x86_64-1.0.0-kvm-and-xen-Snapshot20261013.qcow2" from "https://openqa.opensuse.org/tests/6270521/asset/hdd/openSUSE-Tumbleweed-Minimal-VM.x86_64-1.0.0-kvm-and-xen-Snapshot20261013.qcow2"
+[info] [#978394] Size of "/var/lib/openqa/cache/openqa.opensuse.org/openSUSE-Tumbleweed-Minimal-VM.x86_64-1.0.0-kvm-and-xen-Snapshot20261013.qcow2" is 294 MiB, with ETag ""6aceabbc-12620000""
+[info] [#978394] Download of "/var/lib/openqa/cache/openqa.opensuse.org/openSUSE-Tumbleweed-Minimal-VM.x86_64-1.0.0-kvm-and-xen-Snapshot20261013.qcow2" successful (11 MiB/s), new cache size is 397 GiB
+
+[2026-10-14T01:57:58.620433Z] [debug] Found HDD_2, caching combustion_ltp.qcow2
+[2026-10-14T01:57:58.622398Z] [info] Downloading combustion_ltp.qcow2, request #978408 sent to Cache Service
+[2026-10-14T01:58:03.746736Z] [info] Download of combustion_ltp.qcow2 processed:
+[info] [#978408] Cache size of "/var/lib/openqa/cache" is 397 GiB, with limit 400 GiB
+[info] [#978408] Downloading "combustion_ltp.qcow2" from "https://openqa.opensuse.org/tests/6270503/asset/hdd/combustion_ltp.qcow2"
+[info] [#978408] Content of "/var/lib/openqa/cache/openqa.opensuse.org/combustion_ltp.qcow2" has not changed, updating last use
+
+[2026-10-14T01:58:03.749943Z] [info] Rsync from 'rsync://openqa.opensuse.org/tests' to '/var/lib/openqa/cache/openqa.opensuse.org', request #978412 sent to Cache Service
+[2026-10-14T01:58:08.917081Z] [info] Output of rsync:
+[info] [#978411] Calling: rsync -avHP --timeout 1800 rsync://openqa.opensuse.org/tests/ --delete /var/lib/openqa/cache/openqa.opensuse.org/tests/
+Try 1:
+STDOUT:
+receiving incremental file list
+
+sent 6,010 bytes  received 2,390,967 bytes  4,793,954.00 bytes/sec
+total size is 8,143,244,433  speedup is 3,397.30
+
+STDERR:
+
+
+[2026-10-14T01:58:08.917181Z] [info] Finished to rsync tests
+[2026-10-14T01:58:08.920650Z] [debug] +++ worker notes +++
+[2026-10-14T01:58:09.401641Z] [debug] [pid:3026873] [37mCurrent version is 5.1791893714.eb5a713 [interface v60][0m
+[2026-10-14T01:58:09.414978Z] [debug] [pid:3026873] [37mgit hash in 'opensuse': 9774489af0c369db871b163d1e91de7b6aa7ed79[0m
+[2026-10-14T01:58:09.448602Z] [debug] [pid:3026873] [37mgit url in 'opensuse': "https://github.com/os-autoinst/os-autoinst-distri-opensuse.git"[0m
+[2026-10-14T01:58:09.448730Z] [debug] [pid:3026873] [37mTEST_GIT_HASH=9774489af0c369db871b163d1e91de7b6aa7ed79 TEST_GIT_URL=https://github.com/os-autoinst/os-autoinst-distri-opensuse.git[0m
+[2026-10-14T01:58:09.815279Z] [debug] [pid:3026873] [37musingenv DESKTOP=textmode[0m
+[2026-10-14T01:58:09.815394Z] [debug] [pid:3026873] [37musingenv DISTRI=opensuse[0m
+[2026-10-14T01:58:09.815437Z] [debug] [pid:3026873] [37musingenv QEMUCPU=host[0m
+[2026-10-14T01:58:09.815472Z] [debug] [pid:3026873] [37musingenv INSTLANG=en_US[0m
+[2026-10-14T01:58:09.815497Z] [debug] [pid:3026873] [37musingenv QEMUVGA=virtio[0m
+[2026-10-14T01:58:09.815522Z] [debug] [pid:3026873] [37musingenv UEFI=1[0m
+[2026-10-14T01:58:09.817705Z] [debug] [pid:3026873] [37mscheduling bootloader_uefi tests/installation/bootloader_uefi.pm[0m
+[2026-10-14T01:58:09.818805Z] [debug] [pid:3026873] [37mscheduling first_boot tests/installation/first_boot.pm[0m
+[2026-10-14T01:58:09.820257Z] [debug] [pid:3026873] [37mscheduling host_config tests/jeos/host_config.pm[0m
+[2026-10-14T01:58:09.821530Z] [debug] [pid:3026873] [37mscheduling force_scheduled_tasks tests/console/force_scheduled_tasks.pm[0m
+[2026-10-14T01:58:09.822319Z] [debug] [pid:3026873] [37mscheduling zypper_clear_repos tests/update/zypper_clear_repos.pm[0m
+[2026-10-14T01:58:09.823080Z] [debug] [pid:3026873] [37mscheduling zypper_ar tests/console/zypper_ar.pm[0m
+[2026-10-14T01:58:09.823697Z] [debug] [pid:3026873] [37mscheduling zypper_ref tests/console/zypper_ref.pm[0m
+[2026-10-14T01:58:09.826976Z] [debug] [pid:3026873] [37mscheduling install_ltp tests/kernel/install_ltp.pm[0m
+[2026-10-14T01:58:09.832597Z] [info] [pid:3026955] cmdsrv: daemon reachable under http://*:20273/xxxxxxxxxxxxxxxx/
+[2026-10-14T01:58:09.833824Z] [info] [pid:3026955] Listening at "http://[::]:20273"
+Web application available at http://[::]:20273
+[2026-10-14T01:58:09.837289Z] [debug] [pid:3026873] [37mgit hash in 'opensuse/products/opensuse/needles': 2eb63dabecd419b257f52d0ae09062295d171661[0m
+[2026-10-14T01:58:09.879349Z] [debug] [pid:3026873] [37mgit url in 'opensuse/products/opensuse/needles': "git@github.com:os-autoinst/os-autoinst-needles-opensuse.git"[0m
+[2026-10-14T01:58:09.879472Z] [debug] [pid:3026873] [37minit needles from opensuse/products/opensuse/needles[0m
+[2026-10-14T01:58:10.458426Z] [debug] [pid:3026873] [37mloaded 6149 needles[0m
+[2026-10-14T01:58:10.634232Z] [debug] [pid:3026873] [37m3026873: channel_out 15, channel_in 14[0m
+[2026-10-14T01:58:10.680210Z] [debug] [pid:3027628] [37m3027628: cmdpipe 13, rsppipe 16[0m
+[2026-10-14T01:58:10.680645Z] [debug] [pid:3027628] [37mstarted mgmt loop with pid 3027628[0m
+[2026-10-14T01:58:10.766247Z] [debug] [pid:3027628] [37mLaunching external video encoder: ffmpeg -y -hide_banner -nostats -r 24 -f image2pipe -vcodec ppm -i - -pix_fmt yuv420p -c:v libsvtav1 -crf 50 -preset 7 -b:v 0 'video.webm'[0m
+[2026-10-14T01:58:10.850457Z] [debug] [pid:3027628] [37mqemu version detected: 10.0.13[0m
+[2026-10-14T01:58:10.850972Z] [warn] [pid:3027628] [31m!!! backend::qemu::_set_graphics_backend: QEMUVGA is deprecated, please set QEMU_VIDEO_DEVICE[0m
+[2026-10-14T01:58:10.852743Z] [debug] [pid:3027628] [37mrunning `/usr/bin/chattr +C /var/lib/openqa/pool/27/raid`[0m
+[2026-10-14T01:58:10.866553Z] [debug] [pid:3027628] [37mCommand `/usr/bin/chattr +C /var/lib/openqa/pool/27/raid` terminated with 1
+  /usr/bin/chattr: Operation not supported while setting flags on /var/lib/openqa/pool/27/raid[0m
+[2026-10-14T01:58:10.866658Z] [debug] [pid:3027628] [37mConfiguring storage controllers and block devices[0m
+[2026-10-14T01:58:10.867197Z] [debug] [pid:3027628] [37mrunning `/usr/bin/qemu-img info --output=json /var/lib/openqa/pool/27/openSUSE-Tumbleweed-Minimal-VM.x86_64-1.0.0-kvm-and-xen-Snapshot20261013.qcow2`[0m
+[2026-10-14T01:58:10.916409Z] [debug] [pid:3027628] [37mrunning `/usr/bin/qemu-img info --output=json /var/lib/openqa/pool/27/combustion_ltp.qcow2`[0m
+[2026-10-14T01:58:10.960754Z] [debug] [pid:3027628] [37mrunning `/usr/bin/qemu-img info --output=json /usr/share/qemu/ovmf-x86_64-ms-4m-code.bin`[0m
+[2026-10-14T01:58:11.003016Z] [debug] [pid:3027628] [37mrunning `virt-fw-vars -i /usr/share/qemu/ovmf-x86_64-ms-4m-vars.bin -o /var/lib/openqa/pool/27/ovmf-x86_64-ms-4m-vars-adjusted.bin --set-json /var/lib/openqa/pool/27/resolution-fw-conf.json`[0m
+[2026-10-14T01:58:12.052284Z] [debug] [pid:3027628] [37mINFO: reading raw edk2 varstore from /usr/share/qemu/ovmf-x86_64-ms-4m-vars.bin
+  INFO: var store range: 0x64 -> 0x40000
+  INFO: set variable PlatformConfig from /var/lib/openqa/pool/27/resolution-fw-conf.json
+  INFO: writing raw edk2 varstore to /var/lib/openqa/pool/27/ovmf-x86_64-ms-4m-vars-adjusted.bin[0m
+[2026-10-14T01:58:12.052444Z] [debug] [pid:3027628] [37mrunning `/usr/bin/qemu-img info --output=json /var/lib/openqa/pool/27/ovmf-x86_64-ms-4m-vars-adjusted.bin`[0m
+[2026-10-14T01:58:12.097110Z] [debug] [pid:3027628] [37mInitializing block device images[0m
+[2026-10-14T01:58:12.097395Z] [debug] [pid:3027628] [37mrunning `/usr/bin/qemu-img create -f qcow2 -F qcow2 -b /var/lib/openqa/pool/27/openSUSE-Tumbleweed-Minimal-VM.x86_64-1.0.0-kvm-and-xen-Snapshot20261013.qcow2 /var/lib/openqa/pool/27/raid/hd0-overlay0 25769803776`[0m
+[2026-10-14T01:58:12.143600Z] [debug] [pid:3027628] [37mFormatting '/var/lib/openqa/pool/27/raid/hd0-overlay0', fmt=qcow2 cluster_size=65536 extended_l2=off compression_type=zlib size=25769803776 backing_file=/var/lib/openqa/pool/27/openSUSE-Tumbleweed-Minimal-VM.x86_64-1.0.0-kvm-and-xen-Snapshot20261013.qcow2 backing_fmt=qcow2 lazy_refcounts=off refcount_bits=16[0m
+[2026-10-14T01:58:12.143710Z] [debug] [pid:3027628] [37mrunning `/usr/bin/qemu-img create -f qcow2 -F qcow2 -b /var/lib/openqa/pool/27/combustion_ltp.qcow2 /var/lib/openqa/pool/27/raid/hd1-overlay0 104857600`[0m
+[2026-10-14T01:58:12.187758Z] [debug] [pid:3027628] [37mFormatting '/var/lib/openqa/pool/27/raid/hd1-overlay0', fmt=qcow2 cluster_size=65536 extended_l2=off compression_type=zlib size=104857600 backing_file=/var/lib/openqa/pool/27/combustion_ltp.qcow2 backing_fmt=qcow2 lazy_refcounts=off refcount_bits=16[0m
+[2026-10-14T01:58:12.187885Z] [debug] [pid:3027628] [37mrunning `/usr/bin/qemu-img create -f qcow2 -F raw -b /usr/share/qemu/ovmf-x86_64-ms-4m-code.bin /var/lib/openqa/pool/27/raid/pflash-code-overlay0 3653632`[0m
+[2026-10-14T01:58:12.232517Z] [debug] [pid:3027628] [37mFormatting '/var/lib/openqa/pool/27/raid/pflash-code-overlay0', fmt=qcow2 cluster_size=65536 extended_l2=off compression_type=zlib size=3653632 backing_file=/usr/share/qemu/ovmf-x86_64-ms-4m-code.bin backing_fmt=raw lazy_refcounts=off refcount_bits=16[0m
+[2026-10-14T01:58:12.232628Z] [debug] [pid:3027628] [37mrunning `/usr/bin/qemu-img create -f qcow2 -F raw -b /var/lib/openqa/pool/27/ovmf-x86_64-ms-4m-vars-adjusted.bin /var/lib/openqa/pool/27/raid/pflash-vars-overlay0 540672`[0m
+[2026-10-14T01:58:12.277548Z] [debug] [pid:3027628] [37mFormatting '/var/lib/openqa/pool/27/raid/pflash-vars-overlay0', fmt=qcow2 cluster_size=65536 extended_l2=off compression_type=zlib size=540672 backing_file=/var/lib/openqa/pool/27/ovmf-x86_64-ms-4m-vars-adjusted.bin backing_fmt=raw lazy_refcounts=off refcount_bits=16[0m
+[2026-10-14T01:58:12.277713Z] [debug] [pid:3027628] [37minit_blockdev_images: Finished creating block devices[0m
+[2026-10-14T01:58:12.279321Z] [debug] [pid:3027628] [37mstarting: /usr/bin/qemu-system-x86_64 -device virtio-vga,edid=on,xres=1024,yres=768 -only-migratable -chardev ringbuf,id=serial0,logfile=serial0,logappend=on -serial chardev:serial0 -audiodev none,id=snd0 -device intel-hda -device hda-output,audiodev=snd0 -global isa-fdc.fdtypeA=none -m 2048 -cpu host -netdev user,id=qanet0 -device virtio-net,netdev=qanet0,mac=52:54:00:12:34:56 -object rng-random,filename=/dev/urandom,id=rng0 -device virtio-rng-pci,rng=rng0 -device qemu-xhci -device usb-tablet -smp 1 -enable-kvm -no-shutdown -vnc :117,share=force-shared -device virtio-serial -chardev pipe,id=virtio_console,path=virtio_console,logfile=virtio_console.log,logappend=on -device virtconsole,chardev=virtio_console,name=org.openqa.console.virtio_console -chardev pipe,id=virtio_console_user,path=virtio_console_user,logfile=virtio_console_user.log,logappend=on -device virtconsole,chardev=virtio_console_user,name=org.openqa.console.virtio_console_user -chardev socket,path=qmp_socket,server=on,wait=off,id=qmp_socket,logfile=qmp_socket.log,logappend=on -qmp chardev:qmp_socket -S -device virtio-scsi-pci,id=scsi0 -blockdev driver=file,node-name=hd0-overlay0-file,filename=/var/lib/openqa/pool/27/raid/hd0-overlay0,cache.no-flush=on -blockdev driver=qcow2,node-name=hd0-overlay0,file=hd0-overlay0-file,cache.no-flush=on,discard=unmap -device virtio-blk,id=hd0-device,drive=hd0-overlay0,bootindex=0,serial=hd0 -blockdev driver=file,node-name=hd1-overlay0-file,filename=/var/lib/openqa/pool/27/raid/hd1-overlay0,cache.no-flush=on -blockdev driver=qcow2,node-name=hd1-overlay0,file=hd1-overlay0-file,cache.no-flush=on,discard=unmap -device virtio-blk,id=hd1-device,drive=hd1-overlay0,serial=hd1 -drive id=pflash-code-overlay0,if=pflash,file=/var/lib/openqa/pool/27/raid/pflash-code-overlay0,unit=0,readonly=on -drive id=pflash-vars-overlay0,if=pflash,file=/var/lib/openqa/pool/27/raid/pflash-vars-overlay0,unit=1[0m
+[2026-10-14T01:58:12.285727Z] [debug] [pid:3027628] [37mWaiting for 0 attempts[0m
+[2026-10-14T01:58:13.286244Z] [debug] [pid:3027628] [37mWaiting for 1 attempts[0m
+[2026-10-14T01:58:14.286647Z] [debug] [pid:3027628] [37mFinished after 2 attempts[0m
+[2026-10-14T01:58:14.300104Z] [debug] [pid:3027628] [37mEstablishing VNC connection to localhost:6017[0m
+[2026-10-14T01:58:14.352777Z] [debug] [pid:3027628] [37mpointer type 0 0 640 480 -257[0m
+[2026-10-14T01:58:14.352877Z] [debug] [pid:3027628] [37mled state 0 1 1 -261[0m
+[2026-10-14T01:58:14.356944Z] [debug] [pid:3027628] [37mStart CPU[0m
+[2026-10-14T01:58:14.357121Z] [debug] [pid:3027628] [37mEVENT {"data":{"client":{"family":"ipv4","host":"127.0.0.1","service":"40276","websocket":false},"server":{"auth":"none","family":"ipv4","host":"0.0.0.0","service":"6017","websocket":false}},"event":"VNC_CONNECTED","timestamp":{"microseconds":300522,"seconds":1791943094}}[0m
+[2026-10-14T01:58:14.357207Z] [debug] [pid:3027628] [37mEVENT {"data":{"client":{"family":"ipv4","host":"127.0.0.1","service":"40276","websocket":false},"server":{"auth":"none","family":"ipv4","host":"0.0.0.0","service":"6017","websocket":false}},"event":"VNC_INITIALIZED","timestamp":{"microseconds":302075,"seconds":1791943094}}[0m
+[2026-10-14T01:58:14.357280Z] [debug] [pid:3027628] [37mEVENT {"event":"RESUME","timestamp":{"microseconds":357151,"seconds":1791943094}}[0m
+[2026-10-14T01:58:14.358200Z] [debug] [pid:3027432] [37mGOT GO[0m
+[2026-10-14T01:58:14.359938Z] [debug] [pid:3027628] [37mQEMU: QEMU emulator version 10.0.13 (SUSE Linux 16)[0m
+[2026-10-14T01:58:14.359989Z] [debug] [pid:3027628] [37mQEMU: Copyright (c) 2003-2025 Fabrice Bellard and the QEMU Project developers[0m
+[2026-10-14T01:58:14.360434Z] [debug] [pid:3027432] [37mSnapshots are supported[0m
+[2026-10-14T01:58:14.362051Z] [debug] [pid:3027432] [1;34m||| starting bootloader_uefi tests/installation/bootloader_uefi.pm[0m
+[2026-10-14T01:58:45.035323Z] [debug] [pid:3027432] [1;34m||| finished bootloader_uefi installation (runtime: 31 s)[0m
+[2026-10-14T01:58:45.036525Z] [debug] [pid:3027432] [1;34m||| starting first_boot tests/installation/first_boot.pm[0m
+[2026-10-14T01:59:27.802451Z] [debug] [pid:3027432] [1;34m||| finished first_boot installation (runtime: 42 s)[0m
+[2026-10-14T01:59:27.803302Z] [debug] [pid:3027432] [1;34m||| starting host_config tests/jeos/host_config.pm[0m
+[2026-10-14T01:59:27.803969Z] [debug] [pid:3027432] <<< testapi::select_console(testapi_console="root-console")
+[2026-10-14T01:59:28.110471Z] [debug] [pid:3027432] [37mactivate_console, console: root-console, type: console[0m
+[2026-10-14T02:00:53.252842Z] [debug] [pid:3027432] [1;34m||| finished host_config jeos (runtime: 86 s)[0m
+[2026-10-14T02:00:53.254141Z] [debug] [pid:3027432] [1;34m||| starting force_scheduled_tasks tests/console/force_scheduled_tasks.pm[0m
+[2026-10-14T02:00:53.254746Z] [debug] [pid:3027432] <<< testapi::select_console(testapi_console="root-console")
+[2026-10-14T02:00:53.558858Z] [debug] [pid:3027432] <<< testapi::assert_screen(mustmatch="root-console", no_wait=1, timeout=30)
+[2026-10-14T02:00:57.978744Z] [debug] [pid:3027432] [32m>>> testapi::_handle_found_needle: found root-console-20180724, similarity 1.00 @ 96/752[0m
+[2026-10-14T02:00:57.979737Z] [debug] [pid:3027432] <<< testapi::assert_script_run(cmd="dmesg -n 7", max_interval=250, timeout=90, quiet=undef, fail_message="")
+[2026-10-14T02:00:57.981049Z] [debug] [pid:3027432] <<< testapi::type_string(string="dmesg -n 7\n", max_interval=250, wait_screen_change=0, wait_still_screen=0, timeout=30, similarity_level=47)
+[2026-10-14T02:00:59.410982Z] [debug] [pid:3027432] <<< testapi::script_run(cmd="limit=11; for c in `seq 1 200`; do read load dummy < /proc/loadavg  ; top -n1 -b| head -n30 ; test \"\${load/./}\" -le \$limit && break ; sleep 5; done; echo TOP-DONE > /dev/ttyS0", max_interval=250, timeout=0, output="", quiet=undef)
+[2026-10-14T02:00:59.411217Z] [debug] [pid:3027432] <<< testapi::type_string(string="limit=11; for c in `seq 1 200`; do read load dummy < /proc/loadavg  ; top -n1 -b| head -n30 ; test \"\${load/./}\" -le \$limit && break ; sleep 5; done; echo TOP-DONE > /dev/ttyS0", max_interval=250, wait_screen_change=0, wait_still_screen=0, timeout=30, similarity_level=47)
+[2026-10-14T02:01:05.614325Z] [debug] [pid:3027432] <<< testapi::send_key(key="ret", wait_screen_change=0)
+[2026-10-14T02:03:01.935405Z] [debug] [pid:3027432] <<< testapi::script_run(cmd="ls -a /etc/cron.{hourly,daily,weekly,monthly}", output="", quiet=undef, max_interval=250, timeout=30)
+[2026-10-14T02:03:01.936701Z] [debug] [pid:3027432] <<< testapi::type_string(string="ls -a /etc/cron.{hourly,daily,weekly,monthly}\n", max_interval=250, wait_screen_change=0, wait_still_screen=0, timeout=30, similarity_level=47)
+[2026-10-14T02:03:04.567597Z] [debug] [pid:3027432] <<< testapi::assert_script_run(cmd="for i in \$(systemctl list-units --type=timer --state=active --no-legend | sed -e 's/\\(\\S\\+\\)\\.timer\\s.*/\\1/'); do echo \"Triggering systemd timed service \$i\" && systemctl stop \$i.timer && systemctl mask \$i.timer && systemctl start \$i; done", quiet=undef, fail_message="", max_interval=250, timeout=1000)
+[2026-10-14T02:03:04.568709Z] [debug] [pid:3027432] <<< testapi::type_string(string="for i in \$(systemctl list-units --type=timer --state=active --no-legend | sed -e 's/\\(\\S\\+\\)\\.timer\\s.*/\\1/'); do echo \"Triggering systemd timed service \$i\" && systemctl stop \$i.timer && systemctl mask \$i.timer && systemctl start \$i; done\n", max_interval=250, wait_screen_change=0, wait_still_screen=0, timeout=30, similarity_level=47)
+[2026-10-14T02:03:20.031896Z] [debug] [pid:3027432] <<< testapi::script_run(cmd="! [ -d /usr/share/btrfsmaintenance/ ]", timeout=30, max_interval=250, quiet=undef, output="")
+[2026-10-14T02:03:20.033266Z] [debug] [pid:3027432] <<< testapi::type_string(string="! [ -d /usr/share/btrfsmaintenance/ ]\n", max_interval=250, wait_screen_change=0, wait_still_screen=0, timeout=30, similarity_level=47)
+[2026-10-14T02:03:22.382103Z] [debug] [pid:3027432] <<< testapi::assert_script_run(cmd="find /usr/share/btrfsmaintenance/ -type f -exec ln -fs /bin/true {} \\;", fail_message="", quiet=undef, timeout=300, max_interval=250)
+[2026-10-14T02:03:22.383235Z] [debug] [pid:3027432] <<< testapi::type_string(string="find /usr/share/btrfsmaintenance/ -type f -exec ln -fs /bin/true {} \\;\n", max_interval=250, wait_screen_change=0, wait_still_screen=0, timeout=30, similarity_level=47)
+[2026-10-14T02:03:25.874451Z] [debug] [pid:3027432] <<< testapi::assert_script_run(cmd="sync", timeout=90, max_interval=250, fail_message="", quiet=undef)
+[2026-10-14T02:03:25.875830Z] [debug] [pid:3027432] <<< testapi::type_string(string="sync\n", max_interval=250, wait_screen_change=0, wait_still_screen=0, timeout=30, similarity_level=47)
+[2026-10-14T02:03:28.098909Z] [debug] [pid:3027432] <<< testapi::assert_script_run(cmd="dmesg -n 1", quiet=undef, fail_message="", max_interval=250, timeout=90)
+[2026-10-14T02:03:28.100069Z] [debug] [pid:3027432] <<< testapi::type_string(string="dmesg -n 1\n", max_interval=250, wait_screen_change=0, wait_still_screen=0, timeout=30, similarity_level=47)
+[2026-10-14T02:03:29.521287Z] [debug] [pid:3027432] <<< testapi::assert_script_run(cmd="cd", timeout=90, max_interval=250, quiet=undef, fail_message="")
+[2026-10-14T02:03:29.522656Z] [debug] [pid:3027432] <<< testapi::type_string(string="cd\n", max_interval=250, wait_screen_change=0, wait_still_screen=0, timeout=30, similarity_level=47)
+[2026-10-14T02:03:30.676432Z] [debug] [pid:3027432] <<< testapi::script_run(cmd="test -d /sys/fs/selinux", output="", quiet=undef, max_interval=250, timeout=30)
+[2026-10-14T02:03:30.677870Z] [debug] [pid:3027432] <<< testapi::type_string(string="test -d /sys/fs/selinux\n", max_interval=250, wait_screen_change=0, wait_still_screen=0, timeout=30, similarity_level=47)
+[2026-10-14T02:03:32.538646Z] [debug] [pid:3027432] <<< testapi::type_string(string="cat - > /tmp/scriptcRlTo.sh;", max_interval=250, wait_screen_change=0, wait_still_screen=0, timeout=30, similarity_level=47)
+[2026-10-14T02:03:33.533362Z] [debug] [pid:3027432] <<< testapi::type_string(string="\n", max_interval=250, wait_screen_change=0, wait_still_screen=0, timeout=30, similarity_level=47)
+[2026-10-14T02:03:33.568083Z] [debug] [pid:3027432] <<< testapi::type_string(string="ausearch -m avc,user_avc,selinux_err,user_selinux_err -r\n", max_interval=250, wait_screen_change=0, wait_still_screen=0, timeout=300, similarity_level=47)
+[2026-10-14T02:03:35.552993Z] [debug] [pid:3027432] <<< testapi::send_key(key="ctrl-d", wait_screen_change=0)
+[2026-10-14T02:03:35.822284Z] [debug] [pid:3027432] <<< testapi::type_string(string="(echo cRlTo; bash -eox pipefail /tmp/scriptcRlTo.sh ; echo SCRIPT_FINISHEDcRlTo-\$?-) | tee /dev/ttyS0\n", max_interval=250, wait_screen_change=0, wait_still_screen=0, timeout=30, similarity_level=47)
+[2026-10-14T02:03:40.764784Z] [debug] [pid:3027432] <<< distribution::script_output("script failed with : \nOA:START\nOA:DONE-236e-0-OA:cat 28.sh;\nOA:START\ncRlTo\nSCRIPT_FINISHEDcRlTo-1-")
+[2026-10-14T02:03:40.764921Z] [debug] [pid:3027432] [step:console,force_scheduled_tasks,24] lib/consoletest.pm:33 called Utils::Logging::record_avc_selinux_alerts -> products/opensuse/../../lib/Utils/Logging.pm:640 called testapi::record_info
+[2026-10-14T02:03:40.764994Z] [debug] [pid:3027432] <<< testapi::record_info(title="AVC", output="No AVCs were recorded", result="ok")
+[2026-10-14T02:03:40.765198Z] [debug] [pid:3027432] [step:console,force_scheduled_tasks,25] lib/consoletest.pm:35 called opensusebasetest::clear_and_verify_console -> products/opensuse/../../lib/opensusebasetest.pm:51 called utils::clear_console -> lib/utils.pm:441 called testapi::enter_cmd
+[2026-10-14T02:03:40.765297Z] [debug] [pid:3027432] <<< testapi::type_string(string="clear\n", max_interval=250, wait_screen_change=0, wait_still_screen=0, timeout=30, similarity_level=47)
+[2026-10-14T02:03:40.968530Z] [debug] [pid:3027432] <<< testapi::assert_screen(mustmatch="cleared-console", timeout=30)
+[2026-10-14T02:03:42.078574Z] [debug] [pid:3027432] [32m>>> testapi::_handle_found_needle: found cleared-console-standard_prompt-20191207, similarity 1.00 @ 82/1[0m
+[2026-10-14T02:03:42.081634Z] [debug] [pid:3027432] [1;34m||| finished force_scheduled_tasks console (runtime: 169 s)[0m
+[2026-10-14T02:03:43.098138Z] [debug] [pid:3027432] [1;34m||| starting zypper_clear_repos tests/update/zypper_clear_repos.pm[0m
+[2026-10-14T02:03:43.101237Z] [debug] [pid:3027432] <<< testapi::select_console(testapi_console="root-virtio-terminal")
+[2026-10-14T02:03:43.102873Z] [debug] [pid:3027432] [37mactivate_console, console: root-virtio-terminal, type: virtio-terminal[0m
+[2026-10-14T02:03:43.103063Z] [debug] [pid:3027432] <<< serial_terminal::login()
+[2026-10-14T02:03:43.634763Z] [debug] [pid:3027432] <<< distribution::script_output("script failed with : \ncRlTo\nSCRIPT_FINISHEDcRlTo-1-")
+[2026-10-14T02:03:43.634861Z] [debug] [pid:3027432] [step:update,zypper_clear_repos,16] lib/consoletest.pm:33 called Utils::Logging::record_avc_selinux_alerts -> products/opensuse/../../lib/Utils/Logging.pm:640 called testapi::record_info
+[2026-10-14T02:03:43.634921Z] [debug] [pid:3027432] <<< testapi::record_info(title="AVC", output="No AVCs were recorded", result="ok")
+[2026-10-14T02:03:43.635286Z] [debug] [pid:3027628] <<< consoles::serial_screen::type_string(json_cmd_token="xxxxxxxx", cmd="backend_type_string", lf=1, text="clear\n")
+[2026-10-14T02:03:43.636067Z] [debug] [pid:3027432] [1;34m||| finished zypper_clear_repos update (runtime: 0 s)[0m
+[2026-10-14T02:03:43.636843Z] [debug] [pid:3027432] [1;34m||| starting zypper_ar tests/console/zypper_ar.pm[0m
+[2026-10-14T02:03:43.637474Z] [debug] [pid:3027432] <<< testapi::select_console(testapi_console="root-virtio-terminal")
+[2026-10-14T02:03:44.113024Z] [debug] [pid:3027432] <<< distribution::script_output("script failed with : \ncRlTo\nSCRIPT_FINISHEDcRlTo-1-")
+[2026-10-14T02:03:44.113136Z] [debug] [pid:3027432] [step:console,zypper_ar,13] lib/consoletest.pm:33 called Utils::Logging::record_avc_selinux_alerts -> products/opensuse/../../lib/Utils/Logging.pm:640 called testapi::record_info
+[2026-10-14T02:03:44.113210Z] [debug] [pid:3027432] <<< testapi::record_info(title="AVC", output="No AVCs were recorded", result="ok")
+[2026-10-14T02:03:44.113570Z] [debug] [pid:3027628] <<< consoles::serial_screen::type_string(text="clear\n", lf=1, cmd="backend_type_string", json_cmd_token="xxxxxxxx")
+[2026-10-14T02:03:44.113948Z] [debug] [pid:3027432] [1;34m||| finished zypper_ar console (runtime: 1 s)[0m
+[2026-10-14T02:03:44.114644Z] [debug] [pid:3027432] [1;34m||| starting zypper_ref tests/console/zypper_ref.pm[0m
+[2026-10-14T02:03:44.115230Z] [debug] [pid:3027432] <<< testapi::select_console(testapi_console="root-virtio-terminal")
+[2026-10-14T02:03:55.996357Z] [debug] [pid:3027432] <<< distribution::script_output("script failed with : \ncRlTo\nSCRIPT_FINISHEDcRlTo-1-")
+[2026-10-14T02:03:55.996560Z] [debug] [pid:3027432] [step:console,zypper_ref,6] lib/consoletest.pm:33 called Utils::Logging::record_avc_selinux_alerts -> products/opensuse/../../lib/Utils/Logging.pm:640 called testapi::record_info
+[2026-10-14T02:03:55.996682Z] [debug] [pid:3027432] <<< testapi::record_info(title="AVC", output="No AVCs were recorded", result="ok")
+[2026-10-14T02:03:55.997124Z] [debug] [pid:3027628] <<< consoles::serial_screen::type_string(lf=1, text="clear\n", json_cmd_token="xxxxxxxx", cmd="backend_type_string")
+[2026-10-14T02:03:55.997609Z] [debug] [pid:3027432] [1;34m||| finished zypper_ref console (runtime: 11 s)[0m
+[2026-10-14T02:03:55.998890Z] [debug] [pid:3027432] [1;34m||| starting install_ltp tests/kernel/install_ltp.pm[0m
+[2026-10-14T02:03:55.999795Z] [debug] [pid:3027432] <<< testapi::select_console(testapi_console="root-virtio-terminal")
+[2026-10-14T02:03:56.179930Z] [debug] [pid:3027432] <<< distribution::script_output("script failed with : \nCTSnQ\nRepository 'ltp_repo' not found by its alias, number, or URI.\nUse 'zypper repos' to get the list of defined repositories.\nSCRIPT_FINISHEDCTSnQ-3-")
+[2026-10-14T02:03:56.180129Z] [debug] [pid:3027432] [step:kernel,install_ltp,8] tests/kernel/install_ltp.pm:333 called LTP::utils::add_ltp_repo -> products/opensuse/../../lib/LTP/utils.pm:516 called utils::zypper_ar -> lib/utils.pm:819 called utils::zypper_call -> lib/utils.pm:653 called testapi::script_run
+[2026-10-14T02:03:56.180245Z] [debug] [pid:3027432] <<< testapi::script_run(cmd="zypper -n --gpg-auto-import-keys ar -f    https://download.opensuse.org/repositories/benchmark:/ltp:/devel/openSUSE_Factory/ ltp_repo | cat; ( exit \${PIPESTATUS[0]} )", quiet=undef, output="", timeout=700, max_interval=250, check_typing_cmd=0)
+[2026-10-14T02:03:56.180364Z] [debug] [pid:3027432] [step:kernel,install_ltp,8] tests/kernel/install_ltp.pm:333 called LTP::utils::add_ltp_repo -> products/opensuse/../../lib/LTP/utils.pm:516 called utils::zypper_ar -> lib/utils.pm:819 called utils::zypper_call -> lib/utils.pm:653 called testapi::script_run
+[2026-10-14T02:05:39.535075Z] [debug] [pid:3027432] <<< distribution::script_output("script failed with : \npoDZr\npackage kernel-default-extra is not installed\nSCRIPT_FINISHEDpoDZr-1-")
+[2026-10-14T02:05:39.535187Z] [debug] [pid:3027432] [step:kernel,install_ltp,39] tests/kernel/install_ltp.pm:342 called LTP::utils::log_versions -> products/opensuse/../../lib/LTP/utils.pm:145 called testapi::record_info
+[2026-10-14T02:05:39.535255Z] [debug] [pid:3027432] <<< testapi::record_info(title="KERNEL EXTRA PKG", output="package kernel-default-extra is not installed", result="ok")
+[2026-10-14T02:05:39.535478Z] [debug] [pid:3027432] [step:kernel,install_ltp,40] tests/kernel/install_ltp.pm:342 called LTP::utils::log_versions -> products/opensuse/../../lib/LTP/utils.pm:146 called testapi::script_output
+[2026-10-14T02:05:45.653932Z] [debug] [pid:3027432] [1;34m||| finished install_ltp kernel (runtime: 110 s)[0m
+[2026-10-14T02:05:49.358994Z] [debug] [pid:3027432] [1;34m||| starting ar_sh tests/kernel/run_ltp.pm[0m
+[2026-10-14T02:05:49.634078Z] [debug] [pid:3027432] [1;34m||| finished ar_sh kernel (runtime: 0 s)[0m
+[2026-10-14T02:05:49.634849Z] [debug] [pid:3027432] [1;34m||| starting ld01_sh tests/kernel/run_ltp.pm[0m
+[2026-10-14T02:05:49.843813Z] [debug] [pid:3027432] [1;34m||| finished ld01_sh kernel (runtime: 0 s)[0m
+[2026-10-14T02:05:49.844551Z] [debug] [pid:3027432] [1;34m||| starting ldd01_sh tests/kernel/run_ltp.pm[0m
+[2026-10-14T02:05:49.903324Z] [debug] [pid:3027432] [1;34m||| finished ldd01_sh kernel (runtime: 0 s)[0m
+[2026-10-14T02:05:49.904046Z] [debug] [pid:3027432] [1;34m||| starting nm01_sh tests/kernel/run_ltp.pm[0m
+[2026-10-14T02:05:50.024809Z] [debug] [pid:3027432] [1;34m||| finished nm01_sh kernel (runtime: 1 s)[0m
+[2026-10-14T02:05:50.025702Z] [debug] [pid:3027432] [1;34m||| starting file01_sh tests/kernel/run_ltp.pm[0m
+[2026-10-14T02:05:50.202928Z] [debug] [pid:3027432] [1;34m||| finished file01_sh kernel (runtime: 0 s)[0m
+[2026-10-14T02:05:50.203678Z] [debug] [pid:3027432] [1;34m||| starting tar01_sh tests/kernel/run_ltp.pm[0m
+[2026-10-14T02:05:50.240278Z] [debug] [pid:3027432] [1;34m||| finished tar01_sh kernel (runtime: 0 s)[0m
+[2026-10-14T02:05:50.240929Z] [debug] [pid:3027432] [1;34m||| starting cpio01_sh tests/kernel/run_ltp.pm[0m
+[2026-10-14T02:05:50.346667Z] [debug] [pid:3027432] [1;34m||| finished cpio01_sh kernel (runtime: 0 s)[0m
+[2026-10-14T02:05:50.347658Z] [debug] [pid:3027432] [1;34m||| starting unzip01_sh tests/kernel/run_ltp.pm[0m
+[2026-10-14T02:05:50.384687Z] [debug] [pid:3027432] [1;34m||| finished unzip01_sh kernel (runtime: 0 s)[0m
+[2026-10-14T02:05:50.385400Z] [debug] [pid:3027432] [1;34m||| starting gzip01_sh tests/kernel/run_ltp.pm[0m
+[2026-10-14T02:05:50.859400Z] [debug] [pid:3027432] [1;34m||| finished gzip01_sh kernel (runtime: 0 s)[0m
+[2026-10-14T02:05:50.869446Z] [debug] [pid:3027432] [1;34m||| starting cp01_sh tests/kernel/run_ltp.pm[0m
+[2026-10-14T02:05:51.095098Z] [debug] [pid:3027432] [1;34m||| finished cp01_sh kernel (runtime: 1 s)[0m
+[2026-10-14T02:05:51.097223Z] [debug] [pid:3027432] [1;34m||| starting ln01_sh tests/kernel/run_ltp.pm[0m
+[2026-10-14T02:05:51.188004Z] [debug] [pid:3027432] [1;34m||| finished ln01_sh kernel (runtime: 0 s)[0m
+[2026-10-14T02:05:51.189008Z] [debug] [pid:3027432] [1;34m||| starting mkdir01_sh tests/kernel/run_ltp.pm[0m
+[2026-10-14T02:05:51.247556Z] [debug] [pid:3027432] [1;34m||| finished mkdir01_sh kernel (runtime: 0 s)[0m
+[2026-10-14T02:05:51.248209Z] [debug] [pid:3027432] [1;34m||| starting mv01_sh tests/kernel/run_ltp.pm[0m
+[2026-10-14T02:05:51.501608Z] [debug] [pid:3027432] [1;34m||| finished mv01_sh kernel (runtime: 0 s)[0m
+[2026-10-14T02:05:51.502321Z] [debug] [pid:3027432] [1;34m||| starting du01_sh tests/kernel/run_ltp.pm[0m
+[2026-10-14T02:05:51.645402Z] [debug] [pid:3027432] [1;34m||| finished du01_sh kernel (runtime: 0 s)[0m
+[2026-10-14T02:05:51.646107Z] [debug] [pid:3027432] [1;34m||| starting df01_sh tests/kernel/run_ltp.pm[0m
+[2026-10-14T02:05:54.298899Z] [debug] [pid:3027432] [1;34m||| finished df01_sh kernel (runtime: 3 s)[0m
+[2026-10-14T02:05:54.299623Z] [debug] [pid:3027432] [1;34m||| starting mkfs01_sh tests/kernel/run_ltp.pm[0m
+[2026-10-14T02:05:54.746308Z] [debug] [pid:3027432] [1;34m||| finished mkfs01_sh kernel (runtime: 0 s)[0m
+[2026-10-14T02:05:54.747137Z] [debug] [pid:3027432] [1;34m||| starting mkfs01_ext2_sh tests/kernel/run_ltp.pm[0m
+[2026-10-14T02:05:55.226266Z] [debug] [pid:3027432] [1;34m||| finished mkfs01_ext2_sh kernel (runtime: 1 s)[0m
+[2026-10-14T02:05:55.227046Z] [debug] [pid:3027432] [1;34m||| starting mkfs01_ext3_sh tests/kernel/run_ltp.pm[0m
+[2026-10-14T02:05:55.767364Z] [debug] [pid:3027432] [1;34m||| finished mkfs01_ext3_sh kernel (runtime: 0 s)[0m
+[2026-10-14T02:05:55.768118Z] [debug] [pid:3027432] [1;34m||| starting mkfs01_ext4_sh tests/kernel/run_ltp.pm[0m
+[2026-10-14T02:05:56.224776Z] [debug] [pid:3027432] [1;34m||| finished mkfs01_ext4_sh kernel (runtime: 1 s)[0m
+[2026-10-14T02:05:56.225706Z] [debug] [pid:3027432] [1;34m||| starting mkfs01_xfs_sh tests/kernel/run_ltp.pm[0m
+[2026-10-14T02:05:56.586751Z] [debug] [pid:3027432] [1;34m||| finished mkfs01_xfs_sh kernel (runtime: 0 s)[0m
+[2026-10-14T02:05:56.587548Z] [debug] [pid:3027432] [1;34m||| starting mkfs01_btrfs_sh tests/kernel/run_ltp.pm[0m
+[2026-10-14T02:05:56.952107Z] [debug] [pid:3027432] [1;34m||| finished mkfs01_btrfs_sh kernel (runtime: 0 s)[0m
+[2026-10-14T02:05:56.952964Z] [debug] [pid:3027432] [1;34m||| starting mkfs01_minix_sh tests/kernel/run_ltp.pm[0m
+[2026-10-14T02:05:57.258739Z] [debug] [pid:3027432] [1;34m||| finished mkfs01_minix_sh kernel (runtime: 1 s)[0m
+[2026-10-14T02:05:57.259476Z] [debug] [pid:3027432] [1;34m||| starting mkfs01_msdos_sh tests/kernel/run_ltp.pm[0m
+[2026-10-14T02:05:57.562483Z] [debug] [pid:3027432] [1;34m||| finished mkfs01_msdos_sh kernel (runtime: 0 s)[0m
+[2026-10-14T02:05:57.564441Z] [debug] [pid:3027432] [1;34m||| starting mkfs01_vfat_sh tests/kernel/run_ltp.pm[0m
+[2026-10-14T02:05:58.178909Z] [debug] [pid:3027432] [1;34m||| finished mkfs01_vfat_sh kernel (runtime: 1 s)[0m
+[2026-10-14T02:05:58.179674Z] [debug] [pid:3027432] [1;34m||| starting mkfs01_ntfs_sh tests/kernel/run_ltp.pm[0m
+[2026-10-14T02:06:00.532731Z] [debug] [pid:3027432] [1;34m||| finished mkfs01_ntfs_sh kernel (runtime: 2 s)[0m
+[2026-10-14T02:06:00.533443Z] [debug] [pid:3027432] [1;34m||| starting mkswap01_sh tests/kernel/run_ltp.pm[0m
+[2026-10-14T02:06:01.484196Z] [debug] [pid:3027432] [1;34m||| finished mkswap01_sh kernel (runtime: 1 s)[0m
+[2026-10-14T02:06:01.485126Z] [debug] [pid:3027432] [1;34m||| starting which01_sh tests/kernel/run_ltp.pm[0m
+[2026-10-14T02:06:01.521872Z] [debug] [pid:3027432] [1;34m||| finished which01_sh kernel (runtime: 0 s)[0m
+[2026-10-14T02:06:01.523738Z] [debug] [pid:3027432] [1;34m||| starting lsmod01_sh tests/kernel/run_ltp.pm[0m
+[2026-10-14T02:06:01.619063Z] [debug] [pid:3027432] [1;34m||| finished lsmod01_sh kernel (runtime: 0 s)[0m
+[2026-10-14T02:06:01.619907Z] [debug] [pid:3027432] [1;34m||| starting insmod01_sh tests/kernel/run_ltp.pm[0m
+[2026-10-14T02:06:01.673417Z] [debug] [pid:3027432] [1;34m||| finished insmod01_sh kernel (runtime: 0 s)[0m
+[2026-10-14T02:06:01.674144Z] [debug] [pid:3027432] [1;34m||| starting wc01_sh tests/kernel/run_ltp.pm[0m
+[2026-10-14T02:06:01.789366Z] [debug] [pid:3027432] [1;34m||| finished wc01_sh kernel (runtime: 0 s)[0m
+[2026-10-14T02:06:01.790214Z] [debug] [pid:3027432] [1;34m||| starting keyctl01_sh tests/kernel/run_ltp.pm[0m
+[2026-10-14T02:06:02.732137Z] [debug] [pid:3027432] [1;34m||| finished keyctl01_sh kernel (runtime: 1 s)[0m
+[2026-10-14T02:06:02.732876Z] [debug] [pid:3027432] [1;34m||| starting gdb01_sh tests/kernel/run_ltp.pm[0m
+[2026-10-14T02:06:02.974315Z] [debug] [pid:3027432] [1;34m||| finished gdb01_sh kernel (runtime: 0 s)[0m
+[2026-10-14T02:06:02.975018Z] [debug] [pid:3027432] [1;34m||| starting unshare01_sh tests/kernel/run_ltp.pm[0m
+[2026-10-14T02:06:03.074917Z] [debug] [pid:3027432] [1;34m||| finished unshare01_sh kernel (runtime: 1 s)[0m
+[2026-10-14T02:06:03.075573Z] [debug] [pid:3027432] [1;34m||| starting sysctl01_sh tests/kernel/run_ltp.pm[0m
+[2026-10-14T02:06:03.119973Z] [debug] [pid:3027432] [1;34m||| finished sysctl01_sh kernel (runtime: 0 s)[0m
+[2026-10-14T02:06:03.120679Z] [debug] [pid:3027432] [1;34m||| starting sysctl02_sh tests/kernel/run_ltp.pm[0m
+[2026-10-14T02:06:03.190118Z] [debug] [pid:3027432] [1;34m||| finished sysctl02_sh kernel (runtime: 0 s)[0m
+[2026-10-14T02:06:03.190975Z] [debug] [pid:3027432] [1;34m||| starting shell_test01 tests/kernel/run_ltp.pm[0m
+[2026-10-14T02:06:03.232102Z] [debug] [pid:3027432] [1;34m||| finished shell_test01 kernel (runtime: 0 s)[0m
+[2026-10-14T02:06:03.232927Z] [debug] [pid:3027432] [1;34m||| starting shutdown_ltp tests/kernel/shutdown_ltp.pm[0m
+[2026-10-14T02:06:03.234225Z] [debug] [pid:3027432] <<< testapi::script_run(cmd="cat /proc/stat", timeout=30, max_interval=250, quiet=undef, output="")
+[2026-10-14T02:06:03.239569Z] [debug] [pid:3027432] <<< testapi::script_run(cmd="df -h", max_interval=250, timeout=30, output="", quiet=undef)
+[2026-10-14T02:06:03.247677Z] [debug] [pid:3027432] <<< distribution::script_output("Content of /tmp/scriptyD62z.sh :\n \"cat > /tmp/scriptyD62z.sh << 'EOT_yD62z'; echo yD62z-\$?-\" \n")
+[2026-10-14T02:06:03.257933Z] [debug] [pid:3027432] <<< testapi::script_run(cmd="\$LTPROOT/ver_linux > /tmp/ver_linux_after.txt 2>&1", quiet=undef, output="", timeout=120, max_interval=250)
+[2026-10-14T02:06:03.434684Z] [debug] [pid:3027432] <<< testapi::upload_logs(file="/tmp/ver_linux_after.txt", failok=1, timeout=90, failok=1)
+[2026-10-14T02:06:03.434945Z] [debug] [pid:3027432] <<< testapi::script_run(cmd="curl --form upload=\@/tmp/ver_linux_after.txt --form upname=shutdown_ltp-ver_linux_after.txt --max-time 90 http://10.0.2.2:20273/xxxxxxxxxxxxxxxx/uploadlog/ver_linux_after.txt", output="", quiet=undef, max_interval=250, timeout=100)
+[2026-10-14T02:06:03.511781Z] [debug] [pid:3027432] <<< testapi::script_run(cmd="echo '=========> cpuinfo <=========' >> /tmp/system-status.txt; cat /proc/cpuinfo >> /tmp/system-status.txt; echo '' >> /tmp/system-status.txt", output="", quiet=undef, max_interval=250, timeout=40)
+[2026-10-14T02:06:03.516549Z] [debug] [pid:3027432] <<< testapi::script_run(cmd="echo '=========> memory <=========' >> /tmp/system-status.txt; free -m >> /tmp/system-status.txt; echo '' >> /tmp/system-status.txt", quiet=undef, output="", timeout=40, max_interval=250)
+[2026-10-14T02:06:03.521209Z] [debug] [pid:3027432] <<< testapi::script_run(cmd="echo '=========> kernel <=========' >> /tmp/system-status.txt; uname -a >> /tmp/system-status.txt; echo '' >> /tmp/system-status.txt", quiet=undef, output="", timeout=40, max_interval=250)
+[2026-10-14T02:06:03.525519Z] [debug] [pid:3027432] <<< testapi::script_run(cmd="echo '=========> lspci <=========' >> /tmp/system-status.txt; lspci >> /tmp/system-status.txt; echo '' >> /tmp/system-status.txt", max_interval=250, timeout=40, output="", quiet=undef)
+[2026-10-14T02:06:03.529367Z] [debug] [pid:3027432] <<< testapi::script_run(cmd="echo '=========> vmstat <=========' >> /tmp/system-status.txt; vmstat -w >> /tmp/system-status.txt; echo '' >> /tmp/system-status.txt", max_interval=250, timeout=40, output="", quiet=undef)
+[2026-10-14T02:06:03.534493Z] [debug] [pid:3027432] <<< testapi::script_run(cmd="echo '=========> /proc/sys/kernel/tainted <=========' >> /tmp/system-status.txt; cat /proc/sys/kernel/tainted >> /tmp/system-status.txt; echo '' >> /tmp/system-status.txt", quiet=undef, output="", timeout=40, max_interval=250)
+[2026-10-14T02:06:03.538830Z] [debug] [pid:3027432] <<< testapi::script_run(cmd="echo '=========> w <=========' >> /tmp/system-status.txt; w >> /tmp/system-status.txt; echo '' >> /tmp/system-status.txt", timeout=40, max_interval=250, quiet=undef, output="")
+[2026-10-14T02:06:03.551708Z] [debug] [pid:3027432] <<< testapi::script_run(cmd="echo '=========> lsmod <=========' >> /tmp/system-status.txt; lsmod >> /tmp/system-status.txt; echo '' >> /tmp/system-status.txt", output="", quiet=undef, max_interval=250, timeout=40)
+[2026-10-14T02:06:03.558906Z] [debug] [pid:3027432] <<< testapi::script_run(cmd="echo '=========> repos <=========' >> /tmp/system-status.txt; zypper repos -u >> /tmp/system-status.txt; echo '' >> /tmp/system-status.txt", quiet=undef, output="", timeout=40, max_interval=250)
+[2026-10-14T02:06:03.627935Z] [debug] [pid:3027432] <<< testapi::upload_logs(file="/tmp/system-status.txt", failok=1, timeout=100, failok=1, timeout=100)
+[2026-10-14T02:06:03.628302Z] [debug] [pid:3027432] <<< testapi::script_run(cmd="curl --form upload=\@/tmp/system-status.txt --form upname=shutdown_ltp-system-status.txt --max-time 100 http://10.0.2.2:20273/xxxxxxxxxxxxxxxx/uploadlog/system-status.txt", quiet=undef, output="", timeout=110, max_interval=250)
+[2026-10-14T02:06:03.700046Z] [debug] [pid:3027432] <<< testapi::script_run(cmd="journalctl -b -o short-precise >/tmp/journalctl.txt", quiet=undef, output="", timeout=40, max_interval=250)
+[2026-10-14T02:06:03.717060Z] [debug] [pid:3027432] <<< testapi::upload_logs(file="/tmp/journalctl.txt", failok=1, timeout=100, failok=1, timeout=100)
+[2026-10-14T02:06:03.717308Z] [debug] [pid:3027432] <<< testapi::script_run(cmd="curl --form upload=\@/tmp/journalctl.txt --form upname=shutdown_ltp-journalctl.txt --max-time 100 http://10.0.2.2:20273/xxxxxxxxxxxxxxxx/uploadlog/journalctl.txt", output="", quiet=undef, max_interval=250, timeout=110)
+[2026-10-14T02:06:03.788007Z] [debug] [pid:3027432] <<< testapi::script_run(cmd="dmesg >/tmp/dmesg.txt", output="", quiet=undef, max_interval=250, timeout=40)
+[2026-10-14T02:06:03.796130Z] [debug] [pid:3027432] <<< testapi::upload_logs(file="/tmp/dmesg.txt", failok=1, timeout=100, failok=1, timeout=100)
+[2026-10-14T02:06:03.796362Z] [debug] [pid:3027432] <<< testapi::script_run(cmd="curl --form upload=\@/tmp/dmesg.txt --form upname=shutdown_ltp-dmesg.txt --max-time 100 http://10.0.2.2:20273/xxxxxxxxxxxxxxxx/uploadlog/dmesg.txt", quiet=undef, output="", timeout=110, max_interval=250)
+[2026-10-14T02:06:03.864968Z] [debug] [pid:3027432] <<< testapi::script_run(cmd="bash -O nullglob -c 'ls -1 /boot/vmlinu[xz]* /boot/[Ii]mage* /usr/lib/modules/*/[Ii]mage*'", output="", quiet=undef, max_interval=250, timeout=30)
+[2026-10-14T02:06:03.872965Z] [debug] [pid:3027432] <<< distribution::script_output("Content of /tmp/script4ODw1.sh :\n \"cat > /tmp/script4ODw1.sh << 'EOT_4ODw1'; echo 4ODw1-\$?-\" \n")
+[2026-10-14T02:06:03.895528Z] [debug] [pid:3027432] <<< testapi::script_run(cmd="echo -n >/etc/machine-id", output="", quiet=undef, max_interval=250, timeout=30)
+[2026-10-14T02:06:03.899114Z] [debug] [pid:3027432] <<< testapi::select_console(testapi_console="root-console")
+[2026-10-14T02:06:04.203246Z] [debug] [pid:3027432] <<< testapi::assert_screen(mustmatch="root-console", no_wait=1, timeout=30)
+[2026-10-14T02:06:04.267839Z] [debug] [pid:3027432] [32m>>> testapi::_handle_found_needle: found root-console-20200501, similarity 1.00 @ 95/1[0m
+[2026-10-14T02:06:04.269731Z] [debug] [pid:3027432] <<< testapi::type_string(string="poweroff\n", max_interval=250, wait_screen_change=0, wait_still_screen=0, timeout=30, similarity_level=47)
+[2026-10-14T02:06:04.578618Z] [debug] [pid:3027432] <<< testapi::check_screen(mustmatch="qemu-cd-rom-authentication-required", timeout=0)
+[2026-10-14T02:06:05.271596Z] [debug] [pid:3027432] [32m>>> testapi::_check_backend_response: match=qemu-cd-rom-authentication-required timed out after 0 (check_screen)[0m
+[2026-10-14T02:06:05.289661Z] [debug] [pid:3027432] <<< testapi::check_shutdown(timeout=60)
+[2026-10-14T02:06:07.418226Z] [debug] [pid:3027432] [1;34m||| finished shutdown_ltp kernel (runtime: 4 s)[0m
+[2026-10-14T02:06:07.530300Z] [debug] [pid:3026873] [37misotovideo: informing websocket clients before stopping command server: http://127.0.0.1:20273/xxxxxxxxxxxxxxxx/broadcast[0m
+[2026-10-14T02:06:07.541651Z] [debug] [pid:3026873] [37mcommands process exited: 0[0m
+[2026-10-14T02:06:07.641883Z] [debug] [pid:3026873] [37mdone with command server[0m
+[2026-10-14T02:06:07.642623Z] [debug] [pid:3026873] [37mbackend shutdown state: 1[0m
+[2026-10-14T02:06:07.642965Z] [info] [pid:3027628] [33m::: OpenQA::Qemu::Proc::save_state: Saving QEMU state to qemu_state.json[0m
+[2026-10-14T02:06:08.698444Z] [debug] [pid:3027628] [37mPassing remaining frames to the video encoder[0m
+[out#0/webm @ 0x561e88eaa080] video:718KiB audio:0KiB subtitle:0KiB other streams:0KiB global headers:0KiB muxing overhead: 0.455087%
+frame=  650 fps=1.4 q=50.0 Lsize=     721KiB time=00:00:27.04 bitrate= 218.5kbits/s speed=0.0571x    
+[2026-10-14T02:06:09.529620Z] [debug] [pid:3027628] [37mWaiting for video encoder to finalize the video[0m
+[2026-10-14T02:06:09.529700Z] [debug] [pid:3027628] [37mThe external video encoder (pid 3027823) terminated[0m
+[2026-10-14T02:06:09.529743Z] [debug] [pid:3027628] [37mThe built-in video encoder (pid 3027824) terminated[0m
+[2026-10-14T02:06:09.530223Z] [debug] [pid:3027628] [37mQEMU: qemu-system-x86_64: terminating on signal 15 from pid 3027628 (/usr/bin/isotovideo: backend)[0m
+[2026-10-14T02:06:09.530690Z] [debug] [pid:3027628] [37msending magic and exit[0m
+[2026-10-14T02:06:09.530884Z] [debug] [pid:3026873] [37mreceived magic close[0m
+[2026-10-14T02:06:09.551349Z] [debug] [pid:3026873] [37mbackend process exited: 0[0m
+[2026-10-14T02:06:09.652257Z] [debug] [pid:3026873] [37misotovideo completed handle_shutdown: done[0m
+[2026-10-14T02:06:09.652437Z] [debug] [pid:3026873] [37mstopping backend process 3027628[0m
+[2026-10-14T02:06:09.652492Z] [debug] [pid:3026873] [37mdone with backend process[0m
+3026873: EXIT 0
+[2026-10-14T02:06:09.695772Z] [info] Isotovideo exit status: 0
+[2026-10-14T02:06:09.723768Z] [info] +++ worker notes +++
+[2026-10-14T02:06:09.723895Z] [info] End time: 2026-10-14 02:06:09
+[2026-10-14T02:06:09.723938Z] [info] Result: done
+[2026-10-14T02:06:09.726762Z] [info] Uploading install_ltp-config-7.2.9-1-default
+[2026-10-14T02:06:09.980097Z] [info] Uploading install_ltp-grub
+[2026-10-14T02:06:10.013999Z] [info] Uploading install_ltp-grub.cfg
+[2026-10-14T02:06:10.051997Z] [info] Uploading install_ltp-kernel-pkg.txt
+[2026-10-14T02:06:10.081699Z] [info] Uploading install_ltp-rpm-qa.txt
+[2026-10-14T02:06:10.167266Z] [info] Uploading install_ltp-ver_linux_before.txt
+[2026-10-14T02:06:10.350259Z] [info] Uploading ltp_known_issues.yaml
+[2026-10-14T02:06:10.378863Z] [info] Uploading result_array.json
+[2026-10-14T02:06:10.454432Z] [info] Uploading shutdown_ltp-dmesg.txt
+[2026-10-14T02:06:10.484397Z] [info] Uploading shutdown_ltp-journalctl.txt
+[2026-10-14T02:06:10.608945Z] [info] Uploading shutdown_ltp-system-status.txt
+[2026-10-14T02:06:10.641054Z] [info] Uploading shutdown_ltp-ver_linux_after.txt
+[2026-10-14T02:06:10.671098Z] [info] Uploading commands
+[2026-10-14T02:06:10.779061Z] [info] commands: Processing chunk 1/1, avg. speed ~8.764 KiB/s
+[2026-10-14T02:06:10.783335Z] [info] Uploading video.webm
+[2026-10-14T02:06:10.813853Z] [info] Uploading autoinst-log.txt

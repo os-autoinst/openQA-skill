@@ -328,6 +328,11 @@ def check_frontmatter(skill, out):
     if not fm.get("license"):
         out.append(f"frontmatter: {rel}: license missing")
     meta = fm.get("metadata")
+    # A flow mapping or a scalar would hide metadata.version from the check below.
+    if isinstance(meta, str) and meta:
+        out.append(
+            f"frontmatter: {rel}: metadata must be a block mapping, one indented 'key: value' per line"
+        )
     version = meta.get("version") if isinstance(meta, dict) else None
     if version is not None and not VERSION_RE.fullmatch(version):
         out.append(

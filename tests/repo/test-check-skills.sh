@@ -245,6 +245,10 @@ sed -i 's/^metadata:$/&\n  plain text/' "$skill/SKILL.md"
 check "frontmatter: a plain line before the version under metadata does not stop the gate" \
 	"ok - all repository checks pass" "$(gate frontmatter)"
 fresh
+sed -i '/^metadata:$/{N;s/.*/metadata: {version: 1.0}/}' "$skill/SKILL.md"
+finds "frontmatter: a flow-style metadata, which would hide its version, is reported" frontmatter \
+	"metadata must be a block mapping"
+fresh
 sed -i 's/^name: .*/name:\n  first: second/' "$skill/SKILL.md"
 finds "frontmatter: an indented pair under name stays a string and is reported, not a crash" frontmatter \
 	"name 'first: second' must match"

@@ -41,7 +41,7 @@ One line per script, generated from the parsers: do not edit it by hand. What a 
     oqa-sweep.py --uses-schedule schedule/x/y.yaml (--group ID ... | --match REGEX)
 
 Failed, incomplete and timeout_exceeded jobs also get an indented `llm-investigation-summary (automatic, unverified):`
-line (`class=product|test|infra restart=yes|no why="<first bullet>"`) when a comment holds an automatic LLM summary,
+line (`class=product|test|infra why="<first bullet>"`; its restart advice only in `oqa-job.py`) when a comment holds an automatic LLM summary,
 and each build ends with an `llm-investigation-summary clusters` line (classes per failed module). Hints for
 grouping, never verdicts. A missing summary, unreadable comments or a spent request budget print nothing;
 `--no-llm` skips the one comments request per failed job.

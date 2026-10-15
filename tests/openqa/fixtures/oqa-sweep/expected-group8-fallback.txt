@@ -3,7 +3,7 @@ note: /tests/overview.json not usable (no results object); using /api/v1
 group=8 name="Example Stable" build=88.1 version=9.9 total=40 passed=30 softfailed=3 failed=3 skipped=2 unfinished=1 labeled=1 commented=2 unreviewed=2 state=needs-review mode=api-fallback scenario_prefix=exampleos-9.9-
 8001 failed DVD-x86_64-textmode@64bit modules=zypper_up bugrefs=boo#1200002 comments=1 origin=7990
 8003 incomplete DVD-x86_64-minimal@64bit comments=2
-  llm-investigation-summary (automatic, unverified): class=infra restart=yes why="minimal: the worker lost the VNC connection."
+  llm-investigation-summary (automatic, unverified): class=infra why="minimal: the worker lost the VNC connection."
 8002 parallel_failed DVD-x86_64-mm-client@64bit-2G label=old_label comments=2 parents=8001
 llm-investigation-summary clusters (automatic, unverified): - infra=1
 3 current not-ok jobs

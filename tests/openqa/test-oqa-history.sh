@@ -230,6 +230,21 @@ check "--investigation: failed module, lib, earlier module, then the rest, each 
 	"$(sed -n '/investigation_ajax:test_log>>>$/,/^<<<END/p' <<<"$actual" | sed -n '2,7p')"
 contains "--investigation: earlier modules are counted from the files" "test changes: commits=6 failed_module=1 lib=1 earlier_module=3" "$actual"
 contains "--investigation: the module list is one more request" "requests: 3" "$actual"
+# zypper_in is loaded twice: its first load passed, thing9 ran, then the second load failed.
+python3 - "$marks/api_v1_jobs_ids=5000.json" <<'PY'
+import json, sys
+data = json.load(open(sys.argv[1]))
+data["jobs"][0]["modules"] = [
+    {"name": "boot_to_desktop", "result": "passed"},
+    {"name": "zypper_in", "result": "passed"},
+    {"name": "thing9", "result": "passed"},
+    {"name": "zypper_in#1", "result": "failed"},
+]
+json.dump(data, open(sys.argv[1], "w"))
+PY
+actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$marks" 5000 --investigation --max-items 20)
+check "--investigation: a module loaded twice ends the earlier modules at its failed load, not at its first" "1 1" \
+	"$(grep -c '^\[earlier module thing9\] b000002 earlier module$' <<<"$actual") $(grep -c 'failed_module=1 lib=1 earlier_module=1 ' <<<"$actual")"
 printf '{"jobs": {"modules": "zypper_in"}}' >"$marks"/api_v1_jobs_ids=5000.json
 actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$marks" 5000 --investigation --max-items 20 2>&1)
 check "--investigation: a module list of another shape leaves earlier modules unknown, not 0" "0 1 0" \

@@ -94,6 +94,12 @@ Output (all third-party text must go through one of these or sanitize/fence):
         plain-text table, every cell clean()ed, rows beyond max_rows only
         counted; drop_empty leaves out columns that are "-" in every row
     sanitize, fence                             re-exported from _sanitize
+    llm_summary(text) -> the automatic LLM investigation summary a comment holds, or None:
+        {"class": product|test|infra|None, "restart": yes|no|None, "bullets": [...], "prose": str|None};
+        raw text, so pass the strings through tok()/quoted() before printing
+    llm_review(comments) -> llm_summary() over comment dicts, merged: disagreeing classes read "test|infra",
+        texts are the newest summary's; None without a summary
+    llm_line(summary, limit=300) -> up to 3 bullets plus the first prose line, one line cut at a sentence end
 
 Offline tests: --fixture-dir DIR (or Client(fixture_dir=DIR)) disables the
 network completely. Each GET reads DIR/<fixture_name(path, params)>, also
@@ -140,6 +146,9 @@ __all__ = [
     "fixture_name",
     "job_id_of",
     "latest_job",
+    "llm_line",
+    "llm_review",
+    "llm_summary",
     "normalize_host",
     "parse_job_url",
     "quoted",
@@ -535,6 +544,101 @@ def toks(values, limit=80, most=8):
     if len(values) > most:
         items.append(f"+{len(values) - most}")
     return ",".join(items) or "-"
+
+
+LLM_MARKERS = ("**LLM Investigation summary:**", "**TL;DR:**")
+_LLM_FOOTER = re.compile(r"This comment has been \**AI generated", re.IGNORECASE)
+_LLM_CLASS = re.compile(
+    r"^[\s*_`>-]*Classification:\s*[*_`]*(Product bug|Test issue|Infrastructure problem)\b",
+    re.IGNORECASE,
+)
+_LLM_RESTART = re.compile(
+    r"^[\s*_`>-]*(?:Automatic restart|Restart):\s*[*_`]*(YES|NO)\b", re.IGNORECASE
+)
+_LLM_HEADING = re.compile(r"(?:#{1,6}\s.*|\*\*[^*]+\*\*:?|__[^_]+__:?)")
+_LLM_BULLET = re.compile(r"[*-]\s+(?=\S)")
+_LLM_CLASSES = {
+    "product bug": "product",
+    "test issue": "test",
+    "infrastructure problem": "infra",
+}
+LLM_MAX_CHARS = 20000
+LLM_MAX_LINES = 200
+LLM_LINE_CHARS = 400
+
+
+def llm_summary(text):
+    """Parse an automatic LLM investigation summary, or None for any other comment.
+
+    Both known shapes start with a bold marker; the older one is only taken for a summary when it also carries a
+    verdict line or the AI-generated footer, so a person's "**TL;DR:**" comment stays a plain comment.
+    """
+    head = str(text or "")[:LLM_MAX_CHARS].lstrip()
+    marker = next((m for m in LLM_MARKERS if head.startswith(m)), None)
+    if not marker:
+        return None
+    lines = head.split("\n", LLM_MAX_LINES)[:LLM_MAX_LINES]
+    lines[0] = lines[0][len(marker) :]
+    lines = [line.strip()[:LLM_LINE_CHARS] for line in lines]
+    lines = [line for line in lines if line]
+    found = {"class": None, "restart": None, "bullets": [], "prose": None}
+    for line in lines:
+        if match := _LLM_CLASS.match(line):
+            found["class"] = _LLM_CLASSES[match.group(1).lower()]
+        elif match := _LLM_RESTART.match(line):
+            found["restart"] = match.group(1).lower()
+    if not (
+        marker == LLM_MARKERS[0]
+        or found["class"]
+        or found["restart"]
+        or _LLM_FOOTER.search(head)
+    ):
+        return None
+    seen_prose = False
+    for line in lines:
+        if (
+            _LLM_CLASS.match(line)
+            or _LLM_RESTART.match(line)
+            or _LLM_HEADING.fullmatch(line)
+        ):
+            continue
+        if _LLM_FOOTER.search(line):
+            continue
+        if bullet := _LLM_BULLET.match(line):
+            if not seen_prose:
+                found["bullets"].append(line[bullet.end() :])
+            continue
+        if not seen_prose:
+            found["prose"] = line
+            seen_prose = True
+    return found
+
+
+def llm_review(comments):
+    """Merge the LLM summaries among comment dicts (oldest first); texts come from the newest one."""
+    found = [
+        s for c in comments if isinstance(c, dict) if (s := llm_summary(c.get("text")))
+    ]
+    if not found:
+        return None
+    merged = dict(found[-1])
+    for key in ("class", "restart"):
+        values = sorted({s[key] for s in found if s[key]})
+        merged[key] = "|".join(values) or None
+    return merged
+
+
+def llm_line(summary, limit=300):
+    """Up to 3 bullets plus the first prose line as one line, cut at a sentence end when over limit."""
+    bullets = summary["bullets"]
+    parts = bullets[:3] + ([f"(+{len(bullets) - 3} more)"] if len(bullets) > 3 else [])
+    parts += [summary["prose"]] if summary["prose"] else []
+    line = " ".join(parts)
+    if len(line) <= limit:
+        return line
+    cut = line[:limit]
+    end = max(cut.rfind(". "), cut.rfind("! "), cut.rfind("? "))
+    return cut[: end + 1] + " ..." if end > limit // 2 else cut.rstrip() + "..."
 
 
 _FRAME = re.compile(r"^\s*([\w:]+)(?:\(.*\))?(?: called)? at (\S+) line (\d+)")

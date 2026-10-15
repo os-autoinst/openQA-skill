@@ -25,7 +25,7 @@ One line per script, generated from the parsers: do not edit it by hand. What a 
 - `oqa-job.py JOB [--settings REGEX] [--steps N] [--module NAME] [--all-steps] [--exit-code] [--verbose]`
 - `oqa-log.py JOB [--file NAME] (--list | --tail N | --grep REGEX | --errors | --around-module MODULE | --runtimes | --members) [--member PATH] [--compare JOB] [--context N] [--max-matches N] [--ignore-case] [--max-lines N] [--max-line-chars N] [--max-bytes BYTES] [--verbose] [--exit-code]`
 - `oqa-ref.py REF [--body] [--files]`
-- `oqa-sweep.py [--group ID]... [--build BUILD] [--todo] [--include-softfailed] [--limit N] [--passed] [--module NAME] [--groups] [--match REGEX] [--uses-schedule PATH] [--exit-code]`
+- `oqa-sweep.py [--group ID]... [--build BUILD] [--todo] [--include-softfailed] [--limit N] [--no-llm] [--passed] [--module NAME] [--groups] [--match REGEX] [--uses-schedule PATH] [--exit-code]`
 - `refsection.py [--list] FILE [TITLE...]`; exit 1: section missing or ambiguous
 - `review-lint.py [FILE] --lines N [--lib] [--replies N] [--late]`; exit 1: findings
 - `ticket-lint.py [FILE] [--private-suffix SUFFIX]...`; exit 1: findings
@@ -39,6 +39,12 @@ One line per script, generated from the parsers: do not edit it by hand. What a 
     oqa-sweep.py --group ID [--group ID ...] [--build B] [--todo] | --groups [--match REGEX]
     oqa-sweep.py --group ID [--build B] --passed [--module M] [--limit N]    # a source job to clone
     oqa-sweep.py --uses-schedule schedule/x/y.yaml (--group ID ... | --match REGEX)
+
+Failed, incomplete and timeout_exceeded jobs also get an indented `llm-investigation-summary (automatic, unverified):`
+line (`class=product|test|infra restart=yes|no why="<first bullet>"`) when a comment holds an automatic LLM summary,
+and each build ends with an `llm-investigation-summary clusters` line (classes per failed module). Hints for
+grouping, never verdicts. A missing summary, unreadable comments or a spent request budget print nothing;
+`--no-llm` skips the one comments request per failed job.
 
 `--todo` only jobs without bugref or label; `--include-softfailed`; `--limit N` job lines per build (30).
 `--exit-code`: also 1 when `--passed`, `--groups`, `--uses-schedule` list nothing.

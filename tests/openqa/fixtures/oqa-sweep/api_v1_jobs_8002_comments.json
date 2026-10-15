@@ -16,5 +16,14 @@
   "text": "see label:\u001b[5mmm_victim now",
   "updated": "2030-01-02 03:04:05 +0000",
   "userName": "reviewer_b"
+ },
+ {
+  "bugrefs": [],
+  "created": "2030-01-02 03:04:05 +0000",
+  "renderedMarkdown": null,
+  "updated": "2030-01-02 03:04:05 +0000",
+  "id": 91,
+  "userName": "geekotest",
+  "text": "**LLM Investigation summary:**\n\n* mm-client: victim of its parent.\n\nClassification: Test issue\nRestart: NO \u2014 x"
  }
 ]

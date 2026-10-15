@@ -7,6 +7,12 @@ api_v1_job_groups_7_build_results_show_tags=1.json
     GET /api/v1/job_groups/7/build_results?show_tags=1
 api_v1_job_groups_8_build_results_show_tags=1.json
     GET /api/v1/job_groups/8/build_results?show_tags=1
+api_v1_jobs_7010_comments.json
+    GET /api/v1/jobs/7010/comments
+api_v1_jobs_7013_comments.json
+    GET /api/v1/jobs/7013/comments
+api_v1_jobs_7014_comments.json
+    GET /api/v1/jobs/7014/comments
 api_v1_jobs_8001_comments.json
     GET /api/v1/jobs/8001/comments
 api_v1_jobs_8002_comments.json

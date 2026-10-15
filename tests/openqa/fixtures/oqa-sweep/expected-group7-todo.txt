@@ -1,7 +1,9 @@
 host=https://openqa.example.org
 group=7 name="Example Rolling" build=20300102 version=Rolling total=40 passed=30 softfailed=3 failed=4 skipped=2 unfinished=1 labeled=1 commented=2 unreviewed=3 state=needs-review tag=published scenario_prefix=exampleos-Rolling-
 7010 failed DVD-x86_64-textmode modules=boot,zypper_up comments=2 restarts=3
+  llm-investigation-summary (automatic, unverified): class=test restart=no why="boot: grub2 needle did not match after the reboot."
 7011 parallel_failed DVD-x86_64-mm-client@64bit-2G parents=7001,7010
 victims parent=7010 never_ran=2 jobs=7020,7021
+llm-investigation-summary clusters (automatic, unverified): boot,zypper_up test=1
 4 jobs still to review
-requests: 2
+requests: 3

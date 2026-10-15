@@ -44,10 +44,7 @@ comment=12 by=hookbot class=bot created=2030-01-02T03:04
   text="Investigate retry job *textmode:investigate:retry*: t#510 failed."
 comment=13 by=reviewer_a class=carried-over created=2030-01-02T03:04 bugrefs=poo#123456 carried_over_from=400
 comment=14 by=reviewer_b class=automated created=2030-01-02T03:04
-<<<UNTRUSTED NONCE source=openqa.example.org/tests/500/comment/14>>>
-**TL;DR:** grub menu not shown.
-This comment has been AI generated.
-<<<END NONCE>>>
+  text="grub menu not shown."
 comment=15 by=reviewer_b class=human created=2030-01-02T03:04 labels=force_result:softfailed:bsc#1234,boo#99 flags=carryover
 <<<UNTRUSTED NONCE source=openqa.example.org/tests/500/comment/15>>>
 label:force_result:softfailed:bsc#1234 flag:carryover

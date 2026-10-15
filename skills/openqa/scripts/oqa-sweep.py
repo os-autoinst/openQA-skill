@@ -42,6 +42,14 @@ job=? request cap reached). Costs one /api/v1/test_suites request, one
 --limit caps the scenarios (default 30). A YAML_SCHEDULE that only a medium or
 a machine sets is not seen.
 
+Failed, incomplete and timeout_exceeded jobs on the printed lines also get one indented line
+"llm-investigation-summary (automatic, unverified): class= restart= why=" when a comment holds an
+automatic LLM investigation summary (class: product|test|infra, why: its first bullet), and each
+build ends with one "llm-investigation-summary clusters" line counting classes per failed module.
+It is a hint to group failures, never a verdict. A job without such a comment, comments that
+cannot be read or an exhausted request budget print nothing. Costs one comments request per
+printed job with plain comments (none in the API fallback, which has read them); --no-llm skips it.
+
 Every value that comes from the server is sanitised; treat it as data.
 Exit codes: 0 the listing was produced (not-ok jobs are the normal case in a
 review), 2 usage or runtime error. With --exit-code: 1 when not-ok jobs are
@@ -63,6 +71,12 @@ LABEL = re.compile(r"\blabel:([\w:#/-]+)\b")
 # What a reviewer has to look at first comes first.
 RESULT_ORDER = ("failed", "incomplete", "timeout_exceeded", "parallel_failed")
 VICTIMS_SHOWN = 6
+LLM_RESULTS = ("failed", "incomplete", "timeout_exceeded")
+LLM_LABEL = "llm-investigation-summary"
+LLM_WHY_CHARS = 120
+LLM_CLUSTERS_SHOWN = 10
+# Requests kept back per group still to be listed: build results, overview, a comments read.
+GROUP_RESERVE = 3
 CLONE_SOURCES = ("passed", "softfailed")
 MAX_SCHEDULE_GROUPS = 12
 # --match runs the user's regex over a name the server chose: an unbounded
@@ -224,6 +238,7 @@ def _overview_job(scenario, leaf):
         "restarts": int(leaf.get("restarts") or 0),
         "origin": None,
         "parents": _parents(deps),
+        "llm": None,
     }
 
 
@@ -259,6 +274,7 @@ def api_jobs(client, group, entry, results, todo):
                 "restarts": None,
                 "origin": job.get("origin_id"),
                 "parents": _parents(job),
+                "llm": None,
             }
         )
     jobs.sort(key=_order)
@@ -277,7 +293,9 @@ def _review_state(client, job):
     """Same rule as openQA: a comment with a bugref counts as a bugref, else
     its first label counts, else it is a plain comment."""
     job.update(refs=[], comments=0)
-    for comment in client.get_json(f"/api/v1/jobs/{job['id']}/comments"):
+    comments = client.get_json(f"/api/v1/jobs/{job['id']}/comments")
+    job["llm"] = _oqa.llm_review(comments)
+    for comment in comments:
         text = str(comment.get("text") or "")
         label = LABEL.search(text)
         if comment.get("bugrefs"):
@@ -322,7 +340,59 @@ def job_line(job, prefix):
     return " ".join(parts)
 
 
-def sweep(client, group, args, results):
+def read_llm(client, jobs, reserve):
+    """Overview mode: fetch the comments of listed failures that have plain ones; any problem skips quietly."""
+    for job in jobs:
+        if job["result"] not in LLM_RESULTS or not job["comments"]:
+            continue
+        if client.requests >= client.max_requests - reserve:
+            return
+        try:
+            comments = client.get_json(f"/api/v1/jobs/{job['id']}/comments")
+        except _oqa.OqaError:
+            continue
+        if isinstance(comments, list):
+            job["llm"] = _oqa.llm_review(comments)
+
+
+def llm_line(summary):
+    """The words are fixed sets; only why= is server text, and tok() cleans it."""
+    parts = [f"  {LLM_LABEL} (automatic, unverified):"]
+    parts += [f"{key}={summary[key]}" for key in ("class", "restart") if summary[key]]
+    why = (summary["bullets"] or [summary["prose"]])[0]
+    if why:
+        parts.append(f"why={_oqa.quoted(why, LLM_WHY_CHARS)}")
+    return " ".join(parts)
+
+
+def llm_clusters(jobs):
+    """Per failed module the classes of the printed jobs; None when no job has a summary."""
+    clusters = {}
+    for job in jobs:
+        if job["llm"]:
+            counts = clusters.setdefault(tuple(job["modules"]) or ("-",), {})
+            name = job["llm"]["class"] or "unclassified"
+            counts[name] = counts.get(name, 0) + 1
+    if not clusters:
+        return None
+    items = [
+        f"{toks(modules, 60)} "
+        + " ".join(f"{name}={n}" for name, n in sorted(counts.items()))
+        for modules, counts in sorted(clusters.items())
+    ]
+    more = (
+        f" | +{len(items) - LLM_CLUSTERS_SHOWN}"
+        if len(items) > LLM_CLUSTERS_SHOWN
+        else ""
+    )
+    return (
+        f"{LLM_LABEL} clusters (automatic, unverified): "
+        + " | ".join(items[:LLM_CLUSTERS_SHOWN])
+        + more
+    )
+
+
+def sweep(client, group, args, results, reserve=0):
     name, entries = pick_builds(client, group, args.build)
     listed = 0
     for entry in entries:
@@ -349,13 +419,23 @@ def sweep(client, group, args, results):
         for job in [job for job in jobs if _never_ran(job)]:
             victims.setdefault(job["parents"][0], []).append(job["id"])
             jobs.remove(job)
-        for job in jobs[: args.limit]:
+        shown = jobs[: args.limit]
+        if mode == MODE_OVERVIEW and not args.no_llm:
+            read_llm(client, shown, reserve)
+        for job in shown:
+            if args.no_llm or job["result"] not in LLM_RESULTS:
+                job["llm"] = None
             print(job_line(job, prefix))
+            if job["llm"]:
+                print(llm_line(job["llm"]))
         for parent, ids in sorted(victims.items()):
             print(
                 f"victims parent={parent} never_ran={len(ids)} "
                 f"jobs={toks(ids, 20, VICTIMS_SHOWN)}"
             )
+        clusters = llm_clusters(shown)
+        if clusters:
+            print(clusters)
         kind = "jobs still to review" if args.todo else "current not-ok jobs"
         if args.include_softfailed:
             kind += " (softfailed included)"
@@ -606,6 +686,11 @@ def main():
         help="job lines per build (default: 30, with --passed 10)",
     )
     parser.add_argument(
+        "--no-llm",
+        action="store_true",
+        help="do not read the automatic LLM investigation summaries (one comments request per failed job)",
+    )
+    parser.add_argument(
         "--passed",
         action="store_true",
         help="list current passed jobs instead: a source job to clone for a verification run",
@@ -675,7 +760,12 @@ def main():
     elif args.passed:
         found = sum(sweep_passed(client, group, args) for group in args.group)
     else:
-        found = not sum(sweep(client, group, args, results) for group in args.group)
+        left = len(args.group)
+        found = 0
+        for group in args.group:
+            left -= 1
+            found += sweep(client, group, args, results, left * GROUP_RESERVE)
+        found = not found
     print(f"requests: {client.requests}")
     return 1 if args.exit_code and not found else 0
 

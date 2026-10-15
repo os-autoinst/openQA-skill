@@ -106,6 +106,6 @@ Rules for humans and agents changing this repository.
 1. Bump `metadata.version` in the `SKILL.md` frontmatter of every skill the release changes to the new
    `MAJOR.MINOR.PATCH`, in the same commit range as the release and before the tag: it is how an agent that
    loaded the skill names the release. The gate checks the form.
-2. Merge with CI green, then tag the merged commit with an annotated tag, `git tag -a vX.Y.Z`, push the tag,
-   and create the release from it with `gh release create vX.Y.Z --verify-tag`; `--target` would make a
-   lightweight tag instead.
+2. Only after the maintainer's go: merge with CI green, then tag the merged commit with an annotated tag,
+   `git tag -a vX.Y.Z`, push the tag, and create the release from it with
+   `gh release create vX.Y.Z --verify-tag`; `--target` would make a lightweight tag instead.

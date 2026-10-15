@@ -100,7 +100,7 @@ MAX_SCHEDULE_GROUPS = 12
 MATCH_CHARS = 200
 SCHEDULE_PATH = re.compile(r"[A-Za-z0-9_@+.-]+(/[A-Za-z0-9_@+.-]+)*")
 SCENARIO_KEYS = ("DISTRI", "VERSION", "FLAVOR", "ARCH", "MACHINE", "TEST")
-# Jobs of one BUILD label asked for; restarts of a scenario count until latest=1 folds them.
+# Jobs of one BUILD label asked for, restarts and re-clones of a scenario included.
 VR_FETCH = 100
 VARS_BYTES = 256 * 1024
 GIT_HASH = re.compile(r"[0-9a-f]{7,40}")
@@ -675,15 +675,20 @@ def _test_git_hash(client, job_id):
 
 def vr_runs(client, args):
     label = args.vr_build
-    params = {"build": label, "latest": 1, "limit": VR_FETCH}
-    jobs = [
+    params = {"build": label, "limit": VR_FETCH}
+    fetched = [
         job
         for job in client.get_json("/api/v1/jobs", params).get("jobs") or ()
         # Checked again here: a server that ignores the filter must not widen the list.
         if _oqa.job_id_of(job.get("id"))
         and (job.get("settings") or {}).get("BUILD") == label
     ]
-    jobs.sort(key=lambda job: job["id"])
+    # Folded here, not with latest=1: openQA applies limit before latest, which hides the cut.
+    newest = {}
+    for job in sorted(fetched, key=lambda job: job["id"], reverse=True):
+        settings = job.get("settings") or {}
+        newest.setdefault(tuple(str(settings.get(key)) for key in SCENARIO_KEYS), job)
+    jobs = sorted(newest.values(), key=lambda job: job["id"])
     shown = jobs[-args.limit :]
     tests = [str((job.get("settings") or {}).get("TEST")) for job in shown]
     suffixes = {test.partition("@")[2] for test in tests}
@@ -731,7 +736,7 @@ def vr_runs(client, args):
         )
     more = len(jobs) - len(shown)
     cut = f", {more} more not shown (--limit N)" if more else ""
-    if len(jobs) >= VR_FETCH:
+    if len(fetched) >= VR_FETCH:
         cut += f", only the newest {VR_FETCH} jobs of this BUILD were read"
     print(f"{len(jobs)} verification run(s) with this BUILD{cut}")
     return len(jobs)

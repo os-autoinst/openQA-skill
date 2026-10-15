@@ -63,10 +63,10 @@ api_v1_jobs_groupid=7_distri=exampleos_version=Rolling_flavor=utils_arch=x86_64_
     GET /api/v1/jobs?groupid=7&distri=exampleos&version=Rolling&flavor=utils&arch=x86_64&machine=64bit&job_setting=YAML_SCHEDULE=schedule/example/extra_utils.yaml&limit=1
 api_v1_jobs_groupid=8_distri=exampleos_version=9.9_flavor=DVD_arch=x86_64_machine=64bit_job_setting=YAML_SCHEDULE=schedu_57b4d93a5f17.json
     GET /api/v1/jobs?groupid=8&distri=exampleos&version=9.9&flavor=DVD&arch=x86_64&machine=64bit&job_setting=YAML_SCHEDULE=schedule/example/extra_utils.yaml&limit=1
-api_v1_jobs_build=example-user_os-autoinst-distri-example_77_latest=1_limit=100.json
-    GET /api/v1/jobs?build=example-user/os-autoinst-distri-example#77&latest=1&limit=100
-api_v1_jobs_build=example-user_empty_1_latest=1_limit=100.json
-    GET /api/v1/jobs?build=example-user/empty#1&latest=1&limit=100
+api_v1_jobs_build=example-user_os-autoinst-distri-example_77_limit=100.json
+    GET /api/v1/jobs?build=example-user/os-autoinst-distri-example#77&limit=100
+api_v1_jobs_build=example-user_empty_1_limit=100.json
+    GET /api/v1/jobs?build=example-user/empty#1&limit=100
 tests_9001_file_vars.json
     GET /tests/9001/file/vars.json
 tests_9002_file_vars.json

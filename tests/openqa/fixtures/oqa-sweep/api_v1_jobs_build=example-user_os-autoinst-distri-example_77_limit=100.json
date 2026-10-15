@@ -142,6 +142,26 @@
     "DISTRI": "exampleos"
    },
    "modules": []
+  },
+  {
+   "id": 8999,
+   "group_id": null,
+   "state": "done",
+   "result": "failed",
+   "clone_id": 9001,
+   "settings": {
+    "BUILD": "example-user/os-autoinst-distri-example#77",
+    "TEST": "textmode@example-user/os-autoinst-distri-example#fix-thing",
+    "MACHINE": "64bit",
+    "DISTRI": "exampleos"
+   },
+   "modules": [
+    {
+     "name": "boot",
+     "result": "failed",
+     "category": "x"
+    }
+   ]
   }
  ]
 }

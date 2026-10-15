@@ -330,6 +330,7 @@ EOF
 )" "$(head -n 6 <<<"$vr")"
 check "--vr-build: a job of another BUILD (filter ignored) or with an id that is no number is not listed" 0 \
 	"$(grep -Ec '9006|9007|someone-else' <<<"$vr")"
+check "--vr-build: the run a restart replaced is folded into its scenario's newest" 0 "$(grep -c 8999 <<<"$vr")"
 check "--vr-build: vars.json is read once per finished run, never for a running one; its token is never printed" \
 	"requests: 5 0" "$(tail -n 1 <<<"$vr") $(grep -c 'obtokenvalue' <<<"$vr")"
 check "--vr-build: a TEST_GIT_HASH that is no commit id reads hash=?, hostile names are quoted" 1 \
@@ -363,7 +364,7 @@ sweep = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(sweep)
 with tempfile.TemporaryDirectory() as tmp:
     job = {"id": 5, "state": "done", "result": "passed", "settings": {"BUILD": "u/r#1", "TEST": "t@u/r#b", "MACHINE": "m"}}
-    name = sweep._oqa.fixture_name("/api/v1/jobs", {"build": "u/r#1", "latest": 1, "limit": sweep.VR_FETCH})
+    name = sweep._oqa.fixture_name("/api/v1/jobs", {"build": "u/r#1", "limit": sweep.VR_FETCH})
     with open(os.path.join(tmp, name + ".json"), "w") as out:
         json.dump({"jobs": [job]}, out)
     args = argparse.Namespace(vr_build="u/r#1", test_git_hash=None, limit=30)
@@ -373,6 +374,38 @@ print(text.getvalue().splitlines()[1])
 PY
 )
 check "--vr-build: a single run keeps its whole TEST" "https://openqa.example.org/tests/5 t@u/r#b@m result=passed hash=?" "$one"
+actual=$(
+	cd "$(dirname "$script")" && python3 - <<'PY'
+import argparse, importlib.util, json, os, tempfile
+spec = importlib.util.spec_from_file_location("sweep", "oqa-sweep.py")
+sweep = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(sweep)
+sweep.VR_FETCH = 4
+
+
+def run(job_id, test):
+    return {"id": job_id, "state": "running", "settings": {"BUILD": "u/r#1", "TEST": test, "MACHINE": "m"}}
+
+
+# Two scenarios restarted twice each: openQA cuts at the limit first, latest=1 then folds what is left.
+raw = [run(8, "a"), run(7, "b"), run(6, "a"), run(5, "b")]
+with tempfile.TemporaryDirectory() as tmp:
+    for params, jobs in (({"limit": 4}, raw), ({"latest": 1, "limit": 4}, raw[:2])):
+        name = sweep._oqa.fixture_name("/api/v1/jobs", {"build": "u/r#1", **params})
+        with open(os.path.join(tmp, name + ".json"), "w") as out:
+            json.dump({"jobs": jobs}, out)
+    args = argparse.Namespace(vr_build="u/r#1", test_git_hash=None, limit=30)
+    sweep.vr_runs(sweep._oqa.Client("https://openqa.example.org", fixture_dir=tmp), args)
+PY
+)
+check "--vr-build: restarts that fill the fetch limit leave the newest run per scenario, and the cut is said" "$(
+	cat <<'EOF'
+vr_build=u/r#1 runs=2
+https://openqa.example.org/tests/7 b@m result=running hash=?
+https://openqa.example.org/tests/8 a@m result=running hash=?
+2 verification run(s) with this BUILD, only the newest 4 jobs of this BUILD were read
+EOF
+)" "$actual"
 
 # --- hostile content ------------------------------------------------------------
 all=$(

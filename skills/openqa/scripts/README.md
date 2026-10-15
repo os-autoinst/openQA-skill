@@ -74,7 +74,8 @@ Line: `group= version= flavor= arch= machine= test= job= result= build=`.
 
 `--vr-build LABEL`: verification runs are cloned with `_GROUP=0`, so no group lists them; their `BUILD`
 does (`<user>/<repo>#<PR>` from openqa-clone-custom-git-refspec). The newest job of each scenario with that
-BUILD (of its newest 100 jobs; the newest `--limit` runs printed), one `vars.json` read per finished run for its
+BUILD (of its newest 100 jobs, restarts included, the last line says when all 100 were read; the newest
+`--limit` runs printed), one `vars.json` read per finished run for its
 `TEST_GIT_HASH`; `--test-git-hash <PR head>` adds `head=yes|no`. `hash=?`: not read (unfinished, no file,
 request cap). The `@user/repo#branch` suffix every `TEST` shares is printed once as `test_suffix=`.
 

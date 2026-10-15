@@ -115,7 +115,7 @@ openqa-cli api --host https://openqa.opensuse.org -X POST jobs/<id>/restart
 
 - A comment starting `Automatic investigation jobs for job <id>` lists up to four `:investigate:` clones. Read those jobs' results (`scripts/oqa-job.py <clone URL>`), not the comment. -> references/job-triage.md "Investigate jobs"
 - **LLM investigation summary** (`**LLM Investigation summary:**`, posted by the instance's job-done hook; an older form starts `**TL;DR:**` and ends `This comment has been **AI generated**`): bullets `* <module>: <reason>`, a short summary, then `Classification: Product bug|Test issue|Infrastructure problem`, `BISECT: YES|NO` and `Restart: YES|NO`, all written by a model. Rules:
-  - It sorts and clusters a group review (same module and class = probably one cause); it never closes a job or picks a bugref, and it carries no bugref or label, so the job stays unreviewed.
+  - It sorts and clusters a group review (same module and class = probably one cause); it never closes a job or picks a bugref. A bugref the model wrote into it is parsed all the same, so the job counts as reviewed on an unverified ref.
   - Confirm each cluster on one job from its own artifacts before drafting a reference. A model often calls a needle mismatch `infra`: unconfirmed until the step, screenshot and history say so. -> references/job-triage.md "Decision tree"
   - `Restart: YES` is advisory and nothing acts on it. A restart is a write: propose it per job with the sporadic checks, never copied across a cluster. -> "Retrigger or comment"
   - Two summaries on one job may disagree (`class=a|b`).

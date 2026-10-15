@@ -223,8 +223,35 @@ check "frontmatter: the folded value of such a key is not added to the descripti
 	"frontmatter: skills/openqa/SKILL.md: key 'when_to_use' is not in the Agent Skills specification" \
 	"$(gate frontmatter)"
 fresh
-sed -i 's/^license: .*/&\nmetadata:\n  short_name: oqa/' "$skill/SKILL.md"
+sed -i 's/^metadata:$/&\n  short_name: oqa/' "$skill/SKILL.md"
 check "frontmatter: an underscore in a key below metadata passes" "ok - all repository checks pass" "$(gate frontmatter)"
+fresh
+sed -i 's/^  version: .*/  version: "1.0"/' "$skill/SKILL.md"
+finds "frontmatter: a metadata.version that is not MAJOR.MINOR.PATCH" frontmatter "metadata.version '1.0' must be MAJOR.MINOR.PATCH"
+fresh
+sed -i "s/^  version: .*/  version: 'v1.2.3'/" "$skill/SKILL.md"
+finds "frontmatter: a metadata.version with a v prefix" frontmatter "metadata.version 'v1.2.3'"
+fresh
+sed -i 's/^  version: .*/  version: 01.2.3/' "$skill/SKILL.md"
+finds "frontmatter: a metadata.version with a leading zero" frontmatter "metadata.version '01.2.3'"
+fresh
+sed -i 's/^  version: .*/  version: 10.20.300/' "$skill/SKILL.md"
+check "frontmatter: an unquoted MAJOR.MINOR.PATCH passes" "ok - all repository checks pass" "$(gate frontmatter)"
+fresh
+sed -i '/^metadata:$/,/^  version: /d' "$skill/SKILL.md"
+check "frontmatter: no metadata.version passes" "ok - all repository checks pass" "$(gate frontmatter)"
+fresh
+sed -i 's/^metadata:$/&\n  plain text/' "$skill/SKILL.md"
+check "frontmatter: a plain line before the version under metadata does not stop the gate" \
+	"ok - all repository checks pass" "$(gate frontmatter)"
+fresh
+sed -i 's/^name: .*/name:\n  first: second/' "$skill/SKILL.md"
+finds "frontmatter: an indented pair under name stays a string and is reported, not a crash" frontmatter \
+	"name 'first: second' must match"
+fresh
+sed -i 's/^metadata:$/version: 2/' "$skill/SKILL.md"
+check "frontmatter: a version outside metadata is still a key outside the specification" \
+	"frontmatter: skills/openqa/SKILL.md: key 'version' is not in the Agent Skills specification" "$(gate frontmatter)"
 
 # Sizes are bytes of what one read returns: a section as refsection.py cuts it, or a whole file.
 ref=references/redaction.md

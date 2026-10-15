@@ -26,6 +26,7 @@ ROOT = Path(__file__).resolve().parents[2]
 SKILLS = ROOT / "skills"
 
 NAME_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
+VERSION_RE = re.compile(r"(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)")
 ALLOWED_KEYS = {
     "name",
     "description",
@@ -283,12 +284,20 @@ def frontmatter(path):
     block, _ = split_frontmatter(read(path))
     if block is None:
         return None
-    data, key = {}, None
+    data, key, mapping = {}, None, False
     for line in block.splitlines():
         if m := re.match(r"^([\w-]+):\s*(.*)$", line):
             key, val = m.group(1), m.group(2)
             data[key] = "" if val in (">-", ">", "|", "|-") else val
-        elif key and line.startswith(" "):
+            # metadata is the one mapping the specification has; every other value is a string.
+            mapping = key == "metadata" and val == ""
+        elif key and mapping and (m := re.match(r"^\s+([\w-]+):\s*(.*)$", line)):
+            value = m.group(2).strip()
+            if len(value) > 1 and value[0] == value[-1] and value[0] in "\"'":
+                value = value[1:-1]
+            known = data[key] if isinstance(data[key], dict) else {}
+            data[key] = {**known, m.group(1): value}
+        elif key and line.startswith(" ") and isinstance(data[key], str):
             data[key] = (data[key] + " " + line.strip()).strip()
     return data
 
@@ -318,6 +327,12 @@ def check_frontmatter(skill, out):
         )
     if not fm.get("license"):
         out.append(f"frontmatter: {rel}: license missing")
+    meta = fm.get("metadata")
+    version = meta.get("version") if isinstance(meta, dict) else None
+    if version is not None and not VERSION_RE.fullmatch(version):
+        out.append(
+            f"frontmatter: {rel}: metadata.version '{version}' must be MAJOR.MINOR.PATCH"
+        )
     # `gh skill publish` refuses a list here: "allowed-tools must be a string
     # (space-delimited), not an array", which makes the skill unpublishable.
     if fm.get("allowed-tools", "").lstrip().startswith("-"):

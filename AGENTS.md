@@ -99,3 +99,12 @@ Rules for humans and agents changing this repository.
 4. Add a row to the table in `README.md` and, for a reference that is read whole, its cap to `BUDGETS` in
    `tests/repo/check-skills.py`; its sections then need no pointer.
 5. Run the script tests, `python3 tests/repo/check-skills.py` and `python3 tests/repo/check-flags.py`.
+
+## Releasing
+
+1. Bump `metadata.version` in the `SKILL.md` frontmatter of every skill the release changes to the new
+   `MAJOR.MINOR.PATCH`, in the same commit range as the release and before the tag: it is how an agent that
+   loaded the skill names the release. The gate checks the form.
+2. Merge with CI green, then tag the merged commit with an annotated tag, `git tag -a vX.Y.Z`, push the tag,
+   and create the release from it with `gh release create vX.Y.Z --verify-tag`; `--target` would make a
+   lightweight tag instead.

@@ -290,12 +290,12 @@ def earlier_modules(client, job_id, failed):
     modules = job.get("modules") if isinstance(job, dict) else None
     if not isinstance(modules, list):
         return None
-    names = [
-        re.sub(r"#\d+$", "", str(module.get("name") or ""))
-        for module in modules
-        if isinstance(module, dict)
-    ]
-    first = next((i for i, name in enumerate(names) if name in failed), 0)
+    modules = [module for module in modules if isinstance(module, dict)]
+    names = [re.sub(r"#\d+$", "", str(module.get("name") or "")) for module in modules]
+    # By result, not name: an earlier load of a module loaded twice may have passed.
+    first = next(
+        (i for i, module in enumerate(modules) if module.get("result") == "failed"), 0
+    )
     return sorted({name for name in names[:first] if name and name not in failed})
 
 

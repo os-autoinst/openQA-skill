@@ -24,6 +24,8 @@ FIELDS = "number,title,isDraft,headRefOid,updatedAt,author,reviews"
 SEARCH_LIMIT = 100
 MAX_NEWEST = 100
 MAX_ANSWER = 16 * 1024 * 1024
+# gh asks for the first, oldest, 100 reviews of a pull request; a full list may lack my newest.
+GH_REVIEWS = 100
 TITLE_CHARS = 120
 _REPO = re.compile(r"[A-Za-z0-9][A-Za-z0-9-]{0,38}/[A-Za-z0-9._-]{1,100}")
 _LOGIN = re.compile(r"[A-Za-z0-9][A-Za-z0-9-]{0,38}")
@@ -205,7 +207,9 @@ def main():
     counts = {"requested": 0, "reviewed": 0, "moved": 0, "drafts": 0}
     for number, pull in pulls.items():
         head = oid(pull.get("headRefOid"))
-        mine = last_review(pull, me)
+        reviews = pull.get("reviews")
+        cut = isinstance(reviews, list) and len(reviews) >= GH_REVIEWS
+        mine = None if cut else last_review(pull, me)
         moved = mine and mine[1] and head and mine[1] != head
         draft = pull.get("isDraft") is True
         fields = [
@@ -214,7 +218,9 @@ def main():
             f"requested={'yes' if number in asked else 'no'}",
             f"author={tok(login_of(pull.get('author')))}",
         ]
-        if mine:
+        if cut:
+            fields.append("review=?")
+        elif mine:
             fields.append(f"review={mine[0]}@{mine[1][:7] if mine[1] else '?'}")
             fields.append(f"reviewed_at={mine[2]}")
         fields.append(f"head={head[:7] if head else '?'}")

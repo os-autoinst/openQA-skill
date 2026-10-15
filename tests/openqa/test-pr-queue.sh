@@ -275,4 +275,31 @@ summary: repo=os-autoinst/os-autoinst-distri-opensuse me=jdoe prs=100 requested=
 EOF
 ) 4" "$? $(grep -c '^pr=' <<<"$actual") $(grep -v '^pr=' <<<"$actual") $(calls)"
 
+# gh reads the first 100 reviews of a pull request, the oldest: my newest may lie beyond them.
+mkdir -p "$tmp/crowded"
+"$python" - "$tmp/crowded" <<'EOF' || exit 1
+import json
+import sys
+
+
+def reviews(count):
+    return [{"author": {"login": "jdoe" if n == 3 else "x"}, "state": "COMMENTED",
+             "submittedAt": f"2030-01-01T00:{n // 60:02d}:{n % 60:02d}Z", "commit": {"oid": "1" * 40}}
+            for n in range(count)]
+
+
+pulls = [{"number": n, "title": "t", "headRefOid": "2" * 40, "reviews": reviews(count)} for n, count in ((9, 100), (10, 99))]
+for name, data in (("requested", []), ("reviewed", pulls), ("newest", [])):
+    with open(f"{sys.argv[1]}/{name}.json", "w") as out:
+        json.dump(data, out)
+EOF
+actual=$(queue STUB_DIR="$tmp/crowded")
+check "100 reviews, as many as gh reads: my last review is unknown, not taken from the oldest; 99 are read" "0 $(
+	cat <<EOF
+pr=10 draft=no requested=no author=? review=commented@1111111 reviewed_at=2030-01-01T00:00:03Z head=2222222 moved=$(printf '1%.0s' {1..40})..$(printf '2%.0s' {1..40}) title="t"
+pr=9 draft=no requested=no author=? review=? head=2222222 title="t"
+summary: repo=os-autoinst/os-autoinst-distri-opensuse me=jdoe prs=2 requested=0 reviewed=1 moved=1 drafts=0
+EOF
+)" "$? $actual"
+
 exit $fail

@@ -330,7 +330,8 @@ review requested from `--me`, reviewed by `--me` (100 each, a `note:` when a lis
 N non-draft ones (20; 0 = none, at most 100). `--me` defaults to the login gh is authenticated as (`gh api
 user`); gh authenticates itself. One line per pull request, those requested first, then those that moved, then
 by last update. `review=<state>@<commit> reviewed_at=<time>`: my newest submitted review (`@?`: GitHub gave no
-commit; both left out when there is none). `moved=OLD..NEW`, full commits, when the head changed since:
+commit; both left out when there is none). `review=?`: unknown, gh reads only the oldest 100 reviews of a pull
+request and it has that many; look on GitHub. `moved=OLD..NEW`, full commits, when the head changed since:
 `git fetch origin OLD`, then `git diff OLD..NEW -- <files>`. Titles and logins are sanitised.
 
     pr=103 draft=no requested=no author=asmith review=changes_requested@bbbbbbb reviewed_at=2030-01-02T09:00:00Z head=3333333 moved=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb..3333333333333333333333333333333333333333 title="lib/utils: retry the mirror check"

@@ -72,7 +72,7 @@ By kind of change, not by block: `tests/virt_autotest` and virtualization featur
   - **Timeouts**, the most common symptom: compare the test's runtime with its timeout and with the kernel flavour (debug kernels run slower) before raising a limit.
   - **Version gates**: a test that needs a newer kernel or a backport, selftests or kernel-devel built for another kernel than the running one, a package missing in the image, a read-only root on immutable products.
   - **One build, many tests**: a shared library, runner, parent job or package bump; check the common step before each test. A harness can report passed subtests as a failure or the reverse: read the raw subtest results.
-  - **Product** last, naming the last good and first bad kernel. The first stated theory was wrong in 35%; when build and tests both changed, a crossed run decides -> job-triage.md "History and investigation".
+  - **Product** last, naming the last good and first bad kernel. The first stated theory was wrong in 35%; when build and tests both changed and the evidence leaves the class open, a crossed run decides -> job-triage.md "History and investigation".
   - Known failures go to `LTP_KNOWN_ISSUES` with the bug link; a sporadic one is recorded with its rate and the builds it covers.
 
 ## SAP and HA

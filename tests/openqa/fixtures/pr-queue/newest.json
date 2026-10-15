@@ -1,0 +1,105 @@
+[
+ {
+  "author": {
+   "id": "U_105",
+   "is_bot": false,
+   "login": "pdev",
+   "name": ""
+  },
+  "headRefOid": "5555555555555555555555555555555555555555",
+  "isDraft": false,
+  "number": 105,
+  "reviews": [],
+  "title": "data: add the fixture for the new test",
+  "updatedAt": "2030-01-06T10:00:00Z"
+ },
+ {
+  "author": {
+   "id": "U_101",
+   "is_bot": false,
+   "login": "asmith",
+   "name": ""
+  },
+  "headRefOid": "1111111111111111111111111111111111111111",
+  "isDraft": false,
+  "number": 101,
+  "reviews": [],
+  "title": "console/zypper_in: wait for the zypper lock",
+  "updatedAt": "2030-01-05T10:00:00Z"
+ },
+ {
+  "author": {
+   "id": "U_103",
+   "is_bot": false,
+   "login": "asmith",
+   "name": ""
+  },
+  "headRefOid": "3333333333333333333333333333333333333333",
+  "isDraft": false,
+  "number": 103,
+  "reviews": [
+   {
+    "author": {
+     "login": "jdoe"
+    },
+    "authorAssociation": "MEMBER",
+    "body": "",
+    "commit": {
+     "oid": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "id": "R_2",
+    "includesCreatedEdit": false,
+    "reactionGroups": [],
+    "state": "APPROVED",
+    "submittedAt": "2030-01-01T09:00:00Z"
+   },
+   {
+    "author": {
+     "login": "JDoe"
+    },
+    "authorAssociation": "MEMBER",
+    "body": "",
+    "commit": {
+     "oid": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    },
+    "id": "R_3",
+    "includesCreatedEdit": false,
+    "reactionGroups": [],
+    "state": "CHANGES_REQUESTED",
+    "submittedAt": "2030-01-02T09:00:00Z"
+   },
+   {
+    "author": {
+     "login": "asmith"
+    },
+    "authorAssociation": "MEMBER",
+    "body": "",
+    "commit": {
+     "oid": "3333333333333333333333333333333333333333"
+    },
+    "id": "R_4",
+    "includesCreatedEdit": false,
+    "reactionGroups": [],
+    "state": "COMMENTED",
+    "submittedAt": "2030-01-03T09:00:00Z"
+   },
+   {
+    "author": {
+     "login": "jdoe"
+    },
+    "authorAssociation": "MEMBER",
+    "body": "",
+    "commit": {
+     "oid": "3333333333333333333333333333333333333333"
+    },
+    "id": "R_5",
+    "includesCreatedEdit": false,
+    "reactionGroups": [],
+    "state": "PENDING",
+    "submittedAt": null
+   }
+  ],
+  "title": "lib/utils: retry the mirror check",
+  "updatedAt": "2030-01-03T10:00:00Z"
+ }
+]

@@ -56,7 +56,7 @@ Skip tests named `*:investigate:*`: diagnostic clones, not part of the verdict.
 
 **Search before filing**, cheapest first:
 
-1. **Comments on the job.** `(Automatic carryover from t#<id>)`: copied because the *set of failed module names and results* matched an earlier job; the error inside may differ. Read the ticket with `scripts/oqa-ref.py <ref or URL> [--body] [--files]` (state, merged, title; `not-accessible` and `not readable` are final) and compare its failing step and message with this job's; mismatch: new reference. -> references/openqa-model.md "Carry-over"
+1. **Comments on the job.** `(Automatic carryover from t#<id>)`: copied because the *set of failed module names and results* matched an earlier job; the error inside may differ. Read the ticket with `scripts/oqa-ref.py <ref or URL> [--body] [--files]` (state, merged, title; `not-accessible` and `not readable` are final), a `poo#` with `--notes 3`: its latest notes say whether it already tracks this failure or has a fix. Compare its failing step and message with this job's; mismatch: new reference. -> references/openqa-model.md "Carry-over"
 2. **Siblings in the build failing the same module**: reuse only after confirming the same failing step.
 3. **Scenario history**: `scripts/oqa-history.py <job URL>` lists earlier failures with bugrefs, last good, first bad. An older reference that was not carried over is reusable once the failure matches.
 4. **`auto_review` tickets**: a subject holding `auto_review:"<regex>"` claims every job whose `autoinst-log.txt` or `reason` matches. Test the regex with `scripts/oqa-log.py <job URL> --grep '<regex>'` before reusing. -> references/review-comments-tickets.md "auto_review subjects"

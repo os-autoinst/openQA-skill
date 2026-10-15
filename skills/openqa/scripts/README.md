@@ -24,7 +24,7 @@ One line per script, generated from the parsers: do not edit it by hand. What a 
 - `oqa-history.py JOB [--previous N] [--investigation] [--max-items N] [--exit-code] [--verbose]`
 - `oqa-job.py JOB [--settings REGEX] [--steps N] [--module NAME] [--all-steps] [--exit-code] [--verbose]`
 - `oqa-log.py JOB [--file NAME] (--list | --tail N | --grep REGEX | --errors | --around-module MODULE | --runtimes | --members) [--member PATH] [--compare JOB] [--context N] [--max-matches N] [--ignore-case] [--max-lines N] [--max-line-chars N] [--max-bytes BYTES] [--verbose] [--exit-code]`
-- `oqa-ref.py REF [--body] [--files]`
+- `oqa-ref.py REF [--body] [--files] [--notes N]`
 - `oqa-sweep.py [--group ID]... [--build BUILD] [--todo] [--include-softfailed] [--limit N] [--no-llm] [--passed] [--module NAME] [--groups] [--match REGEX] [--uses-schedule PATH] [--vr-build LABEL] [--test-git-hash SHA] [--exit-code]`
 - `refsection.py [--list] FILE [TITLE...]`; exit 1: section missing or ambiguous
 - `review-lint.py [FILE] --lines N [--lib] [--replies N] [--late]`; exit 1: findings
@@ -237,11 +237,15 @@ All-empty columns are dropped.
 
 ## oqa-ref.py - state of the ticket behind a bugref
 
-    oqa-ref.py gh#owner/repo#N | boo#N | bsc#N | bnc#N | poo#N | TICKET_URL [--body] [--files]
+    oqa-ref.py gh#owner/repo#N | boo#N | bsc#N | bnc#N | poo#N | TICKET_URL [--body] [--files] [--notes N]
 
 No `--host`: the prefix selects one fixed host (api.github.com, bugzilla.opensuse.org, bugzilla.suse.com,
 progress.opensuse.org); nothing fetched can change it. One request; `--body` adds the description, fenced and
 capped at 4000 bytes (Bugzilla: +1 request); `--files` lists the files of a GitHub PR (max 100, +1 request).
+`--notes N` (1-10, progress only, same request): the last N non-empty journal notes, oldest first, each as
+`note created=<date>` and a fence capped at 1500 bytes, author left out; the latest notes say whether the
+ticket already tracks a failure or has a fix. A ticket the anonymous read cannot see (401, 403, 404) gets
+`notes: the ticket needs a login; the user can read it at <url>`: hand that to the user.
 
     ref=gh#os-autoinst/openQA#1234 kind=pr state=closed open=no merged=yes merged_at=2017-03-07T14:10:38Z updated=... title="Fix ..." url=https://github.com/os-autoinst/openQA/pull/1234
     ref=boo#1000001 kind=bug state=RESOLVED/DUPLICATE open=no duplicate_of=1000003 updated=... title="..." url=...

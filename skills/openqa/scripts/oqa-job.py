@@ -118,7 +118,7 @@ BUGREF = re.compile(
 )
 LABEL = re.compile(r"\blabel:([\w:#/-]+)\b")
 FLAG = re.compile(r"\bflag:([\w:#]+)\b")
-CARRYOVER = re.compile(r"\(Automatic (?:carryover|takeover) from t#([0-9]{1,18})\)")
+CARRYOVER = _oqa.CARRYOVER
 # The '#' after the marker is optional upstream, so "bootloader_uefi#1" (module
 # run twice) parses as a boo reference. Anything not in one of these two
 # well-formed shapes is flagged.

@@ -252,6 +252,16 @@ for verdict in (
 ')
 check "emphasis around the label, before or after its colon, or around the value: the verdict is read, not prose" \
 	"$(printf 'product no None\n%.0s' 1 2 3 4)" "$actual"
+actual=$(py '
+import _oqa
+own = {"text": "**LLM Investigation summary:**\n\n* own\n\nClassification: Test issue"}
+copied = {"text": "**LLM Investigation summary:**\n\n* copied\n\nClassification: Product bug\n\nboo#1\n\n(Automatic carryover from t#41)"}
+taken = {"text": "**LLM Investigation summary:**\n\n* taken\n\nboo#1\n\n(Automatic takeover from t#40)"}
+print(_oqa.llm_review([own, copied, taken]))
+print(_oqa.llm_review([copied]))
+')
+check "a summary openQA carried over from another job is not taken for this job" \
+	"$(printf "%s\n" "{'class': 'test', 'restart': None, 'bullets': ['own'], 'prose': None}" None)" "$actual"
 
 # --- clone chains -------------------------------------------------------------
 actual=$(oqa --fixture-dir "$fixtures" chain 100)

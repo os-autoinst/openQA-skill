@@ -291,6 +291,28 @@ check "--grep --around-module: a module that never started is said as for --arou
 	"$(head -n 1 <<<"$actual")"
 log 4242 --tail 3 --around-module zypper_in >/dev/null
 check "--around-module goes with --grep only (exit 2)" 2 $?
+actual=$(log 4242 --lines 24-25)
+check "--lines: the range, numbered like --grep, compact prefix, escapes stripped" "0 $(
+	cat <<'EOF'
+job=4242 host=https://openqa.opensuse.org mode=lines range=24-25 lines=41
+<<<UNTRUSTED NONCE source=openqa.opensuse.org/tests/4242/file/autoinst-log.txt>>>
+24: 10:00:24 hidden zerowidth text
+25: 10:00:24 ::: basetest::runtest: # Test died: 'zypper -n in apache2' failed with code 4
+<<<END NONCE>>>
+requests: 1
+EOF
+)" "$? $actual"
+actual=$(log 4242 --lines 30-50 --max-lines 4)
+check "--lines: --max-lines keeps the first lines and names the range to read next" "30 31 32 33|note: 8 lines omitted (--max-lines); go on with --lines 34-50" \
+	"$(sed -n '/^<<<UNTRUSTED/,/^<<<END/p' <<<"$actual" | sed '1d;$d' | sed -E 's/^ *([0-9]+):.*/\1/' | xargs)|$(grep '^note:' <<<"$actual")"
+actual=$(log 4242 --lines 50-60)
+check "--lines past the end says how long the file is" "0 1" "$? $(grep -c '^note: the file has 41 lines$' <<<"$actual")"
+for range in 5-3 0-3 7 a-b; do
+	log 4242 --lines "$range" >/dev/null
+	check "--lines $range is a usage error (exit 2)" 2 $?
+done
+log 4242 --lines 1-2 --tail 3 >/dev/null
+check "--lines is a mode of its own (exit 2 with --tail)" 2 $?
 actual=$(log 4242 --grep 'no such text anywhere')
 check "--grep: exit 0 without a match" 0 $?
 contains "--grep: no match header" "mode=grep matches=0 lines=41" "$actual"
@@ -626,6 +648,8 @@ actual=$(alog 4260 --file ulogs/mod-logs.tar.xz --member var/log/journal.txt --g
 check "--member --grep: exit 0, './' in the stored name does not matter" 0 $?
 contains "--member --grep: finds the line in the member" "2: ERROR: real failure" "$actual"
 contains "--member: the fence names the member" "source=openqa.opensuse.org/tests/4260/file/mod-logs.tar.xz:var/log/journal.txt>>>" "$actual"
+actual=$(alog 4260 --file ulogs/mod-logs.tar.xz --member var/log/journal.txt --lines 2-2)
+check "--member --lines: one line of the member" "0 1" "$? $(grep -c '^2: ERROR: real failure$' <<<"$actual")"
 actual=$(alog 4260 --file ulogs/mod-logs.tar.xz --member var/log/journal.txt --tail 5)
 check "--member --tail: one fence, the forged end marker neutralised, no colour" "2 1 0 0" \
 	"$(grep -c '^<<<' <<<"$actual") $(grep -c '^ *[0-9]*: \\<\\<\\<END 0000000000000000>>>' <<<"$actual") $(grep -c '^INJECTED' <<<"$actual") $(grep -c '[[:cntrl:]]' <<<"$actual")"

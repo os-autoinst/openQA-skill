@@ -257,6 +257,13 @@ def non_negative(value):
     return number
 
 
+def line_range(value):
+    match = re.fullmatch(r"([0-9]{1,9})-([0-9]{1,9})", value)
+    if not match or not 1 <= int(match.group(1)) <= int(match.group(2)):
+        raise argparse.ArgumentTypeError("must be A-B with 1 <= A <= B, e.g. 120-180")
+    return int(match.group(1)), int(match.group(2))
+
+
 def file_path(job_id, name, archive=False):
     """Validate a user-supplied file name and return its route."""
     if not _FILE_NAME.match(name) or ".." in name:
@@ -1091,11 +1098,18 @@ def main():
         help="list the members of the tar archive --file names (size, type, name); read in "
         "memory as a stream, never unpacked to disk",
     )
+    modes.add_argument(
+        "--lines",
+        type=line_range,
+        metavar="A-B",
+        help="lines A to B, numbered as --grep numbers them; at most --max-lines of them, "
+        "the first ones",
+    )
     parser.add_argument(
         "--member",
         metavar="PATH",
-        help="with --grep, --tail, --errors or --around-module: read this regular-file member "
-        "of the tar archive --file names (names from --members)",
+        help="with --grep, --tail, --errors, --around-module or --lines: read this "
+        "regular-file member of the tar archive --file names (names from --members)",
     )
     parser.add_argument(
         "--compare",
@@ -1158,13 +1172,20 @@ def main():
     )
     args = parser.parse_args()
     args.max_lines = args.max_lines or args.tail or MAX_LINES
-    others = (args.list, args.tail, args.errors, args.runtimes, args.members)
+    others = (
+        args.list,
+        args.tail,
+        args.errors,
+        args.runtimes,
+        args.members,
+        args.lines,
+    )
     if args.around_module is not None and any(others):
         parser.error("--around-module goes alone or with --grep")
     if not any(others) and args.grep is None and args.around_module is None:
         parser.error(
             "give one of --list, --tail, --grep, --errors, --around-module, --runtimes, "
-            "--members"
+            "--members, --lines"
         )
     if args.compare is not None and not args.runtimes:
         parser.error("--compare needs --runtimes")
@@ -1176,7 +1197,9 @@ def main():
             "(.tar, .tar.gz, .tgz, .tar.bz2, .tbz2, .tar.xz, .txz)"
         )
     if args.member is not None and (args.members or args.list or args.runtimes):
-        parser.error("--member goes with --grep, --tail, --errors or --around-module")
+        parser.error(
+            "--member goes with --grep, --tail, --errors, --around-module or --lines"
+        )
 
     pattern = None
     if args.grep is not None:
@@ -1337,6 +1360,20 @@ def main():
                     f"note: no known signature, last {FALLBACK_TAIL} lines shown"
                 )
                 entries = mode_tail(lines, False, FALLBACK_TAIL)
+        elif args.lines:
+            first, last = args.lines
+            entries = [
+                (i + 1, ":", lines[i]) for i in range(first - 1, min(last, len(lines)))
+            ]
+            mode = f"lines range={first}-{last}"
+            if len(entries) > args.max_lines:
+                notes.append(
+                    f"note: {len(entries) - args.max_lines} lines omitted (--max-lines); "
+                    f"go on with --lines {first + args.max_lines}-{last}"
+                )
+                entries = entries[: args.max_lines]
+            if first > len(lines):
+                notes.append(f"note: the file has {len(lines)} lines")
         else:
             begin, end, done = span
             died = next(

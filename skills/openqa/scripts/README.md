@@ -114,7 +114,8 @@ A restarted job is history, a `parallel_failed` job is a victim, steps after the
     oqa-job.py JOB_URL|ID [--steps N] [--settings REGEX] [--module NAME] [-v] [--exit-code]
     oqa-job.py JOB_URL|ID --module NAME --all-steps    # every step of one module: num result title shot
 
-`--steps N` failing steps per module (2); `--settings '^(QEMU|HDD)'` adds settings by key (default: BACKEND,
+`--steps N` failing steps per module (2; `0`: no step lines, only the job and its failed modules, each with
+`+N failing steps not shown`); `--settings '^(QEMU|HDD)'` adds settings by key (default: BACKEND,
 CASEDIR, NEEDLES_DIR, YAML_SCHEDULE); `-v` whole traces, ulog names, all settings of the scenario, longer
 comments. `--module NAME` alone keeps only that module's lines, whatever its result, and ends them with
 `+N of M steps not shown (--all-steps lists them)`.

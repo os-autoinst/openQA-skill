@@ -632,7 +632,7 @@ def print_modules(client, job, max_steps, verbose, wanted=None):
         ]
         # The die message explains the step before it: keep it in view.
         shown = bad[:max_steps]
-        if died is not None and steps[died] not in shown:
+        if max_steps and died is not None and steps[died] not in shown:
             shown = [*shown[: max_steps - 1], steps[died]]
         for step in shown:
             shot = step_shot(steps, step)
@@ -828,10 +828,10 @@ def print_comments(client, job_id, result, verbose):
             show_text(body, label, max_lines, max_bytes, "  ")
 
 
-def positive(value):
+def non_negative(value):
     number = int(value)
-    if number < 1:
-        raise argparse.ArgumentTypeError("must be >= 1")
+    if number < 0:
+        raise argparse.ArgumentTypeError("must be >= 0")
     return number
 
 
@@ -862,10 +862,11 @@ def main():
     )
     parser.add_argument(
         "--steps",
-        type=positive,
+        type=non_negative,
         default=2,
         metavar="N",
-        help="failing steps to show per failed module (default: 2)",
+        help="failing steps to show per failed module (default: 2); 0: no step lines, "
+        "only the job and its failed modules with their counts",
     )
     parser.add_argument(
         "--module",

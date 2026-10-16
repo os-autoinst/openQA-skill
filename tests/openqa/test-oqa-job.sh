@@ -46,8 +46,8 @@ job http://openqa.example.org/tests/500 >/dev/null 2>&1
 check "plain http job URL is refused" 2 $?
 job 500 --settings '(' >/dev/null 2>&1
 check "broken --settings regex exits 2" 2 $?
-job 500 --steps 0 >/dev/null 2>&1
-check "--steps must be positive" 2 $?
+job 500 --steps -1 >/dev/null 2>&1
+check "--steps must not be negative" 2 $?
 job 4040 >/dev/null 2>&1
 check "unknown job exits 2" 2 $?
 
@@ -134,6 +134,11 @@ actual=$(job 500 --steps 1 | normalize)
 check "--steps 1 keeps the die message" "test-died:needle-mismatch test-died:command-failure serial-failure parser-result-failed" \
 	"$(grep -o 'kind=[^ ]*' <<<"$actual" | cut -d= -f2 | xargs)"
 check "--steps 1 says what it left out" 1 "$(grep -c '^  +1 failing steps not shown (--steps N)$' <<<"$actual")"
+actual=$(job 500 --steps 0)
+check "--steps 0: the job and its failed modules with their counts, no step line, no step text" "0 1 5 0 0 1 1" \
+	"$? $(grep -c '^job=500 ' <<<"$actual") $(grep -c '^module=.* result=failed' <<<"$actual") $(grep -c '^  step=\|^    \(text\|frame\|tags\|candidates\)=' <<<"$actual") $(grep -c 'source=openqa.example.org/tests/500/step/' <<<"$actual") $(grep -c '^  +2 failing steps not shown (--steps N)$' <<<"$actual") $(grep -c '^review: ' <<<"$actual")"
+check "--steps 0: the module lines are those of the digest" \
+	"$(job 500 | grep '^module=')" "$(grep '^module=' <<<"$actual")"
 
 # --- hostile content ------------------------------------------------------------
 check "no escape or control byte reaches the output" 0 "$(grep -c '[[:cntrl:]]' <<<"$(tr -d '\t' <<<"$raw")")"

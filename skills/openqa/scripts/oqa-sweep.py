@@ -24,9 +24,10 @@ from, parents lists dependency parents: for parallel_failed and skipped jobs
 triage the parent or sibling that failed, not this job. review=? means the
 comments were not read. Jobs that never ran because a parent failed
 (cancelled, skipped) are folded into one "victims" line per parent.
---test REGEX keeps the jobs whose test name it matches (re.search, case-sensitive),
-so one scenario's spread over flavors and arches needs no full listing; the header
-counters stay those of the whole build.
+--test REGEX keeps the jobs whose test name it matches (re.search, case-sensitive,
+the name without the @machine the overview may add), so one scenario's spread over
+flavors and arches needs no full listing; the header counters stay those of the
+whole build.
 
 --passed turns the list around: current passed and softfailed jobs of the
 build, either is a source to clone for a verification run; --module M keeps
@@ -252,10 +253,16 @@ def overview_jobs(client, group, entry, results, todo, pattern=None):
 
 
 def _of_test(jobs, pattern):
-    """The jobs whose test name --test matches; all of them without --test."""
+    """The jobs whose test name --test matches; all of them without --test. The overview
+    names a test on a machine other than the preferred one TEST@MACHINE, /api/v1 plain
+    TEST: the match is on TEST in both."""
     if pattern is None:
         return jobs
-    return [job for job in jobs if pattern.search(str(job["test"])[:MATCH_CHARS])]
+    return [
+        job
+        for job in jobs
+        if pattern.search(str(job["test"]).split("@", 1)[0][:MATCH_CHARS])
+    ]
 
 
 def _overview_job(scenario, leaf):
@@ -825,8 +832,9 @@ def main():
         "--test",
         type=test_regex,
         metavar="REGEX",
-        help="only jobs whose test name matches (a Python regex searched in it, "
-        "case-sensitive), e.g. '^ltp_syscalls' for one scenario across flavors and arches",
+        help="only jobs whose test name, without @machine, matches (a Python regex "
+        "searched in it, case-sensitive), e.g. '^ltp_syscalls$' for one scenario across "
+        "flavors and arches",
     )
     parser.add_argument(
         "--limit",

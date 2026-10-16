@@ -267,6 +267,24 @@ check "--errors: the other suite and kernel hits are counted, not shown; WARNING
 actual=$(log 4256 --errors --file serial_terminal.txt)
 check "--errors --file serial_terminal.txt: the same labels, one block" "1 1" \
 	"$(grep -c '^job=4256 .* mode=errors hits=suite:4,kernel:6 lines=23$' <<<"$actual") $(grep -c '^<<<UNTRUSTED' <<<"$actual")"
+actual=$(log 4257 --errors)
+check "--errors: a program's WARNING:, BUG: or bracketed time in serial_terminal.txt is no kernel hit; the hint stays" "1 1" \
+	"$(grep -c '^file=serial_terminal.txt mode=errors hits=- lines=9$' <<<"$actual") $(grep -c "^hint: only a 'Test died' line" <<<"$actual")"
+log 4257 --errors --file serial_terminal.txt --exit-code >/dev/null
+check "--errors --exit-code: program output alone in serial_terminal.txt is no hit (exit 0)" 0 $?
+actual=$(log 4258 --errors --file serial_terminal.txt)
+check "--errors: without a printk time only the kernel's own WARNING, BUG and Oops count; a real Oops after program output is shown" "0 $(
+	cat <<'EOF'
+job=4258 host=https://openqa.opensuse.org mode=errors hits=kernel:9 lines=14
+<<<UNTRUSTED NONCE source=openqa.opensuse.org/tests/4258/file/serial_terminal.txt>>>
+6 [kernel] Oops: 0000 [#1] PREEMPT SMP NOPTI
+7 [kernel] [   12.345678][  T812] BUG: Bad rss-counter state mm:0000000000000000 type:MM_ANONPAGES val:1
+8 [kernel] WARNING: CPU: 2 PID: 812 at mm/slub.c:4321 kmem_cache_free+0x1/0x2
+<<<END NONCE>>>
+note: first 3 hits per label shown, --grep for more
+requests: 1
+EOF
+)" "$? $actual"
 actual=$(log 4249 --file serial_terminal.txt --around-module bci_test_podman)
 check "--around-module: a file without module markers says so" "0 $(
 	cat <<'EOF'

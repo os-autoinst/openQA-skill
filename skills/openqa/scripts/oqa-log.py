@@ -243,8 +243,16 @@ SIGNATURES = (
 _OUTCOME = ("module", "signal", "stop", "result")
 
 SERIAL_TERMINAL = "serial_terminal.txt"
-# A kernel message starts the line, follows a printk time or caller id ("] "), or a journal's "kernel: ".
-_KERNEL = r"(?:^|\]\s|\bkernel:\s)\s*"
+# A kernel line has a printk time, maybe with a caller id ("[  T812]"), or a journal's "kernel: ".
+_KERNEL = r"(?:\[\s*\d+\.\d+\](?:\[\s*[TC]\d+\])?|\bkernel:)\s+"
+_OOPS = r"(?:Internal error: )?Oops(?::| - )"
+# Programs print "WARNING:" and "BUG:" too: a line without that prefix needs the kernel's own wording.
+_BARE_KERNEL = (
+    r"^\s*(?:WARNING: (?:CPU: \d+ PID: \d+|(?:at )?\S+\.(?:c|h|rs):\d+\b|at \S+, CPU#\d+)"
+    r"|BUG: (?:kernel NULL pointer|unable to handle|soft lockup|KASAN|KFENCE"
+    r"|scheduling while atomic|sleeping function|Bad page|workqueue lockup)"
+    rf"|{_OOPS})"
+)
 # What a suite or the kernel prints to the serial terminal, which autoinst-log.txt does not hold.
 SERIAL_SIGNATURES = (
     _signature(
@@ -253,11 +261,12 @@ SERIAL_SIGNATURES = (
     _signature(
         "kernel",
         [
-            _KERNEL + r"(?:WARNING:|BUG:|(?:Internal error: )?Oops(?::| - ))",
-            r"Transaction aborted",
+            _KERNEL + rf"(?:WARNING:|BUG:|{_OOPS})",
+            _BARE_KERNEL,
+            r"\bBTRFS\b[^\n]{0,100}?Transaction aborted",
         ],
     ),
-    _signature("kernel", [_KERNEL + r"Call Trace\b"], 4),
+    _signature("kernel", [rf"(?:^\s*|{_KERNEL})Call Trace\b"], 4),
     *SIGNATURES,
 )
 

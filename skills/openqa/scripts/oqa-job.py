@@ -26,6 +26,10 @@ How to read it:
   - A job with clone_id was restarted: its result is history, look at the newest job.
     Each clone chain member, and the newest on the SUPERSEDED line (started=), carries
     its start time in UTC, id:result@2030-01-02T03:04Z; one not started yet has none.
+  - A step text longer than 8 lines that holds verdict lines (TFAIL, TBROK, TWARN,
+    TCONF, "not ok", "Failures:", the diff of an xfstests .out.bad; for a died test its
+    message and the lines with failed, error or not found) shows those instead of its
+    head, then counts the other lines. kind=parser-result-failed: a parse_extra_log result.
   - parallel_failed and skipped jobs are victims. The culprit hint names the
     failed/incomplete/timeout_exceeded job of the cluster that finished first.
   - Steps after the "Failed" text step of a module belong to post_fail_hook
@@ -165,6 +169,14 @@ CARP_FRAME = re.compile(r"^\s+\S.* called at \S+ line \d+")
 DIED_COMMAND = re.compile(
     r"failed with code|command '.*?' (?:failed|timed out)|timed out", re.DOTALL
 )
+# Verdict lines of a step text too long to show whole: LTP, TAP/KTAP and xfstests
+# results, the .out.bad diff body (not its ---/+++ header), and for a died test its
+# message plus the lines that say what failed.
+SUITE_VERDICT = re.compile(
+    r"\b(?:TFAIL|TBROK|TWARN|TCONF)\b|^\s*(?:#\s*)?not ok\b|^\s*Failures:"
+)
+DIFF_LINE = re.compile(r"^\s*[-+](?![-+]{2}\s)")
+DIED_VERDICT = re.compile(r"failed|error|not found", re.IGNORECASE)
 # Anchored, so one backtracking pass: "\S+\Z" would be quadratic.
 UP_TO_LAST_SPACE = re.compile(r".*\s", re.DOTALL)
 
@@ -176,16 +188,40 @@ def toks(values, limit=80, most=12):
     return _oqa.toks(values, limit, most)
 
 
-def show_text(text, source, max_lines, max_bytes, indent=""):
-    """Short single-line text inline in quotes, anything else capped and fenced."""
+def verdicts(lines, died):
+    """Indexes of the lines that carry a verdict."""
+    diff = any(".out.bad" in line for line in lines)
+    return [
+        index
+        for index, line in enumerate(lines)
+        if SUITE_VERDICT.search(line)
+        or (diff and DIFF_LINE.match(line))
+        or (died and (index == 0 or DIED_VERDICT.search(line)))
+    ]
+
+
+def show_text(text, source, max_lines, max_bytes, indent="", died=None):
+    """Short single-line text inline in quotes, anything else capped and fenced.
+
+    died: None for a comment, else whether the step died; a step text longer than
+    max_lines shows its verdict lines, when it has any, instead of its head."""
     text = text.strip("\n")
     if "\n" not in text and len(text) <= INLINE:
         print(f"{indent}text={_oqa.quoted(text, INLINE)}")
         return
     lines = text.split("\n")
-    kept = "\n".join(lines[:max_lines])
-    if len(lines) > max_lines:
-        kept += f"\n[... {len(lines) - max_lines} more lines]"
+    long = died is not None and len(lines) > max_lines
+    picked = verdicts(lines, died) if long else []
+    if picked:
+        kept = "\n".join(lines[index] for index in picked[:max_lines])
+        more = len(picked) - max_lines
+        rest = f"{more} more verdict lines and " if more > 0 else ""
+        rest += f"{len(lines) - len(picked)} other lines"
+        kept += f"\n[verdict lines only; {rest} not shown]"
+    else:
+        kept = "\n".join(lines[:max_lines])
+        if len(lines) > max_lines:
+            kept += f"\n[... {len(lines) - max_lines} more lines]"
     kept = _oqa.sanitize(kept, max_line=300, max_bytes=max_bytes)
     print(_oqa.fence(kept, source), end="")
 
@@ -197,7 +233,16 @@ def reduce_details(obj):
         if obj["result"] not in BAD_STEPS:
             keys = ("num", "result", "title", "screenshot")
             return {key: obj.get(key) for key in keys if key == "title" or key in obj}
-        keys = ("num", "result", "title", "screenshot", "text", "tags", "needles")
+        keys = (
+            "num",
+            "result",
+            "title",
+            "screenshot",
+            "text",
+            "tags",
+            "needles",
+            "_source",
+        )
         step = {key: obj[key] for key in keys if key in obj}
         if isinstance(obj.get("text_data"), str):
             step["text_data"] = obj["text_data"][:TEXT_READ]
@@ -480,7 +525,8 @@ def step_kind(step):
         return "needle-mismatch"
     if step.get("result") == "softfail":
         return "soft-failure"
-    if step.get("result") == "failed":
+    # openQA marks a result of parse_extra_log with _source=parser; such a step may also read "fail".
+    if step.get("result") == "failed" or step.get("_source") == "parser":
         return "parser-result-failed"
     if title == "wait_serial":
         return "wait_serial-mismatch"
@@ -518,7 +564,8 @@ def step_shot(steps, step):
 
 def print_step(client, job_id, module, step, source, verbose, shot=None):
     number = step.get("num")
-    line = f"  step={tok(number, 10)} kind={step_kind(step)}"
+    kind = step_kind(step)
+    line = f"  step={tok(number, 10)} kind={kind}"
     title = step.get("title")
     if verbose or (title and title != "Failed"):
         line += f" title={_oqa.quoted(title, 60)}"
@@ -566,7 +613,9 @@ def print_step(client, job_id, module, step, source, verbose, shot=None):
         hidden = sum(1 for line in lines[trace:] if line.strip())
         text = "\n".join(lines[:trace])
     if text.strip("\n"):
-        show_text(text, f"{source}/step/{number}", HEAD_LINES, HEAD_BYTES, "    ")
+        # --verbose asked for the trace: verdict lines would leave it out.
+        died = None if verbose and trace is not None else kind.startswith("test-died")
+        show_text(text, f"{source}/step/{number}", HEAD_LINES, HEAD_BYTES, "    ", died)
     if frame:
         print(f"    frame={_oqa.quoted(frame, 200)}")
     if hidden:

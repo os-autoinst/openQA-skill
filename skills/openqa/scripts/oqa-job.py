@@ -43,8 +43,8 @@ How to read it:
     of a few hundred bytes is a blank screen.
   - --module NAME alone limits the module lines to that module, whatever its
     result, and says how many of its steps were not shown.
-  - ulogs[<module>]= are the uploaded logs of a failed module, named
-    <module>-<name>: oqa-log.py JOB --file ulogs/<module>-<name>.
+  - ulogs[<module>]= are the uploaded logs of a failed module by their file
+    names, <module>-<name>, as oqa-log.py JOB --file <module>-<name> reads them.
   - force_result_not_applied=<result>: a force_result label asks for a result
     the job does not have; openQA refused it or it was typed after the fact.
   - review state follows openQA: a comment with a bugref makes the job
@@ -634,12 +634,12 @@ def print_modules(client, job, max_steps, verbose, wanted=None):
                 f"  no failing step recorded: read the ulogs {tok(name, 60)}-* and serial0.txt"
             )
         own = [
-            str(ulog)[len(name) + 1 :]
+            str(ulog)
             for ulog in job.get("ulogs") or ()
             if str(ulog).startswith(f"{name}-")
         ]
         if own:
-            print(f"  ulogs[{tok(name, 80)}]={toks(own, 80, MAX_FILES[verbose])}")
+            print(f"  ulogs[{tok(name, 80)}]={toks(own, 160, MAX_FILES[verbose])}")
     if len(failed) > MAX_MODULES:
         print(f"+{len(failed) - MAX_MODULES} failed modules not shown")
     for module in soft[:MAX_MODULES]:

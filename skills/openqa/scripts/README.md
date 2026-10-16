@@ -130,7 +130,7 @@ comments. `--module NAME` alone keeps only that module's lines, whatever its res
         text="# Test died: command 'docker build ...' failed"
         frame="testapi::assert_script_run at tests/console/libssh.pm line 99"
       +130 post_fail_hook steps not shown
-      ulogs[libssh]=journal.txt,commands.tgz
+      ulogs[libssh]=libssh-journal.txt,libssh-commands.tgz
     logs=autoinst-log.txt,worker-log.txt,serial0.txt ulogs=16
     review: reviewed=yes bugrefs=poo#201672 comments=1
     comment=963649 by=reviewer_a class=carried-over created=2026-09-19T08:12 bugrefs=poo#201672 carried_over_from=5962127
@@ -141,9 +141,9 @@ restarted, newest=ID result=...`, `culprit=ID (...)` for victims, needle steps w
 `tags=` and `candidates=N best=name:91% (worst area each)`, `SUSPECT_BUGREF=` (module name parsed as bugref),
 `force_result_not_applied=<r>`, `; the hook died at step=N` after `post_fail_hook steps not shown` (the hook
 itself died: logs it would have uploaded may be missing; its message is the `post_fail_hook failed: ` line of
-`autoinst-log.txt`). `frame=`: first stack frame outside os-autoinst. `ulogs[<module>]=a,b`: that
-module's uploaded logs (`oqa-log.py --file ulogs/<module>-a`). `class=`: human, bot (first non-heading line),
-automated, carried-over.
+`autoinst-log.txt`). `frame=`: first stack frame outside os-autoinst. `ulogs[<module>]=<module>-a,<module>-b`:
+that module's uploaded logs by the file names `oqa-log.py --file` takes. `class=`: human, bot (first
+non-heading line), automated, carried-over.
 
 A failing step's line ends with its screenshot, `shot=<host>/tests/<id>/images/<screenshot>`; a step
 without one (a die message, `wait_serial`) has `last_shot=`, the newest screenshot before it in the module,

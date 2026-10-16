@@ -41,7 +41,7 @@ MODULE_HEAD = 8
 MODULE_AFTER = 3
 CUT_MARGIN = 2048  # longer than any credential a bounded redaction rule matches
 
-_FILE_NAME = re.compile(r"^(?:ulogs/)?[A-Za-z0-9_][A-Za-z0-9._+@=~-]*$")
+_FILE_NAME = re.compile(r"^(?:ulogs/)?[A-Za-z0-9_][A-Za-z0-9._+@=~#-]*$")
 # Anchored, so one backtracking pass: "\S+\Z" would be quadratic.
 _UP_TO_LAST_SPACE = re.compile(r".*\s", re.DOTALL)
 # Uploaded tar archives --members and --member may open (y2logs.tar.bz2, *.tar.xz, ...).

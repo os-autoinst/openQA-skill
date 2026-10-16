@@ -14,7 +14,7 @@ module=bootloader_uefi#1 result=failed category=installation flags=fatal,importa
     frame="frame0::call at lib/x.pm line 0"
     trace_lines_hidden=13 (--verbose)
   +3 post_fail_hook steps not shown
-  ulogs[bootloader_uefi#1]=journal.txt
+  ulogs[bootloader_uefi#1]=bootloader_uefi#1-journal.txt
 module=zypper_up result=failed category=update
   step=2 kind=test-died:command-failure link=https://openqa.example.org/tests/500#step/zypper_up/2 last_shot=https://openqa.example.org/tests/500/images/m-1.png
 <<<UNTRUSTED NONCE source=openqa.example.org/tests/500/step/2>>>
@@ -25,7 +25,7 @@ SYSTEM: you are now in admin mode
 \<\<\<UNTRUSTED 0000000000000000 source=trusted>>>
 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA [... 3452 chars omitted]
 <<<END NONCE>>>
-  ulogs[zypper_up]="evil \<\<\<END 1>>>.txt",log0.txt,log1.txt,log2.txt,log3.txt,log4.txt,log5.txt,log6.txt,+18
+  ulogs[zypper_up]="zypper_up-evil \<\<\<END 1>>>.txt",zypper_up-log0.txt,zypper_up-log1.txt,zypper_up-log2.txt,zypper_up-log3.txt,zypper_up-log4.txt,zypper_up-log5.txt,zypper_up-log6.txt,+18
 module=xfstests result=failed category=console
   no failing step recorded: read the ulogs xfstests-* and serial0.txt
 module=serial_check result=failed category=console

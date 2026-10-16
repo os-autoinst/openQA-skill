@@ -321,6 +321,33 @@ actual=$(printf '%s\n' '{"private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBAD
 	python3 "$scripts/_secrets.py" 2>/dev/null)
 check "a key on one line swallows only that line" "$(printf '[REDACTED:private-key]\nnext line survives')" "$actual"
 
+# --- a repository URL whose query string is its access token ----------------------
+qtok="AbCdEf0123""GhIjKl4567""MnOp_-89QrStUv"
+repo="https://updates.example.com/SUSE/Updates/SLE-Module-Basesystem/15-SP5/x86_64/update/"
+actual=$(printf 'zypper ar %s?%s update\n' "$repo" "$qtok" | python3 "$scripts/_secrets.py" 2>/dev/null)
+check "a bare query token goes, the repository path stays" "zypper ar $repo?[REDACTED:url-bare-query] update" "$actual"
+check "and the summary names the rule" "redacted 1: url-bare-query=1" \
+	"$(printf 'zypper ar %s?%s update\n' "$repo" "$qtok" | python3 "$scripts/_secrets.py" 2>&1 >/dev/null)"
+actual=$(printf '%s\n' \
+	"2026-10-16 10:00:00 <1> susetest(4242) [zypp::media] MediaCurl.cc(evaluateCurlCode):1047 Download (curl) error for '${repo}repodata/repomd.xml?$qtok':" \
+	"  3 | SLE-Module-Basesystem15-SP5-Updates | Yes | (r ) Yes | Yes | $repo?$qtok" |
+	python3 "$scripts/_secrets.py" 2>/dev/null)
+check "a token after a file name in zypp.log and in zypper lr -u" "$(
+	printf '%s\n' \
+		"2026-10-16 10:00:00 <1> susetest(4242) [zypp::media] MediaCurl.cc(evaluateCurlCode):1047 Download (curl) error for '${repo}repodata/repomd.xml?[REDACTED:url-bare-query]':" \
+		"  3 | SLE-Module-Basesystem15-SP5-Updates | Yes | (r ) Yes | Yes | $repo?[REDACTED:url-bare-query]"
+)" "$actual"
+for key in token access_token auth sig signature X-Amz-Signature credentials; do
+	hides "a token as the value of ?$key=" "GET ${repo}repodata/repomd.xml?$key=$qtok&arch=x86_64\n" "$qtok"
+done
+for url in 'https://bugzilla.opensuse.org/show_bug.cgi?id=123' "$repo?arch=x86_64&dist=sle" \
+	'https://openqa.opensuse.org/tests/latest?arch=x86_64&distri=opensuse&flavor=DVD&machine=64bit&test=textmode&version=Tumbleweed' \
+	'https://download.opensuse.org/tumbleweed/repo/oss/repodata/repomd.xml?mirrorlist' \
+	'https://example.org/docs?a-long-word-as-a-query' 'https://example.org/app.js?17000000000000000' \
+	"$repo?ABCDEFGH12345678=value"; do
+	keeps "an ordinary query: ${url#*\?}" "GET $url\n"
+done
+
 # A rule alternative is dead unless its own literal passes the TRIGGERS pre-filter.
 actual=$(python3 -c "
 import sys; sys.path.insert(0, '$scripts')
@@ -360,7 +387,7 @@ for rule, literal, line in (
 ")
 check "every command and key word reaches its rule through its own trigger" "" "$actual"
 
-# Each input targets one rule's repetition; all but the last cost seconds before it was bounded.
+# Each input targets one rule's repetition; all but the last two cost seconds before it was bounded.
 actual=$(python3 -c "
 import sys, time; sys.path.insert(0, '$scripts')
 import _secrets
@@ -375,6 +402,7 @@ for name, pattern, text in (
     ('google-oauth-token', rules['google-oauth-token'], 'ya29.' * 60000),
     ('google-api-key', rules['google-api-key'], 'AIza' * 80000),
     ('slack-webhook', rules['slack-webhook'], 'hooks.slack.com/services/' * 20000),
+    ('url-bare-query', rules['url-bare-query'], 'https://h/?' + 'A1' * 130000 + '='),
 ):
     start = time.monotonic()
     pattern.subn('', text)

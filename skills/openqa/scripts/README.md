@@ -87,7 +87,8 @@ request cap). The `@user/repo#branch` suffix every `TEST` shares is printed once
 Every third-party string the scripts print goes through it, stdout and stderr alike, so a
 credential-shaped value never reaches the transcript. `[REDACTED:<rule>]` marks what went;
 the diagnostic half is kept, so `https://alice:[REDACTED:url-userinfo]@host/` still names the
-account and the host. A per-rule count goes to stderr: treat it as "this job's artefacts held
+account and the host, and `.../update/?[REDACTED:url-bare-query]` the repository whose token
+was the whole query string. A per-rule count goes to stderr: treat it as "this job's artefacts held
 a credential", and say so. Error messages are covered too: every script's parser is
 `_sanitize.ArgumentParser`, whose errors (they quote argv) are redacted after their `repr()`
 escapes are decoded; any other error quotes an argument or path only once it is sanitised or

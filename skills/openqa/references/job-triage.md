@@ -47,9 +47,9 @@ Classes: PRODUCT, TEST (code, needle, schedule, settings), INFRA (worker, backen
 | `softfailed`: ok | referenced bugs still open and fitting? |
 | `kind=parser-result-failed`; a suite module failed with no `fail` step | suite-results.md "Where results live" |
 | `no candidate needle with tag(s) '<tags>' matched`; `assert_screen_change failed to detect a screen change`, `wait_still_screen timed out after <n>s!` (from `type_string`; `wait_still_screen` itself never dies), `Machine didn't shut down!` | "Needle mismatch" |
-| `command '<cmd>' failed`, `command '<cmd>' timed out`, `script failed with : `, `script timeout: `, `output not validating` | "Command failures" |
-| `fail` `wait_serial` step plus the test's own die text; `<message> - Serial error: <line>` | "Command failures" |
-| `<perl error> at <file> line <n>.`, `Could not retrieve required variable <VAR>`, `Maximum allowed test steps (MAX_TEST_STEPS=<n>) exceeded` | TEST; regression if the test log since last good touches that file |
+| `command '<cmd>' failed`, `command '<cmd>' timed out`, `script failed with : `, `script timeout: `, `output not validating`; a `fail` `wait_serial` step plus the test's own die text; `<message> - Serial error: <line>` | "Command failures" |
+| `<perl error> at <file> line <n>.`, `Could not retrieve required variable <VAR>` | TEST; regression if the test log since last good touches that file |
+| `Maximum allowed test steps (MAX_TEST_STEPS=<n>) exceeded` | TEST (loop); after hundreds of fast-failing modules, what fails them |
 | `barrier '<name>' timeout after <n> seconds`, `<ctx>: lock owner already finished`, `Failed to wait for children` | "Clusters" |
 
 ## Needle mismatch
@@ -90,7 +90,7 @@ Classes: PRODUCT, TEST (code, needle, schedule, settings), INFRA (worker, backen
 | `isotovideo died: Unable to clone Git repository "<url>" specified via CASEDIR ...` | git ref gone. TEST settings |
 | `died: terminated prematurely, ...`, `terminated prematurely: Encountered corrupted state file` | mostly INFRA (`No space left on device`); log tail, `worker-log.txt` |
 | `no test modules scheduled/uploaded` | empty schedule or early crash. TEST |
-| `scheduled for more than <n> days` | never ran (`cancelled`, no logs): unassigned for `max_job_scheduled_time` (7 days), usually as no worker offers its `WORKER_CLASS`, none is online or all are reserved -> openqa-model.md "Auth and roles". INFRA; TEST settings if the class is wrong |
+| `scheduled for more than <n> days` | never ran (`cancelled`, no logs) for `max_job_scheduled_time` (7 days): no online, free worker offers its `WORKER_CLASS` -> openqa-model.md "Auth and roles". INFRA; TEST settings if the class is wrong |
 
 - **Suffix ` [Auto-restarting because reason matches ...]`:** follow the clone. **` [Not restarting job despite ...]`:** persistent; ticket, not another restart -> openqa-model.md "Automatic restarts"
 - **`Result: done` does not mean passed:** isotovideo exited normally. Plain `failed` jobs have no `reason`.

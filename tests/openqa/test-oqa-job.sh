@@ -533,6 +533,30 @@ rm -rf "$tmp"
 check "no failing step: names the module's own ulogs and serial_terminal.txt when the job has them" \
 	"  no failing step recorded: read the ulogs suite_results-* and serial_terminal.txt and serial0.txt|  ulogs[suite_results]=suite_results-results.txt" \
 	"$(sed -n '/^module=suite_results /,/^logs=/p' <<<"$actual" | grep -E '^  (no failing|ulogs\[)' | paste -sd'|')"
+# hint_860 CASE: the no-failing-step lines of module suite_results, job 860 changed as CASE says
+hint_860() {
+	local dir
+	dir=$(mktemp -d)
+	cp "$fixtures"/api_v1_jobs_860_* "$dir"
+	python3 - "$dir" "$1" <<'PY'
+import json, sys
+path = f"{sys.argv[1]}/api_v1_jobs_860_details.json"
+data = json.load(open(path))
+if sys.argv[2] == "no-ulogs-field":
+    del data["job"]["ulogs"]
+else:
+    data["job"]["logs"].append("serial_terminal.txt")
+    data["job"]["ulogs"] = ["service_check-results.txt"]
+json.dump(data, open(path, "w"))
+PY
+	python3 "$script" --host https://openqa.example.org --fixture-dir "$dir" 860 |
+		sed -n '/^module=suite_results /,/^logs=/p' | grep -E '^  (no failing|ulogs\[)' | paste -sd'|'
+	rm -rf "$dir"
+}
+check "no failing step, an answer without a ulogs field: the module's ulogs may exist, so they are named" \
+	"  no failing step recorded: read the ulogs suite_results-* and serial0.txt" "$(hint_860 no-ulogs-field)"
+check "no failing step, ulogs only of another module: serial_terminal.txt and serial0.txt, no ulogs" \
+	"  no failing step recorded: read serial_terminal.txt and serial0.txt" "$(hint_860 other-ulogs)"
 
 # --- investigation comments that name their mode ----------------------------------
 tmp=$(mktemp -d)

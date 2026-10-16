@@ -23,7 +23,7 @@ One line per script, generated from the parsers: do not edit it by hand. What a 
 - `oqa-comment-lint.py [FILE] [--text TEXT] [--private-suffix SUFFIX]...`; exit 1: at least one warning
 - `oqa-history.py JOB [--previous N] [--before TIME] [--investigation] [--max-items N] [--exit-code] [--verbose]`
 - `oqa-job.py JOB [--settings REGEX] [--steps N] [--module NAME] [--all-steps] [--exit-code] [--verbose]`
-- `oqa-log.py JOB [--file NAME] (--list | --tail N | --grep REGEX | --errors | --around-module MODULE | --runtimes | --members) [--member PATH] [--compare JOB] [--context N] [--max-matches N] [--ignore-case] [--max-lines N] [--max-line-chars N] [--max-bytes BYTES] [--verbose] [--exit-code]`
+- `oqa-log.py JOB [--file NAME] [--list | --tail N | --grep REGEX | --errors | --runtimes | --members] [--around-module MODULE] [--member PATH] [--compare JOB] [--context N] [--max-matches N] [--ignore-case] [--max-lines N] [--max-line-chars N] [--max-bytes BYTES] [--verbose] [--exit-code]`
 - `oqa-ref.py REF [--body] [--files] [--notes N]`
 - `oqa-sweep.py [--group ID]... [--build BUILD] [--todo] [--include-softfailed] [--limit N] [--no-llm] [--passed] [--module NAME] [--groups] [--match REGEX] [--uses-schedule PATH] [--vr-build LABEL] [--test-git-hash SHA] [--exit-code]`
 - `pr-queue.py [--repo O/R] [--newest N] [--me LOGIN]`
@@ -163,6 +163,7 @@ the screen it failed on. The same step of a good run: `--module NAME --all-steps
 Logs are MBs; grepping `error|failed` drowns in `timeout=` noise.
 
     oqa-log.py JOB [--file NAME] --list | --errors | --around-module M | --grep REGEX | --tail N
+    oqa-log.py JOB --grep REGEX --around-module M    # matches inside one module's span only
     oqa-log.py JOB --runtimes [--compare JOB]
     oqa-log.py JOB --file ulogs/<name>.tar.xz (--members | --member PATH --grep REGEX|--tail N|--errors)
 
@@ -179,7 +180,10 @@ into one `~` line: counts, first..last time. `--errors` with only a `Test died` 
 most `--max-lines` lines (60, the `--` between distant matches included), cutting from the end, so the
 first matches stay. When fewer matches are printed than found, the header says so and names the cap
 that cut them: `mode=grep matches=37 (shown 10 of 37; --max-matches N)`; raising `--max-lines` alone
-prints no further match. `--grep` (like `--match` of oqa-sweep.py) compiles the pattern as given: a nested quantifier such as
+prints no further match. With `--around-module M` the matches and their context come from that module's
+last run only, `starting` to `finished` marker, and the header gains `span=`. One mode is required;
+`--around-module` is the one that also goes with another, `--grep`. `--grep` (like `--match` of
+oqa-sweep.py) compiles the pattern as given: a nested quantifier such as
 `(a+)+b` can hang on a single line, the same way `grep -E` would, and the script cannot time it out.
 Prefer anchored patterns without nested quantifiers. Names from `--list` go to `--file`, which validates
 them; do not paste one into a shell.

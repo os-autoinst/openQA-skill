@@ -1,0 +1,506 @@
+[!p]104\[0m[?7h[1G[0J[6n[32766;32766H[6n[!p]104\[0m[?7h[1G[0J[6n[32766;32766H[6n]3008;start=4dbcbd04423b45abb3752c0b6448b1c3;user=root;hostname=susetest;machineid=c7c0c40d364447af89e46102e48ec7e0;bootid=c3b9d6b960694835a9f47230b0e69789;pid=1064;pidfdid=1065;comm=(agetty);servicename=serial-getty@hvc0.service;invocationid=6a67f089e2884e2495f1ee2a5a1b4632;type=service\P+q6E616D65\
+
+Welcome to openSUSE Tumbleweed 20260426 - Kernel 6.19.12-1-default (hvc0).
+
+ens4: 10.0.2.15
+
+
+
+susetest login: 
+
+susetest login: root
+
+Password: 
+]3008;start=b812a187637c4d2ca3e1b6d7652aa174;user=root;hostname=susetest;machineid=c7c0c40d364447af89e46102e48ec7e0;bootid=c3b9d6b960694835a9f47230b0e69789;pid=1064;pidfdid=1065;comm=login;targetuser=root;sessionid=1;type=session\Last login: Mon Apr 27 21:04:11 EDT 2026 on tty6
+Have a lot of fun...
+[1msusetest:~ #[m(B export PAGER=cat TERM=dumb; stty cols 2048; exec $SHELL
+susetest:~ # PS1="# "
+# export TERM=dumb; echo Gi8yV-$?-
+Gi8yV-0-
+# echo Logged into $(tty); echo 1XrKo-$?-
+Logged into /dev/hvc0
+1XrKo-0-
+# systemctl --no-pager disable firewalld; echo fo51w-$?-
+Removed '/etc/systemd/system/multi-user.target.wants/firewalld.service'.
+Removed '/etc/systemd/system/dbus-org.fedoraproject.FirewallD1.service'.
+fo51w-0-
+# systemctl --no-pager stop firewalld; echo 32hWT-$?-
+32hWT-0-
+# cat > /tmp/scriptQF9Xl.sh << 'EOT_QF9Xl'; echo QF9Xl-$?-
+> mount
+> EOT_QF9Xl
+QF9Xl-0-
+# echo QF9Xl; bash -oe pipefail /tmp/scriptQF9Xl.sh ; echo SCRIPT_FINISHEDQF9Xl-$?-
+QF9Xl
+/dev/vda2 on / type btrfs (rw,relatime,seclabel,discard=async,space_cache=v2,subvolid=266,subvol=/@/.snapshots/1/snapshot)
+devtmpfs on /dev type devtmpfs (rw,nosuid,seclabel,size=1984660k,nr_inodes=496165,mode=755,inode64)
+tmpfs on /dev/shm type tmpfs (rw,nosuid,nodev,seclabel,inode64,usrquota)
+devpts on /dev/pts type devpts (rw,nosuid,noexec,relatime,seclabel,gid=5,mode=600,ptmxmode=000)
+sysfs on /sys type sysfs (rw,nosuid,nodev,noexec,relatime,seclabel)
+securityfs on /sys/kernel/security type securityfs (rw,nosuid,nodev,noexec,relatime)
+cgroup2 on /sys/fs/cgroup type cgroup2 (rw,nosuid,nodev,noexec,relatime,seclabel,nsdelegate,memory_recursiveprot,memory_hugetlb_accounting)
+none on /sys/fs/pstore type pstore (rw,nosuid,nodev,noexec,relatime,seclabel)
+bpf on /sys/fs/bpf type bpf (rw,nosuid,nodev,noexec,relatime,mode=700)
+configfs on /sys/kernel/config type configfs (rw,nosuid,nodev,noexec,relatime)
+proc on /proc type proc (rw,nosuid,nodev,noexec,relatime)
+tmpfs on /run type tmpfs (rw,nosuid,nodev,seclabel,size=802068k,nr_inodes=819200,mode=755,inode64)
+selinuxfs on /sys/fs/selinux type selinuxfs (rw,nosuid,noexec,relatime)
+systemd-1 on /proc/sys/fs/binfmt_misc type autofs (rw,relatime,fd=39,pgrp=1,timeout=0,minproto=5,maxproto=5,direct,pipe_ino=5322)
+hugetlbfs on /dev/hugepages type hugetlbfs (rw,nosuid,nodev,relatime,seclabel,pagesize=2M)
+debugfs on /sys/kernel/debug type debugfs (rw,nosuid,nodev,noexec,relatime,seclabel)
+tracefs on /sys/kernel/tracing type tracefs (rw,nosuid,nodev,noexec,relatime,seclabel)
+mqueue on /dev/mqueue type mqueue (rw,nosuid,nodev,noexec,relatime,seclabel)
+fusectl on /sys/fs/fuse/connections type fusectl (rw,nosuid,nodev,noexec,relatime)
+none on /run/credentials/systemd-journald.service type tmpfs (ro,nosuid,nodev,noexec,relatime,nosymfollow,seclabel,size=1024k,nr_inodes=1024,mode=700,inode64,noswap)
+/dev/vda2 on /.snapshots type btrfs (rw,relatime,seclabel,discard=async,space_cache=v2,subvolid=265,subvol=/@/.snapshots)
+/dev/vda2 on /boot/grub2/i386-pc type btrfs (rw,relatime,seclabel,discard=async,space_cache=v2,subvolid=264,subvol=/@/boot/grub2/i386-pc)
+/dev/vda2 on /boot/grub2/x86_64-efi type btrfs (rw,relatime,seclabel,discard=async,space_cache=v2,subvolid=263,subvol=/@/boot/grub2/x86_64-efi)
+/dev/vda2 on /home type btrfs (rw,relatime,seclabel,discard=async,space_cache=v2,subvolid=262,subvol=/@/home)
+/dev/vda2 on /root type btrfs (rw,relatime,seclabel,discard=async,space_cache=v2,subvolid=260,subvol=/@/root)
+/dev/vda2 on /opt type btrfs (rw,relatime,seclabel,discard=async,space_cache=v2,subvolid=261,subvol=/@/opt)
+/dev/vda2 on /srv type btrfs (rw,relatime,seclabel,discard=async,space_cache=v2,subvolid=259,subvol=/@/srv)
+tmpfs on /tmp type tmpfs (rw,nosuid,nodev,seclabel,size=2005172k,nr_inodes=1048576,inode64,usrquota)
+/dev/vda2 on /usr/local type btrfs (rw,relatime,seclabel,discard=async,space_cache=v2,subvolid=258,subvol=/@/usr/local)
+/dev/vda2 on /var type btrfs (rw,relatime,seclabel,discard=async,space_cache=v2,subvolid=257,subvol=/@/var)
+binfmt_misc on /proc/sys/fs/binfmt_misc type binfmt_misc (rw,nosuid,nodev,noexec,relatime)
+none on /run/credentials/getty@tty1.service type tmpfs (ro,nosuid,nodev,noexec,relatime,nosymfollow,seclabel,size=1024k,nr_inodes=1024,mode=700,inode64,noswap)
+none on /run/credentials/serial-getty@ttyS0.service type tmpfs (ro,nosuid,nodev,noexec,relatime,nosymfollow,seclabel,size=1024k,nr_inodes=1024,mode=700,inode64,noswap)
+none on /run/credentials/serial-getty@hvc0.service type tmpfs (ro,nosuid,nodev,noexec,relatime,nosymfollow,seclabel,size=1024k,nr_inodes=1024,mode=700,inode64,noswap)
+none on /run/credentials/serial-getty@hvc1.service type tmpfs (ro,nosuid,nodev,noexec,relatime,nosymfollow,seclabel,size=1024k,nr_inodes=1024,mode=700,inode64,noswap)
+tmpfs on /run/user/0 type tmpfs (rw,nosuid,nodev,relatime,seclabel,size=401032k,nr_inodes=100258,mode=700,inode64)
+SCRIPT_FINISHEDQF9Xl-0-
+# cat > /tmp/scripttCtSh.sh << 'EOT_tCtSh'; echo tCtSh-$?-
+> df -h / | awk 'NR==2 {print $2}'
+> EOT_tCtSh
+tCtSh-0-
+# echo tCtSh; bash -oe pipefail /tmp/scripttCtSh.sh ; echo SCRIPT_FINISHEDtCtSh-$?-
+tCtSh
+98G
+SCRIPT_FINISHEDtCtSh-0-
+# cat > /tmp/scriptNsEsr.sh << 'EOT_NsEsr'; echo NsEsr-$?-
+> cat /opt/version.log
+> EOT_NsEsr
+NsEsr-0-
+# echo NsEsr; bash -oe pipefail /tmp/scriptNsEsr.sh ; echo SCRIPT_FINISHEDNsEsr-$?-
+NsEsr
+coreutils-9.11-1.1.x86_64
+xfsprogs-6.19.0-1.2.x86_64
+e2fsprogs-1.47.3-1.3.x86_64
+btrfsprogs-6.19-1.3.x86_64
+kernel-default-6.19.12-1.1.x86_64
+xfsdump-3.2.0-1.2.x86_64
+fio-3.41-1.2.x86_64
+xfstests-20260317.57d71a88-1.1.x86_64
+6.19.12-1-default
+Name        : kernel-default
+Version     : 6.19.12
+Release     : 1.1
+Architecture: x86_64
+Install Date: Mon 27 Apr 2026 08:46:16 PM EDT
+Group       : System/Kernel
+Size        : 291793673
+License     : GPL-2.0-only
+Signature   : RSA/SHA512, Wed 15 Apr 2026 11:36:22 AM EDT, Key ID 35a2f86e29b700a4
+Source RPM  : kernel-default-6.19.12-1.1.nosrc.rpm
+Build Date  : Sun 12 Apr 2026 01:36:53 PM EDT
+Build Host  : reproducible
+Packager    : https://bugs.opensuse.org
+Vendor      : openSUSE
+URL         : https://www.kernel.org/
+Summary     : The Standard Kernel
+Description :
+The standard kernel for both uniprocessor and multiprocessor systems.
+
+
+Source Timestamp: 2026-04-12 17:36:53 +0000
+GIT Revision: c7234f7435aefeda97031bd56ce6912c3fe2a3ce
+GIT Branch: stable
+Distribution: openSUSE Tumbleweed
+SCRIPT_FINISHEDNsEsr-0-
+# cat > /tmp/scriptptrIq.sh << 'EOT_ptrIq'; echo ptrIq-$?-
+> cat /boot/config-$(uname -r)
+> EOT_ptrIq
+ptrIq-0-
+# echo ptrIq; bash -oe pipefail /tmp/scriptptrIq.sh ; echo SCRIPT_FINISHEDptrIq-$?-
+ptrIq
+#
+# Automatically generated file; DO NOT EDIT.
+# Linux/x86 6.19.12 Kernel Configuration
+#
+[... kernel config cut from the saved fixture ...]
+CONFIG_NETWORK_FILESYSTEMS=y
+CONFIG_NFS_FS=m
+CONFIG_NFS_V2=m
+CONFIG_NFS_V3=m
+CONFIG_NFS_V3_ACL=y
+CONFIG_NFS_V4=m
+CONFIG_NFS_SWAP=y
+CONFIG_NFS_V4_1=y
+CONFIG_NFS_V4_2=y
+CONFIG_PNFS_FILE_LAYOUT=m
+CONFIG_PNFS_BLOCK=m
+CONFIG_PNFS_FLEXFILE_LAYOUT=m
+CONFIG_NFS_V4_1_IMPLEMENTATION_ID_DOMAIN="kernel.org"
+# CONFIG_NFS_V4_1_MIGRATION is not set
+CONFIG_NFS_V4_SECURITY_LABEL=y
+CONFIG_NFS_FSCACHE=y
+# CONFIG_NFS_USE_LEGACY_DNS is not set
+CONFIG_NFS_USE_KERNEL_DNS=y
+CONFIG_NFS_DEBUG=y
+# CONFIG_NFS_DISABLE_UDP_SUPPORT is not set
+CONFIG_NFS_V4_2_READ_PLUS=y
+CONFIG_NFSD=m
+# CONFIG_NFSD_V2 is not set
+CONFIG_NFSD_V3_ACL=y
+CONFIG_NFSD_V4=y
+CONFIG_NFSD_PNFS=y
+CONFIG_NFSD_BLOCKLAYOUT=y
+CONFIG_NFSD_SCSILAYOUT=y
+CONFIG_NFSD_FLEXFILELAYOUT=y
+CONFIG_NFSD_V4_2_INTER_SSC=y
+CONFIG_NFSD_V4_SECURITY_LABEL=y
+# CONFIG_NFSD_LEGACY_CLIENT_TRACKING is not set
+# CONFIG_NFSD_V4_DELEG_TIMESTAMPS is not set
+CONFIG_GRACE_PERIOD=m
+CONFIG_LOCKD=m
+CONFIG_LOCKD_V4=y
+CONFIG_NFS_ACL_SUPPORT=m
+CONFIG_NFS_COMMON=y
+# CONFIG_NFS_LOCALIO is not set
+CONFIG_NFS_V4_2_SSC_HELPER=y
+[... kernel config cut from the saved fixture ...]
+SCRIPT_FINISHEDptrIq-0-
+# zypper -n in nfs-client nfs-kernel-server nfs4-acl-tools | cat; ( exit ${PIPESTATUS[0]} ); echo 3ztcQ-$?-
+Loading repository data...
+Reading installed packages...
+'nfs-client' is already installed.
+No update candidate for 'nfs-client-2.8.6-52.2.x86_64'. The highest available version is already installed.
+Resolving package dependencies...
+
+The following 2 NEW packages are going to be installed:
+  nfs4-acl-tools nfs-kernel-server
+
+2 new packages to install.
+
+Package download size:   223.1 KiB
+
+Package install size change:
+              |     566.5 KiB  required by packages that will be installed
+   566.5 KiB  |  -      0 B    released by packages that will be removed
+
+Backend:  classic_rpmtrans
+Continue? [y/n/v/...? shows all options] (y): y
+Preloading Packages [..
+Preloading: nfs-kernel-server-2.8.6-52.2.x86_64.rpm [done]
+.
+Preloading: nfs4-acl-tools-0.4.2-1.2.x86_64.rpm [done]
+.done]
+Retrieving: nfs-kernel-server-2.8.6-52.2.x86_64 (OSS) (1/2), 176.0 KiB    
+Retrieving: nfs4-acl-tools-0.4.2-1.2.x86_64 (OSS) (2/2),  47.2 KiB    
+
+Checking for file conflicts: [....done]
+(1/2) Installing: nfs-kernel-server-2.8.6-52.2.x86_64 [..done]
+(2/2) Installing: nfs4-acl-tools-0.4.2-1.2.x86_64 [..done]
+Running post-transaction scripts [.....done]
+3ztcQ-0-
+# mkdir -p /opt/export/test /opt/export/scratch /opt/nfs/test /opt/nfs/scratch && chown nobody:nogroup /opt/export/test /opt/export/scratch && echo '/opt/export/test *(rw,no_subtree_check,no_root_squash,fsid=1)' >> /etc/exports && echo '/opt/export/scratch *(rw,no_subtree_check,no_root_squash,fsid=2)' >> /etc/exports; echo aflzF-$?-
+aflzF-0-
+# echo 'options lockd nlm_grace_period=15' >> /etc/modprobe.d/lockd.conf && echo 'options lockd nlm_timeout=5' >> /etc/modprobe.d/lockd.conf; echo ALveg-$?-
+ALveg-0-
+# sed -i 's/NFSV4LEASETIME=""/NFSV4LEASETIME="15"/' /etc/sysconfig/nfs; echo 7RdG2-$?-
+7RdG2-0-
+# curl -v -o /etc/nfs.conf http://10.0.2.2:20573/xxxxxxxxxxxxxxxx/files//etc/nfs.conf; echo i8ccC-$?-
+  % Total    % Received % Xferd  Average Speed  Time    Time    Time   Current
+                                 Dload  Upload  Total   Spent   Left   Speed
+
+  0      0   0      0   0      0      0      0                              0*   Trying 10.0.2.2:20573...
+* Established connection to 10.0.2.2 (10.0.2.2 port 20573) from 10.0.2.15 port 46704 
+* using HTTP/1.x
+> GET /xxxxxxxxxxxxxxxx/files//etc/nfs.conf HTTP/1.1
+
+> Host: 10.0.2.2:20573
+
+> User-Agent: curl/8.19.0
+
+> Accept: */*
+
+> 
+
+* Request completely sent off
+< HTTP/1.1 200 OK
+
+< Accept-Ranges: bytes
+
+< Content-Length: 35
+
+< Content-Type: application/octet-stream
+
+< Date: Tue, 28 Apr 2026 01:10:48 GMT
+
+< ETag: "c8fb7d5068ed239a74d03d8cffceab91"
+
+< Last-Modified: Tue, 28 Apr 2026 01:10:48 GMT
+
+< Server: Mojolicious (Perl)
+
+< 
+
+{ [35 bytes data]
+
+100     35 100     35   0      0   2437      0                              0
+100     35 100     35   0      0   2121      0                              0
+100     35 100     35   0      0   1868      0                              0
+* Connection #0 to host 10.0.2.2:20573 left intact
+i8ccC-0-
+# exportfs -a && systemctl restart rpcbind && systemctl enable nfs-server.service && systemctl restart nfs-server; echo QSnH1-$?-
+Created symlink '/etc/systemd/system/multi-user.target.wants/nfs-server.service' → '/usr/lib/systemd/system/nfs-server.service'.
+QSnH1-0-
+# cat > /tmp/scriptBdZ7g.sh << 'EOT_BdZ7g'; echo BdZ7g-$?-
+> cat /proc/fs/nfsd/nfsv4gracetime;
+> EOT_BdZ7g
+BdZ7g-0-
+# echo BdZ7g; bash -oe pipefail /tmp/scriptBdZ7g.sh ; echo SCRIPT_FINISHEDBdZ7g-$?-
+BdZ7g
+15
+SCRIPT_FINISHEDBdZ7g-0-
+# echo export KEEP_DMESG=yes >> /opt/xfstests/local.config; echo WtzLp-$?-
+WtzLp-0-
+# echo export TEST_DEV=localhost:/opt/export/test >> /opt/xfstests/local.config; echo HBmFi-$?-
+HBmFi-0-
+# echo export TEST_DIR=/opt/nfs/test >> /opt/xfstests/local.config; echo 8BCJv-$?-
+8BCJv-0-
+# echo export SCRATCH_DEV=localhost:/opt/export/scratch >> /opt/xfstests/local.config; echo _1ztN-$?-
+_1ztN-0-
+# echo export SCRATCH_MNT=/opt/nfs/scratch >> /opt/xfstests/local.config; echo yXRWl-$?-
+yXRWl-0-
+# echo export FSTYP=nfs >> /opt/xfstests/local.config; echo J1Dc1-$?-
+J1Dc1-0-
+# echo export NFS_MOUNT_OPTIONS='"-o rw,relatime,vers=4.0"' >> /opt/xfstests/local.config; echo HMRLW-$?-
+HMRLW-0-
+# cat > /tmp/script~vNE1.sh << 'EOT_~vNE1'; echo ~vNE1-$?-
+> cat /opt/xfstests/local.config
+> EOT_~vNE1
+~vNE1-0-
+# echo ~vNE1; bash -oe pipefail /tmp/script~vNE1.sh ; echo SCRIPT_FINISHED~vNE1-$?-
+~vNE1
+export KEEP_DMESG=yes
+export TEST_DEV=localhost:/opt/export/test
+export TEST_DIR=/opt/nfs/test
+export SCRATCH_DEV=localhost:/opt/export/scratch
+export SCRATCH_MNT=/opt/nfs/scratch
+export FSTYP=nfs
+export NFS_MOUNT_OPTIONS="-o rw,relatime,vers=4.0"
+SCRIPT_FINISHED~vNE1-0-
+# echo generic/001 > /dev/ttyS0
+# timeout -k 3 1995 /opt/wrapper.sh 'generic/001' -nfs   | tee /opt/log/generic/001; echo ${PIPESTATUS[0]} > /opt/log/subtest_result_num; echo 0BWIF-$?-
+[Wrapper] Starting cleanup for generic/001...
+FSTYP         -- nfs
+PLATFORM      -- Linux/x86_64 susetest 6.19.12-1-default #1 SMP PREEMPT_DYNAMIC Sun Apr 12 17:36:53 UTC 2026 (c7234f7)
+MKFS_OPTIONS  -- localhost:/opt/export/scratch
+MOUNT_OPTIONS -- -o rw,relatime,vers=4.0 -o context=system_u:object_r:root_t:s0 localhost:/opt/export/scratch /opt/nfs/scratch
+
+generic/001        QA output created by 001
+cleanup
+setup ....................................
+iter 1 chain ... check ....................................
+iter 2 chain ... check ....................................
+iter 3 chain ... check ....................................
+iter 4 chain ... check ....................................
+iter 5 chain ... check ....................................
+cleanup
+ 5s
+Ran: generic/001
+Passed all 1 tests
+
+0BWIF-0-
+# cat > /tmp/scriptm833Z.sh << 'EOT_m833Z'; echo m833Z-$?-
+> tail -n 1 /opt/log/subtest_result_num
+> EOT_m833Z
+m833Z-0-
+# echo m833Z; bash -oe pipefail /tmp/scriptm833Z.sh ; echo SCRIPT_FINISHEDm833Z-$?-
+m833Z
+0
+SCRIPT_FINISHEDm833Z-0-
+# cat > /tmp/scriptUjsmd.sh << 'EOT_Ujsmd'; echo Ujsmd-$?-
+> echo 'generic-001 ... ... PASSED (5s)' | tee -a /opt/status.log
+> EOT_Ujsmd
+Ujsmd-0-
+# echo Ujsmd; bash -oe pipefail /tmp/scriptUjsmd.sh ; echo SCRIPT_FINISHEDUjsmd-$?-
+Ujsmd
+generic-001 ... ... PASSED (5s)
+SCRIPT_FINISHEDUjsmd-0-
+# cat > /tmp/scriptSmA1s.sh << 'EOT_SmA1s'; echo SmA1s-$?-
+> cat /opt/log/subtest_result_num
+> EOT_SmA1s
+SmA1s-0-
+# echo SmA1s; bash -oe pipefail /tmp/scriptSmA1s.sh ; echo SCRIPT_FINISHEDSmA1s-$?-
+SmA1s
+0
+SCRIPT_FINISHEDSmA1s-0-
+# cat > /tmp/scriptFfzVP.sh << 'EOT_FfzVP'; echo FfzVP-$?-
+> if [ -f /opt/log/generic/001 ]; then tail -n 200 /opt/log/generic/001 | sed "s/'//g" | tr -cd '\11\12\15\40-\176'; else echo 'No log in test path, find log in serial0.txt'; fi
+> EOT_FfzVP
+FfzVP-0-
+# echo FfzVP; bash -oe pipefail /tmp/scriptFfzVP.sh ; echo SCRIPT_FINISHEDFfzVP-$?-
+FfzVP
+[Wrapper] Starting cleanup for generic/001...
+FSTYP         -- nfs
+PLATFORM      -- Linux/x86_64 susetest 6.19.12-1-default #1 SMP PREEMPT_DYNAMIC Sun Apr 12 17:36:53 UTC 2026 (c7234f7)
+MKFS_OPTIONS  -- localhost:/opt/export/scratch
+MOUNT_OPTIONS -- -o rw,relatime,vers=4.0 -o context=system_u:object_r:root_t:s0 localhost:/opt/export/scratch /opt/nfs/scratch
+
+generic/001        QA output created by 001
+cleanup
+setup ....................................
+iter 1 chain ... check ....................................
+iter 2 chain ... check ....................................
+iter 3 chain ... check ....................................
+iter 4 chain ... check ....................................
+iter 5 chain ... check ....................................
+cleanup
+ 5s
+Ran: generic/001
+Passed all 1 tests
+
+SCRIPT_FINISHEDFfzVP-0-
+# umount /dev/vda2 &> /dev/null; echo sPtbE-$?-
+sPtbE-32-
+# cat > /tmp/scriptX6yxj.sh << 'EOT_X6yxj'; echo X6yxj-$?-
+> uname -r
+> EOT_X6yxj
+X6yxj-0-
+# echo X6yxj; bash -oe pipefail /tmp/scriptX6yxj.sh ; echo SCRIPT_FINISHEDX6yxj-$?-
+X6yxj
+6.19.12-1-default
+SCRIPT_FINISHEDX6yxj-0-
+# cat > /tmp/scriptzKaE7.sh << 'EOT_zKaE7'; echo zKaE7-$?-
+> rpm -q glibc
+> EOT_zKaE7
+zKaE7-0-
+# echo zKaE7; bash -oe pipefail /tmp/scriptzKaE7.sh ; echo SCRIPT_FINISHEDzKaE7-$?-
+zKaE7
+glibc-2.42-3.3.x86_64
+SCRIPT_FINISHEDzKaE7-0-
+# cat > /tmp/script_kEzC.sh << 'EOT__kEzC'; echo _kEzC-$?-
+> rpm -q xfstests
+> EOT__kEzC
+_kEzC-0-
+# echo _kEzC; bash -oe pipefail /tmp/script_kEzC.sh ; echo SCRIPT_FINISHED_kEzC-$?-
+_kEzC
+xfstests-20260317.57d71a88-1.1.x86_64
+SCRIPT_FINISHED_kEzC-0-
+# echo generic/002 > /dev/ttyS0
+# timeout -k 3 1995 /opt/wrapper.sh 'generic/002' -nfs   | tee /opt/log/generic/002; echo ${PIPESTATUS[0]} > /opt/log/subtest_result_num; echo BMVWQ-$?-
+[Wrapper] Starting cleanup for generic/002...
+FSTYP         -- nfs
+PLATFORM      -- Linux/x86_64 susetest 6.19.12-1-default #1 SMP PREEMPT_DYNAMIC Sun Apr 12 17:36:53 UTC 2026 (c7234f7)
+MKFS_OPTIONS  -- localhost:/opt/export/scratch
+MOUNT_OPTIONS -- -o rw,relatime,vers=4.0 -o context=system_u:object_r:root_t:s0 localhost:/opt/export/scratch /opt/nfs/scratch
+
+generic/002        QA output created by 002
+Silence is goodness ...
+ 0s
+Ran: generic/002
+Passed all 1 tests
+
+BMVWQ-0-
+# cat > /tmp/scriptm833Z.sh << 'EOT_m833Z'; echo m833Z-$?-
+> tail -n 1 /opt/log/subtest_result_num
+> EOT_m833Z
+m833Z-0-
+# echo m833Z; bash -oe pipefail /tmp/scriptm833Z.sh ; echo SCRIPT_FINISHEDm833Z-$?-
+m833Z
+0
+SCRIPT_FINISHEDm833Z-0-
+# cat > /tmp/scriptIFyqX.sh << 'EOT_IFyqX'; echo IFyqX-$?-
+> echo 'generic-002 ... ... PASSED (1s)' | tee -a /opt/status.log
+> EOT_IFyqX
+IFyqX-0-
+# echo IFyqX; bash -oe pipefail /tmp/scriptIFyqX.sh ; echo SCRIPT_FINISHEDIFyqX-$?-
+IFyqX
+generic-002 ... ... PASSED (1s)
+SCRIPT_FINISHEDIFyqX-0-
+# cat > /tmp/scriptSmA1s.sh << 'EOT_SmA1s'; echo SmA1s-$?-
+> cat /opt/log/subtest_result_num
+> EOT_SmA1s
+SmA1s-0-
+# echo SmA1s; bash -oe pipefail /tmp/scriptSmA1s.sh ; echo SCRIPT_FINISHEDSmA1s-$?-
+SmA1s
+0
+SCRIPT_FINISHEDSmA1s-0-
+# cat > /tmp/scriptKdC_s.sh << 'EOT_KdC_s'; echo KdC_s-$?-
+> if [ -f /opt/log/generic/002 ]; then tail -n 200 /opt/log/generic/002 | sed "s/'//g" | tr -cd '\11\12\15\40-\176'; else echo 'No log in test path, find log in serial0.txt'; fi
+> EOT_KdC_s
+KdC_s-0-
+# echo KdC_s; bash -oe pipefail /tmp/scriptKdC_s.sh ; echo SCRIPT_FINISHEDKdC_s-$?-
+KdC_s
+[Wrapper] Starting cleanup for generic/002...
+FSTYP         -- nfs
+PLATFORM      -- Linux/x86_64 susetest 6.19.12-1-default #1 SMP PREEMPT_DYNAMIC Sun Apr 12 17:36:53 UTC 2026 (c7234f7)
+MKFS_OPTIONS  -- localhost:/opt/export/scratch
+MOUNT_OPTIONS -- -o rw,relatime,vers=4.0 -o context=system_u:object_r:root_t:s0 localhost:/opt/export/scratch /opt/nfs/scratch
+
+generic/002        QA output created by 002
+Silence is goodness ...
+ 0s
+Ran: generic/002
+Passed all 1 tests
+
+SCRIPT_FINISHEDKdC_s-0-
+# umount /dev/vda2 &> /dev/null; echo sPtbE-$?-
+sPtbE-32-
+# cat > /tmp/scriptX6yxj.sh << 'EOT_X6yxj'; echo X6yxj-$?-
+> uname -r
+> EOT_X6yxj
+X6yxj-0-
+# echo X6yxj; bash -oe pipefail /tmp/scriptX6yxj.sh ; echo SCRIPT_FINISHEDX6yxj-$?-
+X6yxj
+6.19.12-1-default
+SCRIPT_FINISHEDX6yxj-0-
+# cat > /tmp/scriptzKaE7.sh << 'EOT_zKaE7'; echo zKaE7-$?-
+> rpm -q glibc
+> EOT_zKaE7
+zKaE7-0-
+# echo zKaE7; bash -oe pipefail /tmp/scriptzKaE7.sh ; echo SCRIPT_FINISHEDzKaE7-$?-
+zKaE7
+glibc-2.42-3.3.x86_64
+SCRIPT_FINISHEDzKaE7-0-
+# cat > /tmp/script_kEzC.sh << 'EOT__kEzC'; echo _kEzC-$?-
+> rpm -q xfstests
+> EOT__kEzC
+_kEzC-0-
+# echo _kEzC; bash -oe pipefail /tmp/script_kEzC.sh ; echo SCRIPT_FINISHED_kEzC-$?-
+_kEzC
+xfstests-20260317.57d71a88-1.1.x86_64
+SCRIPT_FINISHED_kEzC-0-
+# echo generic/003 > /dev/ttyS0
+generic-760 ... ... PASSED (7s)
+generic-761 ... ... PASSED (1s)
+generic-763 ... ... PASSED (1s)
+generic-764 ... ... SKIPPED (1s)
+generic-765 ... ... SKIPPED (1s)
+generic-766 ... ... SKIPPED (0s)
+generic-767 ... ... SKIPPED (0s)
+generic-768 ... ... SKIPPED (1s)
+generic-769 ... ... SKIPPED (1s)
+generic-770 ... ... SKIPPED (1s)
+generic-771 ... ... SKIPPED (0s)
+generic-775 ... ... SKIPPED (1s)
+generic-776 ... ... SKIPPED (1s)
+generic-777 ... ... SKIPPED (1s)
+generic-779 ... ... SKIPPED (0s)
+generic-780 ... ... SKIPPED (0s)
+generic-781 ... ... SKIPPED (1s)
+generic-782 ... ... SKIPPED (1s)
+generic-783 ... ... SKIPPED (1s)
+generic-784 ... ... SKIPPED (0s)
+generic-785 ... ... SKIPPED (0s)
+generic-786 ... ... SKIPPED (1s)
+generic-787 ... ... SKIPPED (1s)
+generic-788 ... ... SKIPPED (0s)
+generic-789 ... ... SKIPPED (1s)
+generic-790 ... ... SKIPPED (1s)
+generic-791 ... ... SKIPPED (1s)
+Test run complete
+SCRIPT_FINISHEDvXeDN-0-
+# 

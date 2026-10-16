@@ -1,0 +1,11 @@
+[    0.000000] [      T0] Linux version 7.0.1-1-default (geeko@buildhost) (gcc (SUSE Linux) 15.2.1 20260202, GNU ld (GNU Binutils; openSUSE Tumbleweed) 2.45.0.20251103-3) #1 SMP PREEMPT_DYNAMIC Fri Apr 24 04:01:30 UTC 2026 (7cb5b59)
+[    6.622255] [      T1] SELinux:  policy capability genfs_seclabel_symlinks=1
+[    6.630006] [      T1] SELinux:  policy capability genfs_seclabel_wildcard=0
+[    6.631756] [      T1] SELinux:  policy capability functionfs_seclabel=0
+[   23.790108] [   T1849] RPC: Registered named UNIX socket transport module.
+[   23.791631] [   T1849] RPC: Registered udp transport module.
+[   23.792933] [   T1849] RPC: Registered tcp transport module.
+[   23.794098] [   T1849] RPC: Registered tcp-with-tls transport module.
+[   23.796576] [   T1849] RPC: Registered tcp NFSv4.1 backchannel transport module.
+[   24.088875] [   T1879] NFSD: Using nfsdcld client tracking operations.
+[   24.090203] [   T1879] NFSD: no clients to reclaim, skipping NFSv4 grace period (net effffff9)

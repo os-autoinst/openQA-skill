@@ -147,6 +147,13 @@ itself died: logs it would have uploaded may be missing; its message is the `pos
 that module's uploaded logs by the file names `oqa-log.py --file` takes. `class=`: human, bot (first
 non-heading line), automated, carried-over.
 
+A step text is cut at 8 lines. When it is longer and holds verdict lines, those are shown instead of its
+head, then `[verdict lines only; N other lines not shown]`: `TFAIL`, `TBROK`, `TWARN`, `TCONF`, a TAP or
+KTAP `not ok`, `Failures:` and, when the text names an `.out.bad`, the `+`/`-` lines of that diff
+(xfstests); for a died test also its message and the lines with `failed`, `error` or `not found`.
+`kind=parser-result-failed`: a result openQA parsed from a suite's report (`parse_extra_log`: LTP, KTAP,
+JUnit), whatever its `fail` or `failed`.
+
 A failing step's line ends with its screenshot, `shot=<host>/tests/<id>/images/<screenshot>`; a step
 without one (a die message, `wait_serial`) has `last_shot=`, the newest screenshot before it in the module,
 the screen it failed on. The same step of a good run: `--module NAME --all-steps` on that run, `shot` column.

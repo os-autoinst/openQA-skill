@@ -242,6 +242,25 @@ SIGNATURES = (
 # Labels that say how the run ended, not why.
 _OUTCOME = ("module", "signal", "stop", "result")
 
+SERIAL_TERMINAL = "serial_terminal.txt"
+# A kernel message starts the line, follows a printk time or caller id ("] "), or a journal's "kernel: ".
+_KERNEL = r"(?:^|\]\s|\bkernel:\s)\s*"
+# What a suite or the kernel prints to the serial terminal, which autoinst-log.txt does not hold.
+SERIAL_SIGNATURES = (
+    _signature(
+        "suite", [r"\bTFAIL\b", r"\bTBROK\b", r"^\s*(?:#\s*)?not ok\b", r"^Failures:"]
+    ),
+    _signature(
+        "kernel",
+        [
+            _KERNEL + r"(?:WARNING:|BUG:|(?:Internal error: )?Oops(?::| - ))",
+            r"Transaction aborted",
+        ],
+    ),
+    _signature("kernel", [_KERNEL + r"Call Trace\b"], 4),
+    *SIGNATURES,
+)
+
 
 def positive(value):
     number = int(value)
@@ -658,7 +677,7 @@ def mode_grep(lines, pattern, context, max_matches, span=None):
     return entries, len(hits)
 
 
-def mode_errors(lines, verbose):
+def mode_errors(lines, verbose, signatures=SIGNATURES):
     """Return (entries, counts per label, last started module, finished?)."""
     entries, counts, taken = [], {}, set()
     started = finished = None
@@ -673,7 +692,7 @@ def mode_errors(lines, verbose):
             and match.group(1) == started[1].group(1)
         ):
             finished = index
-        for label, pattern, after, continuation in SIGNATURES:
+        for label, pattern, after, continuation in signatures:
             if not pattern.search(probe):
                 continue
             counts[label] = counts.get(label, 0) + 1
@@ -950,6 +969,34 @@ def runtime_rows(runs, other, last, other_last, cut=(False, False)):
     return [row for _, row in rows], slower, running
 
 
+def serial_errors(client, job_id, args):
+    """--errors over serial_terminal.txt: (lines to print, any hit?); nothing when the job has none."""
+    path = file_path(job_id, SERIAL_TERMINAL)
+    try:
+        lines, truncated = fetch_all(client, path, args.max_bytes)
+    except _oqa.NotFound:
+        return [], False
+    except _oqa.OqaError as error:
+        return [f"note: {SERIAL_TERMINAL} not read ({error})"], False
+    entries, counts, _, _ = mode_errors(lines, args.verbose, SERIAL_SIGNATURES)
+    found = ",".join(f"{label}:{count}" for label, count in counts.items())
+    out = [f"file={SERIAL_TERMINAL} mode=errors hits={found or '-'} lines={len(lines)}"]
+    if truncated:
+        out.append(f"warning: only the first {args.max_bytes} bytes of it were read")
+    if not counts:
+        return out, False
+    entries, dropped = cap_entries(entries, args.max_lines)
+    block = _oqa.sanitize(
+        render(entries, args.max_line_chars, args.verbose), max_line=0, max_bytes=131072
+    )
+    out.append(_oqa.fence(block, f"{client.host.split('//')[1]}{path}").rstrip("\n"))
+    if dropped:
+        out.append(f"note: {dropped} lines omitted at '--' (--max-lines)")
+    if any(count > PER_LABEL for count in counts.values()):
+        out.append(f"note: first {PER_LABEL} hits per label shown, --grep for more")
+    return out, True
+
+
 def show_runtimes(client, args, job_id, head):
     """Print the --runtimes digest; return 1 when something ran long, else 0."""
     other = other_last = compare_id = theirs = None
@@ -1076,7 +1123,9 @@ def main():
         action="store_true",
         help="digest of known failure signatures: test died, needle mismatch, failed or "
         "timed-out command, serial failure, backend died, setup problem, result lines, "
-        "plus the last started module",
+        "plus the last started module; of autoinst-log.txt (the default --file) and, in a "
+        f"block of its own, of {SERIAL_TERMINAL} when the job has one, where suite verdicts "
+        "and kernel splats are",
     )
     parser.add_argument(
         "--around-module",
@@ -1229,7 +1278,7 @@ def main():
     archive = args.members or args.member is not None
     path = file_path(job_id, args.file, archive)
     source = f"{client.host.split('//')[1]}{path}"
-    notes, status = [], 0
+    notes, status, extra = [], 0, []
     if args.members:
         body = fetch_archive(client, path, args.max_bytes)
         # tok() quotes a name and folds its line breaks: a name never opens a line.
@@ -1335,10 +1384,17 @@ def main():
                 )
             status = 1 if total else 0
         elif args.errors:
-            entries, counts, started, finished = mode_errors(lines, args.verbose)
+            serial = args.file.removeprefix("ulogs/") == SERIAL_TERMINAL
+            signatures = SERIAL_SIGNATURES if serial else SIGNATURES
+            entries, counts, started, finished = mode_errors(
+                lines, args.verbose, signatures
+            )
             found = ",".join(f"{label}:{count}" for label, count in counts.items())
             mode = f"errors hits={found or '-'}"
-            status = 1 if counts else 0
+            serial_hits = False
+            if args.file == DEFAULT_FILE and args.member is None:
+                extra, serial_hits = serial_errors(client, job_id, args)
+            status = 1 if counts or serial_hits else 0
             if any(count > PER_LABEL for count in counts.values()):
                 notes.append(
                     f"note: first {PER_LABEL} hits per label shown, --grep for more"
@@ -1349,7 +1405,8 @@ def main():
                     f"last_module={_oqa.tok(match.group(1))} script={_oqa.tok(match.group(2))} "
                     f"start={index + 1} finished={finished + 1 if finished else 'never'}"
                 )
-            if not set(counts) - {"died", *_OUTCOME} and "died" in counts:
+            only_died = not set(counts) - {"died", *_OUTCOME} and "died" in counts
+            if only_died and not serial_hits:
                 notes.append(
                     "hint: only a 'Test died' line: command output is not in autoinst-log.txt; "
                     "try --file serial_terminal.txt (or serial0.txt) with --grep/--tail, or "
@@ -1414,6 +1471,8 @@ def main():
     print(_oqa.fence(block, source), end="")
     for note in notes:
         print(note)
+    for line in extra:
+        print(line)
     print(f"requests: {client.requests}")
     return status if args.exit_code else 0
 

@@ -174,8 +174,18 @@ polling lines. `--exit-code`: 1 when `--errors`/`--grep` matched, the module nev
 found a module still running at the end or one that took 2x and 60 s more than in `--compare`.
 `[date] [level] [pid]` prints as `HH:MM:SS` (level kept unless debug/info). `--around-module` ends just after
 `# Test died` and folds assert_screen polling (no match / no change / check_asserted_screen took / stall)
-into one `~` line: counts, first..last time. `--errors` with only a `Test died` hit hints at
-`serial_terminal.txt` and the module's ulogs. A ranged tail is numbered from the end (`-1` = last line).
+into one `~` line: counts, first..last time. A ranged tail is numbered from the end (`-1` = last line).
+
+`--errors` on `autoinst-log.txt` (the default `--file`, no `--member`) also reads `serial_terminal.txt` when
+the job has one, as suite verdicts and kernel splats are there, and prints its hits after the first block,
+under their own header line and fence: `file=serial_terminal.txt mode=errors hits=suite:2,kernel:1
+lines=N`; `hits=-` when it holds none, no line when the job has no such file. `[suite]` marks `TFAIL`,
+`TBROK`, a TAP `not ok`, `Failures:`; `[kernel]` marks `WARNING:`, `BUG:`, `Oops:`, `Call Trace` (with the
+4 lines after it), each only in a kernel line (at its start, after a printk time `] ` or a journal's
+`kernel: `), and `Transaction aborted`; the signatures of `autoinst-log.txt` apply there too, and
+`--file serial_terminal.txt --errors` uses the same set. Each block keeps its first 3 hits per label and
+at most `--max-lines` lines. With only a `Test died` hit and no serial-terminal hit, a hint points at
+`serial_terminal.txt` and the module's ulogs.
 
 `--grep` prints the first `--max-matches` matches (10) with `--context` lines around each, and of those at
 most `--max-lines` lines (60, the `--` between distant matches included), cutting from the end, so the

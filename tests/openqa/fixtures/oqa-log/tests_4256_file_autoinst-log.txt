@@ -1,0 +1,7 @@
+[2030-01-01T10:00:01.000000Z] [debug] [pid:4711] ||| starting mmap22 tests/kernel/run_ltp.pm
+[2030-01-01T10:00:02.000000Z] [debug] [pid:4711] <<< testapi::wait_serial(regexp=qr/### TEST mmap22 COMPLETE >>> \d+\./u, timeout=900)
+[2030-01-01T10:00:05.000000Z] [debug] [pid:4711] ||| finished mmap22 kernel (runtime: 4 s)
+[2030-01-01T10:00:06.000000Z] [debug] [pid:4711] ||| starting generic_035 tests/xfstests/run_subtest.pm
+[2030-01-01T10:00:09.000000Z] [info] [pid:4711] ::: basetest::runtest: # Test died: generic/035 failed at tests/xfstests/run_subtest.pm line 200.
+[2030-01-01T10:00:10.000000Z] [debug] [pid:4711] ||| finished generic_035 xfstests (runtime: 4 s)
+[2030-01-01T10:00:12.000000Z] [info] [pid:4711] Result: done

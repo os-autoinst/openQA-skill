@@ -24,12 +24,14 @@ Route: GET /api/v1/jobs/<id>/comments (Controller/API/V1/Comment.pm "list"): bug
 created of each comment; the table's bugrefs and label follow
 Schema/ResultSet/Comments.pm "comment_data_for_jobs".
 
-Route: GET /tests/<id>/downloads_ajax and /tests/<id>/file/<name>
-(Controller/Test.pm "downloads", Controller/File.pm "test_file"): uploaded package lists.
+Route: GET /tests/<id>/downloads_ajax, /tests/<id>/file/<name> and
+/tests/<id>/file/details-<module>.json (Controller/Test.pm "downloads", Controller/File.pm
+"test_file"): uploaded package lists, and the steps of a module with their text.
 """
 
 import argparse
 import os
+import posixpath
 import re
 import sys
 from datetime import datetime, timezone
@@ -48,6 +50,7 @@ IDS_PER_REQUEST = 25
 MAX_WORKERS = 20
 MAX_COMMENT_JOBS = 30
 MAX_REQUESTS = 80
+DETAILS_BYTES = 4 << 20
 LIST_BYTES = 512 << 10
 # Uploaded package lists, by preference: rpm -qa (lib/LTP/utils.pm log_versions), xfstests'
 # version.log, rpm -qi of the kernel.
@@ -73,6 +76,11 @@ _PER_RUN = re.compile(
     r"^(?:CHECKSUM_\w+|QEMUPORT|VNC|WORKER_ID|WORKER_INSTANCE|JOBTOKEN|NAME"
     r"|\w*_GIT_HASH|\w*_GIT_URL)$"
 )
+# A frame of a step's stack trace, "... called at lib/utils.pm line 12"; os-autoinst's and
+# Perl's own frames are not test code.
+_FRAME = re.compile(r"\bat (\S{1,400}) line \d+")
+_NOT_DISTRI = re.compile(r"^\(|^/usr/|/os-autoinst/|/perl5/")
+_RENAME = re.compile(r"^(.*)\{(.*) => (.*)\}(.*)$")
 _QI_FIELD = re.compile(r"^(Name|Version|Release)\s*:\s*(\S+)$")
 _PACKAGE_LINE = re.compile(r"[A-Za-z0-9_.+~^-]+")
 _UPLOAD_NAME = r"[A-Za-z0-9_][A-Za-z0-9._+@=~-]*"
@@ -417,35 +425,69 @@ def touched(paths, pattern):
     return names
 
 
-def marks(paths, failed_re, earlier_re=None):
-    """Markers for a commit that touches a failed module's test file, lib/ or the test
-    file of a module that ran before the failed one.
+def stat_paths(path):
+    """Both sides of a rename as git --stat prints it ("a/{x => y}/b", "x => y"), else the path."""
+    match = _RENAME.match(path)
+    if match:
+        head, old, new, tail = match.groups()
+        return [re.sub("/+", "/", head + side + tail) for side in (old, new)]
+    return path.split(" => ", 1)
+
+
+def on_call_path(path, frames):
+    """The frame file a changed path is, or None. A relative frame is relative to the test
+    repository; an absolute one and git's ".../<tail>" match by their tail."""
+    for candidate in stat_paths(path):
+        short = candidate.startswith(".../")
+        tail = candidate[4:] if short else candidate
+        for frame in frames:
+            absolute = frame.startswith("/")
+            if frame == tail or (
+                (short or absolute) and frame.endswith("/" + tail.lstrip("/"))
+            ):
+                return candidate if absolute else frame
+    return None
+
+
+def marks(paths, failed_re, earlier_re=None, frames=()):
+    """Markers for a commit that touches a failed module's test file, another file of the
+    failing step's stack trace, lib/ or the test file of a module that ran before the
+    failed one.
 
     git shortens a long path to ".../<tail>": such a name may still be a test module, but
     whether it lies in lib/ cannot be told."""
     found = [f"[failed module {name}]" for name in touched(paths, failed_re)]
+    calls = []
+    for path in paths:
+        frame = None if touched([path], failed_re) else on_call_path(path, frames)
+        if frame and frame not in calls:
+            calls.append(frame)
+    found += [f"[call path {frame}]" for frame in calls]
     if any(path.startswith(("lib/", "{lib")) or "=> lib/" in path for path in paths):
         found.append("[lib]")
     return found + [f"[earlier module {name}]" for name in touched(paths, earlier_re)]
 
 
-def marked_heads(text, limit, failed, earlier=()):
-    """Commits touching the failed module, lib/, an earlier module, then the rest, each
-    group newest first; the counts of the first three."""
+MARKED = ("[failed module ", "[call path ", "[lib]", "[earlier module ")
+
+
+def marked_heads(text, limit, failed, earlier=(), frames=(), verbose=False):
+    """Commits touching the failed module, the failing call path, lib/, an earlier module,
+    then the rest, each group newest first; the counts of the first four. verbose: every
+    commit, each followed by its files."""
     patterns = module_pattern(failed), module_pattern(earlier)
-    groups, counts = ([], [], [], []), [0, 0, 0]
+    groups, counts = ([], [], [], [], []), [0, 0, 0, 0]
     for head, paths in commits(text):
-        tags = marks(paths, *patterns)
-        hits = (
-            any(tag.startswith("[failed module ") for tag in tags),
-            "[lib]" in tags,
-            any(tag.startswith("[earlier module ") for tag in tags),
-        )
+        tags = marks(paths, *patterns, frames)
+        hits = [any(tag.startswith(mark) for tag in tags) for mark in MARKED]
         counts = [count + hit for count, hit in zip(counts, hits)]
-        group = next((i for i, hit in enumerate(hits) if hit), 3)
-        groups[group].append(" ".join([*tags, head]))
-    lines = [line for group in groups for line in group]
-    return lines[:limit], len(lines), tuple(counts)
+        group = next((i for i, hit in enumerate(hits) if hit), 4)
+        files = [f"    {path}" for path in paths] if verbose else []
+        groups[group].append([" ".join([*tags, head]), *files])
+    entries = [entry for group in groups for entry in group]
+    shown = entries if verbose else entries[:limit]
+    lines = [line for entry in shown for line in entry]
+    return lines, len(entries), len(shown), tuple(counts)
 
 
 def earlier_modules(job, failed):
@@ -461,6 +503,45 @@ def earlier_modules(job, failed):
         (i for i, module in enumerate(modules) if module.get("result") == "failed"), 0
     )
     return sorted({name for name in names[:first] if name and name not in failed})
+
+
+def first_failed(job, row):
+    """The name of the first failed module as openQA stores its results, "#<n>" kept."""
+    modules = job.get("modules") if isinstance(job, dict) else None
+    for module in modules if isinstance(modules, list) else ():
+        if isinstance(module, dict) and module.get("result") == "failed":
+            return str(module.get("name") or "") or None
+    names = row.get("failedmodules") or ()
+    return str(names[0]) if names else None
+
+
+def call_path(client, job_id, module):
+    """Files of the stack trace of the failing step, outside os-autoinst; None when there
+    is no readable step that died."""
+    if not module:
+        return None
+    try:
+        data = client.get_json(
+            f"/tests/{job_id}/file/details-{module}.json", max_bytes=DETAILS_BYTES
+        )
+    except _oqa.OqaError:
+        return None
+    steps = data.get("details") if isinstance(data, dict) else data
+    for step in steps if isinstance(steps, list) else ():
+        text = step.get("text_data") if isinstance(step, dict) else None
+        if not isinstance(text, str) or "# Test died" not in text:
+            continue
+        files = []
+        for match in _FRAME.finditer(text[:65536]):
+            if _NOT_DISTRI.search(match.group(1)):
+                continue
+            path = posixpath.normpath(match.group(1))
+            while path.startswith("../"):
+                path = path[3:]
+            if path not in files:
+                files.append(path)
+        return files
+    return None
 
 
 def uploads(client, job_id):
@@ -556,13 +637,13 @@ def versions_line(client, job_id, good_id):
     )
 
 
-def fenced(client, job_id, title, lines):
-    block = _oqa.sanitize("\n".join(lines), max_line=240, max_bytes=16384)
+def fenced(client, job_id, title, lines, max_bytes=16384):
+    block = _oqa.sanitize("\n".join(lines), max_line=240, max_bytes=max_bytes)
     source = f"{client.host.split('//')[1]}/tests/{job_id}/investigation_ajax:{title}"
     return _oqa.fence(block, source)
 
 
-def investigation(client, job_id, limit, verbose, failed=(), job=None):
+def investigation(client, job_id, limit, verbose, failed=(), job=None, module=None):
     try:
         data = client.get_json(f"/tests/{job_id}/investigation_ajax")
     except _oqa.NotFound as error:
@@ -642,17 +723,20 @@ def investigation(client, job_id, limit, verbose, failed=(), job=None):
             continue
         if key == "test_log":
             earlier = earlier_modules(job, failed) if failed else []
-            heads, total, (module, lib, before) = marked_heads(
-                text, limit, failed, earlier or ()
+            frames = call_path(client, job_id, module)
+            heads, total, shown, (in_module, on_path, lib, before) = marked_heads(
+                text, limit, failed, earlier or (), frames or (), verbose
             )
-            # Unknown, not 0: no earlier-module commit must look ruled out.
+            # Unknown, not 0: no earlier-module or call-path commit must look ruled out.
             before = "?" if earlier is None else before
+            on_path = "?" if frames is None else on_path
             order = (
-                f"failed_module={module} lib={lib} earlier_module={before} "
-                "(those first, then newest first)"
+                f"failed_module={in_module} call_path={on_path} lib={lib} "
+                f"earlier_module={before} (those first, then newest first)"
             )
         else:
             heads, total = git_heads(text, limit)
+            shown = len(heads)
             order = "(newest first)"
         print(
             f"  {title} changes: commits={total} {order} url={_oqa.tok(data.get(url_key), 120)}"
@@ -660,13 +744,14 @@ def investigation(client, job_id, limit, verbose, failed=(), job=None):
         stat = data.get(stat_key)
         if isinstance(stat, str) and stat.startswith("Too many commits"):
             print(f"  {title} diff stat: {_oqa.quoted(stat, 160)}")
-        omitted = total - len(heads)
+        omitted = total - shown
         print(
             fenced(
                 client,
                 job_id,
                 key,
                 heads + ([f"[... {omitted} more commits omitted]"] if omitted else []),
+                65536 if verbose else 16384,
             ),
             end="",
         )
@@ -728,7 +813,7 @@ def main():
         "--verbose",
         action="store_true",
         help="--investigation: keep per-run settings (checksums, ports, worker ids, git "
-        "hashes) and 'not available' lines",
+        "hashes) and 'not available' lines; list every test commit with its files",
     )
     args = parser.parse_args()
 
@@ -810,13 +895,15 @@ def main():
             for name in current.get("failedmodules") or ()
             if name
         }
+        job = (runs or {}).get(job_id)
         investigation(
             client,
             job_id,
             args.max_items,
             args.verbose,
             sorted(failed),
-            (runs or {}).get(job_id),
+            job,
+            first_failed(job, current),
         )
     print(f"requests: {client.requests}")
     return status if args.exit_code else 0

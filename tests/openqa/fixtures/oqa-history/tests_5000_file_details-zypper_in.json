@@ -1,0 +1,23 @@
+{
+ "result": "failed",
+ "details": [
+  {
+   "result": "ok",
+   "text": "zypper_in-1.txt",
+   "text_data": "at lib/not_the_die_step.pm line 3",
+   "title": "wait_serial"
+  },
+  {
+   "result": "fail",
+   "text": "zypper_in-2.txt",
+   "title": "Failed",
+   "text_data": "# Test died: command 'zypper -n in foo' failed at /usr/lib/os-autoinst/testapi.pm line 1045.\n--- # stack trace\ntestapi::assert_script_run('zypper -n in foo') called at lib/utils.pm line 210\nutils::zypper_call('in foo') called at products/exampleos/../../lib/zypper_helper.pm line 33\nzypper_helper::install() called at tests/console/zypper_in.pm line 12\neval {...} called at (eval 1234) line 5\nbasetest::runtest(...) called at /usr/lib/os-autoinst/basetest.pm line 352\n"
+  },
+  {
+   "result": "fail",
+   "text": "zypper_in-3.txt",
+   "text_data": "# Post fail hook died: at lib/post_fail_only.pm line 9",
+   "title": "Failed\n(post)"
+  }
+ ]
+}

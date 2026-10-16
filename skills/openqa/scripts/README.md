@@ -136,8 +136,9 @@ comments. `--module NAME` alone keeps only that module's lines, whatever its res
     comment=963649 by=reviewer_a class=carried-over created=2026-09-19T08:12 bugrefs=poo#201672 carried_over_from=5962127
     requests: 4
 
-When set: `reason="..."`, `state=` (not done), `clone chain: 470:incomplete -> [500:failed]`, `SUPERSEDED:
-restarted, newest=ID result=...`, `culprit=ID (...)` for victims, needle steps with
+When set: `reason="..."`, `state=` (not done), `clone chain: 470:incomplete@2030-01-01T21:10Z -> [500:failed@2030-01-02T03:04Z]`
+(each member's start time in UTC, none before it started), `SUPERSEDED: restarted, newest=ID result=...
+started=...`, `culprit=ID (...)` for victims, needle steps with
 `tags=` and `candidates=N best=name:91% (worst area each)`, `SUSPECT_BUGREF=` (module name parsed as bugref),
 `force_result_not_applied=<r>`, `; the hook died at step=N` after `post_fail_hook steps not shown` (the hook
 itself died: logs it would have uploaded may be missing; its message is the `post_fail_hook failed: ` line of

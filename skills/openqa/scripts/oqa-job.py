@@ -24,6 +24,8 @@ How to read it:
     and llm_restart= as words and its bullets plus first prose line as one capped
     text line; it is a hint, never a verdict. --verbose shows the whole text.
   - A job with clone_id was restarted: its result is history, look at the newest job.
+    Each clone chain member, and the newest on the SUPERSEDED line (started=), carries
+    its start time in UTC, id:result@2030-01-02T03:04Z; one not started yet has none.
   - parallel_failed and skipped jobs are victims. The culprit hint names the
     failed/incomplete/timeout_exceeded job of the cluster that finished first.
   - Steps after the "Failed" text step of a module belong to post_fail_hook
@@ -63,7 +65,7 @@ import json
 import os
 import re
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from urllib.parse import quote
 
 # python3 -I leaves the script's own directory off sys.path; the sibling modules live there.
@@ -307,6 +309,17 @@ def print_settings(job, pattern, verbose):
         )
 
 
+def start_minute(job):
+    """t_started, which openQA gives in UTC, as 2030-01-02T03:04Z; None before the start."""
+    try:
+        started = datetime.fromisoformat(str(job.get("t_started")))
+        if started.tzinfo:
+            started = started.astimezone(timezone.utc)
+    except (ValueError, OverflowError):
+        return None
+    return started.strftime("%Y-%m-%dT%H:%MZ")
+
+
 def print_chain(client, job, verbose):
     if not job.get("origin_id") and not job.get("clone_id"):
         if verbose:
@@ -326,6 +339,9 @@ def print_chain(client, job, verbose):
     parts = []
     for link in chain:
         text = f"{link['id']}:{tok(link.get('result'), 30)}"
+        started = start_minute(link)
+        if started:
+            text += f"@{started}"
         parts.append(f"[{text}]" if link["id"] == job["id"] else text)
     more_old = "... -> " if chain[0].get("origin_id") else ""
     more_new = " -> ..." if chain[-1].get("clone_id") else ""
@@ -341,6 +357,8 @@ def print_chain(client, job, verbose):
         line = f"SUPERSEDED: restarted, newest={newest['id']} result={tok(newest.get('result'), 30)}"
         if newest.get("state") != "done":
             line += f" state={tok(newest.get('state'), 30)}"
+        if start_minute(newest):
+            line += f" started={start_minute(newest)}"
         print(line)
 
 

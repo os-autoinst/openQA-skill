@@ -696,15 +696,17 @@ def print_modules(client, job, max_steps, verbose, wanted=None):
             print(line)
         if wanted is not None and len(steps) > len(shown):
             print(hidden_steps(steps, len(shown)))
-        if not bad:
-            print(
-                f"  no failing step recorded: read the ulogs {tok(name, 60)}-* and serial0.txt"
-            )
         own = [
             str(ulog)
             for ulog in job.get("ulogs") or ()
             if str(ulog).startswith(f"{name}-")
         ]
+        if not bad:
+            read = [f"the ulogs {tok(name, 60)}-*"] if own or "ulogs" not in job else []
+            if "serial_terminal.txt" in (job.get("logs") or ()):
+                read.append("serial_terminal.txt")
+            read.append("serial0.txt")
+            print(f"  no failing step recorded: read {' and '.join(read)}")
         if own:
             print(f"  ulogs[{tok(name, 80)}]={toks(own, 160, MAX_FILES[verbose])}")
     if len(failed) > MAX_MODULES:

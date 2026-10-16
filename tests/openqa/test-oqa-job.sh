@@ -67,8 +67,8 @@ check "step kinds" \
 	"$(grep -o 'kind=[^ ]*' <<<"$actual" | cut -d= -f2 | xargs)"
 check "post_fail_hook steps are counted, not shown" 1 \
 	"$(grep -c '^  +3 post_fail_hook steps not shown$' <<<"$actual")"
-check "failed module without failing step points to ulogs" 1 \
-	"$(grep -c 'no failing step recorded: read the ulogs xfstests-\*' <<<"$actual")"
+check "failed module without failing step and without own ulogs names no ulogs" "  no failing step recorded: read serial0.txt" \
+	"$(sed -n '/^module=xfstests /,/^module=/p' <<<"$actual" | grep 'no failing step')"
 check "test died: message plus the first frame outside os-autoinst, no trace" "1 1 0" \
 	"$(grep -c "^    text=\"# Test died: no candidate needle with tag(s) 'grub2, bootloader' matched\"$" <<<"$actual") $(grep -c '^    frame="frame0::call at lib/x.pm line 0"$' <<<"$actual") $(grep -c 'stack trace\|frame1::call' <<<"$actual")"
 check "identity settings, url and empty fields are not repeated" 0 \
@@ -450,7 +450,7 @@ check "no \"Failed\" step: the hook is counted from \"Post-fail\" on, its death 
 check "no \"Failed\" step: hook steps are no failing steps of the test" "2 0" \
 	"$(grep -c '^  step=[12] kind=step-failed title="check [ab]" ' <<<"$actual") $(grep -c 'failing steps not shown\|title="Failed (post)"\|Post fail hook died\|INJECTED\|^<<<' <<<"$actual")"
 check "no failing step before the hook: the module says so and still names the dead hook" \
-	"  +2 post_fail_hook steps not shown; the hook died at step=3|  no failing step recorded: read the ulogs suite_results-* and serial0.txt" \
+	"  +2 post_fail_hook steps not shown; the hook died at step=3|  no failing step recorded: read serial0.txt" \
 	"$(sed -n '/^module=suite_results /,/^logs=/p' <<<"$actual" | grep '^  ' | paste -sd'|')"
 tmp=$(mktemp -d)
 cp "$fixtures"/api_v1_jobs_860_* "$tmp"
@@ -466,6 +466,21 @@ rm -rf "$tmp"
 check "no \"Failed\" step, hook alive: the count line has no suffix, a failed hook step is not counted" \
 	"  +3 post_fail_hook steps not shown" \
 	"$(sed -n '/^module=service_check /,/^module=suite_results /p' <<<"$actual" | grep 'not shown')"
+tmp=$(mktemp -d)
+cp "$fixtures"/api_v1_jobs_860_* "$tmp"
+python3 - "$tmp" <<'PY'
+import json, sys
+path = f"{sys.argv[1]}/api_v1_jobs_860_details.json"
+data = json.load(open(path))
+data["job"]["logs"].append("serial_terminal.txt")
+data["job"]["ulogs"] = ["suite_results-results.txt"]
+json.dump(data, open(path, "w"))
+PY
+actual=$(python3 "$script" --host https://openqa.example.org --fixture-dir "$tmp" 860)
+rm -rf "$tmp"
+check "no failing step: names the module's own ulogs and serial_terminal.txt when the job has them" \
+	"  no failing step recorded: read the ulogs suite_results-* and serial_terminal.txt and serial0.txt|  ulogs[suite_results]=suite_results-results.txt" \
+	"$(sed -n '/^module=suite_results /,/^logs=/p' <<<"$actual" | grep -E '^  (no failing|ulogs\[)' | paste -sd'|')"
 
 # --- investigation comments that name their mode ----------------------------------
 tmp=$(mktemp -d)

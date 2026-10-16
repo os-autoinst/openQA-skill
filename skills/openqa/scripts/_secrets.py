@@ -268,7 +268,7 @@ RULES = (
     (
         "url-query",
         re.compile(
-            r"(?i)([?&](?:key|api[-_]?key|sig|signature|x-amz-signature|x-amz-credential"
+            r"(?i)([?&](?:key|api[-_]?key|sig|signature|x-(?:amz|goog)-signature|x-amz-credential"
             r"|x-amz-security-token|auth)=)"
             + _SLOT
             + r"(?!=)(?!\[REDACTED:[a-z-]+\](?:[&\s#'\"]|$))"

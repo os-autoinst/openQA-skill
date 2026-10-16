@@ -337,7 +337,7 @@ check "a token after a file name in zypp.log and in zypper lr -u" "$(
 		"2026-10-16 10:00:00 <1> susetest(4242) [zypp::media] MediaCurl.cc(evaluateCurlCode):1047 Download (curl) error for '${repo}repodata/repomd.xml?[REDACTED:url-bare-query]':" \
 		"  3 | SLE-Module-Basesystem15-SP5-Updates | Yes | (r ) Yes | Yes | $repo?[REDACTED:url-bare-query]"
 )" "$actual"
-for key in token access_token auth sig signature X-Amz-Signature credentials; do
+for key in token access_token auth sig signature X-Amz-Signature X-Goog-Signature credentials; do
 	hides "a token as the value of ?$key=" "GET ${repo}repodata/repomd.xml?$key=$qtok&arch=x86_64\n" "$qtok"
 done
 for url in 'https://bugzilla.opensuse.org/show_bug.cgi?id=123' "$repo?arch=x86_64&dist=sle" \

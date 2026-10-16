@@ -1,0 +1,24 @@
+Name        : kernel-default
+Version     : 7.0.6
+Release     : 1.1
+Architecture: x86_64
+Install Date: Sat 16 May 2026 04:07:52 AM EDT
+Group       : System/Kernel
+Size        : 293609125
+License     : GPL-2.0-only
+Signature   : RSA/SHA512, Wed 13 May 2026 12:25:59 PM EDT, Key ID 35a2f86e29b700a4
+Source RPM  : kernel-default-7.0.6-1.1.nosrc.rpm
+Build Date  : Mon 11 May 2026 04:08:01 AM EDT
+Build Host  : reproducible
+Packager    : https://bugs.opensuse.org
+Vendor      : openSUSE
+URL         : https://www.kernel.org/
+Summary     : The Standard Kernel
+Description :
+The standard kernel for both uniprocessor and multiprocessor systems.
+
+
+Source Timestamp: 2026-05-11 08:08:27 +0000
+GIT Revision: 437be8832681838511717fe64b6fc051de6587be
+GIT Branch: stable
+Distribution: openSUSE Tumbleweed

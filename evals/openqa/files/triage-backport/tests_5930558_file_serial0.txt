@@ -1,0 +1,37 @@
+[    0.000000][    T0] Linux version 7.0.6-1-default (geeko@buildhost) (gcc (SUSE Linux) 15.2.1 20260202, GNU ld (GNU Binutils; openSUSE Tumbleweed) 2.45.0.20251103-3) #1 SMP PREEMPT_DYNAMIC Mon May 11 08:08:27 UTC 2026 (437be88)
+[!p]104\[0m[?7h[1G[0J[6n[32766;32766H[6n[!p]104\[0m[?7h[1G[0J[6n[32766;32766H[6n]3008;start=b2012976c08c40188fd21c99f1f413b0;user=root;hostname=susetest;machineid=0d863c5d034143229ed884f92a55f39b;bootid=28811666b6f846638bb651623da2d298;pid=1066;pidfdid=1066;comm=(agetty);servicename=serial-getty@ttyS0.service;invocationid=28627edf9cf24325819a86077aec8adc;type=service\P+q6E616D65\
+
+Welcome to openSUSE Tumbleweed 20260515 - Kernel 7.0.6-1-default (ttyS0).
+
+ens4: 10.0.2.15
+
+
+
+susetest login: [   16.087041][ T1208] OpenQA::run_ltp.pm: Starting ima_selinux
+[   16.237702][ T1289] loop: module loaded
+[   16.240319][ T1288] loop0: detected capacity change from 0 to 614400
+[   16.363926][ T1321] operation not supported error, dev loop0, sector 614272 op 0x9:(WRITE_ZEROES) flags 0x10800800 phys_seg 0 prio class 2
+[   16.493863][ T1329] EXT4-fs (loop0): mounting ext3 file system using the ext4 subsystem
+[   16.496829][ T1329] EXT4-fs (loop0): mounted filesystem 5f372f1a-5e88-49bb-9d92-3677075ae971 r/w with ordered data mode. Quota mode: none.
+[   16.553969][ T1266] ima: policy update failed
+[   16.557265][ T1384] ima: policy update completed
+[   16.756340][ T1492] EXT4-fs (loop0): unmounting filesystem 5f372f1a-5e88-49bb-9d92-3677075ae971.
+YpuUt-0-
+[!p]104\[0m[?7h[1G[0J[6n[32766;32766H[6n]3008;end=b2012976c08c40188fd21c99f1f413b0\[   32.842542][   T27] audit: type=1305 audit(1778920642.037:166): op=set audit_enabled=0 old=1 auid=4294967295 ses=4294967295 subj=system_u:system_r:auditctl_t:s0 res=1
+[   32.942801][  T764] systemd-journald[764]: Received client request to relinquish /var/log/journal/0d863c5d034143229ed884f92a55f39b access.
+[   33.047203][    T1] systemd-shutdown[1]: Syncing filesystems and block devices.
+[   33.057551][    T1] systemd-shutdown[1]: Sending SIGTERM to remaining processes...
+[   33.958675][    T1] systemd-shutdown[1]: Deactivating swaps.
+[   33.960838][    T1] systemd-shutdown[1]: All swaps deactivated.
+[   33.962449][    T1] systemd-shutdown[1]: Detaching loop devices.
+[   33.966269][    T1] systemd-shutdown[1]: All loop devices detached.
+[   33.968033][    T1] systemd-shutdown[1]: Stopping MD devices.
+[   33.970088][    T1] systemd-shutdown[1]: All MD devices stopped.
+[   33.972050][    T1] systemd-shutdown[1]: Detaching DM devices.
+[   33.974079][    T1] systemd-shutdown[1]: All DM devices detached.
+[   33.976047][    T1] systemd-shutdown[1]: All filesystems, swaps, loop devices, MD devices and DM devices detached.
+[   33.988172][    T1] systemd-shutdown[1]: Syncing filesystems and block devices.
+[   33.990400][    T1] systemd-shutdown[1]: Powering off.
+[   34.128273][    T1] ACPI: PM: Preparing to enter system sleep state S5
+[   34.129981][    T1] kvm: exiting hardware virtualization
+[   34.131442][    T1] reboot: Power down

@@ -1,0 +1,254 @@
+[2026-05-16T08:29:19.777967Z] [info] +++ setup notes +++
+[2026-05-16T08:29:19.778160Z] [info] Running on openqaworker24:29 (Linux 6.12.0-160000.31-default #1 SMP PREEMPT_DYNAMIC Thu May 14 08:31:57 UTC 2026 (60b2d0d) x86_64)
+[2026-05-16T08:29:19.782928Z] [debug] Found ASSET_1, caching Tumbleweed.x86_64-1.0-libvirt-Snapshot20260515.vagrant.libvirt.box
+[2026-05-16T08:29:19.785259Z] [info] Downloading Tumbleweed.x86_64-1.0-libvirt-Snapshot20260515.vagrant.libvirt.box, request #759457 sent to Cache Service
+[2026-05-16T08:29:34.968384Z] [info] Download of Tumbleweed.x86_64-1.0-libvirt-Snapshot20260515.vagrant.libvirt.box processed:
+[info] [#759457] Cache size 400 GiB + needed 0 Byte exceeds limit of 400 GiB, purging least used assets
+[info] [#759457] Purging "/var/lib/openqa/cache/openqa.opensuse.org/openSUSE-Tumbleweed-20260505-WSL.x86_64-26125.10.231.0-Snapshot20260505.appx.sha256" because we need space for new assets, reclaiming 143 Byte
+[info] [#759457] Purging "/var/lib/openqa/cache/openqa.opensuse.org/Aeon-Installer.x86_64-0.1.0-Snapshot20260505.raw.xz" because we need space for new assets, reclaiming 1.9 GiB
+[info] [#759457] Cache size of "/var/lib/openqa/cache" is 398 GiB, with limit 400 GiB
+[info] [#759457] Downloading "Tumbleweed.x86_64-1.0-libvirt-Snapshot20260515.vagrant.libvirt.box" from "https://openqa.opensuse.org/tests/5930558/asset/other/Tumbleweed.x86_64-1.0-libvirt-Snapshot20260515.vagrant.libvirt.box"
+[info] [#759457] Content of "/var/lib/openqa/cache/openqa.opensuse.org/Tumbleweed.x86_64-1.0-libvirt-Snapshot20260515.vagrant.libvirt.box" has not changed, updating last use
+
+[2026-05-16T08:29:34.970748Z] [debug] Found ASSET_2, caching Tumbleweed.x86_64-1.0-virtualbox-Snapshot20260515.vagrant.virtualbox.box
+[2026-05-16T08:29:34.972778Z] [info] Downloading Tumbleweed.x86_64-1.0-virtualbox-Snapshot20260515.vagrant.virtualbox.box, request #759479 sent to Cache Service
+[2026-05-16T08:30:20.605287Z] [info] Download of Tumbleweed.x86_64-1.0-virtualbox-Snapshot20260515.vagrant.virtualbox.box processed:
+[info] [#759479] Cache size of "/var/lib/openqa/cache" is 391 GiB, with limit 400 GiB
+[info] [#759479] Downloading "Tumbleweed.x86_64-1.0-virtualbox-Snapshot20260515.vagrant.virtualbox.box" from "https://openqa.opensuse.org/tests/5930558/asset/other/Tumbleweed.x86_64-1.0-virtualbox-Snapshot20260515.vagrant.virtualbox.box"
+[info] [#759479] Content of "/var/lib/openqa/cache/openqa.opensuse.org/Tumbleweed.x86_64-1.0-virtualbox-Snapshot20260515.vagrant.virtualbox.box" has not changed, updating last use
+
+[2026-05-16T08:30:20.607329Z] [debug] Found ASSET_256, caching openSUSE-Tumbleweed-DVD-x86_64-Snapshot20260515-Media.iso.sha256
+[2026-05-16T08:30:20.609421Z] [info] Downloading openSUSE-Tumbleweed-DVD-x86_64-Snapshot20260515-Media.iso.sha256, request #759490 sent to Cache Service
+[2026-05-16T08:30:35.845402Z] [info] Download of openSUSE-Tumbleweed-DVD-x86_64-Snapshot20260515-Media.iso.sha256 processed:
+[info] [#759490] Cache size of "/var/lib/openqa/cache" is 392 GiB, with limit 400 GiB
+[info] [#759490] Downloading "openSUSE-Tumbleweed-DVD-x86_64-Snapshot20260515-Media.iso.sha256" from "https://openqa.opensuse.org/tests/5930558/asset/other/openSUSE-Tumbleweed-DVD-x86_64-Snapshot20260515-Media.iso.sha256"
+[info] [#759490] Content of "/var/lib/openqa/cache/openqa.opensuse.org/openSUSE-Tumbleweed-DVD-x86_64-Snapshot20260515-Media.iso.sha256" has not changed, updating last use
+
+[2026-05-16T08:30:35.847672Z] [debug] Found HDD_1, caching opensuse-Tumbleweed-x86_64-20260515-DVD@64bit-with-ltp.qcow2
+[2026-05-16T08:30:35.873426Z] [info] Downloading opensuse-Tumbleweed-x86_64-20260515-DVD@64bit-with-ltp.qcow2, request #759510 sent to Cache Service
+[2026-05-16T08:32:33.760348Z] [info] Download of opensuse-Tumbleweed-x86_64-20260515-DVD@64bit-with-ltp.qcow2 processed:
+Asset "opensuse-Tumbleweed-x86_64-20260515-DVD@64bit-with-ltp.qcow2" was downloaded by #759489, details are therefore unavailable here
+[2026-05-16T08:32:33.762241Z] [debug] Found ISO, caching openSUSE-Tumbleweed-DVD-x86_64-Snapshot20260515-Media.iso
+[2026-05-16T08:32:33.764309Z] [info] Downloading openSUSE-Tumbleweed-DVD-x86_64-Snapshot20260515-Media.iso, request #759575 sent to Cache Service
+[2026-05-16T08:32:48.966635Z] [info] Download of openSUSE-Tumbleweed-DVD-x86_64-Snapshot20260515-Media.iso processed:
+[info] [#759574] Cache size of "/var/lib/openqa/cache" is 396 GiB, with limit 400 GiB
+[info] [#759574] Downloading "openSUSE-Tumbleweed-DVD-x86_64-Snapshot20260515-Media.iso" from "https://openqa.opensuse.org/tests/5930649/asset/iso/openSUSE-Tumbleweed-DVD-x86_64-Snapshot20260515-Media.iso"
+[info] [#759574] Content of "/var/lib/openqa/cache/openqa.opensuse.org/openSUSE-Tumbleweed-DVD-x86_64-Snapshot20260515-Media.iso" has not changed, updating last use
+
+[2026-05-16T08:32:48.969014Z] [info] Rsync from 'rsync://openqa.opensuse.org/tests' to '/var/lib/openqa/cache/openqa.opensuse.org', request #759594 sent to Cache Service
+[2026-05-16T08:32:54.051790Z] [info] Output of rsync:
+[info] [#759593] Calling: rsync -avHP --timeout 1800 rsync://openqa.opensuse.org/tests/ --delete /var/lib/openqa/cache/openqa.opensuse.org/tests/
+Try 1:
+STDOUT:
+receiving incremental file list
+
+sent 5,462 bytes  received 1,798,175 bytes  3,607,274.00 bytes/sec
+total size is 7,861,247,949  speedup is 4,358.55
+
+STDERR:
+
+
+[2026-05-16T08:32:54.051910Z] [info] Finished to rsync tests
+[2026-05-16T08:32:54.055077Z] [debug] +++ worker notes +++
+[2026-05-16T08:32:54.489774Z] [debug] [pid:101204] [37mCurrent version is 5.1778844169.c47a052 [interface v55][0m
+[2026-05-16T08:32:54.502891Z] [debug] [pid:101204] [37mgit hash in 'opensuse': f0bdbc5b8d670be541e0caea0e51ac418bb83b57[0m
+[2026-05-16T08:32:54.538415Z] [debug] [pid:101204] [37mgit url in 'opensuse': "https://github.com/os-autoinst/os-autoinst-distri-opensuse.git"[0m
+[2026-05-16T08:32:54.943622Z] [debug] [pid:101204] [37musingenv DESKTOP=textmode[0m
+[2026-05-16T08:32:54.943850Z] [debug] [pid:101204] [37musingenv DISTRI=opensuse[0m
+[2026-05-16T08:32:54.943943Z] [debug] [pid:101204] [37musingenv QEMUCPU=host[0m
+[2026-05-16T08:32:54.944005Z] [debug] [pid:101204] [37musingenv INSTLANG=en_US[0m
+[2026-05-16T08:32:54.944100Z] [debug] [pid:101204] [37musingenv DVD=1[0m
+[2026-05-16T08:32:54.944181Z] [debug] [pid:101204] [37musingenv ISO=openSUSE-Tumbleweed-DVD-x86_64-Snapshot20260515-Media.iso[0m
+[2026-05-16T08:32:54.944258Z] [debug] [pid:101204] [37musingenv ISO_MAXSIZE=4700372992[0m
+[2026-05-16T08:32:54.947461Z] [debug] [pid:101204] [37mscheduling boot_ltp tests/kernel/boot_ltp.pm[0m
+[2026-05-16T08:32:54.955478Z] [info] [pid:101736] cmdsrv: daemon reachable under http://*:20293/xxxxxxxxxxxxxxxx/
+[2026-05-16T08:32:54.957074Z] [info] [pid:101736] Listening at "http://[::]:20293"
+Web application available at http://[::]:20293
+[2026-05-16T08:32:54.961014Z] [debug] [pid:101204] [37mgit hash in 'opensuse/products/opensuse/needles': 74c32d06e8f9f663c028c95e611a0cf87029d6b1[0m
+[2026-05-16T08:32:55.002757Z] [debug] [pid:101204] [37mgit url in 'opensuse/products/opensuse/needles': "git@github.com:os-autoinst/os-autoinst-needles-opensuse.git"[0m
+[2026-05-16T08:32:55.002919Z] [debug] [pid:101204] [37minit needles from opensuse/products/opensuse/needles[0m
+opensuse/products/opensuse/needles/systemsettings-plasma-6.6-upgraded-20260512.json missing match area
+ at /usr/lib/os-autoinst/needle.pm line 112.
+	needle::new("needle", "opensuse/products/opensuse/needles/systemsettings-plasma-6.6-"...) called at /usr/lib/os-autoinst/needle.pm line 255
+	needle::wanted_() called at /usr/lib/perl5/5.42.0/File/Find.pm line 675
+	File::Find::_find_dir_symlnk(HASH(0x5571a8219188), "/var/lib/openqa/pool/29/opensuse/products/opensuse/needles", "opensuse/products/opensuse/needles") called at /usr/lib/perl5/5.42.0/File/Find.pm line 234
+	File::Find::_find_opt(HASH(0x5571a8219188), "opensuse/products/opensuse/needles") called at /usr/lib/perl5/5.42.0/File/Find.pm line 763
+	File::Find::find(HASH(0x5571a8219188), "opensuse/products/opensuse/needles") called at /usr/lib/os-autoinst/needle.pm line 273
+	needle::init() called at /usr/lib/os-autoinst/OpenQA/Isotovideo/Runner.pm line 82
+	OpenQA::Isotovideo::Runner::prepare(OpenQA::Isotovideo::Runner=HASH(0x5571a1253510)) called at /usr/lib/os-autoinst/OpenQA/Isotovideo/Runner.pm line 250
+	OpenQA::Isotovideo::Runner::init(OpenQA::Isotovideo::Runner=HASH(0x5571a1253510)) called at /usr/bin/isotovideo line 190
+[2026-05-16T08:32:55.550137Z] [debug] [pid:101204] [37mloaded 5738 needles[0m
+[2026-05-16T08:32:55.707178Z] [debug] [pid:101204] [37m101204: channel_out 15, channel_in 14[0m
+[2026-05-16T08:32:55.795316Z] [debug] [pid:102210] [37m102210: cmdpipe 13, rsppipe 16[0m
+[2026-05-16T08:32:55.795848Z] [debug] [pid:102210] [37mstarted mgmt loop with pid 102210[0m
+[2026-05-16T08:32:55.858097Z] [debug] [pid:102210] [37mLaunching external video encoder: ffmpeg -y -hide_banner -nostats -r 24 -f image2pipe -vcodec ppm -i - -pix_fmt yuv420p -c:v libvpx-vp9 -crf 35 -b:v 1500k -cpu-used 1 'video.webm'[0m
+[2026-05-16T08:32:55.938240Z] [debug] [pid:102210] [37mqemu version detected: 10.0.9[0m
+[2026-05-16T08:32:55.940196Z] [debug] [pid:102210] [37mrunning `/usr/bin/chattr +C /var/lib/openqa/pool/29/raid`[0m
+[2026-05-16T08:32:55.951471Z] [debug] [pid:102210] [37mCommand `/usr/bin/chattr +C /var/lib/openqa/pool/29/raid` terminated with 1
+  /usr/bin/chattr: Operation not supported while setting flags on /var/lib/openqa/pool/29/raid[0m
+[2026-05-16T08:32:55.951571Z] [debug] [pid:102210] [37mConfiguring storage controllers and block devices[0m
+[2026-05-16T08:32:55.952086Z] [debug] [pid:102210] [37mrunning `/usr/bin/qemu-img info --output=json /var/lib/openqa/pool/29/opensuse-Tumbleweed-x86_64-20260515-DVD@64bit-with-ltp.qcow2`[0m
+[2026-05-16T08:32:56.003367Z] [debug] [pid:102210] [37mrunning `/usr/bin/qemu-img info --output=json /var/lib/openqa/pool/29/openSUSE-Tumbleweed-DVD-x86_64-Snapshot20260515-Media.iso`[0m
+[2026-05-16T08:32:56.038082Z] [debug] [pid:102210] [37mInitializing block device images[0m
+[2026-05-16T08:32:56.038270Z] [debug] [pid:102210] [37mrunning `/usr/bin/qemu-img create -f qcow2 -F qcow2 -b /var/lib/openqa/pool/29/opensuse-Tumbleweed-x86_64-20260515-DVD@64bit-with-ltp.qcow2 /var/lib/openqa/pool/29/raid/hd0-overlay0 32212254720`[0m
+[2026-05-16T08:32:56.075790Z] [debug] [pid:102210] [37mFormatting '/var/lib/openqa/pool/29/raid/hd0-overlay0', fmt=qcow2 cluster_size=65536 extended_l2=off compression_type=zlib size=32212254720 backing_file=/var/lib/openqa/pool/29/opensuse-Tumbleweed-x86_64-20260515-DVD@64bit-with-ltp.qcow2 backing_fmt=qcow2 lazy_refcounts=off refcount_bits=16[0m
+[2026-05-16T08:32:56.075897Z] [debug] [pid:102210] [37mrunning `/usr/bin/qemu-img create -f qcow2 -F raw -b /var/lib/openqa/pool/29/openSUSE-Tumbleweed-DVD-x86_64-Snapshot20260515-Media.iso /var/lib/openqa/pool/29/raid/cd0-overlay0 4463788032`[0m
+[2026-05-16T08:32:56.110200Z] [debug] [pid:102210] [37mFormatting '/var/lib/openqa/pool/29/raid/cd0-overlay0', fmt=qcow2 cluster_size=65536 extended_l2=off compression_type=zlib size=4463788032 backing_file=/var/lib/openqa/pool/29/openSUSE-Tumbleweed-DVD-x86_64-Snapshot20260515-Media.iso backing_fmt=raw lazy_refcounts=off refcount_bits=16[0m
+[2026-05-16T08:32:56.110283Z] [debug] [pid:102210] [37minit_blockdev_images: Finished creating block devices[0m
+[2026-05-16T08:32:56.111299Z] [debug] [pid:102210] [37mstarting: /usr/bin/qemu-system-x86_64 -device VGA,edid=on,xres=1024,yres=768 -only-migratable -chardev ringbuf,id=serial0,logfile=serial0,logappend=on -serial chardev:serial0 -audiodev none,id=snd0 -device intel-hda -device hda-output,audiodev=snd0 -global isa-fdc.fdtypeA=none -m 1536 -cpu host -netdev user,id=qanet0 -device virtio-net,netdev=qanet0,mac=52:54:00:12:34:56 -object rng-random,filename=/dev/urandom,id=rng0 -device virtio-rng-pci,rng=rng0 -boot order=c -device qemu-xhci -device usb-tablet -smp 1 -enable-kvm -no-shutdown -vnc :119,share=force-shared -device virtio-serial -chardev pipe,id=virtio_console,path=virtio_console,logfile=virtio_console.log,logappend=on -device virtconsole,chardev=virtio_console,name=org.openqa.console.virtio_console -chardev pipe,id=virtio_console_user,path=virtio_console_user,logfile=virtio_console_user.log,logappend=on -device virtconsole,chardev=virtio_console_user,name=org.openqa.console.virtio_console_user -chardev socket,path=qmp_socket,server=on,wait=off,id=qmp_socket,logfile=qmp_socket.log,logappend=on -qmp chardev:qmp_socket -S -device virtio-scsi-pci,id=scsi0 -blockdev driver=file,node-name=hd0-overlay0-file,filename=/var/lib/openqa/pool/29/raid/hd0-overlay0,cache.no-flush=on -blockdev driver=qcow2,node-name=hd0-overlay0,file=hd0-overlay0-file,cache.no-flush=on,discard=unmap -device virtio-blk,id=hd0-device,drive=hd0-overlay0,bootindex=0,serial=hd0 -blockdev driver=file,node-name=cd0-overlay0-file,filename=/var/lib/openqa/pool/29/raid/cd0-overlay0,cache.no-flush=on -blockdev driver=qcow2,node-name=cd0-overlay0,file=cd0-overlay0-file,cache.no-flush=on,discard=unmap -device scsi-cd,id=cd0-device,drive=cd0-overlay0,serial=cd0[0m
+[2026-05-16T08:32:56.115210Z] [debug] [pid:102210] [37mWaiting for 0 attempts[0m
+[2026-05-16T08:32:57.115729Z] [debug] [pid:102210] [37mWaiting for 1 attempts[0m
+[2026-05-16T08:32:58.116059Z] [debug] [pid:102210] [37mFinished after 2 attempts[0m
+[2026-05-16T08:32:58.131726Z] [debug] [pid:102210] [37mEstablishing VNC connection to localhost:6019[0m
+[2026-05-16T08:32:58.184473Z] [debug] [pid:102210] [37mpointer type 0 0 640 480 -257[0m
+[2026-05-16T08:32:58.184554Z] [debug] [pid:102210] [37mled state 0 1 1 -261[0m
+[2026-05-16T08:32:58.187435Z] [debug] [pid:102210] [37mStart CPU[0m
+[2026-05-16T08:32:58.187695Z] [debug] [pid:102210] [37mEVENT {"data":{"client":{"family":"ipv4","host":"127.0.0.1","service":"53612","websocket":false},"server":{"auth":"none","family":"ipv4","host":"0.0.0.0","service":"6019","websocket":false}},"event":"VNC_CONNECTED","timestamp":{"microseconds":132261,"seconds":1778920378}}[0m
+[2026-05-16T08:32:58.187800Z] [debug] [pid:102210] [37mEVENT {"data":{"client":{"family":"ipv4","host":"127.0.0.1","service":"53612","websocket":false},"server":{"auth":"none","family":"ipv4","host":"0.0.0.0","service":"6019","websocket":false}},"event":"VNC_INITIALIZED","timestamp":{"microseconds":133801,"seconds":1778920378}}[0m
+[2026-05-16T08:32:58.188074Z] [debug] [pid:102210] [37mEVENT {"event":"RESUME","timestamp":{"microseconds":187990,"seconds":1778920378}}[0m
+[2026-05-16T08:32:58.192021Z] [debug] [pid:101828] [37mGOT GO[0m
+[2026-05-16T08:32:58.193827Z] [debug] [pid:102210] [37mQEMU: QEMU emulator version 10.0.9 (SUSE Linux 16)[0m
+[2026-05-16T08:32:58.193889Z] [debug] [pid:102210] [37mQEMU: Copyright (c) 2003-2025 Fabrice Bellard and the QEMU Project developers[0m
+[2026-05-16T08:32:58.196786Z] [debug] [pid:101828] [37mSnapshots are supported[0m
+[2026-05-16T08:32:58.198883Z] [debug] [pid:101828] [1;34m||| starting boot_ltp tests/kernel/boot_ltp.pm[0m
+[2026-05-16T08:33:17.298786Z] [debug] [pid:101828] <<< testapi::select_console(testapi_console="root-virtio-terminal")
+[2026-05-16T08:33:19.601893Z] [debug] [pid:101828] <<< distribution::script_output("script failed with : \npoDZr\npackage kernel-default-extra is not installed\nSCRIPT_FINISHEDpoDZr-1-")
+[2026-05-16T08:33:19.601993Z] [debug] [pid:101828] tests/kernel/boot_ltp.pm:67 called LTP::utils::log_versions -> products/opensuse/../../lib/LTP/utils.pm:140 called testapi::record_info
+[2026-05-16T08:33:19.602062Z] [debug] [pid:101828] <<< testapi::record_info(title="KERNEL EXTRA PKG", output="package kernel-default-extra is not installed", result="ok")
+[2026-05-16T08:33:19.602242Z] [debug] [pid:101828] tests/kernel/boot_ltp.pm:67 called LTP::utils::log_versions -> products/opensuse/../../lib/LTP/utils.pm:141 called testapi::script_output
+[2026-05-16T08:33:20.517826Z] [debug] [pid:101828] [1;34m||| finished boot_ltp kernel (runtime: 22 s)[0m
+[2026-05-16T08:33:21.592163Z] [debug] [pid:101828] [1;34m||| starting ima_measurements tests/kernel/run_ltp.pm[0m
+[2026-05-16T08:33:22.275314Z] [debug] [pid:101828] <<< testapi::select_console(testapi_console="root-console")
+[2026-05-16T08:33:57.541121Z] [debug] [pid:101828] <<< testapi::select_console(testapi_console="root-virtio-terminal")
+[2026-05-16T08:33:58.645719Z] [debug] [pid:101828] [1;34m||| finished ima_measurements kernel (runtime: 37 s)[0m
+[2026-05-16T08:33:58.646924Z] [debug] [pid:101828] [1;34m||| starting ima_policy tests/kernel/run_ltp.pm[0m
+[2026-05-16T08:33:59.261405Z] [debug] [pid:101828] <<< testapi::select_console(testapi_console="root-console")
+[2026-05-16T08:34:34.323519Z] [debug] [pid:101828] <<< testapi::select_console(testapi_console="root-virtio-terminal")
+[2026-05-16T08:34:36.411582Z] [debug] [pid:101828] [1;34m||| finished ima_policy kernel (runtime: 38 s)[0m
+[2026-05-16T08:34:36.412686Z] [debug] [pid:101828] [1;34m||| starting ima_tpm tests/kernel/run_ltp.pm[0m
+[2026-05-16T08:34:37.045366Z] [debug] [pid:101828] <<< testapi::select_console(testapi_console="root-console")
+[2026-05-16T08:35:12.248618Z] [debug] [pid:101828] <<< testapi::select_console(testapi_console="root-virtio-terminal")
+[2026-05-16T08:35:13.112681Z] [debug] [pid:101828] [1;34m||| finished ima_tpm kernel (runtime: 37 s)[0m
+[2026-05-16T08:35:13.116249Z] [debug] [pid:101828] [1;34m||| starting ima_violations tests/kernel/run_ltp.pm[0m
+[2026-05-16T08:35:13.849820Z] [debug] [pid:101828] <<< testapi::select_console(testapi_console="root-console")
+[2026-05-16T08:35:49.007335Z] [debug] [pid:101828] <<< testapi::select_console(testapi_console="root-virtio-terminal")
+[2026-05-16T08:35:49.708454Z] [debug] [pid:101828] [1;34m||| finished ima_violations kernel (runtime: 36 s)[0m
+[2026-05-16T08:35:49.709640Z] [debug] [pid:101828] [1;34m||| starting ima_keys tests/kernel/run_ltp.pm[0m
+[2026-05-16T08:35:50.363730Z] [debug] [pid:101828] <<< testapi::select_console(testapi_console="root-console")
+[2026-05-16T08:36:26.456949Z] [debug] [pid:101828] <<< testapi::select_console(testapi_console="root-virtio-terminal")
+[2026-05-16T08:36:27.495915Z] [debug] [pid:101828] [1;34m||| finished ima_keys kernel (runtime: 38 s)[0m
+[2026-05-16T08:36:27.496992Z] [debug] [pid:101828] [1;34m||| starting ima_kexec tests/kernel/run_ltp.pm[0m
+[2026-05-16T08:36:28.464880Z] [debug] [pid:101828] <<< testapi::select_console(testapi_console="root-console")
+[2026-05-16T08:37:04.518800Z] [debug] [pid:101828] <<< testapi::select_console(testapi_console="root-virtio-terminal")
+[2026-05-16T08:37:05.274366Z] [debug] [pid:101828] [1;34m||| finished ima_kexec kernel (runtime: 38 s)[0m
+[2026-05-16T08:37:05.275533Z] [debug] [pid:101828] [1;34m||| starting ima_selinux tests/kernel/run_ltp.pm[0m
+[2026-05-16T08:37:05.276263Z] [debug] [pid:101828] <<< testapi::script_run(cmd="echo 'OpenQA::run_ltp.pm: Starting ima_selinux' > /dev/kmsg", quiet=undef, max_interval=250, output="", timeout=30)
+[2026-05-16T08:37:05.284295Z] [debug] [pid:101828] <<< testapi::send_key(key="ret", wait_screen_change=0)
+[2026-05-16T08:37:06.016837Z] [debug] [pid:101828] <<< testapi::script_run(cmd="vmstat -w", quiet=undef, max_interval=250, timeout=30, output="")
+[2026-05-16T08:37:06.029063Z] [debug] [pid:101828] <<< testapi::record_info(title="reboot", output="", result="ok")
+[2026-05-16T08:37:06.029333Z] [debug] [pid:101828] <<< testapi::select_console(testapi_console="root-console")
+[2026-05-16T08:37:06.333609Z] [debug] [pid:101828] <<< testapi::wait_still_screen(timeout=30, similarity_level=47, stilltime=1)
+[2026-05-16T08:37:08.020552Z] [debug] [pid:101828] [32m>>> testapi::wait_still_screen: detected same image for 1 seconds (1.68297696113586 s elapsed), last detected similarity is 50.4372371212676[0m
+[2026-05-16T08:37:08.020978Z] [debug] [pid:101828] <<< testapi::assert_screen(mustmatch=[
+    "tty6-selected",
+    "text-logged-in-root"
+  ], timeout=90)
+[2026-05-16T08:37:12.463648Z] [debug] [pid:101828] [32m>>> testapi::_handle_found_needle: found tty6-selected-20180514, similarity 1.00 @ 74/116[0m
+[2026-05-16T08:37:12.464839Z] [debug] [pid:101828] <<< testapi::type_string(string="root\n", max_interval=250, wait_screen_change=0, wait_still_screen=0, timeout=30, similarity_level=47)
+[2026-05-16T08:37:12.633935Z] [debug] [pid:101828] <<< testapi::assert_screen(mustmatch="password-prompt", timeout=60)
+[2026-05-16T08:37:13.182640Z] [debug] [pid:101828] [32m>>> testapi::_handle_found_needle: found password-prompt-20200507, similarity 1.00 @ 0/128[0m
+[2026-05-16T08:37:13.183106Z] [debug] [pid:101828] <<< testapi::type_string(string="[masked]", max_interval=100, wait_screen_change=0, wait_still_screen=0, timeout=30, similarity_level=47)
+[2026-05-16T08:37:14.387815Z] [debug] [pid:101828] <<< testapi::send_key(key="ret", wait_screen_change=0)
+[2026-05-16T08:37:14.622411Z] [debug] [pid:101828] <<< testapi::assert_screen(mustmatch="text-logged-in-root", timeout=60)
+[2026-05-16T08:37:15.680434Z] [debug] [pid:101828] [32m>>> testapi::_handle_found_needle: found text-logged-in-root-20151204, similarity 1.00 @ 63/176[0m
+[2026-05-16T08:37:15.680737Z] [debug] [pid:101828] <<< testapi::assert_screen(mustmatch="root-console", timeout=30)
+[2026-05-16T08:37:16.729112Z] [debug] [pid:101828] [32m>>> testapi::_handle_found_needle: found root-console-20180724, similarity 1.00 @ 88/176[0m
+[2026-05-16T08:37:16.729474Z] [debug] [pid:101828] <<< testapi::type_string(string="kbdrate -s -d99999\n", max_interval=250, wait_screen_change=0, wait_still_screen=0, timeout=30, similarity_level=47)
+[2026-05-16T08:37:17.370310Z] [debug] [pid:101828] <<< testapi::type_string(string="setterm -blank 0", max_interval=250, wait_screen_change=0, wait_still_screen=0, timeout=30, similarity_level=47)
+[2026-05-16T08:37:17.909568Z] [debug] [pid:101828] <<< testapi::type_string(string="; echo YpuUt-\$?- > /dev/ttyS0\n", max_interval=250, wait_screen_change=0, wait_still_screen=0, timeout=30, similarity_level=47)
+[2026-05-16T08:37:20.066670Z] [debug] [pid:101828] <<< testapi::assert_screen(mustmatch="root-console", timeout=30, no_wait=1)
+[2026-05-16T08:37:20.129292Z] [debug] [pid:101828] [32m>>> testapi::_handle_found_needle: found validate_product-root-console-20250403, similarity 1.00 @ 40/145[0m
+[2026-05-16T08:37:20.129659Z] [debug] [pid:101828] <<< testapi::type_string(string="reboot\n", max_interval=250, wait_screen_change=0, wait_still_screen=0, timeout=30, similarity_level=47)
+[2026-05-16T08:37:20.367008Z] [debug] [pid:101828] <<< testapi::check_screen(mustmatch="qemu-cd-rom-authentication-required", timeout=0)
+[2026-05-16T08:37:21.137015Z] [debug] [pid:101828] [32m>>> testapi::_check_backend_response: match=qemu-cd-rom-authentication-required timed out after 0 (check_screen)[0m
+[2026-05-16T08:37:21.151753Z] [debug] [pid:101828] <<< testapi::assert_screen(mustmatch=[
+    "grub2"
+  ], timeout=100)
+[2026-05-16T08:37:24.382866Z] [debug] [pid:101828] [32m>>> testapi::_handle_found_needle: found bootloader-grub2-jeos-20250610, similarity 1.00 @ 8/8[0m
+[2026-05-16T08:37:24.433503Z] [debug] [pid:101828] <<< testapi::send_key(key="ret", wait_screen_change=0)
+[2026-05-16T08:37:24.670098Z] [debug] [pid:101828] <<< testapi::assert_screen(mustmatch=[
+    "linux-login",
+    "emergency-shell",
+    "emergency-mode"
+  ], timeout=500)
+[2026-05-16T08:37:41.164185Z] [debug] [pid:101828] [32m>>> testapi::_handle_found_needle: found linux-login-20200525, similarity 1.00 @ 72/749[0m
+[2026-05-16T08:37:41.165048Z] [debug] [pid:101828] <<< testapi::select_console(testapi_console="root-virtio-terminal")
+[2026-05-16T08:37:41.647966Z] [debug] [pid:101828] <<< testapi::send_key(key="ret", wait_screen_change=0)
+[2026-05-16T08:37:41.677968Z] [debug] [pid:101828] <<< testapi::send_key(key="ret", wait_screen_change=0)
+[2026-05-16T08:37:42.096177Z] [debug] [pid:101828] <<< testapi::assert_script_run(cmd="export TERM=dumb", quiet=undef, max_interval=250, timeout=90, fail_message="")
+[2026-05-16T08:37:42.100855Z] [debug] [pid:101828] <<< testapi::assert_script_run(cmd="echo Logged into \$(tty)", result_title="vconsole_login", fail_message="", quiet=undef, max_interval=250, timeout=30)
+[2026-05-16T08:37:42.106299Z] [debug] [pid:101828] <<< testapi::assert_script_run(cmd="export LTPROOT=/opt/ltp; export LTP_COLORIZE_OUTPUT=n TMPDIR=/tmp PATH=\$LTPROOT/testcases/bin:\$PATH", fail_message="", max_interval=250, timeout=90, quiet=undef)
+[2026-05-16T08:37:42.110712Z] [debug] [pid:101828] <<< testapi::assert_script_run(cmd="export PASSWD='nots3cr3t'", max_interval=250, timeout=90, quiet=undef, fail_message="")
+[2026-05-16T08:37:42.115224Z] [debug] [pid:101828] <<< testapi::script_run(cmd="export LTP_IMA_LOAD_POLICY=1", timeout=30, max_interval=250, output="", quiet=undef)
+[2026-05-16T08:37:42.119671Z] [debug] [pid:101828] <<< testapi::assert_script_run(cmd="cd \$LTPROOT/testcases/bin", timeout=90, max_interval=250, quiet=undef, fail_message="")
+[2026-05-16T08:37:42.143123Z] [debug] [pid:101828] [1;34m||| finished ima_selinux kernel (runtime: 37 s)[0m
+[2026-05-16T08:37:42.144248Z] [debug] [pid:101828] [1;34m||| starting ima_conditionals_uid tests/kernel/run_ltp.pm[0m
+[2026-05-16T08:37:42.715617Z] [debug] [pid:101828] <<< testapi::select_console(testapi_console="root-console")
+[2026-05-16T08:38:22.262595Z] [debug] [pid:101828] <<< testapi::select_console(testapi_console="root-virtio-terminal")
+[2026-05-16T08:38:22.735034Z] [debug] [pid:101828] [1;34m||| finished ima_conditionals_uid kernel (runtime: 40 s)[0m
+[2026-05-16T08:38:22.736152Z] [debug] [pid:101828] [1;34m||| starting ima_conditionals_fowner tests/kernel/run_ltp.pm[0m
+[2026-05-16T08:38:23.306472Z] [debug] [pid:101828] <<< testapi::select_console(testapi_console="root-console")
+[2026-05-16T08:38:53.453044Z] [debug] [pid:101828] <<< testapi::select_console(testapi_console="root-virtio-terminal")
+[2026-05-16T08:38:54.707716Z] [debug] [pid:101828] [1;34m||| finished ima_conditionals_fowner kernel (runtime: 32 s)[0m
+[2026-05-16T08:38:54.708812Z] [debug] [pid:101828] [1;34m||| starting ima_conditionals_gid tests/kernel/run_ltp.pm[0m
+[2026-05-16T08:38:55.302522Z] [debug] [pid:101828] <<< testapi::select_console(testapi_console="root-console")
+[2026-05-16T08:39:29.437197Z] [debug] [pid:101828] <<< testapi::select_console(testapi_console="root-virtio-terminal")
+[2026-05-16T08:39:30.184002Z] [debug] [pid:101828] [1;34m||| finished ima_conditionals_gid kernel (runtime: 36 s)[0m
+[2026-05-16T08:39:30.185165Z] [debug] [pid:101828] [1;34m||| starting ima_conditionals_fgroup tests/kernel/run_ltp.pm[0m
+[2026-05-16T08:39:30.749444Z] [debug] [pid:101828] <<< testapi::select_console(testapi_console="root-console")
+[2026-05-16T08:40:00.899834Z] [debug] [pid:101828] <<< testapi::select_console(testapi_console="root-virtio-terminal")
+[2026-05-16T08:40:02.250927Z] [debug] [pid:101828] [1;34m||| finished ima_conditionals_fgroup kernel (runtime: 32 s)[0m
+[2026-05-16T08:40:02.252032Z] [debug] [pid:101828] [1;34m||| starting evm_overlay tests/kernel/run_ltp.pm[0m
+[2026-05-16T08:40:02.790084Z] [debug] [pid:101828] [1;34m||| finished evm_overlay kernel (runtime: 0 s)[0m
+[2026-05-16T08:40:02.790839Z] [debug] [pid:101828] [1;34m||| starting shutdown_ltp tests/kernel/shutdown_ltp.pm[0m
+[2026-05-16T08:40:03.444145Z] [debug] [pid:101828] <<< testapi::select_console(testapi_console="root-console")
+[2026-05-16T08:40:21.405200Z] [debug] [pid:101828] [1;34m||| finished shutdown_ltp kernel (runtime: 19 s)[0m
+[2026-05-16T08:40:21.517377Z] [debug] [pid:101204] [37mdone with autotest process[0m
+[2026-05-16T08:40:21.517678Z] [debug] [pid:101204] [37misotovideo starting handle_shutdown[0m
+[2026-05-16T08:40:21.517743Z] [debug] [pid:101204] [37mstopping command server 101736 because test execution ended[0m
+[2026-05-16T08:40:21.517795Z] [debug] [pid:101204] [37misotovideo: informing websocket clients before stopping command server: http://127.0.0.1:20293/xxxxxxxxxxxxxxxx/broadcast[0m
+[2026-05-16T08:40:21.527954Z] [debug] [pid:101204] [37mcommands process exited: 0[0m
+[2026-05-16T08:40:21.628195Z] [debug] [pid:101204] [37mdone with command server[0m
+[2026-05-16T08:40:21.628933Z] [debug] [pid:101204] [37mbackend shutdown state: 1[0m
+[2026-05-16T08:40:21.629254Z] [info] [pid:102210] [33m::: OpenQA::Qemu::Proc::save_state: Saving QEMU state to qemu_state.json[0m
+[2026-05-16T08:40:22.668706Z] [debug] [pid:102210] [37mPassing remaining frames to the video encoder[0m
+frame=  807 fps=1.8 q=0.0 Lsize=    3087kB time=00:00:33.58 bitrate= 752.9kbits/s speed=0.0757x    
+video:3081kB audio:0kB subtitle:0kB other streams:0kB global headers:0kB muxing overhead: 0.193336%
+[2026-05-16T08:40:22.981417Z] [debug] [pid:102210] [37mWaiting for video encoder to finalize the video[0m
+[2026-05-16T08:40:22.981494Z] [debug] [pid:102210] [37mThe external video encoder (pid 102598) terminated[0m
+[2026-05-16T08:40:22.981536Z] [debug] [pid:102210] [37mThe built-in video encoder (pid 102600) terminated[0m
+[2026-05-16T08:40:22.982005Z] [debug] [pid:102210] [37mQEMU: qemu-system-x86_64: terminating on signal 15 from pid 102210 (/usr/bin/isotovideo: backend)[0m
+[2026-05-16T08:40:22.982477Z] [debug] [pid:102210] [37msending magic and exit[0m
+[2026-05-16T08:40:22.982681Z] [debug] [pid:101204] [37mreceived magic close[0m
+[2026-05-16T08:40:23.023891Z] [debug] [pid:101204] [37mbackend process exited: 0[0m
+[2026-05-16T08:40:23.124836Z] [debug] [pid:101204] [37misotovideo completed handle_shutdown: done[0m
+[2026-05-16T08:40:23.125029Z] [debug] [pid:101204] [37mstopping backend process 102210[0m
+[2026-05-16T08:40:23.125093Z] [debug] [pid:101204] [37mdone with backend process[0m
+101204: EXIT 0
+[2026-05-16T08:40:23.179052Z] [info] Isotovideo exit status: 0
+[2026-05-16T08:40:23.233057Z] [info] +++ worker notes +++
+[2026-05-16T08:40:23.233179Z] [info] End time: 2026-05-16 08:40:23
+[2026-05-16T08:40:23.233225Z] [info] Result: done
+[2026-05-16T08:40:23.235643Z] [info] Uploading boot_ltp-config-7.0.6-1-default
+[2026-05-16T08:40:23.341213Z] [info] Uploading boot_ltp-kernel-pkg.txt
+[2026-05-16T08:40:23.402847Z] [info] Uploading boot_ltp-ver_linux_before.txt
+[2026-05-16T08:40:23.481764Z] [info] Uploading ltp_known_issues.yaml
+[2026-05-16T08:40:23.517788Z] [info] Uploading result_array.json
+[2026-05-16T08:40:23.567312Z] [info] Uploading shutdown_ltp-dmesg.txt
+[2026-05-16T08:40:23.614867Z] [info] Uploading shutdown_ltp-journalctl.txt
+[2026-05-16T08:40:23.672809Z] [info] Uploading shutdown_ltp-system-status.txt
+[2026-05-16T08:40:23.713850Z] [info] Uploading shutdown_ltp-ver_linux_after.txt
+[2026-05-16T08:40:23.764861Z] [info] Uploading ima
+[2026-05-16T08:40:23.850864Z] [info] ima: Processing chunk 1/1, avg. speed ~5.446 KiB/s
+[2026-05-16T08:40:23.868534Z] [info] Uploading video.webm
+[2026-05-16T08:40:24.003034Z] [info] Uploading autoinst-log.txt

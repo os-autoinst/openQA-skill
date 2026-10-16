@@ -1,0 +1,37 @@
+[    0.000000][    T0] Linux version 7.0.7-1-default (geeko@buildhost) (gcc (SUSE Linux) 15.2.1 20260202, GNU ld (GNU Binutils; openSUSE Tumbleweed) 2.45.0.20251103-3) #1 SMP PREEMPT_DYNAMIC Fri May 15 08:50:06 UTC 2026 (f1d450c)
+[!p]104\[0m[?7h[1G[0J[6n[32766;32766H[6n[!p]104\[0m[?7h[1G[0J[6n[32766;32766H[6n]3008;start=9b63e65ebafc4cb1bfd2620a169ec937;user=root;hostname=susetest;machineid=dcf76e184d474a6291364d194ff73d6f;bootid=d77da86eebf545a4b734b9c91d1b532d;pid=1056;pidfdid=1056;comm=(agetty);servicename=serial-getty@ttyS0.service;invocationid=5951d3f5ce1a4332914da231e8dfbb43;type=service\P+q6E616D65\
+
+Welcome to openSUSE Tumbleweed 20260516 - Kernel 7.0.7-1-default (ttyS0).
+
+ens4: 10.0.2.15
+
+
+
+susetest login: [   15.217133][ T1225] OpenQA::run_ltp.pm: Starting ima_selinux
+[   15.383826][ T1306] loop: module loaded
+[   15.387099][ T1305] loop0: detected capacity change from 0 to 614400
+[   15.514577][   T31] operation not supported error, dev loop0, sector 614272 op 0x9:(WRITE_ZEROES) flags 0x10800800 phys_seg 0 prio class 2
+[   15.633875][ T1344] EXT4-fs (loop0): mounting ext3 file system using the ext4 subsystem
+[   15.636552][ T1344] EXT4-fs (loop0): mounted filesystem 1cebdd31-7589-4e4c-b5c3-fbb7b51b967b r/w with ordered data mode. Quota mode: none.
+[   15.690332][ T1283] ima: policy update failed
+[   15.693330][ T1397] ima: policy update completed
+[   15.701760][ T1283] SELinux: ima_selinux.sh (1283) wrote to checkreqprot. This is no longer supported.
+[   15.720449][ T1418] EXT4-fs (loop0): unmounting filesystem 1cebdd31-7589-4e4c-b5c3-fbb7b51b967b.
+YpuUt-0-
+[!p]104\[0m[?7h[1G[0J[6n[32766;32766H[6n]3008;end=9b63e65ebafc4cb1bfd2620a169ec937\[   31.672391][   T27] audit: type=1305 audit(1778999074.408:166): op=set audit_enabled=0 old=1 auid=4294967295 ses=4294967295 subj=system_u:system_r:auditctl_t:s0 res=1
+[   31.754986][  T763] systemd-journald[763]: Received client request to relinquish /var/log/journal/dcf76e184d474a6291364d194ff73d6f access.
+[   31.871389][    T1] systemd-shutdown[1]: Syncing filesystems and block devices.
+[   33.808954][    T1] systemd-shutdown[1]: Deactivating swaps.
+[   33.810410][    T1] systemd-shutdown[1]: All swaps deactivated.
+[   33.811944][    T1] systemd-shutdown[1]: Detaching loop devices.
+[   33.815289][    T1] systemd-shutdown[1]: All loop devices detached.
+[   33.816911][    T1] systemd-shutdown[1]: Stopping MD devices.
+[   33.818460][    T1] systemd-shutdown[1]: All MD devices stopped.
+[   33.820004][    T1] systemd-shutdown[1]: Detaching DM devices.
+[   33.821546][    T1] systemd-shutdown[1]: All DM devices detached.
+[   33.823098][    T1] systemd-shutdown[1]: All filesystems, swaps, loop devices, MD devices and DM devices detached.
+[   33.832849][    T1] systemd-shutdown[1]: Syncing filesystems and block devices.
+[   33.835015][    T1] systemd-shutdown[1]: Powering off.
+[   33.940597][    T1] ACPI: PM: Preparing to enter system sleep state S5
+[   33.942270][    T1] kvm: exiting hardware virtualization
+[   33.943623][    T1] reboot: Power down

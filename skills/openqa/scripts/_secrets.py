@@ -277,12 +277,15 @@ RULES = (
         r"\1" + MARK.format("url-query"),
     ),
     # A query with no key is the access token of a SUSE update repository; it needs
-    # letters and digits both, so a long word or a timestamp stays.
+    # letters and digits both, so a long word or a timestamp stays. Base64 may end it
+    # with "=" padding; then the query must end there, as "key=/path" and "key=&b=1"
+    # go on.
     (
         "url-bare-query",
         re.compile(
             r"(://(?:(?!://)[^\s?#'\"<>]){1,2048}\?)"
-            r"(?=[A-Za-z_-]*[0-9])(?=[0-9_-]*[A-Za-z])[A-Za-z0-9_-]{16,}(?![A-Za-z0-9_=-])"
+            r"(?=[A-Za-z_-]*[0-9])(?=[0-9_-]*[A-Za-z])[A-Za-z0-9_-]{16,}"
+            r"(?:={1,2}(?=$|[\s'\"<>)\]#]|[.,;](?:\s|$)))?(?![A-Za-z0-9_=-])"
         ),
         r"\1" + MARK.format("url-bare-query"),
     ),

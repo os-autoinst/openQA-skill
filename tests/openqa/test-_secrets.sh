@@ -337,6 +337,10 @@ check "a token after a file name in zypp.log and in zypper lr -u" "$(
 		"2026-10-16 10:00:00 <1> susetest(4242) [zypp::media] MediaCurl.cc(evaluateCurlCode):1047 Download (curl) error for '${repo}repodata/repomd.xml?[REDACTED:url-bare-query]':" \
 		"  3 | SLE-Module-Basesystem15-SP5-Updates | Yes | (r ) Yes | Yes | $repo?[REDACTED:url-bare-query]"
 )" "$actual"
+for pad in '= update' '==' '=).' '==. Next' '=, next' '=#top'; do
+	actual=$(printf 'zypper ar %s?%s%s\n' "$repo" "$qtok" "$pad" | python3 "$scripts/_secrets.py" 2>/dev/null)
+	check "a bare query token with base64 padding where the query ends goes whole: '$pad'" "zypper ar $repo?[REDACTED:url-bare-query]${pad##*=}" "$actual"
+done
 for key in token access_token auth sig signature X-Amz-Signature X-Goog-Signature credentials; do
 	hides "a token as the value of ?$key=" "GET ${repo}repodata/repomd.xml?$key=$qtok&arch=x86_64\n" "$qtok"
 done
@@ -344,7 +348,9 @@ for url in 'https://bugzilla.opensuse.org/show_bug.cgi?id=123' "$repo?arch=x86_6
 	'https://openqa.opensuse.org/tests/latest?arch=x86_64&distri=opensuse&flavor=DVD&machine=64bit&test=textmode&version=Tumbleweed' \
 	'https://download.opensuse.org/tumbleweed/repo/oss/repodata/repomd.xml?mirrorlist' \
 	'https://example.org/docs?a-long-word-as-a-query' 'https://example.org/app.js?17000000000000000' \
-	"$repo?ABCDEFGH12345678=value"; do
+	"$repo?ABCDEFGH12345678=value" "$repo?ABCDEFGH12345678===" "$repo?ABCDEFGH12345678==value" \
+	"$repo?ABCDEFGH12345678=/path/to/file" "$repo?ABCDEFGH12345678=+x" "$repo?ABCDEFGH12345678=.x" \
+	"$repo?ABCDEFGH12345678=&page=2" "$repo?ABCDEFGH12345678=;page=2" "$repo?ABCDEFGH12345678=,x"; do
 	keeps "an ordinary query: ${url#*\?}" "GET $url\n"
 done
 
@@ -402,7 +408,7 @@ for name, pattern, text in (
     ('google-oauth-token', rules['google-oauth-token'], 'ya29.' * 60000),
     ('google-api-key', rules['google-api-key'], 'AIza' * 80000),
     ('slack-webhook', rules['slack-webhook'], 'hooks.slack.com/services/' * 20000),
-    ('url-bare-query', rules['url-bare-query'], 'https://h/?' + 'A1' * 130000 + '='),
+    ('url-bare-query', rules['url-bare-query'], 'https://h/?' + 'A1' * 130000 + '==='),
 ):
     start = time.monotonic()
     pattern.subn('', text)

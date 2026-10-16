@@ -1,0 +1,157 @@
+
+    <h5>Result files
+    </h5>
+    <ul class="resultfile-list">
+    <li>
+            <i title="Video of this testrun" class="fa-regular fa-file-video"></i>
+            <a href="/tests/5933072/video?filename=video.webm">
+                Video
+            </a>
+        <a href="/tests/5933072/file/video.webm" target="blank" title="Raw/download">
+            <i class="fa-solid fa-download"></i>
+        </a>
+    </li>
+    <li>
+            <i title="Logfile produced by this testrun" class="fa-solid fa-terminal"></i>
+            <a href="/tests/5933072/logfile?filename=autoinst-log.txt">
+                autoinst-log.txt
+            </a>
+        <a href="/tests/5933072/file/autoinst-log.txt" target="blank" title="Raw/download">
+            <i class="fa-solid fa-download"></i>
+        </a>
+    </li>
+    <li>
+            <i title="Logfile produced by this testrun" class="fa-solid fa-terminal"></i>
+            <a href="/tests/5933072/logfile?filename=worker-log.txt">
+                worker-log.txt
+            </a>
+        <a href="/tests/5933072/file/worker-log.txt" target="blank" title="Raw/download">
+            <i class="fa-solid fa-download"></i>
+        </a>
+    </li>
+    <li>
+            <i class="fa-regular fa-file"></i>
+            <a href="/tests/5933072/file/vars.json">
+                vars.json
+            </a>
+    <li>
+            <i title="Logfile produced by this testrun" class="fa-solid fa-terminal"></i>
+            <a href="/tests/5933072/logfile?filename=serial0.txt">
+                serial0.txt
+            </a>
+        <a href="/tests/5933072/file/serial0.txt" target="blank" title="Raw/download">
+            <i class="fa-solid fa-download"></i>
+        </a>
+    </li>
+    <li>
+            <i title="Logfile produced by this testrun" class="fa-solid fa-terminal"></i>
+            <a href="/tests/5933072/logfile?filename=serial_terminal.txt">
+                serial_terminal.txt
+            </a>
+        <a href="/tests/5933072/file/serial_terminal.txt" target="blank" title="Raw/download">
+            <i class="fa-solid fa-download"></i>
+        </a>
+    </li>
+    <li>
+            <i title="Logfile produced by this testrun" class="fa-solid fa-terminal"></i>
+            <a href="/tests/5933072/logfile?filename=serial_terminal_user.txt">
+                serial_terminal_user.txt
+            </a>
+        <a href="/tests/5933072/file/serial_terminal_user.txt" target="blank" title="Raw/download">
+            <i class="fa-solid fa-download"></i>
+        </a>
+    </li>
+</ul>
+
+    <h6>Uploaded logs
+    </h6>
+    <ul class="resultfile-list">
+    <li>
+            <i class="fa-regular fa-file"></i>
+            <a href="http://openqa-assets.opensuse.org/tests/5933072/file/boot_ltp-config-7.0.7-1-default">
+                boot_ltp-config-7.0.7-1-default
+            </a>
+    <li>
+            <i title="Logfile produced by this testrun" class="fa-solid fa-terminal"></i>
+            <a href="/tests/5933072/logfile?filename=boot_ltp-kernel-pkg.txt">
+                boot_ltp-kernel-pkg.txt
+            </a>
+        <a href="http://openqa-assets.opensuse.org/tests/5933072/file/boot_ltp-kernel-pkg.txt" target="blank" title="Raw/download">
+            <i class="fa-solid fa-download"></i>
+        </a>
+    </li>
+    <li>
+            <i title="Logfile produced by this testrun" class="fa-solid fa-terminal"></i>
+            <a href="/tests/5933072/logfile?filename=boot_ltp-ver_linux_before.txt">
+                boot_ltp-ver_linux_before.txt
+            </a>
+        <a href="http://openqa-assets.opensuse.org/tests/5933072/file/boot_ltp-ver_linux_before.txt" target="blank" title="Raw/download">
+            <i class="fa-solid fa-download"></i>
+        </a>
+    </li>
+    <li>
+            <i class="fa-regular fa-file"></i>
+            <a href="http://openqa-assets.opensuse.org/tests/5933072/file/ltp_known_issues.yaml">
+                ltp_known_issues.yaml
+            </a>
+    <li>
+            <i class="fa-regular fa-file"></i>
+            <a href="http://openqa-assets.opensuse.org/tests/5933072/file/result_array.json">
+                result_array.json
+            </a>
+    <li>
+            <i title="Logfile produced by this testrun" class="fa-solid fa-terminal"></i>
+            <a href="/tests/5933072/logfile?filename=shutdown_ltp-dmesg.txt">
+                shutdown_ltp-dmesg.txt
+            </a>
+        <a href="http://openqa-assets.opensuse.org/tests/5933072/file/shutdown_ltp-dmesg.txt" target="blank" title="Raw/download">
+            <i class="fa-solid fa-download"></i>
+        </a>
+    </li>
+    <li>
+            <i title="Logfile produced by this testrun" class="fa-solid fa-terminal"></i>
+            <a href="/tests/5933072/logfile?filename=shutdown_ltp-journalctl.txt">
+                shutdown_ltp-journalctl.txt
+            </a>
+        <a href="http://openqa-assets.opensuse.org/tests/5933072/file/shutdown_ltp-journalctl.txt" target="blank" title="Raw/download">
+            <i class="fa-solid fa-download"></i>
+        </a>
+    </li>
+    <li>
+            <i title="Logfile produced by this testrun" class="fa-solid fa-terminal"></i>
+            <a href="/tests/5933072/logfile?filename=shutdown_ltp-system-status.txt">
+                shutdown_ltp-system-status.txt
+            </a>
+        <a href="http://openqa-assets.opensuse.org/tests/5933072/file/shutdown_ltp-system-status.txt" target="blank" title="Raw/download">
+            <i class="fa-solid fa-download"></i>
+        </a>
+    </li>
+    <li>
+            <i title="Logfile produced by this testrun" class="fa-solid fa-terminal"></i>
+            <a href="/tests/5933072/logfile?filename=shutdown_ltp-ver_linux_after.txt">
+                shutdown_ltp-ver_linux_after.txt
+            </a>
+        <a href="http://openqa-assets.opensuse.org/tests/5933072/file/shutdown_ltp-ver_linux_after.txt" target="blank" title="Raw/download">
+            <i class="fa-solid fa-download"></i>
+        </a>
+    </li>
+</ul>
+
+
+    <h5>Assets
+    </h5>
+    <ul id="asset-list">            <li>
+                    <a href="/tests/5933072/asset/other/openSUSE-Tumbleweed-DVD-x86_64-Snapshot20260516-Media.iso.sha256" id="asset_93867561">
+                    openSUSE-Tumbleweed-DVD-x86_64-Snapshot20260516-Media.iso.sha256
+</a>                    (124 Byte)
+                <a href="/admin/assets?search=openSUSE-Tumbleweed-DVD-x86_64-Snapshot20260516-Media.iso.sha256" title="Find in assets table">
+                    <i class="fa-solid fa-table"></i>
+                </a>
+            </li>
+            <li>
+                    opensuse-Tumbleweed-x86_64-20260516-DVD@64bit-with-ltp-uefi-vars.qcow2 (does not exist)
+                <a href="/admin/assets?search=opensuse-Tumbleweed-x86_64-20260516-DVD%4064bit-with-ltp-uefi-vars.qcow2" title="Find in assets table">
+                    <i class="fa-solid fa-table"></i>
+                </a>
+            </li>
+</ul>

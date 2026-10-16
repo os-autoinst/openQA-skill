@@ -1,0 +1,133 @@
+[!p]104\[0m[?7h[1G[0J[6n[32766;32766H[6n[!p]104\[0m[?7h[1G[0J[6n[32766;32766H[6n]3008;start=b8817fbc6bed4f3fa6e4b20fe2e61696;user=root;hostname=susetest;machineid=0d863c5d034143229ed884f92a55f39b;bootid=0e4df6116e6d43e497b32b8e234685a5;pid=1064;pidfdid=1064;comm=(agetty);servicename=serial-getty@hvc0.service;invocationid=cb810a4576a242d8a84c7dc1dcc1fbea;type=service\P+q6E616D65\
+
+Welcome to openSUSE Tumbleweed 20260515 - Kernel 7.0.6-1-default (hvc0).
+
+ens4: 10.0.2.15
+
+
+
+susetest login: 
+
+susetest login: root
+
+Password: 
+]3008;start=9f79d45eff8842a7ba826bf315ba3d9d;user=root;hostname=susetest;machineid=0d863c5d034143229ed884f92a55f39b;bootid=0e4df6116e6d43e497b32b8e234685a5;pid=1064;pidfdid=1064;comm=login;targetuser=root;sessionid=1;type=session\Last login: Sat May 16 04:25:30 EDT 2026 on tty6
+Have a lot of fun...
+[1msusetest:~ #[m(B export PAGER=cat TERM=dumb; stty cols 2048; exec $SHELL
+susetest:~ # PS1="# "
+# export TERM=dumb; echo Gi8yV-$?-
+Gi8yV-0-
+# echo Logged into $(tty); echo 1XrKo-$?-
+Logged into /dev/hvc0
+1XrKo-0-
+# gzip -9 </dev/fb0 >framebuffer.dat.gz; echo O4CVk-$?-
+bash: /dev/fb0: No such file or directory
+O4CVk-1-
+> EOT_qGHiZ
+qGHiZ-0-
+# echo qGHiZ; bash -oe pipefail /tmp/scriptqGHiZ.sh ; echo SCRIPT_FINISHEDqGHiZ-$?-
+qGHiZ
+Name        : ltp
+Version     : 20260513.8cd7644a
+Release     : 2804.1
+Architecture: x86_64
+Install Date: Sat 16 May 2026 04:24:07 AM EDT
+Group       : System/Benchmark
+Size        : 642283699
+License     : GPL-2.0-or-later
+Signature   : RSA/SHA256, Fri 15 May 2026 08:15:33 PM EDT, Key ID 5e717d50a34cb126
+Source RPM  : ltp-20260513.8cd7644a-2804.1.src.rpm
+Build Date  : Fri 15 May 2026 08:04:23 PM EDT
+Build Host  : reproducible
+Vendor      : obs://build.opensuse.org/benchmark:ltp:devel
+URL         : http://linux-test-project.github.io
+Summary     : The Linux Test Project
+Description :
+A collection of test suites to validate the reliability, robustness and
+stability of Linux. It provides tools for testing the kernel and
+related features.
+Distribution: benchmark:ltp:devel / openSUSE_Factory
+SCRIPT_FINISHEDqGHiZ-0-
+# cat > /tmp/scriptLT~xS.sh << 'EOT_LT~xS'; echo LT~xS-$?-
+# echo 'OpenQA::run_ltp.pm: Starting ima_selinux' > /dev/kmsg; echo 7Ei2P-$?-
+7Ei2P-0-
+# ima_selinux.sh; echo "### TEST ima_selinux COMPLETE >>> $?."
+tmpfs is skipped
+ima_selinux 1 TINFO: Running: ima_selinux.sh 
+ima_selinux 1 TINFO: Tested kernel: Linux susetest 7.0.6-1-default #1 SMP PREEMPT_DYNAMIC Mon May 11 08:08:27 UTC 2026 (437be88) x86_64 x86_64 x86_64 GNU/Linux
+ima_selinux 1 TINFO: Using /tmp/LTP_ima_selinux.OvIsHaXzvf as tmpdir (tmpfs filesystem)
+tst_device.c:98: TINFO: Found free device 0 '/dev/loop0'
+ima_selinux 1 TINFO: Formatting ext3 with opts='/dev/loop0'
+ima_selinux 1 TINFO: Mounting device: mount -t ext3 /dev/loop0 /tmp/LTP_ima_selinux.OvIsHaXzvf/mntpoint 
+ima_selinux 1 TINFO: timeout per run is 0h 5m 0s
+ima_selinux 1 TINFO: IMA kernel config:
+ima_selinux 1 TINFO: CONFIG_IMA=y
+ima_selinux 1 TINFO: CONFIG_IMA_MEASURE_PCR_IDX=10
+ima_selinux 1 TINFO: CONFIG_IMA_LSM_RULES=y
+ima_selinux 1 TINFO: CONFIG_IMA_NG_TEMPLATE=y
+ima_selinux 1 TINFO: CONFIG_IMA_DEFAULT_TEMPLATE="ima-ng"
+ima_selinux 1 TINFO: CONFIG_IMA_DEFAULT_HASH_SHA256=y
+ima_selinux 1 TINFO: CONFIG_IMA_DEFAULT_HASH="sha256"
+ima_selinux 1 TINFO: CONFIG_IMA_READ_POLICY=y
+ima_selinux 1 TINFO: CONFIG_IMA_APPRAISE=y
+ima_selinux 1 TINFO: CONFIG_IMA_ARCH_POLICY=y
+ima_selinux 1 TINFO: CONFIG_IMA_APPRAISE_BOOTPARAM=y
+ima_selinux 1 TINFO: CONFIG_IMA_APPRAISE_MODSIG=y
+ima_selinux 1 TINFO: CONFIG_IMA_KEYRINGS_PERMIT_SIGNED_BY_BUILTIN_OR_SECONDARY=y
+ima_selinux 1 TINFO: CONFIG_IMA_BLACKLIST_KEYRING=y
+ima_selinux 1 TINFO: CONFIG_IMA_MEASURE_ASYMMETRIC_KEYS=y
+ima_selinux 1 TINFO: CONFIG_IMA_QUEUE_EARLY_BOOT_KEYS=y
+ima_selinux 1 TINFO: CONFIG_IMA_SECURE_AND_OR_TRUSTED_BOOT=y
+ima_selinux 1 TINFO: CONFIG_IMA_DISABLE_HTABLE=y
+ima_selinux 1 TINFO: /proc/cmdline: BOOT_IMAGE=/boot/vmlinuz-7.0.6-1-default root=UUID=1c95e42c-07f9-4214-8398-1439abeac4d0 splash=silent video=1024x768 plymouth.ignore-serial-consoles console=ttyS0 console=tty inst.install_url=https://openqa.opensuse.org/assets/repo/openSUSE-Tumbleweed-oss-x86_64-Snapshot20260515 kernel.softlockup_panic=1 resume=/dev/disk/by-uuid/4a2c7b60-4e02-47c4-bb95-8ad959552ba3 security=selinux selinux=1 mitigations=auto ignore_loglevel
+ima_selinux 1 TINFO: $TMPDIR is on tmpfs => run on loop device
+ima_selinux 1 TINFO: test requires IMA policy:
+measure func=CRITICAL_DATA label=selinux
+ima_selinux 1 TINFO: WARNING: missing required policy content: 'measure func=CRITICAL_DATA label=selinux'
+ima_selinux 1 TINFO: trying to load '/opt/ltp/testcases/data/ima_selinux/selinux.policy' policy:
+measure func=CRITICAL_DATA label=selinux
+ima_selinux 1 TINFO: example policy successfully loaded
+ima_selinux 1 TINFO: verifying SELinux policy hash measurement
+ima_selinux 1 TPASS: SELinux policy hash measured correctly
+ima_selinux 2 TINFO: verifying SELinux state measurement
+ima_selinux 2 TPASS: SELinux state measured correctly
+ima_selinux 3 TINFO: WARNING: policy loaded via LTP_IMA_LOAD_POLICY=1, reboot recommended
+
+Summary:
+passed   2
+failed   0
+broken   0
+skipped  0
+warnings 0
+### TEST ima_selinux COMPLETE >>> 0.
+# vmstat -w; echo kQ8Ut-$?-
+# echo '=========> lspci <=========' >> /tmp/system-status.txt; lspci >> /tmp/system-status.txt; echo '' >> /tmp/system-status.txt; echo Ajv~x-$?-
+Ajv~x-0-
+# echo '=========> repos <=========' >> /tmp/system-status.txt; zypper repos -u >> /tmp/system-status.txt; echo '' >> /tmp/system-status.txt; echo uK9zS-$?-
+uK9zS-0-
+# curl --form upload=@/tmp/system-status.txt --form upname=shutdown_ltp-system-status.txt --max-time 100 http://10.0.2.2:20293/xxxxxxxxxxxxxxxx/uploadlog/system-status.txt; echo uhdOg-$?-
+OK: shutdown_ltp-system-status.txt
+uhdOg-0-
+# journalctl -b -o short-precise >/tmp/journalctl.txt; echo yZ6~m-$?-
+yZ6~m-0-
+# curl --form upload=@/tmp/journalctl.txt --form upname=shutdown_ltp-journalctl.txt --max-time 100 http://10.0.2.2:20293/xxxxxxxxxxxxxxxx/uploadlog/journalctl.txt; echo wH5AK-$?-
+OK: shutdown_ltp-journalctl.txt
+wH5AK-0-
+# dmesg >/tmp/dmesg.txt; echo pKznl-$?-
+pKznl-0-
+# curl --form upload=@/tmp/dmesg.txt --form upname=shutdown_ltp-dmesg.txt --max-time 100 http://10.0.2.2:20293/xxxxxxxxxxxxxxxx/uploadlog/dmesg.txt; echo Q6abu-$?-
+OK: shutdown_ltp-dmesg.txt
+Q6abu-0-
+# echo -n >/etc/machine-id; echo YZJ4T-$?-
+YZJ4T-0-
+# 
+
+Broadcast message from root@susetest on tty6 (Sat 2026-05-16 04:40:18 EDT):
+
+
+
+The system will power off now!
+
+
+
+]3008;end=7f293f4d7ce341c68eb9b21245674593\[!p]104\[0m[?7h[1G[0J[6n[32766;32766H[6n]3008;end=dc254300bb8944d095ef72d85ab04f1f\

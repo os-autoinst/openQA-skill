@@ -210,7 +210,8 @@ them; do not paste one into a shell.
 
 `--lines A-B` reads lines A to B (`1 <= A <= B`), numbered as `--grep` and `--errors` number them, so a
 hit can be read in its surroundings: of the range at most `--max-lines` lines, the first ones, and a
-`note:` with the range to read next.
+`note:` with the range to read next. A range past the end says how long the file is, or, when
+`--max-bytes` cut the read, `note: N lines read (cut at --max-bytes)`.
 
 `--members` lists an uploaded tar archive (`.tar`, `.tar.gz`/`.tgz`, `.tar.bz2`/`.tbz2`, `.tar.xz`/`.txz`, also when
 split over several compressed streams; zstd and zip are refused) as `<size> <type> <name>`, names as stored and

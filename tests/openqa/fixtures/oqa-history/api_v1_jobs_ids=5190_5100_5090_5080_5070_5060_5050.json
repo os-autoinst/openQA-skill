@@ -1,0 +1,53 @@
+{
+ "jobs": [
+  {
+   "id": 5190,
+   "state": "running",
+   "t_started": "2030-01-02T12:00:00",
+   "t_finished": null,
+   "assigned_worker_id": 31
+  },
+  {
+   "id": 5100,
+   "state": "done",
+   "t_started": "2030-01-01T10:00:00",
+   "t_finished": "2030-01-01T10:30:00",
+   "assigned_worker_id": 31
+  },
+  {
+   "id": 5090,
+   "state": "done",
+   "t_started": "2030-01-01T09:00:00",
+   "t_finished": "2030-01-01T09:30:00",
+   "assigned_worker_id": 31
+  },
+  {
+   "id": 5080,
+   "state": "done",
+   "t_started": "2030-01-01T08:00:00",
+   "t_finished": "2030-01-01T08:30:00",
+   "assigned_worker_id": 31
+  },
+  {
+   "id": 5070,
+   "state": "done",
+   "t_started": "2030-01-01T07:00:00",
+   "t_finished": "2030-01-01T07:30:00",
+   "assigned_worker_id": 31
+  },
+  {
+   "id": 5060,
+   "state": "done",
+   "t_started": "2030-01-01T06:00:00",
+   "t_finished": "2030-01-01T06:30:00",
+   "assigned_worker_id": 31
+  },
+  {
+   "id": 5050,
+   "state": "done",
+   "t_started": "2030-01-01T05:00:00",
+   "t_finished": "2030-01-01T05:30:00",
+   "assigned_worker_id": 31
+  }
+ ]
+}

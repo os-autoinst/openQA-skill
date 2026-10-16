@@ -220,25 +220,30 @@ the table rows.
 
     oqa-history.py JOB [--previous N] [--investigation [--max-items N] [-v]] [--exit-code]
 
-`--previous` runs to look at (10, openQA's carry-over depth); `--investigation` adds the settings diff (per-run
-noise left out), package diffs, test and needle commits, `--max-items` (10) lines each: `settings diff
-(last_good -> this job)`, plus a hint to run on first_bad for the tight window when that is another job.
+Every run shows `started` (UTC) and `worker` (`host:instance`; `#<id>` past the first 20 workers or when the
+lookup fails), from one `/api/v1/jobs` request per 25 runs (it carries each run's module list, ~130 kB for an
+LTP run) and one per worker; `note: start times and workers not read` when that list fails. `--previous` runs
+to look at (10, openQA's carry-over depth). All-empty columns are dropped.
+
+`--investigation` adds the settings diff (per-run noise left out), package diffs, test and needle commits,
+`--max-items` (10) lines each: `settings diff (last_good -> this job)`, plus a hint to run on first_bad for the
+tight window when that is another job.
 Test commits that touch a file under `tests/` named like one of this job's failed modules (`<module>.pm|py`, any
 directory: failed module names carry no category) start with `[failed module <module>]`, those touching or
 renaming into `lib/` with `[lib]`, those touching a module that ran before the first failed one (the job's
-module list in run order, one more request) with `[earlier module <module>]`; they come first in that order,
-counted from the files as `failed_module=`, `lib=` and `earlier_module=` (`?`: the module list was unreadable)
-in the `test changes:` line (openQA's test log is `git log --stat`). git shortens a long path to `.../<tail>`:
-such a file still counts for a module, never for `lib/`. A module loaded under another `name` is not matched.
-All-empty columns are dropped.
+module list in run order) with `[earlier module <module>]`; they come first in that order, counted from the
+files as `failed_module=`, `lib=` and `earlier_module=` (`?`: no module list) in the `test changes:` line
+(openQA's test log is `git log --stat`). git shortens a long path to `.../<tail>`: such a file still counts for
+a module, never for `lib/`. A module loaded under another `name` is not matched.
 
-    job=6228892 host=https://openqa.opensuse.org scenario=opensuse-Tumbleweed-DVD-aarch64-salt-minion@aarch64
-    id       build     result  failed_modules      bugrefs
-    6228892  20260919  failed  setup_multimachine  poo#201006
-    last_good=6226440 build=20260917 result=passed
-    first_bad=6228892 build=20260919 streak=1
-    not_ok=4/11 (older runs exist: --previous N)
-    hint: intermittent: only 1 not-ok in a row now; look for a sporadic issue before blaming build ...
+    job=6273362 host=https://openqa.opensuse.org scenario=opensuse-Tumbleweed-JeOS-for-kvm-and-xen-x86_64-jeos-ltp-syscalls@uefi_virtio-2G
+    id       build     started            worker             result      failed_modules  bugrefs     clone
+    6273362  20261014  2026-10-15T15:27Z  openqaworker20:30  failed      mmap22          -           -
+    6272995  20261014  2026-10-15T09:08Z  openqaworker20:3   failed      shutdown_ltp    poo#208620  6273362
+    last_good=6270507 build=20261013 result=softfailed
+    first_bad=6272001 build=20261014 streak=5
+    not_ok=5/11 (older runs exist: --previous N)
+    hint: failing since build 20261014: 5 runs in a row over 1 build(s); ...
 
 ## oqa-ref.py - state of the ticket behind a bugref
 

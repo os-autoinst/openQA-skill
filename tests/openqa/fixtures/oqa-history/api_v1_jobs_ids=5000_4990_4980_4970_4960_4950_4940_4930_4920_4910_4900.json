@@ -1,0 +1,124 @@
+{
+ "jobs": [
+  {
+   "id": 4900,
+   "state": "done",
+   "t_started": "2029-12-31T22:00:00",
+   "t_finished": "2029-12-31T22:20:00"
+  },
+  {
+   "id": 4910,
+   "state": "done",
+   "t_started": "2029-12-31T23:00:00",
+   "t_finished": "2029-12-31T23:20:00",
+   "assigned_worker_id": 31
+  },
+  {
+   "id": 4920,
+   "state": "done",
+   "t_started": "2030-01-01T00:00:00",
+   "t_finished": "2030-01-01T00:20:00",
+   "assigned_worker_id": 31
+  },
+  {
+   "id": 4930,
+   "state": "done",
+   "t_started": "2030-01-01T01:00:00",
+   "t_finished": "2030-01-01T01:20:00",
+   "assigned_worker_id": 31
+  },
+  {
+   "id": 4940,
+   "state": "done",
+   "t_started": "2030-01-01T02:00:00",
+   "t_finished": "2030-01-01T02:20:00",
+   "assigned_worker_id": 32
+  },
+  {
+   "id": 4950,
+   "state": "done",
+   "t_started": "2030-01-01T03:00:00",
+   "t_finished": "2030-01-01T03:20:00",
+   "assigned_worker_id": 31
+  },
+  {
+   "id": 4960,
+   "state": "done",
+   "t_started": "2030-01-01T04:00:00",
+   "t_finished": "2030-01-01T04:20:00",
+   "assigned_worker_id": 31
+  },
+  {
+   "id": 4970,
+   "state": "done",
+   "t_started": "2030-01-01T05:00:00",
+   "t_finished": "2030-01-01T12:00:00",
+   "assigned_worker_id": 33
+  },
+  {
+   "id": 4980,
+   "state": "done",
+   "t_started": "2030-01-01T07:00:00",
+   "t_finished": "2030-01-01T07:20:00",
+   "assigned_worker_id": 31
+  },
+  {
+   "id": 4990,
+   "state": "done",
+   "t_started": "2030-01-01T08:00:00",
+   "t_finished": "2030-01-01T08:20:00",
+   "assigned_worker_id": 32
+  },
+  {
+   "id": 5000,
+   "state": "done",
+   "t_started": "2030-01-01T09:00:00",
+   "t_finished": "2030-01-01T09:30:00",
+   "assigned_worker_id": 31,
+   "modules": [
+    {
+     "name": "boot_to_desktop",
+     "category": "boot",
+     "result": "passed",
+     "flags": [
+      "fatal",
+      "milestone"
+     ]
+    },
+    {
+     "name": "thing9",
+     "category": "console",
+     "result": "passed",
+     "flags": []
+    },
+    {
+     "name": "thing12#1",
+     "category": "console",
+     "result": "passed",
+     "flags": []
+    },
+    {
+     "name": "thing1.4",
+     "category": "console",
+     "result": "passed",
+     "flags": []
+    },
+    "not a module",
+    {
+     "name": "zypper_in",
+     "category": "console",
+     "result": "failed",
+     "flags": [
+      "fatal"
+     ]
+    },
+    {
+     "name": "thing5",
+     "category": "console",
+     "result": "passed",
+     "flags": []
+    }
+   ]
+  }
+ ]
+}

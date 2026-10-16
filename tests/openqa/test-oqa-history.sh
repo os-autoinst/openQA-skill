@@ -277,11 +277,22 @@ actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 5000 --investiga
 contains "versions: rpm -qi is read, last good takes the job's file name first" \
 	"  versions (last_good 4960 -> this job, from install_ltp-kernel-pkg.txt): kernel-default-base 6.1.0-1.1.36.10 -> 6.2.0-1.1.36.11" "$actual"
 check "versions: a version of other characters is not taken" 0 "$(grep -c 'END_4' <<<"$actual")"
+check "versions: a kernel-only list leaves the suites unknown" 1 \
+	"$(grep -c '^  versions (.*): kernel-default-base 6.1.0-1.1.36.10 -> 6.2.0-1.1.36.11; suites ?$' <<<"$actual")"
 rm "$tmp"/tests_4960_file_install_ltp-kernel-pkg.txt "$tmp"/tests_4960_downloads_ajax
 printf '<a href="/tests/4960/file/xfstests-version.log">v</a>\n' >"$tmp"/tests_4960_downloads_ajax
 actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 5000 --investigation)
-contains "versions: version.log is read; two files are both named" \
-	"  versions (last_good 4960 -> this job, from xfstests-version.log -> install_ltp-kernel-pkg.txt): kernel-default-base - -> 6.2.0-1.1.36.11; xfstests 1.1.1-1.1 -> -" "$actual"
+contains "versions: version.log is read; two files are both named; a suite the kernel-only list cannot show reads '?'" \
+	"  versions (last_good 4960 -> this job, from xfstests-version.log -> install_ltp-kernel-pkg.txt): kernel-default-base - -> 6.2.0-1.1.36.11; xfstests 1.1.1-1.1 -> ?" "$actual"
+check "versions: no 'suites ?' once a suite is listed" 0 "$(grep -c 'suites ?' <<<"$actual")"
+# A suite rebuilt at the same version, and a kernel whose release alone changed.
+printf '<a href="/tests/5000/file/install_ltp-rpm-qa.txt">r</a>\n' >"$tmp"/tests_5000_downloads_ajax
+printf '<a href="/tests/4960/file/install_ltp-rpm-qa.txt">r</a>\n' >"$tmp"/tests_4960_downloads_ajax
+printf 'kernel-default-6.4.0-150600.23.1.x86_64\nltp-20300102.def5678-2804.1.x86_64\n' >"$tmp"/tests_4960_file_install_ltp-rpm-qa.txt
+printf 'kernel-default-6.4.0-150600.23.2.x86_64\nltp-20300102.def5678-2805.1.x86_64\n' >"$tmp"/tests_5000_file_install_ltp-rpm-qa.txt
+actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 5000 --investigation)
+contains "versions: a suite's release-only change is marked, a kernel's is not" \
+	"  versions (last_good 4960 -> this job, from install_ltp-rpm-qa.txt): kernel-default 6.4.0-150600.23.1 -> 6.4.0-150600.23.2; ltp 20300102.def5678-2804.1 -> 20300102.def5678-2805.1 (release only)" "$actual"
 rm -rf "$tmp"
 
 actual=$(history 5000 --investigation --max-items 200)

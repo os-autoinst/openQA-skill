@@ -300,6 +300,9 @@ EOF
 )" "$? $(head -n 1 <<<"$actual")
 $(sed -n '/^<<<UNTRUSTED/,/^<<<END/p' <<<"$actual" | sed '1d;$d' | sed -E 's/^ *([0-9]+):.*/\1/' | xargs)
 $(grep '^note:' <<<"$actual")"
+actual=$(log 4242 --grep 'finished' --context 0 --max-lines 2)
+check "--grep: a cut that ends on '--' drops it and counts it" "17 note: 2 lines after the last one shown omitted (--max-lines)" \
+	"$(sed -n '/^<<<UNTRUSTED/,/^<<<END/p' <<<"$actual" | sed '1d;$d' | sed -E 's/^ *([0-9]+):.*/\1/' | xargs) $(grep '^note:' <<<"$actual")"
 actual=$(log 4242 --grep '.' --context 0)
 check "--grep: by default 10 matches, the header says how to see more" \
 	"job=4242 host=https://openqa.opensuse.org mode=grep matches=40 (shown 10 of 40; --max-matches N) lines=41" \

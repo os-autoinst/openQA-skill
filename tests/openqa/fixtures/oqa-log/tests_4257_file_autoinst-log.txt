@@ -1,0 +1,7 @@
+[2030-01-01T10:00:01.000000Z] [debug] [pid:4711] ||| starting bci_test_podman tests/containers/bci_test.pm
+[2030-01-01T10:00:02.000000Z] [debug] [pid:4711] <<< testapi::script_run(cmd="tox -e all", timeout=3600)
+[2030-01-01T10:00:09.000000Z] [info] [pid:4711] ::: basetest::runtest: # Test died: 2 tests failed. at opensuse/tests/containers/bci_test.pm line 162.
+
+[2030-01-01T10:00:10.000000Z] [debug] [pid:4711] ||| finished bci_test_podman containers (runtime: 9 s)
+[2030-01-01T10:00:11.000000Z] [debug] [pid:4711] stopping overall test execution after a fatal test failure
+[2030-01-01T10:00:12.000000Z] [info] [pid:4700] Result: done

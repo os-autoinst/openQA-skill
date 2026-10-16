@@ -188,8 +188,10 @@ the job has one, as suite verdicts and kernel splats are there, and prints its h
 under their own header line and fence: `file=serial_terminal.txt mode=errors hits=suite:2,kernel:1
 lines=N`; `hits=-` when it holds none, no line when the job has no such file. `[suite]` marks `TFAIL`,
 `TBROK`, a TAP `not ok`, `Failures:`; `[kernel]` marks `WARNING:`, `BUG:`, `Oops:`, `Call Trace` (with the
-4 lines after it), each only in a kernel line (at its start, after a printk time `] ` or a journal's
-`kernel: `), and `Transaction aborted`; the signatures of `autoinst-log.txt` apply there too, and
+4 lines after it) after a printk time (`[   12.345678] `, maybe with a caller id `[  T812]`) or a journal's
+`kernel: `, a line without either only in the kernel's own wording (`WARNING: CPU: 2 PID: 812`, `WARNING:`
+with a source file, `BUG: soft lockup` and the like, `Oops:`), as programs print `WARNING:` too, and a
+`BTRFS` line's `Transaction aborted`; the signatures of `autoinst-log.txt` apply there too, and
 `--file serial_terminal.txt --errors` uses the same set. Each block keeps its first 3 hits per label and
 at most `--max-lines` lines. With only a `Test died` hit and no serial-terminal hit, a hint points at
 `serial_terminal.txt` and the module's ulogs.

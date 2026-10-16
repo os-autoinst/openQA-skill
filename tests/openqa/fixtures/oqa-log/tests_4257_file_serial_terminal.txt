@@ -1,0 +1,9 @@
+# pip install -r requirements.txt
+WARNING: Running pip as the 'root' user can result in broken permissions
+# docker info
+WARNING: No swap limit support
+[2030-01-01 10:00:00] WARNING: disk almost full
+[2030-01-01 10:00:01] Call Trace of the last request: none
+BUG: this userspace test found a bug
+WARNING: at least 2 GiB of memory is recommended
+ERROR: Transaction aborted by user

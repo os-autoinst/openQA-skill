@@ -174,7 +174,12 @@ found a module still running at the end or one that took 2x and 60 s more than i
 `# Test died` and folds assert_screen polling (no match / no change / check_asserted_screen took / stall)
 into one `~` line: counts, first..last time. `--errors` with only a `Test died` hit hints at
 `serial_terminal.txt` and the module's ulogs. A ranged tail is numbered from the end (`-1` = last line).
-`--grep` (like `--match` of oqa-sweep.py) compiles the pattern as given: a nested quantifier such as
+
+`--grep` prints the first `--max-matches` matches (10) with `--context` lines around each, and of those at
+most `--max-lines` lines (60, the `--` between distant matches included), cutting from the end, so the
+first matches stay. When fewer matches are printed than found, the header says so and names the cap
+that cut them: `mode=grep matches=37 (shown 10 of 37; --max-matches N)`; raising `--max-lines` alone
+prints no further match. `--grep` (like `--match` of oqa-sweep.py) compiles the pattern as given: a nested quantifier such as
 `(a+)+b` can hang on a single line, the same way `grep -E` would, and the script cannot time it out.
 Prefer anchored patterns without nested quantifiers. Names from `--list` go to `--file`, which validates
 them; do not paste one into a shell.

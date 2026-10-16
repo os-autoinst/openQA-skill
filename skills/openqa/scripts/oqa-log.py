@@ -1112,7 +1112,8 @@ def main():
         type=positive,
         default=10,
         metavar="N",
-        help="--grep: print at most N matches (default: 10)",
+        help="--grep: print at most N matches (default: 10); the header says "
+        "'shown K of N' when there are more",
     )
     parser.add_argument(
         "-i", "--ignore-case", action="store_true", help="--grep: case-insensitive"
@@ -1121,7 +1122,8 @@ def main():
         "--max-lines",
         type=positive,
         metavar="N",
-        help="print at most N lines in any mode (default: 60, with --tail N: N)",
+        help="print at most N lines in any mode, context and '--' lines included (default: "
+        "60, with --tail N: N); --grep keeps the first lines, so the first matches",
     )
     parser.add_argument(
         "--max-line-chars",
@@ -1258,9 +1260,21 @@ def main():
             )
         if pattern:
             entries, total = mode_grep(lines, pattern, args.context, args.max_matches)
+            # The first matches are the ones to keep: cut the end, not the middle.
+            dropped = max(len(entries) - args.max_lines, 0)
+            entries = entries[: args.max_lines]
+            while entries and entries[-1] is None:
+                entries.pop()
+            shown = sum(1 for entry in entries if entry and entry[1] == ":")
             mode = f"grep matches={total}"
-            if total > args.max_matches:
-                mode += f" shown={args.max_matches}"
+            if shown < total:
+                caps = ["--max-matches N"] if total > args.max_matches else []
+                caps += ["--max-lines N"] if dropped else []
+                mode += f" (shown {shown} of {total}; {', '.join(caps)})"
+            if dropped:
+                notes.append(
+                    f"note: {dropped} lines after the last one shown omitted (--max-lines)"
+                )
             status = 1 if total else 0
         elif args.errors:
             entries, counts, started, finished = mode_errors(lines, args.verbose)

@@ -250,7 +250,7 @@ actual=$(log 4242 --grep 'finished \w+ ' --context 1 --max-matches 1)
 status=$?
 check "--grep: context, match markers and --max-matches" "0 $(
 	cat <<'EOF'
-job=4242 host=https://openqa.opensuse.org mode=grep matches=2 shown=1 lines=41
+job=4242 host=https://openqa.opensuse.org mode=grep matches=2 (shown 1 of 2; --max-matches N) lines=41
 <<<UNTRUSTED NONCE source=openqa.opensuse.org/tests/4242/file/autoinst-log.txt>>>
 16- 10:00:16 no change: 75.0s
 17: 10:00:17 ||| finished boot_to_desktop boot (runtime: 31 s)
@@ -259,6 +259,20 @@ job=4242 host=https://openqa.opensuse.org mode=grep matches=2 shown=1 lines=41
 requests: 1
 EOF
 )" "$status $actual"
+actual=$(log 4242 --grep '.' --context 0 --max-matches 100 --max-lines 5)
+check "--grep: --max-lines keeps the first matches, the header names the cap that cut them" "0 $(
+	cat <<'EOF'
+job=4242 host=https://openqa.opensuse.org mode=grep matches=40 (shown 5 of 40; --max-lines N) lines=41
+1 2 3 4 5
+note: 36 lines after the last one shown omitted (--max-lines)
+EOF
+)" "$? $(head -n 1 <<<"$actual")
+$(sed -n '/^<<<UNTRUSTED/,/^<<<END/p' <<<"$actual" | sed '1d;$d' | sed -E 's/^ *([0-9]+):.*/\1/' | xargs)
+$(grep '^note:' <<<"$actual")"
+actual=$(log 4242 --grep '.' --context 0)
+check "--grep: by default 10 matches, the header says how to see more" \
+	"job=4242 host=https://openqa.opensuse.org mode=grep matches=40 (shown 10 of 40; --max-matches N) lines=41" \
+	"$(head -n 1 <<<"$actual")"
 actual=$(log 4242 --grep 'no such text anywhere')
 check "--grep: exit 0 without a match" 0 $?
 contains "--grep: no match header" "mode=grep matches=0 lines=41" "$actual"

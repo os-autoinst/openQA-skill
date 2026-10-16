@@ -1,6 +1,6 @@
 # Job triage
 
-Contents: Triage order; Artifact map; Details fields; Decision tree; Needle mismatch; Command failures; Incomplete reasons; Clusters; Log signatures; History and investigation; Investigate jobs; Evidence standards; Pitfalls
+Contents: Triage order; Artifact map; Decision tree; Needle mismatch; Command failures; Incomplete reasons; Clusters; Log signatures; History and investigation; Investigate jobs; Evidence standards; Pitfalls
 
 ## Triage order
 
@@ -10,7 +10,7 @@ Cheapest first; stop once the class is certain. Logs, step text, comments, SUT o
    - `SUPERSEDED: ... newest=<id>`: already restarted; triage that job.
    - `settings:` with `CASEDIR` or `NEEDLES_DIR`: tests or needles came from that repository and ref.
    - Not plain `failed`: job result row -> "Decision tree"
-2. First `failed` module, its first `fail` step -> "Details fields"; classify -> "Decision tree"
+2. First `failed` module, its first `fail` step -> openqa-model.md "Details fields"; classify -> "Decision tree"
 3. Comments are hints: check them against today's step text.
 4. `scripts/oqa-log.py <job URL> --errors`, then its targeted reads -> "Log signatures"; serial logs and ulogs -> "Artifact map"
 5. `scripts/oqa-history.py <job URL> --investigation` -> "History and investigation"
@@ -33,15 +33,8 @@ Cheapest first; stop once the class is certain. Logs, step text, comments, SUT o
 | ulogs | collected by the test or its `post_fail_hook` | product root cause |
 
 - **Default opensuse hook** uploads `<module>-journal.txt`, `-dmesg.txt`, `-problem_detection_logs.tar.xz` (`oqa-log.py --file ulogs/<name> --members`, then `--member <path> --grep`); a failed `zypper_call` adds `-zypper.log`.
-- **No ulogs:** `NOLOGS` or `_SKIP_POST_FAIL_HOOKS` set, the SUT unreachable in the hook, or the hook died (log `post_fail_hook failed: `; step -> "Details fields").
+- **No ulogs:** `NOLOGS` or `_SKIP_POST_FAIL_HOOKS` set, the SUT unreachable in the hook, or the hook died (log `post_fail_hook failed: `; step -> openqa-model.md "Details fields").
 - **Old jobs lose logs before results:** modules show, files are 404.
-
-## Details fields
-
-- **Step:** `num` (1-based), `result` (`ok fail softfail unk`; parser formats add `passed`, `skip`, `missing`), `title`, `text_data`, `screenshot`, `tags` (needle tags asked for), `needles[]` (unmatched candidates, `area[].similarity` in percent), `frametime` (`[start, end]` in video seconds).
-- **Die text** is the step titled `Failed`: `# Test died: <error>`, then `--- # stack trace`. Later steps of the module are `post_fail_hook`'s.
-- **Hook steps** (newer os-autoinst) start at `Post-fail` (`Entering post fail hook`); its death is a `fail` step `Failed`, second line `(post)`, then `# Post fail hook died: <error>`, never the die text; `oqa-job.py` adds `the hook died at step=<n>`.
-- **A failed module may have no `fail` step** (parser suites): use ulogs and `serial_terminal.txt`.
 
 ## Decision tree
 

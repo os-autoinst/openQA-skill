@@ -1,0 +1,8 @@
+openqa-clone-job --export-command --within-instance https://openqa.opensuse.org/tests/4242 _GROUP=0 QEMURAM=2048 'BUILD=poo 1(2)' 'CASEDIR=https://github.com/example/os-autoinst-distri-example.git#0123456' 'NEEDLES_DIR=https://github.com/bob/os-autoinst-needles-opensuse.git#nb'
+creates: clone of job 4242 on https://openqa.opensuse.org, outside any job group (no asset download, no missing-asset check)
+overrides: _GROUP BUILD CASEDIR NEEDLES_DIR QEMURAM
+note: a short hash is found by deepening the clone; the full TEST_GIT_HASH is fetched at once
+hazard: label has characters not allowed in TEST: no TEST+= suffix, clone shares the scenario history
+hazard: parent publishes assets and --skip-chained-deps is missing: the cloned parent re-publishes the production file name
+hazard: openqa.opensuse.org is a production instance: shared workers, public results
+approval: --export-command only reads and prints; without it this is a write needing approval

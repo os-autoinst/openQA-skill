@@ -30,7 +30,7 @@ One line per script, generated from the parsers: do not edit it by hand. What a 
 - `refsection.py [--list] FILE [TITLE...]`; exit 1: section missing or ambiguous
 - `review-lint.py [FILE] --lines N [--lib] [--replies N] [--late]`; exit 1: findings
 - `ticket-lint.py [FILE] [--private-suffix SUFFIX]...`; exit 1: findings
-- `vr-clone-cmd.py --job JOB... [--pr URL] [--fork USER] [--branch REF] [--repo-name NAME] [--needles-fork USER] [--needles-branch REF] [--needles-repo-name NAME] [--schedule LIST] [--skip-chained-deps] [--within-instance] [--label BUILD] [--set KEY=VALUE]... [--dry-run-flag] [--parent-publishes]`; exit 1: command printed with hazard lines
+- `vr-clone-cmd.py --job JOB... [--pr URL] [--fork USER] [--branch REF] [--test-hash SHA] [--repo-name NAME] [--needles-fork USER] [--needles-branch REF] [--needles-repo-name NAME] [--schedule LIST] [--skip-chained-deps] [--within-instance] [--label BUILD] [--set KEY=VALUE]... [--dry-run-flag] [--parent-publishes]`; exit 1: command printed with hazard lines
 - `vr-reach.py [--repo REPO] [--base REF] [--max-items N]`
 
 ## oqa-sweep.py - what still fails in a build
@@ -397,6 +397,8 @@ code spans skip the placeholder check. Exit 2: not a draft JSON object, over 262
 Forgotten `_GROUP=0`, assets published from a test branch, clones on production.
 
     vr-clone-cmd.py --job URL (--pr PR_URL | --fork USER --branch REF) [--schedule LIST] [--set K=V] [--within-instance]
+    vr-clone-cmd.py --job URL --set K=V [--set K=V ...] [--label L]    # settings only
+    vr-clone-cmd.py --job URL --test-hash SHA [--set K=V] [--label L]  # crossed run
 
     openqa-clone-job https://openqa.opensuse.org/tests/6228436 _GROUP=0 'BUILD=...' 'CASEDIR=...' ...
     approval: running this posts jobs to http://localhost, a write; get the user's approval first
@@ -404,6 +406,17 @@ Forgotten `_GROUP=0`, assets published from a test branch, clones on production.
 Exit 1: `hazard:` lines. Also `--needles-fork/--needles-branch`, `--skip-chained-deps`, `--parent-publishes`;
 `--repo-name`/`--needles-repo-name` when a fork renamed the repository; `--label` sets `BUILD`
 (default `<user>/<repo>#<ref>`); `--dry-run-flag` adds `--export-command`, which prints instead of posting.
+
+Two forms change no code and stay on the job's instance, the host of the job URL (never a default):
+`openqa-clone-job --within-instance <job URL> _GROUP=0 <settings> BUILD=<label> TEST+=-<label>`. Settings
+only: `--set`, `--schedule` or `--needles-fork` without `--pr`, `--fork` or `--test-hash`; label
+`set-<KEY>-...`; the tests are the instance's newest unless the job's `CASEDIR` pins a commit (a `note:` says
+so). Crossed run, the old tests on the new build or the reverse: `--test-hash SHA` (7-40 lowercase hex, the
+full `TEST_GIT_HASH` of the other run fetches at once) adds `CASEDIR=<TEST_GIT_URL>#<SHA>`, `TEST_GIT_URL`
+read from the job's `vars.json` (one GET to that host, https unless localhost; nothing else of the file is
+kept); label `tests-<first 12 of SHA>`; refused (exit 2) when `vars.json` cannot be read or its
+`TEST_GIT_URL` is not a plain http(s) URL, which is then not echoed. Settings come before `TEST+=`, so a
+`KEY:<TEST>=` scope names the source job's `TEST`. Neither form takes `--pr` or `--fork/--branch`.
 Fork unknown: literal `--fork '<user>' --branch '<branch>'`; a `note:` says to replace them. An argument
 that carries a credential is refused (exit 2) with the rule's name, never the value, and so is a `--set`
 whose key names one (`SCC_REGCODE`, `*PASSWORD*`), whatever its value or form (`KEY=` to delete is fine): a

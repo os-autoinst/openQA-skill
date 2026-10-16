@@ -5,6 +5,7 @@
 here=$(cd "$(dirname "$0")" && pwd)
 script="$here/../../skills/openqa/scripts/vr-clone-cmd.py"
 fixtures="$here/fixtures/vr-clone-cmd"
+vars="$fixtures/vars"
 fail=0
 
 work=$(mktemp -d)
@@ -73,7 +74,12 @@ golden pr-worst 1 --job openqa.suse.de/tests/77 --pr "${pr%/*}/1" --needles-fork
 	--needles-branch nb --schedule console/foo --set WORKER_CLASS:client=w2 --dry-run-flag \
 	--label poo123
 
-for name in fork-worst pr-worst; do
+golden settings-basic 0 --job "$lab" --set QEMUCPUS=2 --set 'WORKER_CLASS:textmode=w2' --set QEMURAM=
+golden crossed-basic 0 --fixture-dir "$vars" --job "$lab#step/foo/1" --test-hash 0123456789abcdef0123456789abcdef01234567 --skip-chained-deps
+golden crossed-worst 1 --fixture-dir "$vars" --job https://openqa.opensuse.org/tests/4242 --test-hash 0123456 --label 'poo 1(2)' \
+	--parent-publishes --needles-fork bob --needles-branch nb --set QEMURAM=2048 --dry-run-flag
+
+for name in fork-worst pr-worst crossed-worst; do
 	lines=$(wc -l <"$fixtures/$name.out")
 	if [ "$lines" -le 9 ]; then ok "$name: command plus at most 8 lines"; else not_ok "$name: $lines lines"; fi
 done
@@ -92,8 +98,9 @@ refused "non-numeric id" "must be a number" --job openqa.example.org 12a "${fork
 refused "URL plus id" "not both" --job "$lab" 4242 "${fork[@]}"
 
 # --- form selection ---
-refused "neither --pr nor --fork" "either --pr URL or both" --job "$lab"
-refused "--fork without --branch" "either --pr URL or both" --job "$lab" --fork alice
+refused "nothing to change" "nothing to change: give --pr URL, --fork USER --branch REF, --test-hash SHA or a setting" --job "$lab"
+refused "--fork without --branch" "--fork USER and --branch REF go together" --job "$lab" --fork alice
+refused "--branch without --fork" "--fork USER and --branch REF go together" --job "$lab" --branch fix --set FOO=1
 refused "--pr with --fork" "mutually exclusive" --job "$lab" --pr "$pr" "${fork[@]}"
 refused "not a PR URL" "expected https://github.com" --job "$lab" --pr "${pr%/pull/*}/tree/foo"
 refused "bad fork name" "not a GitHub name" --job "$lab" --fork 'al/ice' --branch x
@@ -163,6 +170,82 @@ refused "same basename from two directories" "two directories" --job "$lab" "${f
 refused "absolute schedule path" "relative path within CASEDIR" --job "$lab" "${fork[@]}" --schedule /tests/console/foo
 refused "empty schedule entry" "empty entry" --job "$lab" "${fork[@]}" --schedule tests/console/foo,
 refused "SCHEDULE via --set" "use --schedule" --job "$lab" "${fork[@]}" --set SCHEDULE=console/foo
+
+# --- settings-only clone ---
+run --job "$lab" --set QEMUCPUS=2
+check "settings only: the job's instance, a label from the keys" \
+	"openqa-clone-job --within-instance $lab _GROUP=0 QEMUCPUS=2 BUILD=set-QEMUCPUS TEST+=-set-QEMUCPUS" "$cmd"
+check "settings only: exit 0 off production" 0 "$rc"
+lacks "settings only: no CASEDIR" "CASEDIR" "$cmd"
+run --job "$lab" --set 'QEMUCPUS=2' --label poo123 --within-instance
+check "settings only: --label names BUILD and the TEST suffix; --within-instance is no second flag" \
+	"openqa-clone-job --within-instance $lab _GROUP=0 QEMUCPUS=2 BUILD=poo123 TEST+=-poo123" "$cmd"
+run --job "$lab" --set 'ARRAY[]=a' --set ARRAY[]=b --schedule tests/console/foo
+has "settings only: a key counts once, --schedule is a change too" "BUILD=set-ARRAY-SCHEDULE TEST+=-set-ARRAY-SCHEDULE" "$cmd"
+run --job "$lab" --needles-fork bob --needles-branch nb
+has "settings only: --needles-fork alone is a change" "BUILD=set-NEEDLES_DIR" "$cmd"
+run --job "$lab" --set WORKER_CLASS:textmode=w2
+check "settings only: a scope names the source TEST, so settings come before TEST+= and no hazard" "0 1" \
+	"$rc $(grep -c 'WORKER_CLASS:textmode=w2 BUILD=set-WORKER_CLASS TEST+=' <<<"$cmd")"
+run --job https://openqa.opensuse.org/tests/1 --set QEMUCPUS=2
+check "settings only on production: hazard, exit 1" "1 1" "$rc $(grep -c '^hazard: openqa.opensuse.org is a production instance' <<<"$out")"
+run --job "$lab" --set QEMUCPUS=2 --label 'a(b)'
+has "settings only: a label TEST cannot take is a hazard" "hazard: label has characters not allowed in TEST" "$out"
+run --job "$lab" --set QEMUCPUS=2 --dry-run-flag --skip-chained-deps
+check "settings only: the dry run and the chained-parent flags apply" \
+	"openqa-clone-job --export-command --skip-chained-deps --within-instance $lab" "${cmd%% _GROUP=0*}"
+run --job "$lab" --set QEMUCPUS=2
+has "settings only: says the tests are the instance's, not the job's commit" \
+	"note: tests run at the instance's newest commit unless the job's CASEDIR pins one; --test-hash pins them" "$out"
+refused "settings only: CASEDIR still has its owners" "use --fork/--branch, --pr or --test-hash" --job "$lab" --set CASEDIR=x
+refused "settings only: an empty --schedule is a schedule error" "--schedule: empty entry" --job "$lab" --schedule ''
+refused "settings only: --needles-branch alone names its partner" "--needles-fork and --needles-branch go together" \
+	--job "$lab" --needles-branch nb
+run --job "$lab" --set QEMUCPUS=2 --label '<user>'
+check "settings only: a placeholder-like label is no placeholder, TEST cannot take it" "1 0 1" \
+	"$rc $(grep -c 'TEST+=' <<<"$cmd") $(grep -c '^hazard: label has characters not allowed in TEST' <<<"$out")"
+
+# --- crossed run: the job's tests at another commit ---
+sha=0123456789abcdef0123456789abcdef01234567
+run --fixture-dir "$vars" --job "$lab" --test-hash "$sha"
+check "crossed: CASEDIR is the job's TEST_GIT_URL at the commit, on the job's instance" \
+	"openqa-clone-job --within-instance $lab _GROUP=0 BUILD=tests-0123456789ab TEST+=-tests-0123456789ab 'CASEDIR=https://github.com/example/os-autoinst-distri-example.git#$sha'" "$cmd"
+lacks "crossed: nothing else of vars.json is printed" "jobtoken" "$out$err"
+lacks "crossed: hostile vars.json values are not printed" "END 99" "$out$err"
+lacks "crossed: a full hash needs no deepening note" "short hash" "$out"
+run --fixture-dir "$vars" --job "$lab" --test-hash 0123abc --set QEMURAM=2048
+check "crossed: a short hash works, with a note; settings go along" "0 1 1" \
+	"$rc $(grep -c '^note: a short hash is found by deepening the clone' <<<"$out") $(grep -c " _GROUP=0 QEMURAM=2048 BUILD=tests-0123abc " <<<"$cmd")"
+refused "crossed: an upper-case or non-hex hash" "not a commit hash" --fixture-dir "$vars" --job "$lab" --test-hash 0123ABC
+refused "crossed: a ref is not a hash" "not a commit hash" --fixture-dir "$vars" --job "$lab" --test-hash main
+refused "crossed: a hash over 40 digits" "not a commit hash" --fixture-dir "$vars" --job "$lab" --test-hash "${sha}0"
+refused "crossed: not with --fork" "--test-hash pins CASEDIR itself" --fixture-dir "$vars" --job "$lab" "${fork[@]}" --test-hash "$sha"
+refused "crossed: not with --pr" "--test-hash pins CASEDIR itself" --fixture-dir "$vars" --job "$lab" --pr "$pr" --test-hash "$sha"
+refused "crossed: vars.json that cannot be read" "--test-hash: vars.json of job 77: no saved response" --fixture-dir "$vars" \
+	--job https://openqa.example.org/tests/77 --test-hash "$sha"
+# The instance is the job's, never a default: a bare host gets http, which only localhost may use.
+refused "crossed: the job's host is the one read, http only for localhost" "only https is allowed" --fixture-dir "$vars" \
+	--job openqa.example.org 4242 --test-hash "$sha"
+mkdir "$work/vars"
+cp "$vars/tests_4242_file_vars.json" "$work/vars/tests_5_file_vars.json"
+run --fixture-dir "$work/vars" --job localhost:9526/tests/5 --test-hash "$sha"
+check "crossed: a local instance is read and targeted" "0 1" \
+	"$rc $(grep -c '^creates: clone of job 5 on http://localhost:9526,' <<<"$out")"
+for url in '' 'git@github.com:example/repo.git' 'https://u:s3cretPassw0rd@github.com/example/repo.git' \
+	'https://github.com/example/repo.git#main' 'https://github.com/example/repo.git?x=1' 'https://[bad/x.git' \
+	'https://github.com/example/repo.git
+hazard: none' 'https://github.com/example/re po.git' 'file:///etc/passwd' 'https://github.com'; do
+	python3 - "$vars/tests_4242_file_vars.json" "$work/vars/tests_4242_file_vars.json" "$url" <<'PY'
+import json, sys
+data = json.load(open(sys.argv[1]))
+data["TEST_GIT_URL"] = sys.argv[3] or None
+json.dump(data, open(sys.argv[2], "w"))
+PY
+	run --fixture-dir "$work/vars" --job "$lab" --test-hash "$sha"
+	check "crossed: refused, value not echoed: ${url:0:30}" "2 0 0" \
+		"$rc $(grep -c 's3cret\|example/re\|passwd\|github\.com\|\[bad' <<<"$err") ${#out}"
+done
+has "crossed: an unusable TEST_GIT_URL is named, not echoed" "TEST_GIT_URL is not a plain http(s) Git URL (not echoed)" "$err"
 
 # --- dependency and host flags ---
 run --job "$lab" "${fork[@]}"

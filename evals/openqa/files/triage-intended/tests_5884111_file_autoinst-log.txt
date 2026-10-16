@@ -1,0 +1,219 @@
+[2026-04-29T11:07:31.250888Z] [info] +++ setup notes +++
+[2026-04-29T11:07:31.251048Z] [info] Running on openqaworker22:35 (Linux 6.12.0-160000.28-default #1 SMP PREEMPT_DYNAMIC Thu Apr  9 10:42:03 UTC 2026 (0926930) x86_64)
+[2026-04-29T11:07:31.255667Z] [debug] Found ASSET_1, caching Tumbleweed.x86_64-1.0-libvirt-Snapshot20260428.vagrant.libvirt.box
+[2026-04-29T11:07:31.258782Z] [info] Downloading Tumbleweed.x86_64-1.0-libvirt-Snapshot20260428.vagrant.libvirt.box, request #877276 sent to Cache Service
+[2026-04-29T11:07:36.344595Z] [info] Download of Tumbleweed.x86_64-1.0-libvirt-Snapshot20260428.vagrant.libvirt.box processed:
+[info] [#877273] Cache size of "/var/lib/openqa/cache" is 385 GiB, with limit 400 GiB
+[info] [#877273] Downloading "Tumbleweed.x86_64-1.0-libvirt-Snapshot20260428.vagrant.libvirt.box" from "https://openqa.opensuse.org/tests/5884067/asset/other/Tumbleweed.x86_64-1.0-libvirt-Snapshot20260428.vagrant.libvirt.box"
+[info] [#877273] Content of "/var/lib/openqa/cache/openqa.opensuse.org/Tumbleweed.x86_64-1.0-libvirt-Snapshot20260428.vagrant.libvirt.box" has not changed, updating last use
+
+[2026-04-29T11:07:36.346414Z] [debug] Found ASSET_2, caching Tumbleweed.x86_64-1.0-virtualbox-Snapshot20260428.vagrant.virtualbox.box
+[2026-04-29T11:07:36.348290Z] [info] Downloading Tumbleweed.x86_64-1.0-virtualbox-Snapshot20260428.vagrant.virtualbox.box, request #877292 sent to Cache Service
+[2026-04-29T11:07:41.417592Z] [info] Download of Tumbleweed.x86_64-1.0-virtualbox-Snapshot20260428.vagrant.virtualbox.box processed:
+[info] [#877291] Cache size of "/var/lib/openqa/cache" is 385 GiB, with limit 400 GiB
+[info] [#877291] Downloading "Tumbleweed.x86_64-1.0-virtualbox-Snapshot20260428.vagrant.virtualbox.box" from "https://openqa.opensuse.org/tests/5884042/asset/other/Tumbleweed.x86_64-1.0-virtualbox-Snapshot20260428.vagrant.virtualbox.box"
+[info] [#877291] Content of "/var/lib/openqa/cache/openqa.opensuse.org/Tumbleweed.x86_64-1.0-virtualbox-Snapshot20260428.vagrant.virtualbox.box" has not changed, updating last use
+
+[2026-04-29T11:07:41.419640Z] [debug] Found ASSET_256, caching openSUSE-Tumbleweed-DVD-x86_64-Snapshot20260428-Media.iso.sha256
+[2026-04-29T11:07:41.421911Z] [info] Downloading openSUSE-Tumbleweed-DVD-x86_64-Snapshot20260428-Media.iso.sha256, request #877307 sent to Cache Service
+[2026-04-29T11:07:46.533099Z] [info] Download of openSUSE-Tumbleweed-DVD-x86_64-Snapshot20260428-Media.iso.sha256 processed:
+[info] [#877304] Cache size of "/var/lib/openqa/cache" is 385 GiB, with limit 400 GiB
+[info] [#877304] Downloading "openSUSE-Tumbleweed-DVD-x86_64-Snapshot20260428-Media.iso.sha256" from "https://openqa.opensuse.org/tests/5884048/asset/other/openSUSE-Tumbleweed-DVD-x86_64-Snapshot20260428-Media.iso.sha256"
+[info] [#877304] Content of "/var/lib/openqa/cache/openqa.opensuse.org/openSUSE-Tumbleweed-DVD-x86_64-Snapshot20260428-Media.iso.sha256" has not changed, updating last use
+
+[2026-04-29T11:07:46.535714Z] [debug] Found HDD_1, caching opensuse-Tumbleweed-x86_64-20260428-DVD@64bit-with-xfstests.qcow2
+[2026-04-29T11:07:46.538010Z] [info] Downloading opensuse-Tumbleweed-x86_64-20260428-DVD@64bit-with-xfstests.qcow2, request #877322 sent to Cache Service
+[2026-04-29T11:09:07.394426Z] [info] Download of opensuse-Tumbleweed-x86_64-20260428-DVD@64bit-with-xfstests.qcow2 processed:
+[info] [#877319] Cache size of "/var/lib/openqa/cache" is 385 GiB, with limit 400 GiB
+[info] [#877319] Downloading "opensuse-Tumbleweed-x86_64-20260428-DVD@64bit-with-xfstests.qcow2" from "https://openqa.opensuse.org/tests/5884048/asset/hdd/opensuse-Tumbleweed-x86_64-20260428-DVD@64bit-with-xfstests.qcow2"
+[info] [#877319] Size of "/var/lib/openqa/cache/openqa.opensuse.org/opensuse-Tumbleweed-x86_64-20260428-DVD@64bit-with-xfstests.qcow2" is 1.4 GiB, with ETag ""69f1e660-5bdb0000""
+[info] [#877319] Download of "/var/lib/openqa/cache/openqa.opensuse.org/opensuse-Tumbleweed-x86_64-20260428-DVD@64bit-with-xfstests.qcow2" successful (18 MiB/s), new cache size is 387 GiB
+
+[2026-04-29T11:09:07.397212Z] [debug] Found ISO, caching openSUSE-Tumbleweed-DVD-x86_64-Snapshot20260428-Media.iso
+[2026-04-29T11:09:07.400119Z] [info] Downloading openSUSE-Tumbleweed-DVD-x86_64-Snapshot20260428-Media.iso, request #877372 sent to Cache Service
+[2026-04-29T11:09:22.589764Z] [info] Download of openSUSE-Tumbleweed-DVD-x86_64-Snapshot20260428-Media.iso processed:
+[info] [#877372] Cache size of "/var/lib/openqa/cache" is 387 GiB, with limit 400 GiB
+[info] [#877372] Downloading "openSUSE-Tumbleweed-DVD-x86_64-Snapshot20260428-Media.iso" from "https://openqa.opensuse.org/tests/5884111/asset/iso/openSUSE-Tumbleweed-DVD-x86_64-Snapshot20260428-Media.iso"
+[info] [#877372] Content of "/var/lib/openqa/cache/openqa.opensuse.org/openSUSE-Tumbleweed-DVD-x86_64-Snapshot20260428-Media.iso" has not changed, updating last use
+
+[2026-04-29T11:09:22.592729Z] [info] Rsync from 'rsync://openqa.opensuse.org/tests' to '/var/lib/openqa/cache/openqa.opensuse.org', request #877399 sent to Cache Service
+[2026-04-29T11:09:27.678855Z] [info] Output of rsync:
+[info] [#877399] Calling: rsync -avHP --timeout 1800 rsync://openqa.opensuse.org/tests/ --delete /var/lib/openqa/cache/openqa.opensuse.org/tests/
+Try 1:
+STDOUT:
+receiving incremental file list
+opensuse/products/opensuse/needles/.git/
+opensuse/products/opensuse/needles/.git/index
+
+              0   0%    0.00kB/s    0:00:00  
+      1,265,335 100%   80.45MB/s    0:00:00 (xfr#1, ir-chk=1022/30838)
+
+sent 12,080 bytes  received 2,981,923 bytes  1,996,002.00 bytes/sec
+total size is 7,830,811,450  speedup is 2,615.50
+
+STDERR:
+
+
+[2026-04-29T11:09:27.678997Z] [info] Finished to rsync tests
+[2026-04-29T11:09:27.683793Z] [debug] +++ worker notes +++
+[2026-04-29T11:09:28.117885Z] [debug] [pid:2059297] [37mCurrent version is 5.1777385737.2417883 [interface v54][0m
+[2026-04-29T11:09:28.133517Z] [debug] [pid:2059297] [37mgit hash in 'opensuse': 08dffab4b668b1fc8e5c56bd30130582d4a60eb3[0m
+[2026-04-29T11:09:28.503870Z] [debug] [pid:2059297] [37mgit url in 'opensuse': "https://github.com/os-autoinst/os-autoinst-distri-opensuse.git"[0m
+[2026-04-29T11:09:28.948549Z] [debug] [pid:2059297] [37musingenv DESKTOP=textmode[0m
+[2026-04-29T11:09:28.948674Z] [debug] [pid:2059297] [37musingenv DISTRI=opensuse[0m
+[2026-04-29T11:09:28.948711Z] [debug] [pid:2059297] [37musingenv QEMUCPU=host[0m
+[2026-04-29T11:09:28.948744Z] [debug] [pid:2059297] [37musingenv INSTLANG=en_US[0m
+[2026-04-29T11:09:28.948775Z] [debug] [pid:2059297] [37musingenv DVD=1[0m
+[2026-04-29T11:09:28.948807Z] [debug] [pid:2059297] [37musingenv ISO=openSUSE-Tumbleweed-DVD-x86_64-Snapshot20260428-Media.iso[0m
+[2026-04-29T11:09:28.948835Z] [debug] [pid:2059297] [37musingenv ISO_MAXSIZE=4700372992[0m
+[2026-04-29T11:09:28.950591Z] [debug] [pid:2059297] [37mscheduling boot_to_desktop tests/boot/boot_to_desktop.pm[0m
+[2026-04-29T11:09:28.959540Z] [debug] [pid:2059297] [37mscheduling partition tests/xfstests/partition.pm[0m
+[2026-04-29T11:09:28.963377Z] [debug] [pid:2059297] [37mscheduling run tests/xfstests/run.pm[0m
+[2026-04-29T11:09:28.964326Z] [debug] [pid:2059297] [37mscheduling generate_report tests/xfstests/generate_report.pm[0m
+[2026-04-29T11:09:28.971845Z] [info] [pid:2059440] cmdsrv: daemon reachable under http://*:20353/xxxxxxxxxxxxxxxx/
+[2026-04-29T11:09:28.973639Z] [info] [pid:2059440] Listening at "http://[::]:20353"
+Web application available at http://[::]:20353
+[2026-04-29T11:09:28.977073Z] [debug] [pid:2059297] [37mgit hash in 'opensuse/products/opensuse/needles': 620d6f75577082733a000b5ef1e050621ca61a2c[0m
+[2026-04-29T11:09:31.545639Z] [debug] [pid:2059297] [37mgit url in 'opensuse/products/opensuse/needles': "git@github.com:os-autoinst/os-autoinst-needles-opensuse.git"[0m
+[2026-04-29T11:09:31.545911Z] [debug] [pid:2059297] [37minit needles from opensuse/products/opensuse/needles[0m
+[2026-04-29T11:09:32.251052Z] [debug] [pid:2059297] [37mloaded 5706 needles[0m
+[2026-04-29T11:09:32.472061Z] [debug] [pid:2059297] [37m2059297: channel_out 15, channel_in 14[0m
+[2026-04-29T11:09:32.595631Z] [debug] [pid:2061111] [37m2061111: cmdpipe 13, rsppipe 16[0m
+[2026-04-29T11:09:32.595981Z] [debug] [pid:2061111] [37mstarted mgmt loop with pid 2061111[0m
+[2026-04-29T11:09:32.820151Z] [debug] [pid:2061111] [37mLaunching external video encoder: ffmpeg -y -hide_banner -nostats -r 24 -f image2pipe -vcodec ppm -i - -pix_fmt yuv420p -c:v libvpx-vp9 -crf 35 -b:v 1500k -cpu-used 1 'video.webm'[0m
+[2026-04-29T11:09:32.931942Z] [debug] [pid:2061111] [37mqemu version detected: 10.0.9[0m
+[2026-04-29T11:09:32.936545Z] [debug] [pid:2061111] [37mrunning `/usr/bin/chattr +C /var/lib/openqa/pool/35/raid`[0m
+[2026-04-29T11:09:32.967412Z] [debug] [pid:2061111] [37mCommand `/usr/bin/chattr +C /var/lib/openqa/pool/35/raid` terminated with 1
+  /usr/bin/chattr: Operation not supported while setting flags on /var/lib/openqa/pool/35/raid[0m
+[2026-04-29T11:09:32.967531Z] [debug] [pid:2061111] [37mConfiguring storage controllers and block devices[0m
+[2026-04-29T11:09:32.968096Z] [debug] [pid:2061111] [37mrunning `/usr/bin/qemu-img info --output=json /var/lib/openqa/pool/35/opensuse-Tumbleweed-x86_64-20260428-DVD@64bit-with-xfstests.qcow2`[0m
+[2026-04-29T11:09:33.034313Z] [debug] [pid:2061111] [37mrunning `/usr/bin/qemu-img info --output=json /var/lib/openqa/pool/35/openSUSE-Tumbleweed-DVD-x86_64-Snapshot20260428-Media.iso`[0m
+[2026-04-29T11:09:33.094299Z] [debug] [pid:2061111] [37mInitializing block device images[0m
+[2026-04-29T11:09:33.094544Z] [debug] [pid:2061111] [37mrunning `/usr/bin/qemu-img create -f qcow2 -F qcow2 -b /var/lib/openqa/pool/35/opensuse-Tumbleweed-x86_64-20260428-DVD@64bit-with-xfstests.qcow2 /var/lib/openqa/pool/35/raid/hd0-overlay0 107374182400`[0m
+[2026-04-29T11:09:33.153922Z] [debug] [pid:2061111] [37mFormatting '/var/lib/openqa/pool/35/raid/hd0-overlay0', fmt=qcow2 cluster_size=65536 extended_l2=off compression_type=zlib size=107374182400 backing_file=/var/lib/openqa/pool/35/opensuse-Tumbleweed-x86_64-20260428-DVD@64bit-with-xfstests.qcow2 backing_fmt=qcow2 lazy_refcounts=off refcount_bits=16[0m
+[2026-04-29T11:09:33.154060Z] [debug] [pid:2061111] [37mrunning `/usr/bin/qemu-img create -f qcow2 -F raw -b /var/lib/openqa/pool/35/openSUSE-Tumbleweed-DVD-x86_64-Snapshot20260428-Media.iso /var/lib/openqa/pool/35/raid/cd0-overlay0 4492099584`[0m
+[2026-04-29T11:09:33.216994Z] [debug] [pid:2061111] [37mFormatting '/var/lib/openqa/pool/35/raid/cd0-overlay0', fmt=qcow2 cluster_size=65536 extended_l2=off compression_type=zlib size=4492099584 backing_file=/var/lib/openqa/pool/35/openSUSE-Tumbleweed-DVD-x86_64-Snapshot20260428-Media.iso backing_fmt=raw lazy_refcounts=off refcount_bits=16[0m
+[2026-04-29T11:09:33.217113Z] [debug] [pid:2061111] [37minit_blockdev_images: Finished creating block devices[0m
+[2026-04-29T11:09:33.218608Z] [debug] [pid:2061111] [37mstarting: /usr/bin/qemu-system-x86_64 -device VGA,edid=on,xres=1024,yres=768 -only-migratable -chardev ringbuf,id=serial0,logfile=serial0,logappend=on -serial chardev:serial0 -audiodev none,id=snd0 -device intel-hda -device hda-output,audiodev=snd0 -global isa-fdc.fdtypeA=none -m 4096 -cpu host -netdev user,id=qanet0 -device virtio-net,netdev=qanet0,mac=52:54:00:12:34:56 -object rng-random,filename=/dev/urandom,id=rng0 -device virtio-rng-pci,rng=rng0 -boot order=c -device qemu-xhci -device usb-tablet -smp 1 -enable-kvm -no-shutdown -vnc :125,share=force-shared -device virtio-serial -chardev pipe,id=virtio_console,path=virtio_console,logfile=virtio_console.log,logappend=on -device virtconsole,chardev=virtio_console,name=org.openqa.console.virtio_console -chardev pipe,id=virtio_console_user,path=virtio_console_user,logfile=virtio_console_user.log,logappend=on -device virtconsole,chardev=virtio_console_user,name=org.openqa.console.virtio_console_user -chardev socket,path=qmp_socket,server=on,wait=off,id=qmp_socket,logfile=qmp_socket.log,logappend=on -qmp chardev:qmp_socket -S -device virtio-scsi-pci,id=scsi0 -blockdev driver=file,node-name=hd0-overlay0-file,filename=/var/lib/openqa/pool/35/raid/hd0-overlay0,cache.no-flush=on -blockdev driver=qcow2,node-name=hd0-overlay0,file=hd0-overlay0-file,cache.no-flush=on,discard=unmap -device virtio-blk,id=hd0-device,drive=hd0-overlay0,bootindex=0,serial=hd0 -blockdev driver=file,node-name=cd0-overlay0-file,filename=/var/lib/openqa/pool/35/raid/cd0-overlay0,cache.no-flush=on -blockdev driver=qcow2,node-name=cd0-overlay0,file=cd0-overlay0-file,cache.no-flush=on,discard=unmap -device scsi-cd,id=cd0-device,drive=cd0-overlay0,serial=cd0[0m
+[2026-04-29T11:09:33.229169Z] [debug] [pid:2061111] [37mWaiting for 0 attempts[0m
+[2026-04-29T11:09:34.229787Z] [debug] [pid:2061111] [37mWaiting for 1 attempts[0m
+[2026-04-29T11:09:35.230189Z] [debug] [pid:2061111] [37mFinished after 2 attempts[0m
+[2026-04-29T11:09:35.242560Z] [debug] [pid:2061111] [37mEstablishing VNC connection to localhost:6025[0m
+[2026-04-29T11:09:35.295176Z] [debug] [pid:2061111] [37mpointer type 0 0 640 480 -257[0m
+[2026-04-29T11:09:35.295265Z] [debug] [pid:2061111] [37mled state 0 1 1 -261[0m
+[2026-04-29T11:09:35.299232Z] [debug] [pid:2061111] [37mStart CPU[0m
+[2026-04-29T11:09:35.299437Z] [debug] [pid:2061111] [37mEVENT {"data":{"client":{"family":"ipv4","host":"127.0.0.1","service":"40078","websocket":false},"server":{"auth":"none","family":"ipv4","host":"0.0.0.0","service":"6025","websocket":false}},"event":"VNC_CONNECTED","timestamp":{"microseconds":243014,"seconds":1777460975}}[0m
+[2026-04-29T11:09:35.299544Z] [debug] [pid:2061111] [37mEVENT {"data":{"client":{"family":"ipv4","host":"127.0.0.1","service":"40078","websocket":false},"server":{"auth":"none","family":"ipv4","host":"0.0.0.0","service":"6025","websocket":false}},"event":"VNC_INITIALIZED","timestamp":{"microseconds":244408,"seconds":1777460975}}[0m
+[2026-04-29T11:09:35.299618Z] [debug] [pid:2061111] [37mEVENT {"event":"RESUME","timestamp":{"microseconds":299443,"seconds":1777460975}}[0m
+[2026-04-29T11:09:35.300460Z] [debug] [pid:2060747] [37mGOT GO[0m
+[2026-04-29T11:09:35.303620Z] [debug] [pid:2061111] [37mQEMU: QEMU emulator version 10.0.9 (SUSE Linux 16)[0m
+[2026-04-29T11:09:35.303672Z] [debug] [pid:2061111] [37mQEMU: Copyright (c) 2003-2025 Fabrice Bellard and the QEMU Project developers[0m
+[2026-04-29T11:09:35.306330Z] [debug] [pid:2060747] [37mSnapshots are supported[0m
+[2026-04-29T11:09:35.308371Z] [debug] [pid:2060747] [1;34m||| starting boot_to_desktop tests/boot/boot_to_desktop.pm[0m
+[2026-04-29T11:09:55.464044Z] [debug] [pid:2060747] [1;34m||| finished boot_to_desktop boot (runtime: 20 s)[0m
+[2026-04-29T11:09:57.335015Z] [debug] [pid:2060747] [1;34m||| starting partition tests/xfstests/partition.pm[0m
+[2026-04-29T11:09:57.338595Z] [debug] [pid:2060747] <<< testapi::select_console(testapi_console="root-virtio-terminal")
+[2026-04-29T11:10:35.439487Z] [debug] [pid:2060747] [1;34m||| finished partition xfstests (runtime: 38 s)[0m
+[2026-04-29T11:10:35.440407Z] [debug] [pid:2060747] [1;34m||| starting run tests/xfstests/run.pm[0m
+[2026-04-29T11:10:35.441031Z] [debug] [pid:2060747] <<< testapi::select_console(testapi_console="root-virtio-terminal")
+[2026-04-29T11:10:36.616333Z] [debug] [pid:2060747] [1;34m||| finished run xfstests (runtime: 1 s)[0m
+[2026-04-29T11:10:38.979486Z] [debug] [pid:2060747] [1;34m||| starting generate_report tests/xfstests/generate_report.pm[0m
+[2026-04-29T11:10:38.980479Z] [debug] [pid:2060747] <<< testapi::select_console(testapi_console="root-virtio-terminal")
+[2026-04-29T11:10:44.500445Z] [debug] [pid:2060747] [1;34m||| finished generate_report xfstests (runtime: 6 s)[0m
+[2026-04-29T11:10:44.501470Z] [debug] [pid:2060747] [1;34m||| starting generic-001 tests/xfstests/run_subtest.pm[0m
+[2026-04-29T11:10:44.502195Z] [debug] [pid:2060747] <<< testapi::select_console(testapi_console="root-virtio-terminal")
+[2026-04-29T11:10:44.502841Z] [debug] [pid:2060747] <<< testapi::script_run(cmd="umount /dev/vda2 &> /dev/null", timeout=30, output="", quiet=undef, max_interval=250)
+[2026-04-29T11:10:44.518773Z] [debug] [pid:2060747] <<< distribution::script_output("Content of /tmp/scriptX6yxj.sh :\n \"cat > /tmp/scriptX6yxj.sh << 'EOT_X6yxj'; echo X6yxj-\$?-\" \n")
+[2026-04-29T11:10:44.531145Z] [debug] [pid:2060747] <<< distribution::script_output("Content of /tmp/scriptzKaE7.sh :\n \"cat > /tmp/scriptzKaE7.sh << 'EOT_zKaE7'; echo zKaE7-\$?-\" \n")
+[2026-04-29T11:10:44.550694Z] [debug] [pid:2060747] <<< distribution::script_output("Content of /tmp/script_kEzC.sh :\n \"cat > /tmp/script_kEzC.sh << 'EOT__kEzC'; echo _kEzC-\$?-\" \n")
+[2026-04-29T11:10:44.570909Z] [debug] [pid:2060747] <<< testapi::assert_script_run(cmd="timeout -k 3 1995 /opt/wrapper.sh 'generic/001' -nfs   | tee /opt/log/generic/001; echo \${PIPESTATUS[0]} > /opt/log/subtest_result_num", quiet=undef, max_interval=250, fail_message="", timeout=2000)
+[2026-04-29T11:10:44.993769Z] [debug] [pid:2060747] <<< distribution::script_output("Content of /tmp/scriptm833Z.sh :\n \"cat > /tmp/scriptm833Z.sh << 'EOT_m833Z'; echo m833Z-\$?-\" \n")
+[2026-04-29T11:10:45.007287Z] [debug] [pid:2060747] <<< testapi::script_run(cmd="if [ -e /opt/xfstests/results/generic/001.out.bad ]; then cat /opt/xfstests/results/generic/001.out.bad | tee /opt/log/generic/001.out.bad; fi", timeout=30, output="", quiet=undef, max_interval=250)
+[2026-04-29T11:10:45.013097Z] [debug] [pid:2060747] <<< testapi::script_run(cmd="if [ -e /opt/xfstests/results/generic/001.full ]; then cat /opt/xfstests/results/generic/001.full | tee /opt/log/generic/001.full; fi", max_interval=250, quiet=undef, output="", timeout=30)
+[2026-04-29T11:10:45.018696Z] [debug] [pid:2060747] <<< testapi::script_run(cmd="if [ -e /opt/xfstests/results/generic/001.dmesg ]; then cat /opt/xfstests/results/generic/001.dmesg | tee /opt/log/generic/001.dmesg; fi", timeout=30, quiet=undef, output="", max_interval=250)
+[2026-04-29T11:10:45.024203Z] [debug] [pid:2060747] <<< testapi::script_run(cmd="if [ -e /opt/test/junk.fsxops ]; then cp /opt/test/junk.fsxops /opt/log/generic/001.junk.fsxops; fi", timeout=30, output="", max_interval=250, quiet=undef)
+[2026-04-29T11:10:45.029682Z] [debug] [pid:2060747] <<< testapi::script_run(cmd="ls /opt/xfstests/results/generic/001.*.md* 1> /dev/null 2>&1", output="", max_interval=250, quiet=undef, timeout=30)
+[2026-04-29T11:10:45.038319Z] [debug] [pid:2060747] <<< distribution::script_output("Content of /tmp/scriptAAEAj.sh :\n \"cat > /tmp/scriptAAEAj.sh << 'EOT_AAEAj'; echo AAEAj-\$?-\" \n")
+[2026-04-29T11:10:45.051562Z] [debug] [pid:2060747] <<< distribution::script_output("Content of /tmp/scriptSmA1s.sh :\n \"cat > /tmp/scriptSmA1s.sh << 'EOT_SmA1s'; echo SmA1s-\$?-\" \n")
+[2026-04-29T11:10:45.063639Z] [debug] [pid:2060747] <<< distribution::script_output("Content of /tmp/scriptMNgLP.sh :\n \"cat > /tmp/scriptMNgLP.sh << 'EOT_MNgLP'; echo MNgLP-\$?-\" \n")
+[2026-04-29T11:10:45.078346Z] [debug] [pid:2060747] <<< distribution::script_output("Content of /tmp/script0ntup.sh :\n \"cat > /tmp/script0ntup.sh << 'EOT_0ntup'; echo 0ntup-\$?-\" \n")
+[2026-04-29T11:10:45.089757Z] [debug] [pid:2060747] <<< distribution::script_output("Content of /tmp/scriptefgmz.sh :\n \"cat > /tmp/scriptefgmz.sh << 'EOT_efgmz'; echo efgmz-\$?-\" \n")
+[2026-04-29T11:10:45.100361Z] [debug] [pid:2060747] <<< distribution::script_output("Content of /tmp/scriptGPCba.sh :\n \"cat > /tmp/scriptGPCba.sh << 'EOT_GPCba'; echo GPCba-\$?-\" \n")
+[2026-04-29T11:10:45.111313Z] [debug] [pid:2060747] [1;34m||| finished generic-001 xfstests (runtime: 1 s)[0m
+[2026-04-29T11:10:45.111991Z] [debug] [pid:2060747] [37mtest generic-001 failed
+   at /usr/lib/os-autoinst/basetest.pm line 305.
+  	basetest::run_post_fail(run_subtest=HASH(0x556579d1aa58), "test generic-001 failed") called at /usr/lib/os-autoinst/basetest.pm line 372
+  	basetest::runtest(run_subtest=HASH(0x556579d1aa58)) called at /usr/lib/os-autoinst/autotest.pm line 569
+[2026-04-29T11:10:50.002111Z] [debug] [pid:2060747] [1;34m||| starting generic-002 tests/xfstests/run_subtest.pm[0m
+[2026-04-29T11:10:50.004458Z] [debug] [pid:2060747] <<< testapi::select_console(testapi_console="root-virtio-terminal")
+[2026-04-29T11:10:50.616514Z] [debug] [pid:2060747] [1;34m||| finished generic-002 xfstests (runtime: 0 s)[0m
+[2026-04-29T11:10:50.617177Z] [debug] [pid:2060747] [37mtest generic-002 failed
+   at /usr/lib/os-autoinst/basetest.pm line 305.
+  	basetest::run_post_fail(run_subtest=HASH(0x556578e2bd70), "test generic-002 failed") called at /usr/lib/os-autoinst/basetest.pm line 372
+  	basetest::runtest(run_subtest=HASH(0x556578e2bd70)) called at /usr/lib/os-autoinst/autotest.pm line 569
+[2026-04-29T11:10:55.407949Z] [debug] [pid:2060747] [1;34m||| starting generic-003 tests/xfstests/run_subtest.pm[0m
+[2026-04-29T11:10:55.409524Z] [debug] [pid:2060747] <<< testapi::select_console(testapi_console="root-virtio-terminal")
+[2026-04-29T11:10:56.033497Z] [debug] [pid:2060747] [1;34m||| finished generic-003 xfstests (runtime: 1 s)[0m
+[2026-04-29T11:10:56.034421Z] [debug] [pid:2060747] [37mtest generic-003 failed
+   at /usr/lib/os-autoinst/basetest.pm line 305.
+  	basetest::run_post_fail(run_subtest=HASH(0x556579ca2018), "test generic-003 failed") called at /usr/lib/os-autoinst/basetest.pm line 372
+  	basetest::runtest(run_subtest=HASH(0x556579ca2018)) called at /usr/lib/os-autoinst/autotest.pm line 569
+[2026-04-29T11:51:11.408194Z] [debug] [pid:2060747] [1;34m||| starting generic-581 tests/xfstests/run_subtest.pm[0m
+[2026-04-29T11:51:11.409126Z] [debug] [pid:2060747] <<< testapi::select_console(testapi_console="root-virtio-terminal")
+[2026-04-29T11:51:11.953349Z] [debug] [pid:2060747] [1;34m||| finished generic-581 xfstests (runtime: 0 s)[0m
+[2026-04-29T11:51:11.953983Z] [debug] [pid:2060747] [37mtest generic-581 failed
+   at /usr/lib/os-autoinst/basetest.pm line 305.
+  	basetest::run_post_fail(run_subtest=HASH(0x556579082e90), "test generic-581 failed") called at /usr/lib/os-autoinst/basetest.pm line 372
+  	basetest::runtest(run_subtest=HASH(0x556579082e90)) called at /usr/lib/os-autoinst/autotest.pm line 569
+[2026-04-29T11:51:16.417266Z] [debug] [pid:2060747] [1;34m||| starting generic-582 tests/xfstests/run_subtest.pm[0m
+[2026-04-29T11:51:16.418264Z] [debug] [pid:2060747] <<< testapi::select_console(testapi_console="root-virtio-terminal")
+[2026-04-29T11:51:16.961037Z] [debug] [pid:2060747] [1;34m||| finished generic-582 xfstests (runtime: 0 s)[0m
+[2026-04-29T11:51:16.961615Z] [debug] [pid:2060747] [37mtest generic-582 failed
+   at /usr/lib/os-autoinst/basetest.pm line 305.
+  	basetest::run_post_fail(run_subtest=HASH(0x556579083298), "test generic-582 failed") called at /usr/lib/os-autoinst/basetest.pm line 372
+  	basetest::runtest(run_subtest=HASH(0x556579083298)) called at /usr/lib/os-autoinst/autotest.pm line 569
+[2026-04-29T11:51:21.384687Z] [debug] [pid:2060747] [1;34m||| starting generic-583 tests/xfstests/run_subtest.pm[0m
+[2026-04-29T11:51:21.385660Z] [debug] [pid:2060747] <<< testapi::select_console(testapi_console="root-virtio-terminal")
+[2026-04-29T11:51:21.882180Z] [debug] [pid:2060747] [37mMaximum allowed test steps (MAX_TEST_STEPS=50000) exceeded[0m
+[2026-04-29T11:51:21.882234Z] [debug] [pid:2060747] [37mscheduled stop of overall test execution after a fatal test failure[0m
+[2026-04-29T11:51:21.882288Z] [debug] [pid:2060747] [37mskipping xfstests-run_subtest#465 (after fatal failure)[0m
+[2026-04-29T11:51:21.882973Z] [debug] [pid:2060747] [37mskipping xfstests-run_subtest#466 (after fatal failure)[0m
+[2026-04-29T11:51:21.966660Z] [debug] [pid:2060747] [37mstopping overall test execution after a fatal test failure[0m
+[2026-04-29T11:51:21.967232Z] [debug] [pid:2060747] [37mSending tests_done[0m
+[2026-04-29T11:51:21.967471Z] [debug] [pid:2059297] [37mstopping autotest process 2060747[0m
+[2026-04-29T11:51:21.967639Z] [debug] [pid:2060747] [37mautotest received signal TERM[0m
+[2026-04-29T11:51:21.979563Z] [debug] [pid:2059297] [37m[autotest] process exited: 1[0m
+[2026-04-29T11:51:22.079787Z] [debug] [pid:2059297] [37mdone with autotest process[0m
+[2026-04-29T11:51:22.080025Z] [debug] [pid:2059297] [37misotovideo starting handle_shutdown[0m
+[2026-04-29T11:51:22.080093Z] [debug] [pid:2059297] [37mstopping command server 2059440 because test execution ended[0m
+[2026-04-29T11:51:22.080141Z] [debug] [pid:2059297] [37misotovideo: informing websocket clients before stopping command server: http://127.0.0.1:20353/xxxxxxxxxxxxxxxx/broadcast[0m
+[2026-04-29T11:51:22.092945Z] [debug] [pid:2059297] [37mcommands process exited: 0[0m
+[2026-04-29T11:51:22.193168Z] [debug] [pid:2059297] [37mdone with command server[0m
+[2026-04-29T11:51:22.193792Z] [debug] [pid:2061111] [37mQEMU status is not 'shutdown', it is 'running'[0m
+[2026-04-29T11:51:22.194023Z] [debug] [pid:2059297] [37mbackend shutdown state: 0[0m
+[2026-04-29T11:51:22.194395Z] [info] [pid:2061111] [33m::: OpenQA::Qemu::Proc::save_state: Saving QEMU state to qemu_state.json[0m
+[2026-04-29T11:51:23.259328Z] [debug] [pid:2061111] [37mPassing remaining frames to the video encoder[0m
+frame=  967 fps=0.4 q=0.0 Lsize=     249kB time=00:00:40.25 bitrate=  50.7kbits/s speed=0.0161x    
+video:243kB audio:0kB subtitle:0kB other streams:0kB global headers:0kB muxing overhead: 2.649494%
+[2026-04-29T11:51:23.463723Z] [debug] [pid:2061111] [37mWaiting for video encoder to finalize the video[0m
+[2026-04-29T11:51:23.463811Z] [debug] [pid:2061111] [37mThe external video encoder (pid 2062098) terminated[0m
+[2026-04-29T11:51:23.463854Z] [debug] [pid:2061111] [37mThe built-in video encoder (pid 2062100) terminated[0m
+[2026-04-29T11:51:23.463990Z] [debug] [pid:2061111] [37mQEMU: qemu-system-x86_64: terminating on signal 15 from pid 2061111 (/usr/bin/isotovideo: backend)[0m
+[2026-04-29T11:51:23.464624Z] [debug] [pid:2061111] [37msending magic and exit[0m
+[2026-04-29T11:51:23.464842Z] [debug] [pid:2059297] [37mreceived magic close[0m
+[2026-04-29T11:51:23.489204Z] [debug] [pid:2059297] [37mbackend process exited: 0[0m
+[2026-04-29T11:51:23.589983Z] [debug] [pid:2059297] [37misotovideo completed handle_shutdown: done[0m
+[2026-04-29T11:51:23.590140Z] [debug] [pid:2059297] [37mstopping backend process 2061111[0m
+[2026-04-29T11:51:23.590186Z] [debug] [pid:2059297] [37mdone with backend process[0m
+2059297: EXIT 0
+[2026-04-29T11:51:23.629286Z] [info] Isotovideo exit status: 0
+[2026-04-29T11:51:23.646745Z] [info] +++ worker notes +++
+[2026-04-29T11:51:23.646842Z] [info] End time: 2026-04-29 11:51:23
+[2026-04-29T11:51:23.646902Z] [info] Result: done
+[2026-04-29T11:51:23.650260Z] [info] Uploading generate_report-dmesg.txt
+[2026-04-29T11:51:23.705134Z] [info] Uploading generate_report-generic.tar.xz
+[2026-04-29T11:51:23.726008Z] [info] Uploading generate_report-journalctl.txt
+[2026-04-29T11:51:23.762146Z] [info] Uploading generate_report-system-status.txt
+[2026-04-29T11:51:23.786264Z] [info] Uploading status.log
+[2026-04-29T11:51:24.260378Z] [info] Uploading video.webm
+[2026-04-29T11:51:24.295188Z] [info] Uploading autoinst-log.txt

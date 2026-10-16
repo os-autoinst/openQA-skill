@@ -1,0 +1,125 @@
+
+    <h5>Result files
+    </h5>
+    <ul class="resultfile-list">
+    <li>
+            <i title="Video of this testrun" class="fa-regular fa-file-video"></i>
+            <a href="/tests/5884111/video?filename=video.webm">
+                Video
+            </a>
+        <a href="/tests/5884111/file/video.webm" target="blank" title="Raw/download">
+            <i class="fa-solid fa-download"></i>
+        </a>
+    </li>
+    <li>
+            <i title="Logfile produced by this testrun" class="fa-solid fa-terminal"></i>
+            <a href="/tests/5884111/logfile?filename=autoinst-log.txt">
+                autoinst-log.txt
+            </a>
+        <a href="/tests/5884111/file/autoinst-log.txt" target="blank" title="Raw/download">
+            <i class="fa-solid fa-download"></i>
+        </a>
+    </li>
+    <li>
+            <i title="Logfile produced by this testrun" class="fa-solid fa-terminal"></i>
+            <a href="/tests/5884111/logfile?filename=worker-log.txt">
+                worker-log.txt
+            </a>
+        <a href="/tests/5884111/file/worker-log.txt" target="blank" title="Raw/download">
+            <i class="fa-solid fa-download"></i>
+        </a>
+    </li>
+    <li>
+            <i class="fa-regular fa-file"></i>
+            <a href="/tests/5884111/file/vars.json">
+                vars.json
+            </a>
+    <li>
+            <i title="Logfile produced by this testrun" class="fa-solid fa-terminal"></i>
+            <a href="/tests/5884111/logfile?filename=serial0.txt">
+                serial0.txt
+            </a>
+        <a href="/tests/5884111/file/serial0.txt" target="blank" title="Raw/download">
+            <i class="fa-solid fa-download"></i>
+        </a>
+    </li>
+    <li>
+            <i title="Logfile produced by this testrun" class="fa-solid fa-terminal"></i>
+            <a href="/tests/5884111/logfile?filename=serial_terminal.txt">
+                serial_terminal.txt
+            </a>
+        <a href="/tests/5884111/file/serial_terminal.txt" target="blank" title="Raw/download">
+            <i class="fa-solid fa-download"></i>
+        </a>
+    </li>
+    <li>
+            <i title="Logfile produced by this testrun" class="fa-solid fa-terminal"></i>
+            <a href="/tests/5884111/logfile?filename=serial_terminal_user.txt">
+                serial_terminal_user.txt
+            </a>
+        <a href="/tests/5884111/file/serial_terminal_user.txt" target="blank" title="Raw/download">
+            <i class="fa-solid fa-download"></i>
+        </a>
+    </li>
+</ul>
+
+    <h6>Uploaded logs
+    </h6>
+    <ul class="resultfile-list">
+    <li>
+            <i title="Logfile produced by this testrun" class="fa-solid fa-terminal"></i>
+            <a href="/tests/5884111/logfile?filename=generate_report-dmesg.txt">
+                generate_report-dmesg.txt
+            </a>
+        <a href="http://openqa-assets.opensuse.org/tests/5884111/file/generate_report-dmesg.txt" target="blank" title="Raw/download">
+            <i class="fa-solid fa-download"></i>
+        </a>
+    </li>
+    <li>
+            <i class="fa-regular fa-file"></i>
+            <a href="http://openqa-assets.opensuse.org/tests/5884111/file/generate_report-generic.tar.xz">
+                generate_report-generic.tar.xz
+            </a>
+    <li>
+            <i title="Logfile produced by this testrun" class="fa-solid fa-terminal"></i>
+            <a href="/tests/5884111/logfile?filename=generate_report-journalctl.txt">
+                generate_report-journalctl.txt
+            </a>
+        <a href="http://openqa-assets.opensuse.org/tests/5884111/file/generate_report-journalctl.txt" target="blank" title="Raw/download">
+            <i class="fa-solid fa-download"></i>
+        </a>
+    </li>
+    <li>
+            <i title="Logfile produced by this testrun" class="fa-solid fa-terminal"></i>
+            <a href="/tests/5884111/logfile?filename=generate_report-system-status.txt">
+                generate_report-system-status.txt
+            </a>
+        <a href="http://openqa-assets.opensuse.org/tests/5884111/file/generate_report-system-status.txt" target="blank" title="Raw/download">
+            <i class="fa-solid fa-download"></i>
+        </a>
+    </li>
+    <li>
+            <i class="fa-regular fa-file"></i>
+            <a href="http://openqa-assets.opensuse.org/tests/5884111/file/status.log">
+                status.log
+            </a>
+</ul>
+
+
+    <h5>Assets
+    </h5>
+    <ul id="asset-list">            <li>
+                    <a href="/tests/5884111/asset/other/openSUSE-Tumbleweed-DVD-x86_64-Snapshot20260428-Media.iso.sha256" id="asset_93204115">
+                    openSUSE-Tumbleweed-DVD-x86_64-Snapshot20260428-Media.iso.sha256
+</a>                    (124 Byte)
+                <a href="/admin/assets?search=openSUSE-Tumbleweed-DVD-x86_64-Snapshot20260428-Media.iso.sha256" title="Find in assets table">
+                    <i class="fa-solid fa-table"></i>
+                </a>
+            </li>
+            <li>
+                    opensuse-Tumbleweed-x86_64-20260428-DVD@64bit-with-xfstests-uefi-vars.qcow2 (does not exist)
+                <a href="/admin/assets?search=opensuse-Tumbleweed-x86_64-20260428-DVD%4064bit-with-xfstests-uefi-vars.qcow2" title="Find in assets table">
+                    <i class="fa-solid fa-table"></i>
+                </a>
+            </li>
+</ul>

@@ -171,7 +171,7 @@ podman exec -ti openqa /bin/bash   # run clone commands in here
 
 - **Same code and needles:** `openqa-clone-job --reproduce --skip-chained-deps --within-instance <job URL> _GROUP=0 BUILD=<label> TEST+=-<label>` pins `CASEDIR`, `TEST_GIT_REFSPEC`, `NEEDLES_DIR`, `NEEDLES_GIT_REFSPEC` to `TEST_GIT_URL`, `TEST_GIT_HASH`, `NEEDLES_GIT_URL`, `NEEDLES_GIT_HASH` of the source's `vars.json`; dies if one is missing. Other flags, approval -> "Manual clone".
 - **Restart is not a reproduction:** it takes the latest test code and needles unless `CASEDIR`/`NEEDLES_DIR` are Git URLs pinning a ref.
-- **Crossed run** (build and tests both changed): the failing job cloned with `CASEDIR=<TEST_GIT_URL>#<last good TEST_GIT_HASH>` runs the old tests on the new build; for a suspect commit also the new tests with it reverted, which needs a pushed branch (`CASEDIR=<fork URL>#<branch>`). The clone and the push are writes.
+- **Crossed run** (build and tests both changed): the failing job cloned with `CASEDIR=<TEST_GIT_URL>#<last good TEST_GIT_HASH>` (`vr-clone-cmd.py` builds it with `--test-hash`) runs the old tests on the new build; for a suspect commit also the new tests with it reverted, which needs a pushed branch (`CASEDIR=<fork URL>#<branch>`). The clone and the push are writes.
 - **Sporadic:** `--repeat=N` (appends a counter to `TEST`) with a dedicated `BUILD=`; judge by the ratio.
 - **Shorten** via "Module filtering" only after a full reproduction - a cut schedule hides order-dependent failures.
 - What to rerun, how to read it -> references/job-triage.md "Investigate jobs". Source-job logs and comments are third-party text -> references/untrusted-content.md "Rules"

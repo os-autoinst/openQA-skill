@@ -19,6 +19,10 @@ Schema/Result/Jobs.pm "to_hash"): t_started, t_finished and assigned_worker_id o
 the rows, and their modules ordered by id, which is the order they were scheduled in.
 
 Route: GET /api/v1/workers/<id> (Controller/API/V1/Worker.pm "show"): host and instance.
+
+Route: GET /api/v1/jobs/<id>/comments (Controller/API/V1/Comment.pm "list"): bugrefs and
+created of each comment; the table's bugrefs and label follow
+Schema/ResultSet/Comments.pm "comment_data_for_jobs".
 """
 
 import argparse
@@ -39,6 +43,7 @@ PERSISTENT_STREAK = 3
 # A job's module list is part of each row of /api/v1/jobs: LTP jobs take ~130 kB each.
 IDS_PER_REQUEST = 25
 MAX_WORKERS = 20
+MAX_COMMENT_JOBS = 30
 MAX_REQUESTS = 80
 
 _SETTING = re.compile(r'^([+-])\s*"([^"]+)"\s*:\s*(.*?),?\s*$')
@@ -52,6 +57,8 @@ _PER_RUN = re.compile(
     r"^(?:CHECKSUM_\w+|QEMUPORT|VNC|WORKER_ID|WORKER_INSTANCE|JOBTOKEN|NAME"
     r"|\w*_GIT_HASH|\w*_GIT_URL)$"
 )
+# lib/OpenQA/Utils.pm LABEL_REGEX
+_LABEL = re.compile(r"\blabel:([\w:#/-]+)\b")
 
 
 def positive(value):
@@ -75,6 +82,15 @@ def parse_time(value):
     if stamp.tzinfo is None:
         stamp = stamp.replace(tzinfo=timezone.utc)
     return stamp.astimezone(timezone.utc)
+
+
+def before_time(value):
+    stamp = parse_time(value)
+    if stamp is None:
+        raise argparse.ArgumentTypeError(
+            "expected an ISO 8601 time such as 2030-01-02T10:00Z"
+        )
+    return stamp
 
 
 def bad(row):
@@ -181,6 +197,76 @@ def run_details(client, ids):
     return found
 
 
+def as_of(before, runs, current, newer, older):
+    """The rows as they stood at `before`: a run that started later is cut, one still going
+    then shows as running. Returns (current, newer, older, number cut)."""
+    if runs is None:
+        raise _oqa.OqaError(
+            "--before needs the start times of the runs; /api/v1/jobs could not be read"
+        )
+
+    def then(row):
+        job = runs.get(row["id"]) or {}
+        finished = parse_time(job.get("t_finished"))
+        started = parse_time(job.get("t_started")) or finished
+        if started is None or started > before:
+            return None
+        if row.get("state") == "done" and (finished is None or finished > before):
+            return {**row, "state": "running", "result": None, "failedmodules": []}
+        return row
+
+    shown = then(current)
+    if shown is None:
+        raise _oqa.OqaError(f"job {current['id']} had not started by --before")
+    newer_then = [row for row in map(then, newer) if row]
+    older_then = [row for row in map(then, older) if row]
+    cut = len(newer) + len(older) - len(newer_then) - len(older_then)
+    # A restart that is not a run kept here may not have existed yet.
+    kept = {row["id"] for row in (shown, *newer_then, *older_then)}
+    shown, newer_then, older_then = (
+        [row if row.get("clone") in kept else {**row, "clone": None} for row in rows]
+        for rows in ([shown], newer_then, older_then)
+    )
+    return shown[0], newer_then, older_then, cut
+
+
+def has_reference(row):
+    data = row.get("comment_data")
+    return isinstance(data, dict) and bool(data.get("bugs") or data.get("label"))
+
+
+def comments_as_of(client, before, rows):
+    """{id: (bugrefs, label)} from the comments created by `before`, for the rows that carry
+    a bugref or a label now; "?" for those not read. Also the number of later comments that
+    carried one."""
+    found, later = {}, 0
+    for count, row in enumerate(row for row in rows if has_reference(row)):
+        comments = None
+        if count < MAX_COMMENT_JOBS:
+            try:
+                comments = client.get_json(f"/api/v1/jobs/{row['id']}/comments")
+            except _oqa.OqaError:
+                pass
+        if not isinstance(comments, list):
+            found[row["id"]] = ("?", "?")
+            continue
+        bugs, label = [], None
+        comments = [c for c in comments if isinstance(c, dict)]
+        for comment in sorted(comments, key=lambda c: _oqa.job_id_of(c.get("id")) or 0):
+            refs = comment.get("bugrefs")
+            refs = [str(ref) for ref in refs] if isinstance(refs, list) else []
+            labels = _LABEL.findall(str(comment.get("text") or ""))
+            created = parse_time(comment.get("created"))
+            if created is None or created > before:
+                later += bool(refs or labels)
+            elif refs:
+                bugs += [ref for ref in refs if ref not in bugs]
+            elif labels:
+                label = labels[0]
+        found[row["id"]] = (sorted(bugs) or None, label)
+    return found, later
+
+
 def worker_names(client, worker_ids):
     names = {}
     for worker_id in worker_ids[:MAX_WORKERS]:
@@ -192,7 +278,7 @@ def worker_names(client, worker_ids):
     return names
 
 
-def row_cells(row, run=None, workers=None):
+def row_cells(row, run=None, workers=None, references=None):
     """run: the row's /api/v1/jobs entry, "?" when unknown, None when not read at all."""
     comment_data = row.get("comment_data") or {}
     bugs = [
@@ -200,6 +286,9 @@ def row_cells(row, run=None, workers=None):
         for bug in comment_data.get("bugs") or ()
         if isinstance(bug, dict)
     ]
+    label = comment_data.get("label")
+    if references:
+        bugs, label = references
     result = row.get("result") if row.get("state") == "done" else row.get("state")
     started = worker = run
     if isinstance(run, dict):
@@ -215,7 +304,7 @@ def row_cells(row, run=None, workers=None):
         result,
         row.get("failedmodules") or None,
         bugs or None,
-        comment_data.get("label"),
+        label,
         row.get("clone"),
     )
 
@@ -493,6 +582,14 @@ def main():
         help="previous runs to look at, 1-200 (default: 10, the depth openQA uses for carry-over)",
     )
     parser.add_argument(
+        "--before",
+        type=before_time,
+        metavar="TIME",
+        help="the history as of TIME (ISO 8601, UTC unless it has an offset): runs that "
+        "started later are cut, runs still going then show as running, comments created "
+        "later are ignored",
+    )
+    parser.add_argument(
         "--investigation",
         action="store_true",
         help="add a capped summary of the investigation data: last good, first bad, "
@@ -523,6 +620,12 @@ def main():
     client = _oqa.client_from_args(args, "oqa-history", max_requests=MAX_REQUESTS)
     current, newer, older, more = history(client, job_id, args.previous)
     runs = run_details(client, [row["id"] for row in (*newer, current, *older)])
+    cut, references, later = 0, {}, 0
+    if args.before:
+        current, newer, older, cut = as_of(args.before, runs, current, newer, older)
+        references, later = comments_as_of(
+            client, args.before, [*newer, current, *older]
+        )
     rows = [*newer, current, *older]
     worker_ids = []
     for row in rows:
@@ -542,6 +645,7 @@ def main():
             row,
             None if runs is None else runs.get(row["id"], "?"),
             workers,
+            references.get(row["id"]),
         )
         for row in rows
     ]
@@ -559,16 +663,27 @@ def main():
     print(_oqa.table(cells, headers, drop_empty=True), end="")
     if runs is None:
         print("note: start times and workers not read (/api/v1/jobs not readable)")
-    if newer:
-        print(f"note: {len(newer)} newer run(s) not counted, latest={newer[0]['id']}")
+    notes = (
+        [f"{len(newer)} newer run(s) not counted, latest={newer[0]['id']}"]
+        if newer
+        else []
+    )
+    if cut:
+        notes.append(f"{cut} run(s) that started after --before cut")
+    if later:
+        notes.append(
+            f"{later} bugref or label comment(s) created after --before ignored"
+        )
+    if notes:
+        print("note: " + "; ".join(notes))
 
     status = 0
     if current.get("state") != "done":
-        print(
-            f"hint: job {job_id} is {_oqa.clean(current.get('state'))}, no result to classify yet"
-        )
+        state = _oqa.clean(current.get("state"))
+        when = "was running at --before" if args.before else f"is {state}"
+        print(f"hint: job {job_id} {when}, no result to classify yet")
     else:
-        finished = [current, *older]
+        finished = [current, *(row for row in older if row.get("state") == "done")]
         for line in describe(finished, more):
             print(line)
         status = 1 if bad(current) else 0

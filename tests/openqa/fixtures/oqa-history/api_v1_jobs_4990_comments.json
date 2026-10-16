@@ -1,0 +1,11 @@
+[
+ {
+  "id": 20,
+  "bugrefs": [
+   "boo#1000001"
+  ],
+  "created": "2030-01-01 11:00:00 +0000",
+  "text": "boo#1000001",
+  "userName": "reviewer_a"
+ }
+]

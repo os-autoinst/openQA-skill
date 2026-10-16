@@ -168,7 +168,7 @@ Overview routes pick the latest job before filtering, so they are safe; `scripts
 - **Step:** `num` (1-based), `result` (`ok fail softfail unk`; parser formats add `passed`, `skip`, `missing`), `title`, `text_data`, `screenshot`, `tags` (needle tags asked for), `needles[]` (unmatched candidates, `area[].similarity` in percent), `frametime` (`[start, end]` in video seconds).
 - **Die text** is the step titled `Failed`: `# Test died: <error>`, then `--- # stack trace`. Later steps of the module are `post_fail_hook`'s.
 - **Hook steps** (newer os-autoinst) start at `Post-fail` (`Entering post fail hook`); its death is a `fail` step `Failed`, second line `(post)`, then `# Post fail hook died: <error>`, never the die text; `oqa-job.py` adds `the hook died at step=<n>`.
-- **A failed module may have no `fail` step** (parser suites): use ulogs and `serial_terminal.txt`.
+- **A failed module may have no `fail` step** (suites) -> references/suite-results.md "Where results live"
 
 ## Step deep link
 

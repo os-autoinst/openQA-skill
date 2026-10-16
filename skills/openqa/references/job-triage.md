@@ -45,6 +45,7 @@ Classes: PRODUCT, TEST (code, needle, schedule, settings), INFRA (worker, backen
 | `incomplete`, `timeout_exceeded`: INFRA or TEST settings, rarely PRODUCT | "Incomplete reasons" |
 | `parallel_failed`, `skipped`: victim | "Clusters" |
 | `softfailed`: ok | referenced bugs still open and fitting? |
+| `kind=parser-result-failed`; a suite module failed with no `fail` step | suite-results.md "Where results live" |
 | `no candidate needle with tag(s) '<tags>' matched`; `assert_screen_change failed to detect a screen change`, `wait_still_screen timed out after <n>s!` (from `type_string`; `wait_still_screen` itself never dies), `Machine didn't shut down!` | "Needle mismatch" |
 | `command '<cmd>' failed`, `command '<cmd>' timed out`, `script failed with : `, `script timeout: `, `output not validating` | "Command failures" |
 | `fail` `wait_serial` step plus the test's own die text; `<message> - Serial error: <line>` | "Command failures" |
@@ -124,8 +125,9 @@ Timestamps are UTC (`Z`) or worker-local with offset; normalise across peers. Pr
 | `settings diff (last_good -> this job): build_changed=` | `vars.json` diff: `BUILD`, `WORKER_CLASS`; hashes: `-v` |
 | `SUT packages diff`, `worker packages diff` | absent: openQA had no diff |
 | `test changes`, `needle changes` | commits since last good, or `No test changes recorded, ...` |
+| `versions:` | kernel and suite packages, last good -> this job |
 
-**Reasoning:** only `BUILD` changed (no `test changes` commit) and no suite is cloned at run time (-> "Pitfalls"): PRODUCT regression; name both builds. Only worker side changed: INFRA. Else step text, history or references may decide (same step and message as a reference, a perl error in a file the window changed, a failure tracking an earlier module's pass over runs). Left open with a marked commit on the failing path or in an earlier module (it can change console, mounts, services, packages), not an unrelated `[lib]` one: before any verdict, ticket, job comment or fix, a crossed run decides:
+**Reasoning:** only `BUILD` changed (no `test changes` commit), and no suite package or clone changed with it (`versions:`, -> suite-results.md "Suite revision"): PRODUCT regression; name both builds. Only worker side changed: INFRA. Else step text, history or references may decide (same step and message as a reference, a perl error in a file the window changed, a failure tracking an earlier module's pass over runs). Left open with a marked commit on the failing path or in an earlier module (it can change console, mounts, services, packages), not an unrelated `[lib]` one: before any verdict, ticket, job comment or fix, a crossed run decides:
 
 1. **Read** an investigate clone (-> "Investigate jobs") or a newer run (`note:`) on the old build or tests, its `TEST_GIT_HASH` and failing step checked: a restart takes the newest tests.
 2. **Else propose** one: a write -> clone-and-run.md "Reproduce a failure"
@@ -161,7 +163,7 @@ Templates -> bugs-and-tickets.md "Bug body", "Ticket body"
 - **Cascades:** after a fatal module the rest is `skipped`; after a non-fatal one later modules run from the last milestone snapshot, or on a dirty SUT. Root cause is the first failed module.
 - **post_fail_hook noise:** hook steps and log lines follow the real failure, the hook's own death included; a hook hanging on a dead SUT turns `failed` into `timeout_exceeded`.
 - **Softfail masking** (`workaround` needles, `record_soft_failure`, `force_soft_failure`, serial `soft` patterns): a closed bug's workaround may still fire and hide something new; soft failures before the failing module are often the lead.
-- **Suite cloned at run time** (BCI-tests, LTP, kselftest, tox, bats): its revision is in neither `TEST_GIT_HASH` nor the investigation test log. `oqa-log.py --grep 'git clone'`, then its commits since last good, before saying PRODUCT. Kernel triage order -> area-conventions.md "Kernel"
+- **Suite cloned or installed at run time:** its revision is not `TEST_GIT_HASH` -> suite-results.md "Suite revision"
 - **Digest and log disagree** (log `last_module=` not in the digest, other worker or date, modules after a fatal one): the artifact is from another run; no evidence, say so.
 
 Sources: openQA lib/OpenQA Constants.pm, Worker/Job.pm, Schema/Result/Jobs.pm, Scheduler/Model/Jobs.pm; os-autoinst testapi.pm, basetest.pm, consoles/serial_screen.pm, autotest.pm, distribution.pm, lockapi.pm, OpenQA/Qemu/Proc.pm; os-autoinst-distri-opensuse lib/utils.pm, lib/known_bugs.pm, lib/Utils/Logging.pm; os-autoinst-scripts openqa-investigate, openqa-llm-investigate

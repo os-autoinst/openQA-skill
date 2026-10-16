@@ -331,6 +331,19 @@ printf 'kernel-default-6.4.0-150600.23.2.x86_64\nltp-20300102.def5678-2805.1.x86
 actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 5000 --investigation)
 contains "versions: a suite's release-only change is marked, a kernel's is not" \
 	"  versions (last_good 4960 -> this job, from install_ltp-rpm-qa.txt): kernel-default 6.4.0-150600.23.1 -> 6.4.0-150600.23.2; ltp 20300102.def5678-2804.1 -> 20300102.def5678-2805.1 (release only)" "$actual"
+# rpm -qa lists name every installed package: one without a suite says none was installed.
+printf 'kernel-default-6.4.0-150600.23.1.x86_64\n' >"$tmp"/tests_4960_file_install_ltp-rpm-qa.txt
+printf 'kernel-default-6.4.0-150600.23.2.x86_64\n' >"$tmp"/tests_5000_file_install_ltp-rpm-qa.txt
+actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 5000 --investigation)
+check "versions: rpm -qa lists without a suite on both sides leave no suite unknown" \
+	"  versions (last_good 4960 -> this job, from install_ltp-rpm-qa.txt): kernel-default 6.4.0-150600.23.1 -> 6.4.0-150600.23.2" \
+	"$(grep '^  versions' <<<"$actual")"
+printf '<a href="/tests/4960/file/install_ltp-kernel-pkg.txt">k</a>\n' >"$tmp"/tests_4960_downloads_ajax
+printf 'Name        : kernel-default\nVersion     : 6.4.0\nRelease     : 150600.23.1\n' >"$tmp"/tests_4960_file_install_ltp-kernel-pkg.txt
+actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 5000 --investigation)
+check "versions: one side kernel-only, the other an rpm -qa list without a suite: the suites are unknown" \
+	"  versions (last_good 4960 -> this job, from install_ltp-kernel-pkg.txt -> install_ltp-rpm-qa.txt): kernel-default 6.4.0-150600.23.1 -> 6.4.0-150600.23.2; suites ?" \
+	"$(grep '^  versions' <<<"$actual")"
 rm -rf "$tmp"
 
 actual=$(history 5000 --investigation --max-items 200)

@@ -1,8 +1,8 @@
 # openQA model
 
-Owns the openQA model shared by test creation and result review. Sources: openQA `lib/OpenQA`, os-autoinst-scripts `openqa-investigate`.
+Owns the openQA model shared by test creation and result review. Sources: openQA `lib/OpenQA`, os-autoinst `basetest.pm`, os-autoinst-scripts `openqa-investigate`.
 
-Contents: Instances; Vocabulary; States and results; Reviewed definition; Bugrefs; Labels and flags; Group comments; Carry-over; Automatic restarts; Clone chain; Read-only API recipes; Listing current failures; Step deep link; Auth and roles
+Contents: Instances; Vocabulary; States and results; Reviewed definition; Bugrefs; Labels and flags; Group comments; Carry-over; Automatic restarts; Clone chain; Read-only API recipes; Listing current failures; Details fields; Step deep link; Auth and roles
 
 ## Instances
 
@@ -162,6 +162,13 @@ curl -s "$H/tests/overview.json?groupid=1&build=$B&result=not_ok"
 ```
 
 Overview routes pick the latest job before filtering, so they are safe; `scripts/oqa-sweep.py` does this. Siblings failing in one module: add `modules=<m>&modules_result=failed`.
+
+## Details fields
+
+- **Step:** `num` (1-based), `result` (`ok fail softfail unk`; parser formats add `passed`, `skip`, `missing`), `title`, `text_data`, `screenshot`, `tags` (needle tags asked for), `needles[]` (unmatched candidates, `area[].similarity` in percent), `frametime` (`[start, end]` in video seconds).
+- **Die text** is the step titled `Failed`: `# Test died: <error>`, then `--- # stack trace`. Later steps of the module are `post_fail_hook`'s.
+- **Hook steps** (newer os-autoinst) start at `Post-fail` (`Entering post fail hook`); its death is a `fail` step `Failed`, second line `(post)`, then `# Post fail hook died: <error>`, never the die text; `oqa-job.py` adds `the hook died at step=<n>`.
+- **A failed module may have no `fail` step** (parser suites): use ulogs and `serial_terminal.txt`.
 
 ## Step deep link
 

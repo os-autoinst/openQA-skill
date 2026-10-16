@@ -24,7 +24,7 @@ You are the **triage** stage. Goal: a classification that a reviewer can act on,
 | parallel_failed, skipped, or the job has parents or children | -> job-triage.md "Clusters" |
 | failing now and then, or "since when?" | -> job-triage.md "History and investigation", "Investigate jobs" |
 | a kernel, LTP, xfstests or kselftests job | -> area-conventions.md "Kernel" (its triage order) |
-| which file holds what | -> job-triage.md "Artifact map", "Details fields" |
+| which file holds what | -> job-triage.md "Artifact map", openqa-model.md "Details fields" |
 | the job was restarted or is a clone | -> openqa-model.md "Clone chain", "Automatic restarts" |
 | a comment already names a bug | `scripts/oqa-ref.py <ref>`, -> openqa-model.md "Carry-over", review-workflow.md "Existing references", "Machine-written comments" |
 | a comment draft is wanted | -> review-comments-tickets.md "Comment recipes", site-policy.md "Overlay lookup", "No policy file"; lint with `scripts/oqa-comment-lint.py` |

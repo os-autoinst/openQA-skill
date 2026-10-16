@@ -1365,10 +1365,11 @@ def main():
                 lines, pattern, args.context, args.max_matches, span and span[:2]
             )
             # The first matches are the ones to keep: cut the end, not the middle.
-            dropped = max(len(entries) - args.max_lines, 0)
+            found_lines = len(entries)
             entries = entries[: args.max_lines]
             while entries and entries[-1] is None:
                 entries.pop()
+            dropped = found_lines - len(entries)
             shown = sum(1 for entry in entries if entry and entry[1] == ":")
             mode = "grep"
             if span:

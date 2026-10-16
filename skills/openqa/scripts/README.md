@@ -23,7 +23,7 @@ One line per script, generated from the parsers: do not edit it by hand. What a 
 - `oqa-comment-lint.py [FILE] [--text TEXT] [--private-suffix SUFFIX]...`; exit 1: at least one warning
 - `oqa-history.py JOB [--previous N] [--before TIME] [--investigation] [--max-items N] [--exit-code] [--verbose]`
 - `oqa-job.py JOB [--settings REGEX] [--steps N] [--module NAME] [--all-steps] [--exit-code] [--verbose]`
-- `oqa-log.py JOB [--file NAME] [--list | --tail N | --grep REGEX | --errors | --runtimes | --members] [--around-module MODULE] [--member PATH] [--compare JOB] [--context N] [--max-matches N] [--ignore-case] [--max-lines N] [--max-line-chars N] [--max-bytes BYTES] [--verbose] [--exit-code]`
+- `oqa-log.py JOB [--file NAME] [--list | --tail N | --grep REGEX | --errors | --runtimes | --members | --lines A-B] [--around-module MODULE] [--member PATH] [--compare JOB] [--context N] [--max-matches N] [--ignore-case] [--max-lines N] [--max-line-chars N] [--max-bytes BYTES] [--verbose] [--exit-code]`
 - `oqa-ref.py REF [--body] [--files] [--notes N]`
 - `oqa-sweep.py [--group ID]... [--build BUILD] [--todo] [--include-softfailed] [--limit N] [--no-llm] [--passed] [--module NAME] [--groups] [--match REGEX] [--uses-schedule PATH] [--vr-build LABEL] [--test-git-hash SHA] [--exit-code]`
 - `pr-queue.py [--repo O/R] [--newest N] [--me LOGIN]`
@@ -164,6 +164,7 @@ Logs are MBs; grepping `error|failed` drowns in `timeout=` noise.
 
     oqa-log.py JOB [--file NAME] --list | --errors | --around-module M | --grep REGEX | --tail N
     oqa-log.py JOB --grep REGEX --around-module M    # matches inside one module's span only
+    oqa-log.py JOB [--file NAME] --lines A-B    # a line range, numbered as --grep numbers it
     oqa-log.py JOB --runtimes [--compare JOB]
     oqa-log.py JOB --file ulogs/<name>.tar.xz (--members | --member PATH --grep REGEX|--tail N|--errors)
 
@@ -188,10 +189,14 @@ oqa-sweep.py) compiles the pattern as given: a nested quantifier such as
 Prefer anchored patterns without nested quantifiers. Names from `--list` go to `--file`, which validates
 them; do not paste one into a shell.
 
+`--lines A-B` reads lines A to B (`1 <= A <= B`), numbered as `--grep` and `--errors` number them, so a
+hit can be read in its surroundings: of the range at most `--max-lines` lines, the first ones, and a
+`note:` with the range to read next.
+
 `--members` lists an uploaded tar archive (`.tar`, `.tar.gz`/`.tgz`, `.tar.bz2`/`.tbz2`, `.tar.xz`/`.txz`, also when
 split over several compressed streams; zstd and zip are refused) as `<size> <type> <name>`, names as stored and
 quoted when unusual, first members first; `--member PATH` (a name from that list, a leading `./` does not
-matter) feeds one regular-file member to `--grep`, `--tail`, `--errors` or `--around-module`, and the header line
+matter) feeds one regular-file member to `--grep`, `--tail`, `--errors`, `--around-module` or `--lines`, and the header line
 gains `file=` and `member=`. Of two members with one name the last is read, as tar does, with a `note:`. The
 archive is downloaded whole (at most `--max-bytes`, else refused rather than read cut) and decompressed as a
 stream in memory, never to disk. The script reads the tar headers itself (ustar, GNU long names, pax path and

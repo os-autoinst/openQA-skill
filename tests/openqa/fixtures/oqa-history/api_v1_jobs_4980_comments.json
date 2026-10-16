@@ -1,0 +1,18 @@
+[
+ {
+  "id": 12,
+  "bugrefs": [],
+  "created": "2030-01-01 10:30:00 +0000",
+  "text": "label:later_label",
+  "userName": "reviewer_a"
+ },
+ {
+  "id": 11,
+  "bugrefs": [
+   "boo#1000001"
+  ],
+  "created": "2030-01-01 08:30:00 +0000",
+  "text": "boo#1000001 (Automatic carryover from t#4970)",
+  "userName": "reviewer_a"
+ }
+]

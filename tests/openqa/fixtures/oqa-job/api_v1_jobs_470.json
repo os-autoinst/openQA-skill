@@ -37,8 +37,8 @@
    "WORKER_CLASS": "qemu_x86_64"
   },
   "state": "done",
-  "t_finished": "2030-01-02T04:10:30",
-  "t_started": "2030-01-02T03:04:05",
+  "t_finished": "2030-01-01T21:12:30",
+  "t_started": "2030-01-01T21:10:00",
   "test": "textmode"
  }
 }

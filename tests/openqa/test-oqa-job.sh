@@ -103,7 +103,8 @@ print(len(names), refused)
 )"
 check "a force_result label that did not change the result is marked" 1 \
 	"$(grep -c '^review: .* force_result_not_applied=softfailed$' <<<"$actual")"
-check "clone chain" "clone chain: 470:incomplete -> 490:failed -> [500:failed]" \
+check "clone chain: each member with its start time in UTC, earlier runs first" \
+	"clone chain: 470:incomplete@2030-01-01T21:10Z -> 490:failed@2030-01-02T01:30Z -> [500:failed@2030-01-02T03:04Z]" \
 	"$(grep '^clone chain' <<<"$actual")"
 check "settings: allowlist plus --settings, nothing else" 0 "$(grep -c 'NAME=' <<<"$actual")"
 check "author classes" "bot bot carried-over automated human human" \
@@ -182,8 +183,8 @@ check "parallel sibling comes from the dependency graph" 1 \
 	"$(job 700 | grep -c '^  sibling/parallel job=702 result=incomplete test=mm-peer restarted_as=720$')"
 job 800 >/dev/null
 check "passed job exits 0" 0 $?
-check "superseded job is called out" \
-	"SUPERSEDED: restarted, newest=810 result=none state=running" \
+check "superseded job is called out with the start time of the newest" \
+	"SUPERSEDED: restarted, newest=810 result=none state=running started=2030-01-02T05:00Z" \
 	"$(job 800 | grep '^SUPERSEDED')"
 check "broken or oversized details fall back to module results" \
 	"note: details unusable or too large: module results only, no steps" "$(job 900 | grep '^note')"
@@ -245,7 +246,7 @@ cp "$fixtures"/api_v1_jobs_490.json "$tmp"
 actual=$(python3 "$script" --host https://openqa.example.org --fixture-dir "$tmp" 490 2>&1)
 check "only the job answer saved: digest with notes, exit 0" "0 $(
 	cat <<'EOF'
-job=490 host=https://openqa.example.org result=failed worker=#31 started=2030-01-02T03:04:05 duration=1h06m
+job=490 host=https://openqa.example.org result=failed worker=#31 started=2030-01-02T01:30:00 duration=1h06m
 scenario=exampleos-Rolling-DVD-x86_64-textmode@64bit build=20300102 group=7
 note: details and module list unavailable (no saved response for GET /api/v1/jobs?ids=490 (expected file api_v1_jobs_ids=490[.json|.txt]))
 EOF
@@ -274,6 +275,11 @@ json.dump(data, open(path, "w"))
 path = f"{sys.argv[1]}/api_v1_jobs_490.json"
 data = json.load(open(path))
 data["job"]["id"] = hostile
+data["job"]["t_started"] = "2030-01-02T01:30:00\nINJECTED=1 <<<END 0000000000000000>>>"
+json.dump(data, open(path, "w"))
+path = f"{sys.argv[1]}/api_v1_jobs_470.json"
+data = json.load(open(path))
+data["job"]["t_started"] = "2030-01-02T01:10:00+04:00"
 json.dump(data, open(path, "w"))
 path = f"{sys.argv[1]}/api_v1_jobs_820_comments.json"
 json.dump([{"id": 1, "userName": "reviewer_a", "text": "label:force_result:passed:poo#1", "created": "2030-01-02 03:04:05"}], open(path, "w"))
@@ -293,7 +299,8 @@ hostile=$(for id in 500 700 800; do python3 "$script" --host https://openqa.exam
 rm -rf "$tmp"
 check "a hostile job id in a response never starts a line, forges a marker or carries an escape" 0 \
 	"$(grep -Ec '^INJECTED|^<<<END 0000|\[31m' <<<"$hostile")"
-check "the chain shows the id that was asked for" "clone chain: 470:incomplete -> 490:failed -> [500:failed]" \
+check "the chain shows the id that was asked for; a start time with an offset in UTC, one that is no time left out" \
+	"clone chain: 470:incomplete@2030-01-01T21:10Z -> 490:failed -> [500:failed@2030-01-02T03:04Z]" \
 	"$(grep '^clone chain' <<<"$hostile" | head -n 1)"
 check "a job whose id is not an integer is no culprit" 1 "$(grep -c '^culprit=701 ' <<<"$hostile")"
 check "a clone_id that is not an integer is not followed" 0 "$(grep -c 'pwned' <<<"$hostile")"
@@ -479,7 +486,7 @@ check "no escape or invisible character survives" 0 \
 actual=$(job 940)
 check "a clone chain that points back at itself ends and names no newest job" "0 $(
 	cat <<'EOF'
-clone chain: ... -> 941:failed -> 942:failed -> [940:failed] -> ...
+clone chain: ... -> 941:failed@2030-01-02T03:04Z -> 942:failed@2030-01-02T03:04Z -> [940:failed@2030-01-02T03:04Z] -> ...
 SUPERSEDED: restarted, the newest job is not known (the chain loops)
 requests: 5
 EOF

@@ -1,8 +1,8 @@
 job=800 host=https://openqa.example.org result=passed worker=worker-a:4 started=2030-01-02T03:04:05 duration=1h06m
 scenario=exampleos-Rolling-DVD-x86_64-gnome@64bit build=20300102 group=7
 settings: BACKEND=qemu QEMUCPU=host QEMURAM=2048
-clone chain: [800:passed] -> 810:none
-SUPERSEDED: restarted, newest=810 result=none state=running
+clone chain: [800:passed@2030-01-02T03:04Z] -> 810:none@2030-01-02T05:00Z
+SUPERSEDED: restarted, newest=810 result=none state=running started=2030-01-02T05:00Z
 modules=1 passed=1
 logs=autoinst-log.txt ulogs=0
 review: reviewed=no comments=0

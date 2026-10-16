@@ -273,6 +273,24 @@ actual=$(log 4242 --grep '.' --context 0)
 check "--grep: by default 10 matches, the header says how to see more" \
 	"job=4242 host=https://openqa.opensuse.org mode=grep matches=40 (shown 10 of 40; --max-matches N) lines=41" \
 	"$(head -n 1 <<<"$actual")"
+actual=$(log 4242 --grep 'finished|starting' --around-module zypper_in --context 0)
+check "--grep --around-module: only matches inside the module's span, which the header names" "0 $(
+	cat <<'EOF'
+job=4242 host=https://openqa.opensuse.org mode=grep span=18-31 matches=2 lines=41
+18: 10:00:18 ||| starting zypper_in tests/console/zypper_in.pm
+--
+31: 10:00:26 ||| finished zypper_in console (runtime: 14 s)
+EOF
+)" "$? $(grep -v '^<<<\|^requests' <<<"$actual")"
+actual=$(log 4242 --grep 'starting zypper_in' --around-module zypper_in --context 2)
+check "--grep --around-module: the context stays inside the span too" "18 19 20" \
+	"$(sed -n '/^<<<UNTRUSTED/,/^<<<END/p' <<<"$actual" | sed '1d;$d' | sed -E 's/^ *([0-9]+)[:-].*/\1/' | xargs)"
+actual=$(log 4242 --grep x --around-module nope)
+check "--grep --around-module: a module that never started is said as for --around-module" \
+	"job=4242 host=https://openqa.opensuse.org file=autoinst-log.txt mode=module started=never lines=41" \
+	"$(head -n 1 <<<"$actual")"
+log 4242 --tail 3 --around-module zypper_in >/dev/null
+check "--around-module goes with --grep only (exit 2)" 2 $?
 actual=$(log 4242 --grep 'no such text anywhere')
 check "--grep: exit 0 without a match" 0 $?
 contains "--grep: no match header" "mode=grep matches=0 lines=41" "$actual"

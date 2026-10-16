@@ -633,15 +633,17 @@ def mode_tail(lines, from_end, count):
     return [(first + index, ":", text) for index, text in enumerate(picked)]
 
 
-def mode_grep(lines, pattern, context, max_matches):
-    hits = [i for i, text in enumerate(lines) if pattern.search(text[:MATCH_WIDTH])]
+def mode_grep(lines, pattern, context, max_matches, span=None):
+    """span: (first, last) index; matches and their context stay inside it."""
+    first, end = span or (0, len(lines) - 1)
+    hits = [i for i in range(first, end + 1) if pattern.search(lines[i][:MATCH_WIDTH])]
     matching = set(hits)
     entries, last = [], -1
     for hit in hits[:max_matches]:
-        low = max(hit - context, last + 1, 0)
+        low = max(hit - context, last + 1, first)
         if entries and low > last + 1:
             entries.append(None)
-        for index in range(low, min(hit + context, len(lines) - 1) + 1):
+        for index in range(low, min(hit + context, end) + 1):
             if index > last:
                 marker = ":" if index in matching else "-"
                 entries.append((index + 1, marker, lines[index]))
@@ -1048,7 +1050,8 @@ def main():
         help=f"log file (default: {DEFAULT_FILE}); e.g. serial0.txt, serial_terminal.txt, "
         "worker-log.txt, vars.json or ulogs/<name> for an uploaded log",
     )
-    modes = parser.add_mutually_exclusive_group(required=True)
+    # --around-module also narrows --grep, so it stays out of the group; main() checks the rest.
+    modes = parser.add_mutually_exclusive_group()
     modes.add_argument(
         "--list", action="store_true", help="list the files the job offers"
     )
@@ -1068,12 +1071,12 @@ def main():
         "timed-out command, serial failure, backend died, setup problem, result lines, "
         "plus the last started module",
     )
-    modes.add_argument(
+    parser.add_argument(
         "--around-module",
         metavar="MODULE",
         help="lines between the module's 'starting' and 'finished' markers (last run); "
         "when capped by --max-lines the window ends just after the '# Test died' line, "
-        "so post_fail_hook output is left out",
+        "so post_fail_hook output is left out; with --grep: grep only those lines",
     )
     modes.add_argument(
         "--runtimes",
@@ -1155,6 +1158,14 @@ def main():
     )
     args = parser.parse_args()
     args.max_lines = args.max_lines or args.tail or MAX_LINES
+    others = (args.list, args.tail, args.errors, args.runtimes, args.members)
+    if args.around_module is not None and any(others):
+        parser.error("--around-module goes alone or with --grep")
+    if not any(others) and args.grep is None and args.around_module is None:
+        parser.error(
+            "give one of --list, --tail, --grep, --errors, --around-module, --runtimes, "
+            "--members"
+        )
     if args.compare is not None and not args.runtimes:
         parser.error("--compare needs --runtimes")
     if args.runtimes and args.file != DEFAULT_FILE:
@@ -1258,15 +1269,39 @@ def main():
             notes.append(
                 f"warning: only the first {args.max_bytes} bytes were read (--max-bytes)"
             )
+        span = None
+        if args.around_module is not None:
+            span, seen = mode_module(lines, args.around_module)
+            if not span:
+                print(
+                    f"{head} file={_oqa.tok(args.file)} mode=module "
+                    f"started=never lines={len(lines)}"
+                )
+                if seen:
+                    print(
+                        "modules started: " + _oqa.toks(seen, 80, 60).replace(",", " ")
+                    )
+                else:
+                    print(
+                        "note: this file has no module markers (autoinst-log.txt has them); "
+                        "use --grep or --tail"
+                    )
+                print(f"requests: {client.requests}")
+                return 1 if args.exit_code else 0
         if pattern:
-            entries, total = mode_grep(lines, pattern, args.context, args.max_matches)
+            entries, total = mode_grep(
+                lines, pattern, args.context, args.max_matches, span and span[:2]
+            )
             # The first matches are the ones to keep: cut the end, not the middle.
             dropped = max(len(entries) - args.max_lines, 0)
             entries = entries[: args.max_lines]
             while entries and entries[-1] is None:
                 entries.pop()
             shown = sum(1 for entry in entries if entry and entry[1] == ":")
-            mode = f"grep matches={total}"
+            mode = "grep"
+            if span:
+                mode += f" span={span[0] + 1}-{span[1] + 1}"
+            mode += f" matches={total}"
             if shown < total:
                 caps = ["--max-matches N"] if total > args.max_matches else []
                 caps += ["--max-lines N"] if dropped else []
@@ -1303,24 +1338,7 @@ def main():
                 )
                 entries = mode_tail(lines, False, FALLBACK_TAIL)
         else:
-            found, seen = mode_module(lines, args.around_module)
-            if not found:
-                print(
-                    f"{head} file={_oqa.tok(args.file)} mode=module "
-                    f"started=never lines={len(lines)}"
-                )
-                if seen:
-                    print(
-                        "modules started: " + _oqa.toks(seen, 80, 60).replace(",", " ")
-                    )
-                else:
-                    print(
-                        "note: this file has no module markers (autoinst-log.txt has them); "
-                        "use --grep or --tail"
-                    )
-                print(f"requests: {client.requests}")
-                return 1 if args.exit_code else 0
-            begin, end, done = found
+            begin, end, done = span
             died = next(
                 (i for i in range(begin, end + 1) if _DIED.search(lines[i])), None
             )

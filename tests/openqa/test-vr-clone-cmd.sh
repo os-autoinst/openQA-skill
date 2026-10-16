@@ -232,7 +232,7 @@ run --fixture-dir "$work/vars" --job localhost:9526/tests/5 --test-hash "$sha"
 check "crossed: a local instance is read and targeted" "0 1" \
 	"$rc $(grep -c '^creates: clone of job 5 on http://localhost:9526,' <<<"$out")"
 for url in '' 'git@github.com:example/repo.git' 'https://u:s3cretPassw0rd@github.com/example/repo.git' \
-	'https://github.com/example/repo.git#main' 'https://github.com/example/repo.git?x=1' 'https://[bad/x.git' \
+	'https://git@github.com/example/repo.git' 'https://github.com/example/repo.git#main' 'https://github.com/example/repo.git?x=1' 'https://[bad/x.git' \
 	'https://github.com/example/repo.git
 hazard: none' 'https://github.com/example/re po.git' 'file:///etc/passwd' 'https://github.com'; do
 	python3 - "$vars/tests_4242_file_vars.json" "$work/vars/tests_4242_file_vars.json" "$url" <<'PY'

@@ -167,8 +167,49 @@ actual=$(sweep --group 7 --group 8)
 check "several groups: one header each, one host line, one requests line" "2 1 1" \
 	"$(grep -c '^group=' <<<"$actual") $(grep -c '^host=' <<<"$actual") $(grep -c '^requests: ' <<<"$actual")"
 
-sweep --group 99 >/dev/null 2>&1
-check "unknown group exits 2" 2 $?
+actual=$(sweep --group 99 2>&1)
+check "unknown group exits 2 and names --host" "2 1" \
+	"$? $(grep -c '^error: group 99 is not readable on https://openqa.example.org (.*); a group of another openQA instance needs --host$' <<<"$actual")"
+tmpg=$(mktemp -d)
+python3 - "$tmpg" "$(dirname "$script")" <<'PY'
+import json, sys
+sys.path.insert(0, sys.argv[2])
+import _oqa
+# What an instance that has no group 99 answers to the listing the fallback asks for.
+params = [("groupid", 99), ("build", "20300102"), ("scope", "current"), ("latest", 1)]
+params.append(("result", ",".join(_oqa.expand_results(["not_ok"]))))
+with open(f"{sys.argv[1]}/{_oqa.fixture_name('/api/v1/jobs', params)}.json", "w") as out:
+    json.dump({"jobs": []}, out)
+PY
+actual=$(python3 "$script" --host https://openqa.example.org --fixture-dir "$tmpg" --group 99 --build 20300102 2>&1)
+status=$?
+rm -r "$tmpg"
+check "unknown group with --build: exit 2 naming --host, not an empty listing" "2 1 0" \
+	"$status $(grep -c 'a group of another openQA instance needs --host$' <<<"$actual") $(grep -c 'current not-ok jobs' <<<"$actual")"
+actual=$(
+	cd "$(dirname "$script")" && python3 - <<'PY'
+import importlib.util
+spec = importlib.util.spec_from_file_location("sweep", "oqa-sweep.py")
+sweep = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(sweep)
+client = sweep._oqa.Client("https://openqa.example.org", fixture_dir="/nonexistent")
+for status in (400, 403, 503):
+    def refuse(path, params=None, status=status):
+        raise sweep._oqa.OqaError(f"HTTP {status}: {path}")
+    client.get_json = refuse
+    try:
+        print(status, sweep.pick_builds(client, 5, "B"))
+    except sweep._oqa.OqaError as error:
+        print(status, error)
+PY
+)
+check "any 4xx for the group is an error naming --host; a 5xx with --build still falls back" "$(
+	cat <<'EOF'
+400 group 5 is not readable on https://openqa.example.org (HTTP 400: /api/v1/job_groups/5/build_results); a group of another openQA instance needs --host
+403 group 5 is not readable on https://openqa.example.org (HTTP 403: /api/v1/job_groups/5/build_results); a group of another openQA instance needs --host
+503 (None, [{'build': 'B'}])
+EOF
+)" "$actual"
 
 # --- passed jobs: a source to clone ---------------------------------------------
 sweep --passed >/dev/null 2>&1

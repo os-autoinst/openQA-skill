@@ -42,7 +42,10 @@ One line per script, generated from the parsers: do not edit it by hand. What a 
     oqa-sweep.py --uses-schedule schedule/x/y.yaml (--group ID ... | --match REGEX)
     oqa-sweep.py --vr-build 'user/os-autoinst-distri-opensuse#123' [--test-git-hash SHA]    # a PR's verification runs
 
-`--build` needs `--group`; `--groups --match REGEX` finds the id.
+`--build` needs `--group`; `--groups --match REGEX` finds the id. Group ids belong to one instance and the
+host is `--host` alone (default o3), never taken from a job URL seen elsewhere: a group the instance
+answers with an HTTP 4xx (a group of another instance) ends in exit 2 with an error naming `--host`,
+not in an empty listing.
 
 Failed, incomplete and timeout_exceeded jobs also get an indented `llm-investigation-summary (automatic, unverified):`
 line (`class=product|test|infra why="<first bullet>"`; its restart advice only in `oqa-job.py`) when a comment holds an automatic LLM summary,

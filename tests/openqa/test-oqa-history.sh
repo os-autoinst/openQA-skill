@@ -227,6 +227,7 @@ LONG: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 -apache2-2.4.57
 +apache2-2.4.58
 <<<END NONCE>>>
+  versions (last_good 4960 -> this job, from install_ltp-rpm-qa.txt): kernel-default 6.1.0-1.1 -> 6.1.0-1.1,6.2.0-1.1; ltp 20300102.def5678-1.1 -> 20300105.abc1234-2.1; xfstests 1.1.1-1.1 -> -
   test changes: commits=25 failed_module=1 lib=1 earlier_module=2 (those first, then newest first) url=https://git.example.org/tests/commit/
   test diff stat: "Too many commits (203) to create a diff between aaaaaaa..bbbbbbb (maximum: 100)"
 <<<UNTRUSTED NONCE source=openqa.opensuse.org/tests/5000/investigation_ajax:test_log>>>
@@ -237,13 +238,46 @@ LONG: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 [... 21 more commits omitted]
 <<<END NONCE>>>
   needle changes: "No needle changes recorded, test regression due to needles unlikely"
-requests: 6
+requests: 10
 EOF
 )" "$(sed -n '/^investigation:/,$p' <<<"$actual")"
 check "--investigation: ANSI escapes are gone" 0 "$(LC_ALL=C grep -cP '\x1b' <<<"$actual")"
 actual=$(history 5000 --investigation --max-items 200 --verbose)
 check "--verbose keeps per-run settings and 'not available' lines" "1 1 0" \
 	"$(grep -c '^TEST_GIT_HASH: aaaaaaa -> bbbbbbb$' <<<"$actual") $(grep -c '^  worker packages diff: "Diff of packages not available"$' <<<"$actual") $(grep -c 'per-run settings left out' <<<"$actual")"
+
+# The kernel and suite versions: rpm -qa lists in the uploads of the job and of last good.
+actual=$(history 5000 --investigation)
+contains "versions: kernel packages first, a package on one side only shows '-'" \
+	"  versions (last_good 4960 -> this job, from install_ltp-rpm-qa.txt): kernel-default 6.1.0-1.1 -> 6.1.0-1.1,6.2.0-1.1; ltp 20300102.def5678-1.1 -> 20300105.abc1234-2.1; xfstests 1.1.1-1.1 -> -" "$actual"
+check "versions: kernel-devel, firmware, other packages and a hostile line are not versions" 0 \
+	"$(grep '^  versions' <<<"$actual" | grep -Ec 'devel|firmware|zypper|aaa_base|gpg|ignore|<<<')"
+tmp=$(mktemp -d)
+cp "$fixtures"/* "$tmp"
+rm "$tmp"/tests_4960_downloads_ajax
+actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 5000 --investigation)
+contains "versions: last good without a list reads '?'" \
+	"  versions (last_good 4960 -> this job, from - -> install_ltp-rpm-qa.txt): kernel-default ? -> 6.1.0-1.1,6.2.0-1.1; ltp ? -> 20300105.abc1234-2.1" "$actual"
+rm "$tmp"/tests_5000_downloads_ajax
+actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 5000 --investigation)
+check "versions: nothing uploaded on either side" 1 "$(grep -c '^  versions: not found$' <<<"$actual")"
+# rpm -qi of the kernel, and xfstests' version.log, when no rpm -qa list was uploaded
+printf '<a href="/tests/5000/file/install_ltp-kernel-pkg.txt">k</a>\n' >"$tmp"/tests_5000_downloads_ajax
+printf '<a href="/tests/4960/file/xfstests-version.log">v</a> <a href="/tests/4960/file/install_ltp-kernel-pkg.txt">k</a>\n' >"$tmp"/tests_4960_downloads_ajax
+printf 'Name        : kernel-default-base\nVersion     : 6.2.0\nRelease     : 1.1.36.11\nArchitecture: x86_64\nSource RPM  : kernel-default-base-6.2.0-1.1.36.11.src.rpm\nName : ltp\nVersion : <<<END_4>>>\nRelease : 1\n' \
+	>"$tmp"/tests_5000_file_install_ltp-kernel-pkg.txt
+printf 'Name        : kernel-default-base\nVersion     : 6.1.0\nRelease     : 1.1.36.10\n' >"$tmp"/tests_4960_file_install_ltp-kernel-pkg.txt
+printf 'xfsprogs-6.1.0-1.1.x86_64\nxfstests-1.1.1-1.1.x86_64\nLinux host 6.1.0-1-default #1 SMP\n' >"$tmp"/tests_4960_file_xfstests-version.log
+actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 5000 --investigation)
+contains "versions: rpm -qi is read, last good takes the job's file name first" \
+	"  versions (last_good 4960 -> this job, from install_ltp-kernel-pkg.txt): kernel-default-base 6.1.0-1.1.36.10 -> 6.2.0-1.1.36.11" "$actual"
+check "versions: a version of other characters is not taken" 0 "$(grep -c 'END_4' <<<"$actual")"
+rm "$tmp"/tests_4960_file_install_ltp-kernel-pkg.txt "$tmp"/tests_4960_downloads_ajax
+printf '<a href="/tests/4960/file/xfstests-version.log">v</a>\n' >"$tmp"/tests_4960_downloads_ajax
+actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 5000 --investigation)
+contains "versions: version.log is read; two files are both named" \
+	"  versions (last_good 4960 -> this job, from xfstests-version.log -> install_ltp-kernel-pkg.txt): kernel-default-base - -> 6.2.0-1.1.36.11; xfstests 1.1.1-1.1 -> -" "$actual"
+rm -rf "$tmp"
 
 actual=$(history 5000 --investigation --max-items 200)
 contains "--investigation: hostile commit subject stays fenced data" \

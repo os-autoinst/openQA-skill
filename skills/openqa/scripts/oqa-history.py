@@ -23,6 +23,9 @@ Route: GET /api/v1/workers/<id> (Controller/API/V1/Worker.pm "show"): host and i
 Route: GET /api/v1/jobs/<id>/comments (Controller/API/V1/Comment.pm "list"): bugrefs and
 created of each comment; the table's bugrefs and label follow
 Schema/ResultSet/Comments.pm "comment_data_for_jobs".
+
+Route: GET /tests/<id>/downloads_ajax and /tests/<id>/file/<name>
+(Controller/Test.pm "downloads", Controller/File.pm "test_file"): uploaded package lists.
 """
 
 import argparse
@@ -45,6 +48,19 @@ IDS_PER_REQUEST = 25
 MAX_WORKERS = 20
 MAX_COMMENT_JOBS = 30
 MAX_REQUESTS = 80
+LIST_BYTES = 512 << 10
+# Uploaded package lists, by preference: rpm -qa (lib/LTP/utils.pm log_versions), xfstests'
+# version.log, rpm -qi of the kernel.
+VERSION_SOURCES = (
+    re.compile(r"(?:^|-)rpm-qa\.txt$"),
+    re.compile(r"(?:^|-)version\.log$"),
+    re.compile(r"(?:^|-)kernel-pkg\.txt$"),
+)
+KERNEL_PACKAGE = re.compile(
+    r"kernel-(?:default|rt|64kb|azure|kvmsmall|vanilla|pae|longterm|zfcpdump|lpae)(?:-base)?"
+)
+SUITE_PACKAGES = ("ltp", "ltp-stable", "blktests", "xfstests", "kirk")
+ARCHS = ("x86_64", "aarch64", "ppc64le", "s390x", "noarch", "i586", "i686", "riscv64")
 
 _SETTING = re.compile(r'^([+-])\s*"([^"]+)"\s*:\s*(.*?),?\s*$')
 # A commit with an empty subject is printed as "<hash> " with nothing after it.
@@ -57,6 +73,9 @@ _PER_RUN = re.compile(
     r"^(?:CHECKSUM_\w+|QEMUPORT|VNC|WORKER_ID|WORKER_INSTANCE|JOBTOKEN|NAME"
     r"|\w*_GIT_HASH|\w*_GIT_URL)$"
 )
+_QI_FIELD = re.compile(r"^(Name|Version|Release)\s*:\s*(\S+)$")
+_PACKAGE_LINE = re.compile(r"[A-Za-z0-9_.+~^-]+")
+_UPLOAD_NAME = r"[A-Za-z0-9_][A-Za-z0-9._+@=~-]*"
 # lib/OpenQA/Utils.pm LABEL_REGEX
 _LABEL = re.compile(r"\blabel:([\w:#/-]+)\b")
 
@@ -444,6 +463,99 @@ def earlier_modules(job, failed):
     return sorted({name for name in names[:first] if name and name not in failed})
 
 
+def uploads(client, job_id):
+    """Names of the files a job uploaded, from the downloads tab; None when unreadable."""
+    try:
+        page = client.get_bytes(
+            f"/tests/{job_id}/downloads_ajax", max_bytes=1 << 20, accept="text/html"
+        ).decode("utf-8", "replace")
+    except _oqa.OqaError:
+        return None
+    names = re.findall(rf"/tests/{job_id}/file/({_UPLOAD_NAME})(?=[\"'?#<>\s])", page)
+    return list(dict.fromkeys(names))
+
+
+def version_file(names, prefer=None):
+    if prefer in (names or ()):
+        return prefer
+    for pattern in VERSION_SOURCES:
+        for name in names or ():
+            if pattern.search(name):
+                return name
+    return None
+
+
+def wanted(name):
+    return bool(KERNEL_PACKAGE.fullmatch(name)) or name in SUITE_PACKAGES
+
+
+def package_versions(text):
+    """{package: [version-release, ...]} of the kernel and the test suites in an rpm -qa
+    list (name-version-release[.arch] lines) or rpm -qi output."""
+    found, fields = {}, {}
+
+    def add(name, version):
+        if not wanted(name) or not _PACKAGE_LINE.fullmatch(version):
+            return
+        if version not in found.setdefault(name, []):
+            found[name].append(version)
+
+    for line in text.split("\n"):
+        line = line.strip()
+        field = _QI_FIELD.match(line)
+        if field:
+            fields[field.group(1)] = field.group(2)
+            if field.group(1) == "Release" and "Name" in fields and "Version" in fields:
+                add(fields["Name"], f"{fields['Version']}-{fields['Release']}")
+                fields = {}
+        elif _PACKAGE_LINE.fullmatch(line):
+            base, dot, arch = line.rpartition(".")
+            parts = (base if dot and arch in ARCHS else line).rsplit("-", 2)
+            if len(parts) == 3 and all(parts):
+                add(parts[0], f"{parts[1]}-{parts[2]}")
+    return found
+
+
+def job_versions(client, job_id, prefer=None):
+    """(file name, {package: versions}) of one job, (None, None) without a package list."""
+    name = version_file(uploads(client, job_id), prefer)
+    if not name:
+        return None, None
+    try:
+        text = client.get_text(f"/tests/{job_id}/file/{name}", max_bytes=LIST_BYTES)
+    except _oqa.OqaError:
+        return name, None
+    return name, package_versions(text)
+
+
+def versions_line(client, job_id, good_id):
+    """Kernel and test suite package versions of last good and this job, side by side."""
+    name, new = job_versions(client, job_id)
+    good_name, old = job_versions(client, good_id, name)
+    if not new and not old:
+        return "  versions: not found"
+    items = []
+    for package in sorted(
+        {*(new or {}), *(old or {})}, key=lambda n: (n[:7] != "kernel-", n)
+    ):
+        before, after = (
+            ",".join(_oqa.tok(v, 60) for v in side[package])
+            if side and package in side
+            else ("-" if side is not None else "?")
+            for side in (old, new)
+        )
+        items.append(
+            f"{package} {after} (unchanged)"
+            if before == after
+            else f"{package} {before} -> {after}"
+        )
+    files = [_oqa.tok(file, 80) if file else "-" for file in (good_name, name)]
+    source = files[1] if name == good_name else " -> ".join(files)
+    return f"  versions (last_good {good_id} -> this job, from {source}): " + "; ".join(
+        items
+    )
+
+
 def fenced(client, job_id, title, lines):
     block = _oqa.sanitize("\n".join(lines), max_line=240, max_bytes=16384)
     source = f"{client.host.split('//')[1]}/tests/{job_id}/investigation_ajax:{title}"
@@ -509,6 +621,9 @@ def investigation(client, job_id, limit, verbose, failed=(), job=None):
             ),
             end="",
         )
+    good_id = link_id(data.get("last_good"))
+    if good_id.isdigit():
+        print(versions_line(client, job_id, int(good_id)))
 
     for key, stat_key, title, url_key in (
         ("test_log", "test_diff_stat", "test", "testgiturl"),
@@ -593,7 +708,8 @@ def main():
         "--investigation",
         action="store_true",
         help="add a capped summary of the investigation data: last good, first bad, "
-        "changed settings, package diffs, test and needle commit subjects",
+        "changed settings, package diffs, kernel and test suite versions, test and needle "
+        "commit subjects",
     )
     parser.add_argument(
         "--max-items",

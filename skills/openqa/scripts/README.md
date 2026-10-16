@@ -235,7 +235,12 @@ the job had not started by then. `--investigation` is not cut: openQA computes i
 
 `--investigation` adds the settings diff (per-run noise left out), package diffs, test and needle commits,
 `--max-items` (10) lines each: `settings diff (last_good -> this job)`, plus a hint to run on first_bad for the
-tight window when that is another job.
+tight window when that is another job. `versions (last_good <id> -> this job, from <file>)` compares the kernel
+(`kernel-<flavor>[-base]`) and the test suites installed as packages (ltp, ltp-stable, blktests, xfstests,
+kirk) as `<package> <old> -> <new>` or `<package> <version> (unchanged)` (`-`: not installed, `?`: no list),
+read from one file each job uploaded: `*rpm-qa.txt` (LTP's `log_versions`), else `*version.log` (xfstests),
+else `*kernel-pkg.txt` (`rpm -qi`), found in the downloads tab; four requests. `versions: not found`: neither
+job uploaded one. A suite built from Git is not there (its `git clone`, LTP's `LTP version` step).
 Test commits that touch a file under `tests/` named like one of this job's failed modules (`<module>.pm|py`, any
 directory: failed module names carry no category) start with `[failed module <module>]`, those touching or
 renaming into `lib/` with `[lib]`, those touching a module that ran before the first failed one (the job's
@@ -252,6 +257,7 @@ a module, never for `lib/`. A module loaded under another `name` is not matched.
     first_bad=6272001 build=20261014 streak=5
     not_ok=5/11 (older runs exist: --previous N)
     hint: failing since build 20261014: 5 runs in a row over 1 build(s); ...
+      versions (last_good 6270507 -> this job, from install_ltp-rpm-qa.txt): kernel-default-base 7.2.9-1.1.36.10 -> 7.2.10-1.1.36.11; ltp 20261013.6262a5fc-2959.1 -> 20261014.1aae0e4d-2960.1
 
 ## oqa-ref.py - state of the ticket behind a bugref
 

@@ -242,12 +242,15 @@ read from one file each job uploaded: `*rpm-qa.txt` (LTP's `log_versions`), else
 else `*kernel-pkg.txt` (`rpm -qi`), found in the downloads tab; four requests. `versions: not found`: neither
 job uploaded one. A suite built from Git is not there (its `git clone`, LTP's `LTP version` step).
 Test commits that touch a file under `tests/` named like one of this job's failed modules (`<module>.pm|py`, any
-directory: failed module names carry no category) start with `[failed module <module>]`, those touching or
-renaming into `lib/` with `[lib]`, those touching a module that ran before the first failed one (the job's
-module list in run order) with `[earlier module <module>]`; they come first in that order, counted from the
-files as `failed_module=`, `lib=` and `earlier_module=` (`?`: no module list) in the `test changes:` line
-(openQA's test log is `git log --stat`). git shortens a long path to `.../<tail>`: such a file still counts for
-a module, never for `lib/`. A module loaded under another `name` is not matched.
+directory: failed module names carry no category) start with `[failed module <module>]`; those touching another
+file of the failing step's stack trace with `[call path <file>]` (the `# Test died` step of the first failed
+module's `details-<module>.json`, one more request; os-autoinst's own frames and the post-fail hook's are not
+read); those touching or renaming into `lib/` with `[lib]`; those touching a module that ran before the first
+failed one (the job's module list in run order) with `[earlier module <module>]`. They come first in that order,
+counted from the files as `failed_module=`, `call_path=`, `lib=` and `earlier_module=` (`?`: no step that died,
+or no module list) in the `test changes:` line (openQA's test log is `git log --stat`). git shortens a long path
+to `.../<tail>`: such a file still counts for a module or the call path, never for `lib/`. A module loaded under
+another `name` is not matched. `-v` lists every test commit, each followed by its files.
 
     job=6273362 host=https://openqa.opensuse.org scenario=opensuse-Tumbleweed-JeOS-for-kvm-and-xen-x86_64-jeos-ltp-syscalls@uefi_virtio-2G
     id       build     started            worker             result      failed_modules  bugrefs     clone
@@ -258,6 +261,7 @@ a module, never for `lib/`. A module loaded under another `name` is not matched.
     not_ok=5/11 (older runs exist: --previous N)
     hint: failing since build 20261014: 5 runs in a row over 1 build(s); ...
       versions (last_good 6270507 -> this job, from install_ltp-rpm-qa.txt): kernel-default-base 7.2.9-1.1.36.10 -> 7.2.10-1.1.36.11; ltp 20261013.6262a5fc-2959.1 -> 20261014.1aae0e4d-2960.1
+      test changes: commits=29 failed_module=0 call_path=? lib=9 earlier_module=3 (those first, then newest first) url=...
 
 ## oqa-ref.py - state of the ticket behind a bugref
 

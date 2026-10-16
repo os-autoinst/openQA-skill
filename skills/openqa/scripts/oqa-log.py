@@ -1440,7 +1440,11 @@ def main():
                 )
                 entries = entries[: args.max_lines]
             if first > len(lines):
-                notes.append(f"note: the file has {len(lines)} lines")
+                notes.append(
+                    f"note: {len(lines)} lines read (cut at --max-bytes)"
+                    if truncated
+                    else f"note: the file has {len(lines)} lines"
+                )
         else:
             begin, end, done = span
             died = next(

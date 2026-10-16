@@ -359,6 +359,9 @@ check "--lines: --max-lines keeps the first lines and names the range to read ne
 	"$(sed -n '/^<<<UNTRUSTED/,/^<<<END/p' <<<"$actual" | sed '1d;$d' | sed -E 's/^ *([0-9]+):.*/\1/' | xargs)|$(grep '^note:' <<<"$actual")"
 actual=$(log 4242 --lines 50-60)
 check "--lines past the end says how long the file is" "0 1" "$? $(grep -c '^note: the file has 41 lines$' <<<"$actual")"
+actual=$(log 4242 --lines 30-40 --max-bytes 500)
+check "--lines past what --max-bytes read says so, not that the file is that long" "0 1 0" \
+	"$? $(grep -c '^note: 6 lines read (cut at --max-bytes)$' <<<"$actual") $(grep -c 'the file has' <<<"$actual")"
 for range in 5-3 0-3 7 a-b; do
 	log 4242 --lines "$range" >/dev/null
 	check "--lines $range is a usage error (exit 2)" 2 $?

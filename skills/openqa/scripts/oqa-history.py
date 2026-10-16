@@ -88,7 +88,8 @@ _NOT_DISTRI = re.compile(r"^\(|^/usr/|/os-autoinst/|/perl5/")
 _RENAME = re.compile(r"^(.*)\{(.*) => (.*)\}(.*)$")
 _QI_FIELD = re.compile(r"^(Name|Version|Release)\s*:\s*(\S+)$")
 _PACKAGE_LINE = re.compile(r"[A-Za-z0-9_.+~^-]+")
-_UPLOAD_NAME = r"[A-Za-z0-9_][A-Za-z0-9._+@=~-]*"
+# The downloads tab links the "#" of a module loaded twice as "%23": generate_report%231-dmesg.txt.
+_UPLOAD_NAME = r"[A-Za-z0-9_](?:[A-Za-z0-9._+@=~-]|%23)*"
 _DURATION = re.compile(r"(?:(\d{1,5}) days )?(\d{1,5}):(\d\d) (hours|minutes)")
 # lib/OpenQA/Utils.pm LABEL_REGEX
 _LABEL = re.compile(r"\blabel:([\w:#/-]+)\b")
@@ -585,7 +586,7 @@ def uploads(client, job_id):
     except _oqa.OqaError:
         return None
     names = re.findall(rf"/tests/{job_id}/file/({_UPLOAD_NAME})(?=[\"'?#<>\s])", page)
-    return list(dict.fromkeys(names))
+    return list(dict.fromkeys(name.replace("%23", "#") for name in names))
 
 
 def version_file(names, prefer=None):

@@ -344,6 +344,13 @@ actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 5000 --investiga
 check "versions: one side kernel-only, the other an rpm -qa list without a suite: the suites are unknown" \
 	"  versions (last_good 4960 -> this job, from install_ltp-kernel-pkg.txt -> install_ltp-rpm-qa.txt): kernel-default 6.4.0-150600.23.1 -> 6.4.0-150600.23.2; suites ?" \
 	"$(grep '^  versions' <<<"$actual")"
+# A module loaded twice: the downloads tab links "install_ltp#1-..." as "install_ltp%231-...".
+printf '<a href="/tests/5000/file/install_ltp%%231-rpm-qa.txt">r</a>\n' >"$tmp"/tests_5000_downloads_ajax
+mv "$tmp"/tests_5000_file_install_ltp-rpm-qa.txt "$tmp"/tests_5000_file_install_ltp_1-rpm-qa.txt
+actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 5000 --investigation)
+check "versions: the upload of a module loaded twice, '%23' in its link, is read by its name" \
+	"  versions (last_good 4960 -> this job, from install_ltp-kernel-pkg.txt -> install_ltp#1-rpm-qa.txt): kernel-default 6.4.0-150600.23.1 -> 6.4.0-150600.23.2; suites ?" \
+	"$(grep '^  versions' <<<"$actual")"
 rm -rf "$tmp"
 
 actual=$(history 5000 --investigation --max-items 200)

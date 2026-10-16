@@ -14,14 +14,18 @@ the scenario whatever their state (lib/OpenQA/Schema/Result/JobNextPrevious.pm).
 Route: GET /tests/<id>/investigation_ajax (Controller/Test.pm "investigate",
 lib/OpenQA/Schema/Result/Jobs.pm "investigate").
 
-Route: GET /api/v1/jobs?ids=<id> (Controller/API/V1/Job.pm "list"): the job's
-modules ordered by id, which is the order they were scheduled in.
+Route: GET /api/v1/jobs?ids=<id>,<id>,... (Controller/API/V1/Job.pm "list",
+Schema/Result/Jobs.pm "to_hash"): t_started, t_finished and assigned_worker_id of
+the rows, and their modules ordered by id, which is the order they were scheduled in.
+
+Route: GET /api/v1/workers/<id> (Controller/API/V1/Worker.pm "show"): host and instance.
 """
 
 import argparse
 import os
 import re
 import sys
+from datetime import datetime, timezone
 
 # python3 -I leaves the script's own directory off sys.path; the sibling modules live there.
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -32,6 +36,10 @@ from _sanitize import ArgumentParser
 OK_RESULTS = _oqa.RESULT_GROUPS["ok"]
 # Not-ok runs in a row from which a failure is called persistent rather than intermittent.
 PERSISTENT_STREAK = 3
+# A job's module list is part of each row of /api/v1/jobs: LTP jobs take ~130 kB each.
+IDS_PER_REQUEST = 25
+MAX_WORKERS = 20
+MAX_REQUESTS = 80
 
 _SETTING = re.compile(r'^([+-])\s*"([^"]+)"\s*:\s*(.*?),?\s*$')
 # A commit with an empty subject is printed as "<hash> " with nothing after it.
@@ -51,6 +59,22 @@ def positive(value):
     if not 1 <= number <= 200:
         raise argparse.ArgumentTypeError("must be between 1 and 200")
     return number
+
+
+def parse_time(value):
+    """An aware UTC datetime from ISO 8601 or openQA's "2030-01-02 10:00:00 +0000", or None;
+    a time without a zone is UTC, as openQA's t_started is."""
+    if not isinstance(value, str):
+        return None
+    text = re.sub(r"[zZ]$", "+00:00", value.strip())
+    text = re.sub(r" ?([+-]\d\d):?(\d\d)$", r"\1:\2", text)
+    try:
+        stamp = datetime.fromisoformat(text)
+    except ValueError:
+        return None
+    if stamp.tzinfo is None:
+        stamp = stamp.replace(tzinfo=timezone.utc)
+    return stamp.astimezone(timezone.utc)
 
 
 def bad(row):
@@ -139,7 +163,37 @@ def history(client, job_id, previous):
     return current, [row for row in rows if row["id"] > job_id], older[:previous], more
 
 
-def row_cells(row):
+def run_details(client, ids):
+    """{id: job} of /api/v1/jobs for the rows, or None when the list cannot be read."""
+    found = {}
+    for start in range(0, len(ids), IDS_PER_REQUEST):
+        chunk = ",".join(str(job_id) for job_id in ids[start : start + IDS_PER_REQUEST])
+        try:
+            data = client.get_json("/api/v1/jobs", {"ids": chunk})
+        except _oqa.OqaError:
+            return None
+        jobs = data.get("jobs") if isinstance(data, dict) else None
+        if not isinstance(jobs, list):
+            return None
+        for job in jobs:
+            if isinstance(job, dict) and _oqa.job_id_of(job.get("id")) in ids:
+                found[job["id"]] = job
+    return found
+
+
+def worker_names(client, worker_ids):
+    names = {}
+    for worker_id in worker_ids[:MAX_WORKERS]:
+        try:
+            worker = client.get_json(f"/api/v1/workers/{worker_id}")["worker"]
+            names[worker_id] = f"{worker['host']}:{worker['instance']}"
+        except (_oqa.OqaError, KeyError, TypeError):
+            continue
+    return names
+
+
+def row_cells(row, run=None, workers=None):
+    """run: the row's /api/v1/jobs entry, "?" when unknown, None when not read at all."""
     comment_data = row.get("comment_data") or {}
     bugs = [
         bug.get("content")
@@ -147,9 +201,17 @@ def row_cells(row):
         if isinstance(bug, dict)
     ]
     result = row.get("result") if row.get("state") == "done" else row.get("state")
+    started = worker = run
+    if isinstance(run, dict):
+        stamp = parse_time(run.get("t_started"))
+        started = stamp.strftime("%Y-%m-%dT%H:%MZ") if stamp else None
+        worker_id = _oqa.job_id_of(run.get("assigned_worker_id"))
+        worker = (workers or {}).get(worker_id, f"#{worker_id}") if worker_id else None
     return (
         row["id"],
         row.get("build"),
+        started,
+        worker,
         result,
         row.get("failedmodules") or None,
         bugs or None,
@@ -278,15 +340,9 @@ def marked_heads(text, limit, failed, earlier=()):
     return lines[:limit], len(lines), tuple(counts)
 
 
-def earlier_modules(client, job_id, failed):
-    """Names of the modules that ran before the first failed one (one request); None
-    when the job's module list cannot be read."""
-    try:
-        data = client.get_json("/api/v1/jobs", {"ids": job_id})
-    except _oqa.OqaError:
-        return None
-    jobs = data.get("jobs") if isinstance(data, dict) else None
-    job = jobs[0] if isinstance(jobs, list) and jobs else {}
+def earlier_modules(job, failed):
+    """Names of the modules that ran before the first failed one; None when the job's
+    module list is unknown."""
     modules = job.get("modules") if isinstance(job, dict) else None
     if not isinstance(modules, list):
         return None
@@ -305,7 +361,7 @@ def fenced(client, job_id, title, lines):
     return _oqa.fence(block, source)
 
 
-def investigation(client, job_id, limit, verbose, failed=()):
+def investigation(client, job_id, limit, verbose, failed=(), job=None):
     try:
         data = client.get_json(f"/tests/{job_id}/investigation_ajax")
     except _oqa.NotFound as error:
@@ -381,7 +437,7 @@ def investigation(client, job_id, limit, verbose, failed=()):
             print(f"  {title} changes: {_oqa.quoted(text, 160)}")
             continue
         if key == "test_log":
-            earlier = earlier_modules(client, job_id, failed) if failed else []
+            earlier = earlier_modules(job, failed) if failed else []
             heads, total, (module, lib, before) = marked_heads(
                 text, limit, failed, earlier or ()
             )
@@ -416,8 +472,9 @@ def main():
     parser = ArgumentParser(
         prog="oqa-history.py",
         description="Newest-first history of the scenario of one openQA job (same distri, version, "
-        "flavor, arch, test and machine), with last good / first bad, the failure rate and a "
-        "one-line classification hint. GET only, three requests at most.",
+        "flavor, arch, test and machine) with start time and worker per run, last good / first "
+        "bad, the failure rate and a one-line classification hint. GET only, "
+        f"{MAX_REQUESTS} requests at most.",
         epilog="Exit codes: 0 the history was produced (a failed job is the normal case), "
         "2 usage or runtime error; --exit-code: 1 when the job is not ok. Aborted runs (obsoleted, cancelled, parallel_failed, ...) "
         "never appear in the history; incomplete and timeout_exceeded runs do and count as "
@@ -463,25 +520,45 @@ def main():
     args = parser.parse_args()
 
     args.host, job_id = _oqa.parse_job_url(args.job, args.host)
-    client = _oqa.client_from_args(args, "oqa-history", max_requests=4)
+    client = _oqa.client_from_args(args, "oqa-history", max_requests=MAX_REQUESTS)
     current, newer, older, more = history(client, job_id, args.previous)
+    runs = run_details(client, [row["id"] for row in (*newer, current, *older)])
+    rows = [*newer, current, *older]
+    worker_ids = []
+    for row in rows:
+        run = (runs or {}).get(row["id"]) or {}
+        worker_id = _oqa.job_id_of(run.get("assigned_worker_id"))
+        if worker_id and worker_id not in worker_ids:
+            worker_ids.append(worker_id)
+    workers = worker_names(client, worker_ids)
 
     scenario = "-".join(
         str(current.get(key) or "?")
         for key in ("distri", "version", "flavor", "arch", "test")
     )
     print(f"job={job_id} host={client.host} scenario={_oqa.tok(scenario, 160)}")
-    rows = [row_cells(row) for row in [*newer, current, *older]]
+    cells = [
+        row_cells(
+            row,
+            None if runs is None else runs.get(row["id"], "?"),
+            workers,
+        )
+        for row in rows
+    ]
     headers = (
         "id",
         "build",
+        "started",
+        "worker",
         "result",
         "failed_modules",
         "bugrefs",
         "label",
         "clone",
     )
-    print(_oqa.table(rows, headers, drop_empty=True), end="")
+    print(_oqa.table(cells, headers, drop_empty=True), end="")
+    if runs is None:
+        print("note: start times and workers not read (/api/v1/jobs not readable)")
     if newer:
         print(f"note: {len(newer)} newer run(s) not counted, latest={newer[0]['id']}")
 
@@ -502,7 +579,14 @@ def main():
             for name in current.get("failedmodules") or ()
             if name
         }
-        investigation(client, job_id, args.max_items, args.verbose, sorted(failed))
+        investigation(
+            client,
+            job_id,
+            args.max_items,
+            args.verbose,
+            sorted(failed),
+            (runs or {}).get(job_id),
+        )
     print(f"requests: {client.requests}")
     return status if args.exit_code else 0
 

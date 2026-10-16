@@ -1,0 +1,10 @@
+{
+ "worker": {
+  "id": 31,
+  "host": "worker-a",
+  "instance": 3,
+  "properties": {
+   "JOBTOKEN": "not-printed"
+  }
+ }
+}

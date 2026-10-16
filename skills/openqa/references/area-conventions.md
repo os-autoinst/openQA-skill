@@ -67,11 +67,11 @@ By kind of change, not by block: `tests/virt_autotest` and virtualization featur
 - **Lib asks**: small utilities without asserts or test-specific file names (#25952); no fixed `/tmp` names shared by parallel instances (#25441).
 - **Renames**: grep POD, `loadtest`, `products/*/main.pm`, other areas' tests; clone an affected production job with new settings (#25369).
 - **Triage**, in this order (433 closed kernel QA investigations: test code 23%, the suite itself 16%, job settings or schedule 15%, product 13%):
-  - **Suite**: LTP, xfstests and kselftests failures were often already fixed upstream (92 cases). Read the suite's upstream history for the failing test at the revision the job ran (-> job-triage.md "Pitfalls") before a local fix or a kernel bug.
+  - **Suite**: LTP, xfstests and kselftests failures were often already fixed upstream (92 cases). Read the suite's upstream history for the failing test at the revision the job ran (-> suite-results.md "Suite revision") before a local fix or a kernel bug.
   - **Settings**: a split or migrated YAML schedule, temp or scratch devices, repo or asset URLs, a setting the job generator dropped. Diff `vars.json` against the last good job before the test code.
   - **Timeouts**, the most common symptom: compare the test's runtime with its timeout and with the kernel flavour (debug kernels run slower) before raising a limit.
   - **Version gates**: a test that needs a newer kernel or a backport, selftests or kernel-devel built for another kernel than the running one, a package missing in the image, a read-only root on immutable products.
-  - **One build, many tests**: a shared library, runner, parent job or package bump; check the common step before each test. A harness can report passed subtests as a failure or the reverse: read the raw subtest results.
+  - **One build, many tests**: a shared library, runner, parent job or package bump; check the common step before each test. A harness can report passed subtests as a failure or the reverse: read the raw subtest results -> suite-results.md "Where results live"
   - **Product** last, naming the last good and first bad kernel. The first stated theory was wrong in 35%; when build and tests both changed and the evidence leaves the class open, a crossed run decides -> job-triage.md "History and investigation".
   - Known failures go to `LTP_KNOWN_ISSUES` with the bug link; a sporadic one is recorded with its rate and the builds it covers.
 

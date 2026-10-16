@@ -1,0 +1,5 @@
+openqa-clone-job --within-instance https://openqa.example.org/tests/4242 _GROUP=0 QEMUCPUS=2 WORKER_CLASS:textmode=w2 QEMURAM= BUILD=set-QEMUCPUS-WORKER_CLASS-QEMURAM TEST+=-set-QEMUCPUS-WORKER_CLASS-QEMURAM
+creates: clone of job 4242 on https://openqa.example.org, outside any job group (no asset download, no missing-asset check)
+overrides: _GROUP BUILD TEST+= QEMUCPUS WORKER_CLASS:textmode; deletes: QEMURAM
+note: tests run at the instance's newest commit unless the job's CASEDIR pins one; --test-hash pins them
+approval: running this posts jobs to https://openqa.example.org, a write; get the user's approval first

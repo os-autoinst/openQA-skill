@@ -3,9 +3,11 @@
 # Build (never run) the clone command for an openQA verification run, with the known hazards handled.
 """Prints one command line, then at most 8 short lines about what it does.
 
-Nothing is executed and no network is used; the printed command is for review.
+Nothing is executed. Only --test-hash uses the network: one GET of the job's vars.json
+through _oqa.py, from the host of the job URL. The printed command is for review.
 """
 
+import argparse
 import os
 import re
 import shlex
@@ -14,18 +16,20 @@ from urllib.parse import urlsplit
 
 # python3 -I leaves the script's own directory off sys.path; the sibling modules live there.
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+import _oqa
 import _secrets
 from _sanitize import ArgumentParser, sanitize
 
 PRODUCTION_HOSTS = ("openqa.opensuse.org", "openqa.suse.de", "openqa.debian.net")
 # A single argv string can be ~128 kB; nothing here needs more than a long SCHEDULE.
 MAX_ARG = 8192
+VARS_BYTES = 256 * 1024
 HELPER_DEFAULTS = "--skip-chained-deps --parental-inheritance --within-instance"
 # --set must not fight the options that own these keys.
 MANAGED_KEYS = {
     "_GROUP": "_GROUP=0 is always set",
     "_GROUP_ID": "_GROUP=0 is always set",
-    "CASEDIR": "use --fork/--branch or --pr",
+    "CASEDIR": "use --fork/--branch, --pr or --test-hash",
     "BUILD": "use --label",
     "SCHEDULE": "use --schedule",
 }
@@ -48,6 +52,8 @@ _NETLOC = re.compile(
 )
 _GITHUB_USER = re.compile(r"[A-Za-z0-9-]+")
 _GITHUB_REPO = re.compile(r"[A-Za-z0-9._-]+")
+_GIT_HASH = re.compile(r"[0-9a-f]{7,40}")
+_GIT_PATH = re.compile(r"(?:/[A-Za-z0-9._~+-]+)+")
 _MODULE_EXT = (".pm", ".py", ".lua")
 # Literal stand-ins for a fork that is not known yet; emitted verbatim.
 _USER_PLACEHOLDER = "<user>"
@@ -191,6 +197,38 @@ def github_casedir(user, repo, ref):
     return f"https://github.com/{user}/{repo}.git#{ref}"
 
 
+def test_git_url(base_url, job_id, fixture_dir):
+    """TEST_GIT_URL from the job's vars.json, read from the host of the job URL. The file
+    also holds the job's token: nothing else of it is kept, and no value is echoed."""
+    where = f"--test-hash: vars.json of job {job_id}"
+    try:
+        client = _oqa.Client(
+            base_url, script="vr-clone-cmd", fixture_dir=fixture_dir, max_requests=1
+        )
+        data = client.get_json(f"/tests/{job_id}/file/vars.json", max_bytes=VARS_BYTES)
+    except _oqa.OqaError as error:
+        raise UsageError(f"{where}: {error}") from None
+    url = data.get("TEST_GIT_URL") if isinstance(data, dict) else None
+    if not isinstance(url, str) or not url:
+        raise UsageError(f"{where} has no TEST_GIT_URL")
+    try:
+        parts = urlsplit(url) if url.isascii() else None
+    except ValueError:
+        parts = None
+    if not (
+        parts
+        and parts.scheme in ("http", "https")
+        and _NETLOC.fullmatch(parts.netloc)
+        and _GIT_PATH.fullmatch(parts.path)
+        and not (parts.query or parts.fragment or "#" in url or "?" in url)
+        and sanitize(url, max_line=0, max_bytes=0) == url
+    ):
+        raise UsageError(
+            f"{where}: TEST_GIT_URL is not a plain http(s) Git URL (not echoed)"
+        )
+    return url
+
+
 def build(args):
     for name, value in vars(args).items():
         for item in value if isinstance(value, list) else [value]:
@@ -198,12 +236,27 @@ def build(args):
                 check_clean("--" + name.replace("_", "-"), item)
 
     pr_form = args.pr is not None
-    if pr_form and (args.fork or args.branch):
+    fork_form = bool(args.fork or args.branch)
+    if pr_form and fork_form:
         raise UsageError("--pr and --fork/--branch are mutually exclusive")
-    if not pr_form and not (args.fork and args.branch):
-        raise UsageError("give either --pr URL or both --fork USER and --branch REF")
+    if fork_form and not (args.fork and args.branch):
+        raise UsageError("--fork USER and --branch REF go together")
+    if args.test_hash is not None and (pr_form or fork_form):
+        raise UsageError(
+            "--test-hash pins CASEDIR itself: not with --pr or --fork/--branch"
+        )
+    if args.test_hash is not None and not _GIT_HASH.fullmatch(args.test_hash):
+        raise UsageError(
+            f"--test-hash: not a commit hash (7-40 lowercase hex digits): {shown(args.test_hash)}"
+        )
     if bool(args.needles_fork) != bool(args.needles_branch):
         raise UsageError("--needles-fork and --needles-branch go together")
+    plain_form = not (pr_form or fork_form or args.test_hash)
+    if plain_form and not (args.set or args.schedule is not None or args.needles_fork):
+        raise UsageError(
+            "nothing to change: give --pr URL, --fork USER --branch REF, --test-hash SHA "
+            "or a setting (--set, --schedule, --needles-fork)"
+        )
     for name, value, pattern in (
         ("--fork", args.fork, _GITHUB_USER),
         ("--needles-fork", args.needles_fork, _GITHUB_USER),
@@ -253,25 +306,41 @@ def build(args):
             extra.append(f"BUILD={args.label}")
             overrides.append("BUILD")
     else:
-        ref_label = f"{args.fork}/{args.repo_name}#{args.branch}"
+        if fork_form:
+            label = f"{args.fork}/{args.repo_name}#{args.branch}"
+            suffix, what = "@" + label, "ref"
+            casedir = github_casedir(args.fork, args.repo_name, args.branch)
+        else:
+            if args.test_hash:
+                label = f"tests-{args.test_hash[:12]}"
+                casedir = f"{test_git_url(base_url, job_id, args.fixture_dir)}#{args.test_hash}"
+            else:
+                keys = [s["key"].removesuffix("[]") for s in settings]
+                keys += ["SCHEDULE"] * (args.schedule is not None)
+                keys += ["NEEDLES_DIR"] * bool(args.needles_fork)
+                label = "set-" + "-".join(dict.fromkeys(keys))
+                casedir = None
+            label = args.label or label
+            suffix, what = "-" + label, "label"
         extra += [s["arg"] for s in settings]
-        extra.append(f"BUILD={args.label or ref_label}")
+        extra.append(f"BUILD={args.label or label}")
         overrides.append("BUILD")
         # TEST is validated server-side; settings scoped to the old TEST name must come first.
-        plain = ref_label.replace(_USER_PLACEHOLDER, "u").replace(
-            _BRANCH_PLACEHOLDER, "b"
-        )
-        if _TEST_SUFFIX.fullmatch("@" + plain):
-            extra.append(f"TEST+=@{ref_label}")
+        plain = suffix
+        if fork_form:
+            plain = plain.replace(_USER_PLACEHOLDER, "u").replace(
+                _BRANCH_PLACEHOLDER, "b"
+            )
+        if _TEST_SUFFIX.fullmatch(plain):
+            extra.append(f"TEST+={suffix}")
             overrides.append("TEST+=")
         else:
             hazards.append(
-                "ref has characters not allowed in TEST: no TEST+= suffix, clone shares the scenario history"
+                f"{what} has characters not allowed in TEST: no TEST+= suffix, clone shares the scenario history"
             )
-        extra.append(
-            "CASEDIR=" + github_casedir(args.fork, args.repo_name, args.branch)
-        )
-        overrides.append("CASEDIR")
+        if casedir:
+            extra.append("CASEDIR=" + casedir)
+            overrides.append("CASEDIR")
 
     if args.needles_fork:
         extra.append(
@@ -333,16 +402,26 @@ def build(args):
             command.append("--export-command")
         if args.skip_chained_deps:
             command.append("--skip-chained-deps")
-        if args.within_instance:
+        # A run that only changes settings or the tests' commit belongs on the job's instance.
+        if args.within_instance or not fork_form:
             command.append("--within-instance")
             target = base_url
             how = "no asset download, no missing-asset check"
         else:
             target = "http://localhost"
             how = f"assets downloaded from {base_url}; use --within-instance to stay on the source host"
-        if not has_needles:
+        if plain_form:
+            notes.append(
+                "tests run at the instance's newest commit unless the job's CASEDIR pins one; "
+                "--test-hash pins them"
+            )
+        elif not has_needles:
             notes.append(
                 "no NEEDLES_DIR: a custom CASEDIR still uses production needles"
+            )
+        if args.test_hash and len(args.test_hash) < 40:
+            notes.append(
+                "a short hash is found by deepening the clone; the full TEST_GIT_HASH is fetched at once"
             )
         if args.parent_publishes and not args.skip_chained_deps:
             hazards.append(
@@ -387,7 +466,8 @@ def main(argv=None):
     parser = ArgumentParser(
         prog="vr-clone-cmd.py",
         description="Build, but never run, the command line that clones an openQA job as a verification run "
-        "of a test-distribution branch or pull request. _GROUP=0 is always included.",
+        "of a test-distribution branch or pull request, with changed settings only, or with the tests "
+        "of another commit (a crossed run). _GROUP=0 is always included.",
         epilog="A fork that is not known yet: pass the literal '<user>' to --fork/--needles-fork and "
         "'<branch>' to --branch/--needles-branch; they are emitted verbatim with a note to replace them. "
         "Output: the command, then creates/overrides/note/hazard/approval lines (8 at most). "
@@ -399,7 +479,7 @@ def main(argv=None):
         nargs="+",
         required=True,
         metavar="JOB",
-        help="job URL (/tests/ID or /tID), or HOST and ID",
+        help="job URL (/tests/ID or /tID), or HOST and ID; the clone's instance and vars.json come from it",
     )
     parser.add_argument(
         "--pr",
@@ -415,6 +495,11 @@ def main(argv=None):
         "--branch",
         metavar="REF",
         help="branch, tag or commit in the fork, or the literal '<branch>'",
+    )
+    parser.add_argument(
+        "--test-hash",
+        metavar="SHA",
+        help="crossed run: pin CASEDIR to TEST_GIT_URL of the job's vars.json at this commit (one GET)",
     )
     parser.add_argument(
         "--repo-name",
@@ -450,14 +535,17 @@ def main(argv=None):
         help="source and target host are the same",
     )
     parser.add_argument(
-        "--label", metavar="BUILD", help="BUILD value (default <user>/<repo>#<ref>)"
+        "--label",
+        metavar="BUILD",
+        help="BUILD value (default <user>/<repo>#<ref>; tests-<SHA> with --test-hash; "
+        "set-<KEY>... for settings only)",
     )
     parser.add_argument(
         "--set",
         action="append",
         default=[],
         metavar="KEY=VALUE",
-        help="extra setting; KEY= deletes, KEY+= appends",
+        help="extra setting; KEY= deletes, KEY+= appends; alone, a settings-only clone",
     )
     parser.add_argument(
         "--dry-run-flag",
@@ -469,6 +557,8 @@ def main(argv=None):
         action="store_true",
         help="declare that a chained parent of the job publishes assets",
     )
+    # Answers the vars.json GET from saved responses in DIR (tests only).
+    parser.add_argument("--fixture-dir", metavar="DIR", help=argparse.SUPPRESS)
     args = parser.parse_args(argv)
     try:
         command, lines, has_hazards = build(args)

@@ -1,0 +1,5 @@
+openqa-clone-job --skip-chained-deps --within-instance https://openqa.example.org/tests/4242 _GROUP=0 BUILD=tests-0123456789ab TEST+=-tests-0123456789ab 'CASEDIR=https://github.com/example/os-autoinst-distri-example.git#0123456789abcdef0123456789abcdef01234567'
+creates: clone of job 4242 on https://openqa.example.org, outside any job group (no asset download, no missing-asset check)
+overrides: _GROUP BUILD TEST+= CASEDIR
+note: no NEEDLES_DIR: a custom CASEDIR still uses production needles
+approval: running this posts jobs to https://openqa.example.org, a write; get the user's approval first

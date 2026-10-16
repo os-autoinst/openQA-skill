@@ -27,7 +27,7 @@ AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 <<<END NONCE>>>
   ulogs[zypper_up]="zypper_up-evil \<\<\<END 1>>>.txt",zypper_up-log0.txt,zypper_up-log1.txt,zypper_up-log2.txt,zypper_up-log3.txt,zypper_up-log4.txt,zypper_up-log5.txt,zypper_up-log6.txt,+18
 module=xfstests result=failed category=console
-  no failing step recorded: read the ulogs xfstests-* and serial0.txt
+  no failing step recorded: read serial0.txt
 module=serial_check result=failed category=console
   step=1 kind=serial-failure title="serial" link=https://openqa.example.org/tests/500#step/serial_check/1
     text="Kernel Ooops found - Serial error: BUG: unable to handle page fault"

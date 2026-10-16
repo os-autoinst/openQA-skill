@@ -29,7 +29,9 @@ How to read it:
   - A step text longer than 8 lines that holds verdict lines (TFAIL, TBROK, TWARN,
     TCONF, "not ok", "Failures:", the diff of an xfstests .out.bad; for a died test its
     message and the lines with failed, error or not found) shows those instead of its
-    head, then counts the other lines. kind=parser-result-failed: a parse_extra_log result.
+    head, then counts the other lines. They come from the first MiB of the text, the
+    died message first, then the failures, TCONF and TWARN last; the first 8 of them
+    are shown in file order. kind=parser-result-failed: a parse_extra_log result.
   - parallel_failed and skipped jobs are victims. The culprit hint names the
     failed/incomplete/timeout_exceeded job of the cluster that finished first.
   - Steps after the "Failed" text step of a module belong to post_fail_hook
@@ -99,7 +101,8 @@ MAX_EXTRA_SETTINGS = 30
 DETAILS_MAX_BYTES = 32 * 1024 * 1024
 TEXT_KEPT = 4000  # characters of text_data used per failing step
 TEXT_MARGIN = 2048  # longer than any credential a bounded redaction rule matches
-TEXT_READ = TEXT_KEPT + TEXT_MARGIN  # characters of text_data kept while parsing
+TEXT_READ = TEXT_KEPT + TEXT_MARGIN  # characters of text_data sanitised before that cut
+TEXT_SCAN = 1 << 20  # characters of a long step text searched for verdict lines
 HEAD_LINES = 8
 HEAD_BYTES = 1200
 INLINE = 240  # longest text printed as text="..." instead of a fenced block
@@ -171,10 +174,9 @@ DIED_COMMAND = re.compile(
 )
 # Verdict lines of a step text too long to show whole: LTP, TAP/KTAP and xfstests
 # results, the .out.bad diff body (not its ---/+++ header), and for a died test its
-# message plus the lines that say what failed.
-SUITE_VERDICT = re.compile(
-    r"\b(?:TFAIL|TBROK|TWARN|TCONF)\b|^\s*(?:#\s*)?not ok\b|^\s*Failures:"
-)
+# message plus the lines that say what failed; TCONF and TWARN only after all those.
+SUITE_VERDICT = re.compile(r"\b(?:TFAIL|TBROK)\b|^\s*(?:#\s*)?not ok\b|^\s*Failures:")
+WEAK_VERDICT = re.compile(r"\b(?:TWARN|TCONF)\b")
 DIFF_LINE = re.compile(r"^\s*[-+](?![-+]{2}\s)")
 DIED_VERDICT = re.compile(r"failed|error|not found", re.IGNORECASE)
 # Anchored, so one backtracking pass: "\S+\Z" would be quadratic.
@@ -189,39 +191,66 @@ def toks(values, limit=80, most=12):
 
 
 def verdicts(lines, died):
-    """Indexes of the lines that carry a verdict."""
+    """Indexes of the lines that carry a verdict: a died test's message first, then
+    the failures, then TCONF and TWARN, each group in file order."""
     diff = any(".out.bad" in line for line in lines)
-    return [
-        index
-        for index, line in enumerate(lines)
-        if SUITE_VERDICT.search(line)
-        or (diff and DIFF_LINE.match(line))
-        or (died and (index == 0 or DIED_VERDICT.search(line)))
-    ]
+    ranked = []
+    for index, line in enumerate(lines):
+        if died and index == 0:
+            ranked.append((0, index))
+        elif (
+            SUITE_VERDICT.search(line)
+            or (diff and DIFF_LINE.match(line))
+            or (died and DIED_VERDICT.search(line))
+        ):
+            ranked.append((1, index))
+        elif WEAK_VERDICT.search(line):
+            ranked.append((2, index))
+    return [index for _, index in sorted(ranked)]
 
 
-def show_text(text, source, max_lines, max_bytes, indent="", died=None):
+def show_text(text, source, max_lines, max_bytes, indent="", died=None, whole=None):
     """Short single-line text inline in quotes, anything else capped and fenced.
 
     died: None for a comment, else whether the step died; a step text longer than
-    max_lines shows its verdict lines, when it has any, instead of its head."""
+    max_lines shows its verdict lines, when it has any, instead of its head.
+    whole: the uncut text when `text` is its cut head; a text of more than max_lines
+    lines is then read from its first TEXT_SCAN characters and counted whole, and a
+    shorter one is shown cut, with a note when whole lines fell off."""
     text = text.strip("\n")
-    if "\n" not in text and len(text) <= INLINE:
-        print(f"{indent}text={_oqa.quoted(text, INLINE)}")
-        return
     lines = text.split("\n")
-    long = died is not None and len(lines) > max_lines
+    total, notes = len(lines), []
+    if whole is not None:
+        total = whole.strip("\n").count("\n") + 1
+        if total > max_lines:
+            lines = whole[:TEXT_SCAN].strip("\n").split("\n")
+        elif total > len(lines):
+            notes.append(
+                f"[step text cut at {TEXT_KEPT} characters; "
+                f"{total - len(lines)} more lines not shown]"
+            )
+    if len(lines) == 1 and len(text) <= INLINE and total <= max_lines:
+        print(f"{indent}text={_oqa.quoted(text, INLINE)}")
+        for note in notes:
+            print(f"{indent}{note}")
+        return
+    long = died is not None and total > max_lines
     picked = verdicts(lines, died) if long else []
+    if long and len(whole or "") > TEXT_SCAN:
+        notes.append(
+            f"[verdict lines searched in the first {TEXT_SCAN} characters only]"
+        )
     if picked:
-        kept = "\n".join(lines[index] for index in picked[:max_lines])
+        kept = "\n".join(lines[index] for index in sorted(picked[:max_lines]))
         more = len(picked) - max_lines
         rest = f"{more} more verdict lines and " if more > 0 else ""
-        rest += f"{len(lines) - len(picked)} other lines"
+        rest += f"{total - len(picked)} other lines"
         kept += f"\n[verdict lines only; {rest} not shown]"
     else:
         kept = "\n".join(lines[:max_lines])
-        if len(lines) > max_lines:
-            kept += f"\n[... {len(lines) - max_lines} more lines]"
+        if total > max_lines:
+            kept += f"\n[... {total - len(lines[:max_lines])} more lines]"
+    kept += "".join(f"\n{note}" for note in notes)
     kept = _oqa.sanitize(kept, max_line=300, max_bytes=max_bytes)
     print(_oqa.fence(kept, source), end="")
 
@@ -245,7 +274,8 @@ def reduce_details(obj):
         )
         step = {key: obj[key] for key in keys if key in obj}
         if isinstance(obj.get("text_data"), str):
-            step["text_data"] = obj["text_data"][:TEXT_READ]
+            # Whole: a long text is counted, and searched for verdict lines, past TEXT_KEPT.
+            step["text_data"] = obj["text_data"]
         return step
     if "area" in obj and "name" in obj:
         areas = obj["area"] if isinstance(obj["area"], list) else []
@@ -494,11 +524,11 @@ def print_dependencies(client, job, verbose):
 
 
 def step_text(step):
-    """text_data, capped here too: a step without "num" is not reduced while parsing.
+    """text_data, capped at TEXT_KEPT.
 
     A longer text is sanitised past the cap before the cut, as a credential cut in
     half matches no redaction rule; the cap still counts raw characters. When
-    stripping brings the parser's cut into view, its last word goes, or at most
+    stripping brings the cut at TEXT_READ into view, its last word goes, or at most
     TEXT_MARGIN characters of a text without a space there.
     """
     text = step.get("text_data")
@@ -596,6 +626,7 @@ def print_step(client, job_id, module, step, source, verbose, shot=None):
     if not text:
         return
     frame, hidden = None, 0
+    whole = step["text_data"] if len(step["text_data"]) > TEXT_KEPT else None
     lines = text.split("\n")
     # The trace starts at a "# stack trace" marker or, in step text, at the first Carp frame.
     trace = next(
@@ -611,11 +642,13 @@ def print_step(client, job_id, module, step, source, verbose, shot=None):
         frame = _oqa.distri_frame(lines[start:])
         # Text engineered to look like a frame would otherwise vanish without a trace.
         hidden = sum(1 for line in lines[trace:] if line.strip())
-        text = "\n".join(lines[:trace])
+        text, whole = "\n".join(lines[:trace]), None
     if text.strip("\n"):
         # --verbose asked for the trace: verdict lines would leave it out.
         died = None if verbose and trace is not None else kind.startswith("test-died")
-        show_text(text, f"{source}/step/{number}", HEAD_LINES, HEAD_BYTES, "    ", died)
+        show_text(
+            text, f"{source}/step/{number}", HEAD_LINES, HEAD_BYTES, "    ", died, whole
+        )
     if frame:
         print(f"    frame={_oqa.quoted(frame, 200)}")
     if hidden:

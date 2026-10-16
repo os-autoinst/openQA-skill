@@ -149,6 +149,11 @@ actual=$(printf 'zypper ar https://alice:hunter2@example.org/r x\n' | python3 "$
 check "sanitize redacts credential values" "zypper ar https://alice:[REDACTED:url-userinfo]@example.org/r x" "$actual"
 actual=$(printf 'worker openqaworker20 ran module foo\n' | python3 "$scripts/_sanitize.py" --no-fence 2>/dev/null)
 check "and leaves ordinary log text alone" "worker openqaworker20 ran module foo" "$actual"
+# The line cap falls 14 characters into a repository token; joined at run time, as no committed line may hold one.
+line="Retrieving https://updates.example.com/SUSE/Updates/x86_64/update/?AbCdEf0123""GhIjKl4567""MnOp_-89QrStUv"
+actual=$(printf '%s\n' "$line" | python3 "$scripts/_sanitize.py" --no-fence --max-line $((${#line} - 20)) 2>/dev/null)
+check "a token cut by the line cap shows no part of it" "1 0" \
+	"$(grep -c 'update/?\[REDACTED:url' <<<"$actual") $(grep -c AbCdEf <<<"$actual")"
 
 # --- excerpt: the denial-of-service cut must not let a split credential through ---
 actual=$(cd "$scripts" && python3 -c 'from _sanitize import excerpt; print(excerpt("\u200b" * 2348 + "https://user:s3cretPassw0rd@host/x", 80))')

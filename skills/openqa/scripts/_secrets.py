@@ -276,6 +276,16 @@ RULES = (
         ),
         r"\1" + MARK.format("url-query"),
     ),
+    # A query with no key is the access token of a SUSE update repository; it needs
+    # letters and digits both, so a long word or a timestamp stays.
+    (
+        "url-bare-query",
+        re.compile(
+            r"(://(?:(?!://)[^\s?#'\"<>]){1,2048}\?)"
+            r"(?=[A-Za-z_-]*[0-9])(?=[0-9_-]*[A-Za-z])[A-Za-z0-9_-]{16,}(?![A-Za-z0-9_=-])"
+        ),
+        r"\1" + MARK.format("url-bare-query"),
+    ),
     # client.conf and similar INI files: "key = ...", commented out or quoted too (the
     # "secret =" line is keyed). A value that runs into code or starts a path is not a key.
     (

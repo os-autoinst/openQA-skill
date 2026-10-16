@@ -615,21 +615,29 @@ def versions_line(client, job_id, good_id):
     good_name, old = job_versions(client, good_id, name)
     if not new and not old:
         return "  versions: not found"
+    # rpm -qi of the kernel cannot show a suite: there a missing one is unknown, not absent.
+    kernel_only = [bool(f and VERSION_SOURCES[-1].search(f)) for f in (good_name, name)]
     items = []
-    for package in sorted(
-        {*(new or {}), *(old or {})}, key=lambda n: (n[:7] != "kernel-", n)
-    ):
+    packages = {*(new or {}), *(old or {})}
+    for package in sorted(packages, key=lambda n: (n[:7] != "kernel-", n)):
         before, after = (
             ",".join(_oqa.tok(v, 60) for v in side[package])
             if side and package in side
-            else ("-" if side is not None else "?")
-            for side in (old, new)
+            else ("?" if side is None or (only and package in SUITE_PACKAGES) else "-")
+            for side, only in zip((old, new), kernel_only)
         )
-        items.append(
-            f"{package} {after} (unchanged)"
-            if before == after
-            else f"{package} {before} -> {after}"
-        )
+        if before == after:
+            items.append(f"{package} {after} (unchanged)")
+        elif (
+            package in SUITE_PACKAGES
+            and "," not in before + after
+            and before.rpartition("-")[0] == after.rpartition("-")[0] != ""
+        ):
+            items.append(f"{package} {before} -> {after} (release only)")
+        else:
+            items.append(f"{package} {before} -> {after}")
+    if any(kernel_only) and not packages & set(SUITE_PACKAGES):
+        items.append("suites ?")
     files = [_oqa.tok(file, 80) if file else "-" for file in (good_name, name)]
     source = files[1] if name == good_name else " -> ".join(files)
     return f"  versions (last_good {good_id} -> this job, from {source}): " + "; ".join(

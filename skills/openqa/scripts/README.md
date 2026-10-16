@@ -277,7 +277,9 @@ the job had not started by then. `--investigation` is not cut: openQA computes i
 `--max-items` (10) lines each: `settings diff (last_good -> this job)`, plus a hint to run on first_bad for the
 tight window when that is another job. `versions (last_good <id> -> this job, from <file>)` compares the kernel
 (`kernel-<flavor>[-base]`) and the test suites installed as packages (ltp, ltp-stable, blktests, xfstests,
-kirk) as `<package> <old> -> <new>` or `<package> <version> (unchanged)` (`-`: not installed, `?`: no list),
+kirk) as `<package> <old> -> <new>` or `<package> <version> (unchanged)` (`-`: not installed, `?`: no list,
+or a suite in a kernel-only list; `suites ?` closes a line read only from such lists; `(release only)`: a suite
+rebuilt at the same version),
 read from one file each job uploaded: `*rpm-qa.txt` (LTP's `log_versions`), else `*version.log` (xfstests),
 else `*kernel-pkg.txt` (`rpm -qi`), found in the downloads tab; four requests. `versions: not found`: neither
 job uploaded one. A suite built from Git is not there (its `git clone`, LTP's `LTP version` step).

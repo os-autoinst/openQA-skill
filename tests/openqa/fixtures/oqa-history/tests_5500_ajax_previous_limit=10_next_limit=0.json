@@ -21,9 +21,9 @@
     "parents_ok": 1
    },
    "distri": "exampleos",
-   "duration": "10:00 minutes",
+   "duration": 0,
    "failedmodules": [],
-   "finished": "2030-01-01T10:00:00Z",
+   "finished": null,
    "flavor": "DVD",
    "group": 7,
    "id": 5500,

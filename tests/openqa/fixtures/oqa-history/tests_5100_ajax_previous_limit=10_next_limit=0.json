@@ -21,9 +21,9 @@
     "parents_ok": 1
    },
    "distri": "exampleos",
-   "duration": "10:00 minutes",
+   "duration": 0,
    "failedmodules": [],
-   "finished": "2030-01-01T10:00:00Z",
+   "finished": null,
    "flavor": "DVD",
    "group": 7,
    "id": 5190,
@@ -66,11 +66,11 @@
     "parents_ok": 1
    },
    "distri": "exampleos",
-   "duration": "10:00 minutes",
+   "duration": "30:00 minutes",
    "failedmodules": [
     "yast2_lan"
    ],
-   "finished": "2030-01-01T10:00:00Z",
+   "finished": "2030-01-01T10:30:00Z",
    "flavor": "DVD",
    "group": 7,
    "id": 5100,
@@ -112,9 +112,9 @@
     "parents_ok": 1
    },
    "distri": "exampleos",
-   "duration": "10:00 minutes",
+   "duration": "30:00 minutes",
    "failedmodules": [],
-   "finished": "2030-01-01T10:00:00Z",
+   "finished": "2030-01-01T09:30:00Z",
    "flavor": "DVD",
    "group": 7,
    "id": 5090,
@@ -156,11 +156,11 @@
     "parents_ok": 1
    },
    "distri": "exampleos",
-   "duration": "10:00 minutes",
+   "duration": "30:00 minutes",
    "failedmodules": [
     "yast2_lan"
    ],
-   "finished": "2030-01-01T10:00:00Z",
+   "finished": "2030-01-01T08:30:00Z",
    "flavor": "DVD",
    "group": 7,
    "id": 5080,
@@ -202,9 +202,9 @@
     "parents_ok": 1
    },
    "distri": "exampleos",
-   "duration": "10:00 minutes",
+   "duration": "30:00 minutes",
    "failedmodules": [],
-   "finished": "2030-01-01T10:00:00Z",
+   "finished": "2030-01-01T07:30:00Z",
    "flavor": "DVD",
    "group": 7,
    "id": 5070,
@@ -246,9 +246,9 @@
     "parents_ok": 1
    },
    "distri": "exampleos",
-   "duration": "10:00 minutes",
+   "duration": "30:00 minutes",
    "failedmodules": [],
-   "finished": "2030-01-01T10:00:00Z",
+   "finished": "2030-01-01T06:30:00Z",
    "flavor": "DVD",
    "group": 7,
    "id": 5060,
@@ -290,9 +290,9 @@
     "parents_ok": 1
    },
    "distri": "exampleos",
-   "duration": "10:00 minutes",
+   "duration": "30:00 minutes",
    "failedmodules": [],
-   "finished": "2030-01-01T10:00:00Z",
+   "finished": "2030-01-01T05:30:00Z",
    "flavor": "DVD",
    "group": 7,
    "id": 5050,

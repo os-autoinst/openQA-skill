@@ -91,7 +91,7 @@ spec = importlib.util.spec_from_file_location("sweep", "oqa-sweep.py")
 sweep = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(sweep)
 client = _oqa.Client("https://openqa.example.org", fixture_dir=sys.argv[1], max_requests=4)
-args = argparse.Namespace(build=None, todo=False, include_softfailed=False, limit=30, no_llm=False)
+args = argparse.Namespace(build=None, todo=False, include_softfailed=False, limit=30, no_llm=False, test=None)
 out = io.StringIO()
 with contextlib.redirect_stdout(out):
     sweep.sweep(client, 7, args, _oqa.expand_results(["not_ok"]), reserve=1)
@@ -141,6 +141,20 @@ actual=$(sweep --group 7 --include-softfailed --limit 2)
 check "--include-softfailed adds the softfailed job" 1 "$(grep -c '^8 current not-ok jobs (softfailed included), 2 lines shown (--limit N)$' <<<"$actual")"
 check "--limit caps the job lines" 2 "$(grep -Ec '^[0-9]{4} ' <<<"$actual")"
 check "failed jobs come first" "7010 7012" "$(grep -E '^[0-9]{4} ' <<<"$actual" | cut -d' ' -f1 | xargs)"
+
+actual=$(sweep --group 7 --test '^(gnome|kde)$')
+check "--test: only the scenarios whose test matches, the count says so" "0 7012 7013 1 requests: 3" \
+	"$? $(grep -E '^[0-9]{4} ' <<<"$actual" | cut -d' ' -f1 | xargs) $(grep -c '^2 current not-ok jobs whose test matches --test$' <<<"$actual") $(tail -n 1 <<<"$actual")"
+actual=$(sweep --group 8 --test textmode)
+check "--test in the API fallback: filtered before the comments are read" "8001 requests: 4" \
+	"$(grep -E '^[0-9]{4} ' <<<"$actual" | cut -d' ' -f1 | xargs) $(tail -n 1 <<<"$actual")"
+for other in '--passed' '--groups' '--uses-schedule schedule/x.yaml' '--vr-build u/r#1'; do
+	# shellcheck disable=SC2086 # one flag and its value
+	sweep --group 7 --test x $other >/dev/null 2>&1
+	check "--test with $other is a usage error" 2 $?
+done
+sweep --group 7 --test '(' >/dev/null 2>&1
+check "broken --test regex exits 2" 2 $?
 
 actual=$(sweep --group 7 --build 20300101)
 check "--build picks that build's counters" 1 \

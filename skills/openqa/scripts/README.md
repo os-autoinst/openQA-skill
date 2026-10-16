@@ -21,7 +21,7 @@ One line per script, generated from the parsers: do not edit it by hand. What a 
 - `needle-lint.py [--strict] [--errors-only] PATH...`; exit 1: errors (with --strict: any finding)
 - `new-module.py --kind {console,container,python,service,transactional,x11,yam-validate} --path PATH --summary SUMMARY --maintainer MAINTAINER [--package PACKAGE] [--repo REPO] [--stdout]`
 - `oqa-comment-lint.py [FILE] [--text TEXT] [--private-suffix SUFFIX]...`; exit 1: at least one warning
-- `oqa-history.py JOB [--previous N] [--before TIME] [--investigation] [--max-items N] [--exit-code] [--verbose]`
+- `oqa-history.py JOB [--previous N] [--before TIME] [--workers] [--investigation] [--max-items N] [--exit-code] [--verbose]`
 - `oqa-job.py JOB [--settings REGEX] [--steps N] [--module NAME] [--all-steps] [--exit-code] [--verbose]`
 - `oqa-log.py JOB [--file NAME] [--list | --tail N | --grep REGEX | --errors | --runtimes | --members | --lines A-B] [--around-module MODULE] [--member PATH] [--compare JOB] [--context N] [--max-matches N] [--ignore-case] [--max-lines N] [--max-line-chars N] [--max-bytes BYTES] [--verbose] [--exit-code]`
 - `oqa-ref.py REF [--body] [--files] [--notes N]`
@@ -266,20 +266,23 @@ the table rows.
 
 ## oqa-history.py - sporadic or regression
 
-    oqa-history.py JOB [--previous N] [--before TIME] [--investigation [--max-items N] [-v]] [--exit-code]
+    oqa-history.py JOB [--previous N] [--before TIME] [--workers] [--investigation [--max-items N] [-v]] [--exit-code]
 
-Every run shows `started` (UTC) and `worker` (`host:instance`; `#<id>` past the first 20 workers or when the
-lookup fails), from one `/api/v1/jobs` request per 25 runs (it carries each run's module list, ~130 kB for an
-LTP run) and one per worker; `note: start times and workers not read` when that list fails. `--previous` runs
-to look at (10, openQA's carry-over depth). All-empty columns are dropped.
+The table comes from one request: every finished run shows `started` (UTC), its finish less its duration.
+`--workers` (and `--investigation`) add `worker` (`host:instance`; `#<id>` past the first 20 workers or when
+the lookup fails) and the start of a run still going, from one `/api/v1/jobs` request per 25 runs (it carries
+each run's module list, ~130 kB for an LTP run) and one per worker; `note: workers not read` when that list
+fails, the 25-run chunks read before the failure kept. Without them: `note: no worker column; --workers reads
+it`. `--previous` runs to look at (10, openQA's carry-over depth). All-empty columns are dropped.
 
 `--before TIME` (ISO 8601 such as `2030-01-02T10:00Z`, UTC without an offset): the history as it stood then,
 for a review as of a ticket's date. Runs that started later are cut (`note: N run(s) that started after
 --before cut`); a run still going then shows as `running` and counts in none of `last_good`, `first_bad`,
 `streak`, `not_ok`; a restart that is not among the runs kept leaves `clone` empty; bugrefs and label come
 from the comments created by then (one request per run carrying either, 30 at most, `?` beyond; `note: N
-bugref or label comment(s) created after --before ignored`). Exit 2 when the start times cannot be read or
-the job had not started by then. `--investigation` is not cut: openQA computes it at the time of the request.
+bugref or label comment(s) created after --before ignored`). The start of a run still going comes from
+`/api/v1/jobs`; exit 2 when that cannot be read or the job had not started by then. `--investigation` is
+not cut: openQA computes it at the time of the request.
 
 `--investigation` adds the settings diff (per-run noise left out), package diffs, test and needle commits,
 `--max-items` (10) lines each: `settings diff (last_good -> this job)`, plus a hint to run on first_bad for the

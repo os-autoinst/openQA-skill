@@ -14,9 +14,14 @@ the scenario whatever their state (lib/OpenQA/Schema/Result/JobNextPrevious.pm).
 Route: GET /tests/<id>/investigation_ajax (Controller/Test.pm "investigate",
 lib/OpenQA/Schema/Result/Jobs.pm "investigate").
 
+A row's start is its "finished" less its "duration", which Plugin/Helpers.pm
+"_format_time_duration" writes as "MM:SS minutes", "HH:MM hours" or "D days HH:MM hours";
+a run still going has neither.
+
 Route: GET /api/v1/jobs?ids=<id>,<id>,... (Controller/API/V1/Job.pm "list",
 Schema/Result/Jobs.pm "to_hash"): t_started, t_finished and assigned_worker_id of
 the rows, and their modules ordered by id, which is the order they were scheduled in.
+Read only with --workers or --investigation, and with --before for the runs still going.
 
 Route: GET /api/v1/workers/<id> (Controller/API/V1/Worker.pm "show"): host and instance.
 
@@ -34,7 +39,7 @@ import os
 import posixpath
 import re
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 # python3 -I leaves the script's own directory off sys.path; the sibling modules live there.
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -84,6 +89,7 @@ _RENAME = re.compile(r"^(.*)\{(.*) => (.*)\}(.*)$")
 _QI_FIELD = re.compile(r"^(Name|Version|Release)\s*:\s*(\S+)$")
 _PACKAGE_LINE = re.compile(r"[A-Za-z0-9_.+~^-]+")
 _UPLOAD_NAME = r"[A-Za-z0-9_][A-Za-z0-9._+@=~-]*"
+_DURATION = re.compile(r"(?:(\d{1,5}) days )?(\d{1,5}):(\d\d) (hours|minutes)")
 # lib/OpenQA/Utils.pm LABEL_REGEX
 _LABEL = re.compile(r"\blabel:([\w:#/-]+)\b")
 
@@ -207,35 +213,59 @@ def history(client, job_id, previous):
 
 
 def run_details(client, ids):
-    """{id: job} of /api/v1/jobs for the rows, or None when the list cannot be read."""
+    """{id: job} of /api/v1/jobs for the rows, or None when the list cannot be read; the
+    chunks read before one that fails are kept."""
     found = {}
     for start in range(0, len(ids), IDS_PER_REQUEST):
         chunk = ",".join(str(job_id) for job_id in ids[start : start + IDS_PER_REQUEST])
         try:
             data = client.get_json("/api/v1/jobs", {"ids": chunk})
         except _oqa.OqaError:
-            return None
+            break
         jobs = data.get("jobs") if isinstance(data, dict) else None
         if not isinstance(jobs, list):
-            return None
+            break
         for job in jobs:
             if isinstance(job, dict) and _oqa.job_id_of(job.get("id")) in ids:
                 found[job["id"]] = job
-    return found
+    else:
+        return found
+    return found or None
+
+
+def row_times(row, runs):
+    """(started, finished) of a history row: finished less duration, else the start
+    /api/v1/jobs gives in runs; None for what is unknown."""
+    finished = parse_time(row.get("finished"))
+    match = _DURATION.fullmatch(str(row.get("duration") or ""))
+    if finished and match:
+        days, high, low, unit = match.groups()
+        if unit == "hours":
+            spent = timedelta(days=int(days or 0), hours=int(high), minutes=int(low))
+        else:
+            spent = timedelta(minutes=int(high), seconds=int(low))
+        return finished - spent, finished
+    job = (runs or {}).get(row["id"]) or {}
+    return parse_time(job.get("t_started")), finished or parse_time(
+        job.get("t_finished")
+    )
 
 
 def as_of(before, runs, current, newer, older):
     """The rows as they stood at `before`: a run that started later is cut, one still going
     then shows as running. Returns (current, newer, older, number cut)."""
-    if runs is None:
+    if not all(
+        row.get("finished") or (runs or {}).get(row["id"])
+        for row in (current, *newer, *older)
+    ):
         raise _oqa.OqaError(
-            "--before needs the start times of the runs; /api/v1/jobs could not be read"
+            "--before needs the start times of the runs still going; /api/v1/jobs could "
+            "not be read"
         )
 
     def then(row):
-        job = runs.get(row["id"]) or {}
-        finished = parse_time(job.get("t_finished"))
-        started = parse_time(job.get("t_started")) or finished
+        started, finished = row_times(row, runs)
+        started = started or finished
         if started is None or started > before:
             return None
         if row.get("state") == "done" and (finished is None or finished > before):
@@ -306,7 +336,8 @@ def worker_names(client, worker_ids):
 
 
 def row_cells(row, run=None, workers=None, references=None):
-    """run: the row's /api/v1/jobs entry, "?" when unknown, None when not read at all."""
+    """run: the row's /api/v1/jobs entry, "?" when unknown, None when not read at all;
+    workers: None when not read, which leaves the worker cell empty."""
     comment_data = row.get("comment_data") or {}
     bugs = [
         bug.get("content")
@@ -317,12 +348,13 @@ def row_cells(row, run=None, workers=None, references=None):
     if references:
         bugs, label = references
     result = row.get("result") if row.get("state") == "done" else row.get("state")
-    started = worker = run
-    if isinstance(run, dict):
-        stamp = parse_time(run.get("t_started"))
-        started = stamp.strftime("%Y-%m-%dT%H:%MZ") if stamp else None
+    known = isinstance(run, dict)
+    stamp = row_times(row, {row["id"]: run} if known else None)[0]
+    started = stamp.strftime("%Y-%m-%dT%H:%MZ") if stamp else (None if known else run)
+    worker = None if workers is None else run
+    if known and workers is not None:
         worker_id = _oqa.job_id_of(run.get("assigned_worker_id"))
-        worker = (workers or {}).get(worker_id, f"#{worker_id}") if worker_id else None
+        worker = workers.get(worker_id, f"#{worker_id}") if worker_id else None
     return (
         row["id"],
         row.get("build"),
@@ -769,8 +801,8 @@ def main():
     parser = ArgumentParser(
         prog="oqa-history.py",
         description="Newest-first history of the scenario of one openQA job (same distri, version, "
-        "flavor, arch, test and machine) with start time and worker per run, last good / first "
-        "bad, the failure rate and a one-line classification hint. GET only, "
+        "flavor, arch, test and machine) with start time per run, last good / first bad, the "
+        "failure rate and a one-line classification hint, in one request. GET only, "
         f"{MAX_REQUESTS} requests at most.",
         epilog="Exit codes: 0 the history was produced (a failed job is the normal case), "
         "2 usage or runtime error; --exit-code: 1 when the job is not ok. Aborted runs (obsoleted, cancelled, parallel_failed, ...) "
@@ -798,11 +830,17 @@ def main():
         "later are ignored",
     )
     parser.add_argument(
+        "--workers",
+        action="store_true",
+        help="add the worker column: one /api/v1/jobs request per 25 runs, which carry "
+        "their module lists, and one request per worker",
+    )
+    parser.add_argument(
         "--investigation",
         action="store_true",
         help="add a capped summary of the investigation data: last good, first bad, "
         "changed settings, package diffs, kernel and test suite versions, test and needle "
-        "commit subjects",
+        "commit subjects; reads the workers too",
     )
     parser.add_argument(
         "--max-items",
@@ -828,7 +866,13 @@ def main():
     args.host, job_id = _oqa.parse_job_url(args.job, args.host)
     client = _oqa.client_from_args(args, "oqa-history", max_requests=MAX_REQUESTS)
     current, newer, older, more = history(client, job_id, args.previous)
-    runs = run_details(client, [row["id"] for row in (*newer, current, *older)])
+    rows = [*newer, current, *older]
+    full = args.workers or args.investigation
+    # The list carries every run's modules, megabytes for long suites: only when needed.
+    listed = [
+        row["id"] for row in rows if full or (args.before and not row.get("finished"))
+    ]
+    runs = run_details(client, listed) if listed else None
     cut, references, later = 0, {}, 0
     if args.before:
         current, newer, older, cut = as_of(args.before, runs, current, newer, older)
@@ -836,13 +880,15 @@ def main():
             client, args.before, [*newer, current, *older]
         )
     rows = [*newer, current, *older]
-    worker_ids = []
-    for row in rows:
-        run = (runs or {}).get(row["id"]) or {}
-        worker_id = _oqa.job_id_of(run.get("assigned_worker_id"))
-        if worker_id and worker_id not in worker_ids:
-            worker_ids.append(worker_id)
-    workers = worker_names(client, worker_ids)
+    workers = None
+    if full and runs is not None:
+        worker_ids = []
+        for row in rows:
+            run = runs.get(row["id"]) or {}
+            worker_id = _oqa.job_id_of(run.get("assigned_worker_id"))
+            if worker_id and worker_id not in worker_ids:
+                worker_ids.append(worker_id)
+        workers = worker_names(client, worker_ids)
 
     scenario = "-".join(
         str(current.get(key) or "?")
@@ -852,7 +898,9 @@ def main():
     cells = [
         row_cells(
             row,
-            None if runs is None else runs.get(row["id"], "?"),
+            None
+            if runs is None or row["id"] not in listed
+            else runs.get(row["id"], "?"),
             workers,
             references.get(row["id"]),
         )
@@ -870,8 +918,10 @@ def main():
         "clone",
     )
     print(_oqa.table(cells, headers, drop_empty=True), end="")
-    if runs is None:
-        print("note: start times and workers not read (/api/v1/jobs not readable)")
+    if not full:
+        print("note: no worker column; --workers reads it")
+    elif runs is None:
+        print("note: workers not read (/api/v1/jobs not readable)")
     notes = (
         [f"{len(newer)} newer run(s) not counted, latest={newer[0]['id']}"]
         if newer

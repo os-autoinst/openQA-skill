@@ -1,0 +1,11 @@
+{
+ "jobs": [
+  {
+   "id": 5190,
+   "state": "running",
+   "t_started": "2030-01-02T12:00:00",
+   "t_finished": null,
+   "assigned_worker_id": 31
+  }
+ ]
+}

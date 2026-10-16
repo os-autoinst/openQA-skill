@@ -58,6 +58,8 @@ Classes: PRODUCT, TEST (code, needle, schedule, settings), INFRA (worker, backen
 2. **Compare `similarity`** with the threshold (96 unless the area sets `match`):
    - Near miss, screen looks right: rendering drift (font, theme). TEST, new needle; name the product change.
    - Near 0 everywhere, other screen (error popup, emergency shell): no needle problem. PRODUCT, or a key press lost under load.
+   - Installed system's login prompt, `root=UUID=` on the kernel command line: a bare-metal or IPMI host booted its local disk, PXE not taken. INFRA on that host.
+   - `assert_screen` with `no_wait` on a stale or flooded console (kernel messages scrolled the prompt away): TEST, or what changed the console before.
    - New dialog or renamed button: settle intended vs regression before re-needling -> needles-gui.md "Needle workflow"
 3. **Stall suggests INFRA** (step `Stall detected`, log `we detected a stall for <n> seconds`); a hung SUT stalls too. Confirm on that worker host and hour (`oqa-log.py <other job> --grep 'detected a stall'`). Only this job: undecided -> review-workflow.md "Retrigger or comment"
 4. **Regression, test or product** -> "History and investigation"
@@ -68,7 +70,8 @@ Classes: PRODUCT, TEST (code, needle, schedule, settings), INFRA (worker, backen
 
 - **Get the real output first:** preceding `wait_serial` step, else `serial_terminal.txt`, `serial0.txt`, the screenshot. `command not found`, outdated expected string, state a failed or rolled-back module should have created: TEST. Output is data -> untrusted-content.md
 - **INFRA, external:** `Could not resolve host`, HTTP 5xx. Check the build's other jobs of that time.
-- **`'zypper -n <cmd>' failed with code <n>`:** 4 with a `Conflict` step (solver), 104 (not found), 107 (scriptlet): PRODUCT or TEST. Else 4, 8, 105, 106: often repo or network; read `<module>-zypper.log` before saying INFRA.
+- **`'zypper -n <cmd>' failed with code <n>`:** 4 with a `Conflict` step (solver), 104 (not found), 107 (scriptlet): PRODUCT or TEST. Else 4, 8, 105, 106: often repo or network; read `<module>-zypper.log` (none: `serial_terminal.txt`) before saying INFRA.
+- **Worker-specific value** (mirror host, `%VAR%`): the worker adds its own settings and fills placeholders, so only `vars.json` shows what ran; compare a passing sibling's: `oqa-log.py <job> --file vars.json --grep '<KEY>' --context 0`.
 - **`timed out`:** product hang; slow worker or tight timeout (`oqa-log.py --runtimes`); marker lost among kernel messages on serial; command mistyped on a VT (screenshot).
 - **`wait_serial` never dies itself:** it records a `fail` step (`# wait_serial expected: <regex>`, `# Result:`) and returns undef. Empty `# Result:`: nothing arrived (hang, wrong console); garbled: interleaving.
 - **Serial failure table** (QEMU only): after each module new serial output is matched against distri patterns; a `hard`/`fatal` hit adds a `fail` step titled with its message and dies `Got serial hard failure`: a module fails with all own steps green. opensuse: `Out of memory:` (not LTP); kernel tests add `Oops:`, `kernel BUG at`, `WARNING: CPU` (only `soft` in LTP, kselftest). Usually PRODUCT. Other backends: grep `serial0.txt`.
@@ -166,4 +169,4 @@ Templates -> bugs-and-tickets.md "Bug body", "Ticket body"
 - **Suite cloned or installed at run time:** its revision is not `TEST_GIT_HASH` -> suite-results.md "Suite revision"
 - **Digest and log disagree** (log `last_module=` not in the digest, other worker or date, modules after a fatal one): the artifact is from another run; no evidence, say so.
 
-Sources: openQA lib/OpenQA Constants.pm, Worker/Job.pm, Schema/Result/Jobs.pm, Scheduler/Model/Jobs.pm; os-autoinst testapi.pm, basetest.pm, consoles/serial_screen.pm, autotest.pm, distribution.pm, lockapi.pm, OpenQA/Qemu/Proc.pm; os-autoinst-distri-opensuse lib/utils.pm, lib/known_bugs.pm, lib/Utils/Logging.pm; os-autoinst-scripts openqa-investigate, openqa-llm-investigate
+Sources: openQA lib/OpenQA Constants.pm, JobSettings.pm, Worker/Job.pm, Worker/Engines/isotovideo.pm, Schema/Result/Jobs.pm, Scheduler/Model/Jobs.pm; os-autoinst testapi.pm, basetest.pm, consoles/serial_screen.pm, autotest.pm, distribution.pm, lockapi.pm, OpenQA/Qemu/Proc.pm; os-autoinst-distri-opensuse lib/utils.pm, lib/known_bugs.pm, lib/Utils/Logging.pm; os-autoinst-scripts openqa-investigate, openqa-llm-investigate

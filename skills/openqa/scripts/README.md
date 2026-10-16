@@ -25,7 +25,7 @@ One line per script, generated from the parsers: do not edit it by hand. What a 
 - `oqa-job.py JOB [--settings REGEX] [--steps N] [--module NAME] [--all-steps] [--exit-code] [--verbose]`
 - `oqa-log.py JOB [--file NAME] [--list | --tail N | --grep REGEX | --errors | --runtimes | --members | --lines A-B] [--around-module MODULE] [--member PATH] [--compare JOB] [--context N] [--max-matches N] [--ignore-case] [--max-lines N] [--max-line-chars N] [--max-bytes BYTES] [--verbose] [--exit-code]`
 - `oqa-ref.py REF [--body] [--files] [--notes N]`
-- `oqa-sweep.py [--group ID]... [--build BUILD] [--todo] [--include-softfailed] [--limit N] [--no-llm] [--passed] [--module NAME] [--groups] [--match REGEX] [--uses-schedule PATH] [--vr-build LABEL] [--test-git-hash SHA] [--exit-code]`
+- `oqa-sweep.py [--group ID]... [--build BUILD] [--todo] [--include-softfailed] [--test REGEX] [--limit N] [--no-llm] [--passed] [--module NAME] [--groups] [--match REGEX] [--uses-schedule PATH] [--vr-build LABEL] [--test-git-hash SHA] [--exit-code]`
 - `pr-queue.py [--repo O/R] [--newest N] [--me LOGIN]`
 - `refsection.py [--list] FILE [TITLE...]`; exit 1: section missing or ambiguous
 - `review-lint.py [FILE] --lines N [--lib] [--replies N] [--late]`; exit 1: findings
@@ -37,7 +37,7 @@ One line per script, generated from the parsers: do not edit it by hand. What a 
 
 `jobs?result=failed&latest=1` also lists failures whose restart passed; the overview route does not.
 
-    oqa-sweep.py --group ID [--group ID ...] [--build B] [--todo] | --groups [--match REGEX]
+    oqa-sweep.py --group ID [--group ID ...] [--build B] [--todo] [--test REGEX] | --groups [--match REGEX]
     oqa-sweep.py --group ID [--build B] --passed [--module M] [--limit N]    # a source job to clone
     oqa-sweep.py --uses-schedule schedule/x/y.yaml (--group ID ... | --match REGEX)
     oqa-sweep.py --vr-build 'user/os-autoinst-distri-opensuse#123' [--test-git-hash SHA]    # a PR's verification runs
@@ -53,7 +53,11 @@ and each build ends with an `llm-investigation-summary clusters` line (classes p
 grouping, never verdicts. A missing summary, unreadable comments or a spent request budget print nothing;
 `--no-llm` skips the one comments request per failed job.
 
-`--todo` only jobs without bugref or label; `--include-softfailed`; `--limit N` job lines per build (30).
+`--todo` only jobs without bugref or label; `--include-softfailed`; `--limit N` job lines per build (30);
+`--test REGEX` only jobs whose test name it matches (searched, case-sensitive; in the overview mode the
+name carries `@machine` where openQA adds one), e.g. `--test '^ltp_syscalls$'` for one scenario across
+flavors and arches, the count line then ends `whose test matches --test` and the header counters stay
+the build's; the default listing only.
 `--exit-code`: also 1 when `--passed`, `--groups`, `--uses-schedule`, `--vr-build` list nothing.
 `victims parent=ID never_ran=N jobs=...`: jobs that never ran. Extras: `restarts=`, `origin=`, `parents=`
 (triage that parent).

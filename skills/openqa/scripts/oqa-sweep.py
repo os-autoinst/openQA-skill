@@ -24,6 +24,9 @@ from, parents lists dependency parents: for parallel_failed and skipped jobs
 triage the parent or sibling that failed, not this job. review=? means the
 comments were not read. Jobs that never ran because a parent failed
 (cancelled, skipped) are folded into one "victims" line per parent.
+--test REGEX keeps the jobs whose test name it matches (re.search, case-sensitive),
+so one scenario's spread over flavors and arches needs no full listing; the header
+counters stay those of the whole build.
 
 --passed turns the list around: current passed and softfailed jobs of the
 build, either is a source to clone for a verification run; --module M keeps
@@ -218,7 +221,7 @@ def _parents(deps):
     return [job for kind in DEPENDENCY_TYPES for job in _ids(parents.get(kind))]
 
 
-def overview_jobs(client, group, entry, results, todo):
+def overview_jobs(client, group, entry, results, todo, pattern=None):
     params = [("groupid", group), ("build", entry["build"])]
     if entry.get("version") is not None:
         params.append(("version", entry["version"]))
@@ -245,7 +248,14 @@ def overview_jobs(client, group, entry, results, todo):
         job["id"] for job in jobs
     ):
         raise ShapeError("job_ids and results disagree")
-    return jobs, bool(data.get("limit_exceeded"))
+    return _of_test(jobs, pattern), bool(data.get("limit_exceeded"))
+
+
+def _of_test(jobs, pattern):
+    """The jobs whose test name --test matches; all of them without --test."""
+    if pattern is None:
+        return jobs
+    return [job for job in jobs if pattern.search(str(job["test"])[:MATCH_CHARS])]
 
 
 def _overview_job(scenario, leaf):
@@ -258,6 +268,7 @@ def _overview_job(scenario, leaf):
         "result": leaf.get("overall") or leaf.get("state"),
         "prefix": f"{scenario[0]}-{scenario[1]}-",
         "scenario": "-".join(str(part) for part in scenario),
+        "test": scenario[4],
         "modules": sorted(str(name) for name in leaf.get("failures") or ()),
         "refs": sorted(leaf.get("bugs") or ()),
         "label": leaf.get("label"),
@@ -269,7 +280,7 @@ def _overview_job(scenario, leaf):
     }
 
 
-def api_jobs(client, group, entry, results, todo):
+def api_jobs(client, group, entry, results, todo, pattern=None):
     """scope=current drops restarted jobs; a scenario that was scheduled again
     without a restart can still show its older failure here."""
     params = [("groupid", group), ("build", entry["build"])]
@@ -294,6 +305,7 @@ def api_jobs(client, group, entry, results, todo):
                 "result": job.get("result"),
                 "prefix": f"{settings.get('DISTRI')}-{settings.get('VERSION')}-",
                 "scenario": scenario,
+                "test": settings.get("TEST"),
                 "modules": sorted(failed),
                 "refs": None,
                 "label": None,
@@ -304,6 +316,7 @@ def api_jobs(client, group, entry, results, todo):
                 "llm": None,
             }
         )
+    jobs = _of_test(jobs, pattern)
     jobs.sort(key=_order)
     complete = True
     for job in jobs:
@@ -427,7 +440,9 @@ def sweep(client, group, args, results, reserve=0):
     for index, entry in enumerate(entries):
         mode, note = MODE_OVERVIEW, None
         try:
-            jobs, truncated = overview_jobs(client, group, entry, results, args.todo)
+            jobs, truncated = overview_jobs(
+                client, group, entry, results, args.todo, args.test
+            )
             if truncated:
                 note = (
                     "warning: the server truncated the overview, the list is incomplete"
@@ -435,7 +450,9 @@ def sweep(client, group, args, results, reserve=0):
         except (ShapeError, _oqa.OqaError) as error:
             mode = MODE_API
             print(f"note: /tests/overview.json not usable ({error}); using /api/v1")
-            jobs, complete = api_jobs(client, group, entry, results, args.todo)
+            jobs, complete = api_jobs(
+                client, group, entry, results, args.todo, args.test
+            )
             if not complete:
                 note = "warning: request cap reached, '?' marks jobs whose comments were not read"
         prefixes = {job["prefix"] for job in jobs}
@@ -469,6 +486,8 @@ def sweep(client, group, args, results, reserve=0):
         kind = "jobs still to review" if args.todo else "current not-ok jobs"
         if args.include_softfailed:
             kind += " (softfailed included)"
+        if args.test:
+            kind += " whose test matches --test"
         count = len(jobs) + sum(len(ids) for ids in victims.values())
         cut = (
             f", {args.limit} lines shown (--limit N)" if len(jobs) > args.limit else ""
@@ -763,6 +782,13 @@ def positive(value):
     return number
 
 
+def test_regex(value):
+    try:
+        return re.compile(value)
+    except re.error as error:
+        raise argparse.ArgumentTypeError(f"not a valid regex: {error}") from None
+
+
 def git_hash(value):
     if not GIT_HASH.fullmatch(value.lower()):
         raise argparse.ArgumentTypeError("must be 7 to 40 hex digits")
@@ -794,6 +820,13 @@ def main():
     )
     parser.add_argument(
         "--include-softfailed", action="store_true", help="also list softfailed jobs"
+    )
+    parser.add_argument(
+        "--test",
+        type=test_regex,
+        metavar="REGEX",
+        help="only jobs whose test name matches (a Python regex searched in it, "
+        "case-sensitive), e.g. '^ltp_syscalls' for one scenario across flavors and arches",
     )
     parser.add_argument(
         "--limit",
@@ -888,6 +921,8 @@ def main():
         parser.error("--match needs --groups or --uses-schedule")
     if args.module and not args.passed:
         parser.error("--module needs --passed")
+    if args.test and (args.passed or not args.group or args.uses_schedule is not None):
+        parser.error("--test goes with --group ID [--build B] listing not-ok jobs only")
     if args.passed and (args.groups or args.todo or args.include_softfailed):
         parser.error("--passed goes with --group, --build, --module and --limit only")
     if args.limit is None:

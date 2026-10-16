@@ -54,8 +54,8 @@ grouping, never verdicts. A missing summary, unreadable comments or a spent requ
 `--no-llm` skips the one comments request per failed job.
 
 `--todo` only jobs without bugref or label; `--include-softfailed`; `--limit N` job lines per build (30);
-`--test REGEX` only jobs whose test name it matches (searched, case-sensitive; in the overview mode the
-name carries `@machine` where openQA adds one), e.g. `--test '^ltp_syscalls(@|$)'` for one scenario across
+`--test REGEX` only jobs whose test name it matches (searched, case-sensitive, in the name without the
+`@machine` the overview adds), e.g. `--test '^ltp_syscalls$'` for one scenario across
 flavors and arches, the count line then ends `whose test matches --test` and the header counters stay
 the build's; the default listing only.
 `--exit-code`: also 1 when `--passed`, `--groups`, `--uses-schedule`, `--vr-build` list nothing.

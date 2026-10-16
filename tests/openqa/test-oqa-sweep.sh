@@ -148,6 +148,8 @@ check "--test: only the scenarios whose test matches, the count says so" "0 7012
 actual=$(sweep --group 8 --test textmode)
 check "--test in the API fallback: filtered before the comments are read" "8001 requests: 4" \
 	"$(grep -E '^[0-9]{4} ' <<<"$actual" | cut -d' ' -f1 | xargs) $(tail -n 1 <<<"$actual")"
+check "--test matches the name without @machine, in the overview as in the API fallback" "7011|8002" \
+	"$(sweep --group 7 --test '^mm-client$' | grep -E '^[0-9]{4} ' | cut -d' ' -f1 | xargs)|$(sweep --group 8 --test '^mm-client$' | grep -E '^[0-9]{4} ' | cut -d' ' -f1 | xargs)"
 for other in '--passed' '--groups' '--uses-schedule schedule/x.yaml' '--vr-build u/r#1'; do
 	# shellcheck disable=SC2086 # one flag and its value
 	sweep --group 7 --test x $other >/dev/null 2>&1

@@ -433,6 +433,36 @@ for value in "Zq9x""Wv" "Xk""9q" "hun""ter2"; do
 done
 # shellcheck disable=SC2016 # literal slots, as documentation writes them
 keeps "a live.password slot in documentation" 'live.password=$PASSWORD\nlive.password=<password>\n'
+# oqa-job.py --settings and the settings diff of oqa-history.py --investigation print a
+# setting by name; both go through setting_value().
+cp "$here"/fixtures/oqa-job/api_v1_jobs_500*.json "$here"/fixtures/oqa-history/*5000* "$work/"
+python3 -c '
+import json, sys
+work, codes = sys.argv[1:]
+for name in ("api_v1_jobs_500.json", "api_v1_jobs_500_details.json"):
+    with open(f"{work}/{name}") as handle:
+        data = json.load(handle)
+    data["job"]["settings"]["UNIFIED_GUEST_REG_CODES"] = codes
+    with open(f"{work}/{name}", "w") as handle:
+        json.dump(data, handle)
+name = f"{work}/tests_5000_investigation_ajax.json"
+with open(name) as handle:
+    data = json.load(handle)
+data["diff_to_last_good"] = (
+    f"-   \"UNIFIED_GUEST_REG_CODES\" : \"{codes[1:]}\",\n"
+    f"+   \"UNIFIED_GUEST_REG_CODES\" : \"{codes}\",\n" + data["diff_to_last_good"]
+)
+with open(name, "w") as handle:
+    json.dump(data, handle)
+' "$work" "$codes"
+actual=$(python3 "$scripts/oqa-job.py" --fixture-dir "$work" https://openqa.example.org/tests/500 --settings REG_CODES 2>&1)
+check "oqa-job.py --settings masks registration codes held in a setting" \
+	"0 UNIFIED_GUEST_REG_CODES=[REDACTED:secret-setting]" \
+	"$(grep -c "${codes%%,*}" <<<"$actual") $(grep -o 'UNIFIED_GUEST_REG_CODES=[^ ]*' <<<"$actual")"
+actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$work" 5000 --investigation --max-items 6 2>&1)
+check "oqa-history.py --investigation masks them in the settings diff" \
+	"0 UNIFIED_GUEST_REG_CODES: [REDACTED:secret-setting] -> [REDACTED:secret-setting]" \
+	"$(grep -c "${codes%%,*}" <<<"$actual") $(grep -o 'UNIFIED_GUEST_REG_CODES: .*' <<<"$actual")"
 keeps "-r of other commands after a registration command" 'SUSEConnect --status; rm -r /tmp/registration-cache\nSUSEConnect -s && cp -r /etc/zypp /tmp/zypp-backup\nSUSEConnect -d | grep -r Deregistered /var/log/messages\n'
 keeps "-r of other commands" 'zypper -r repo-oss-update in vim\ngrep -r SUSEConnect /etc/zypp/credentials.d\ntransactional-update pkg install vim -r repo-oss-update\n'
 # shellcheck disable=SC2016 # literal slots, as documentation writes them

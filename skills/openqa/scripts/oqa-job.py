@@ -107,6 +107,8 @@ VERBOSE_SETTINGS = (
     "PARALLEL_WITH",
 )
 MAX_EXTRA_SETTINGS = 30
+# isotovideo sets these when it checks out tests and needles: vars.json has them, the job settings not.
+VARS_ONLY = ("TEST_GIT_HASH", "NEEDLES_GIT_HASH")
 DETAILS_MAX_BYTES = 32 * 1024 * 1024
 TEXT_KEPT = 4000  # characters of text_data used per failing step
 TEXT_MARGIN = 2048  # longer than any credential a bounded redaction rule matches
@@ -420,11 +422,20 @@ def print_investigation(job):
     )
 
 
-def print_settings(job, pattern, verbose):
+def print_settings(job, pattern, verbose, url):
     settings = job.get("settings") or {}
     names = VERBOSE_SETTINGS if verbose else DEFAULT_SETTINGS
     keys = [key for key in names if key in settings]
     if pattern:
+        missing = [
+            key for key in VARS_ONLY if pattern.search(key) and key not in settings
+        ]
+        if missing:
+            print(
+                f"note: {' and '.join(missing)} {'are' if missing[1:] else 'is'} in vars.json, "
+                "not in the job settings: "
+                f"oqa-log.py {url} --file vars.json --grep GIT_HASH"
+            )
         extra = sorted(
             key for key in settings if key not in keys and pattern.search(str(key))
         )
@@ -1264,7 +1275,7 @@ def main():
         return status
     print_identity(client, job, how, args.verbose)
     print_investigation(job)
-    print_settings(job, args.settings, args.verbose)
+    print_settings(job, args.settings, args.verbose, f"{client.host}/tests/{job_id}")
     print_chain(client, job, args.verbose, args.before)
     print_dependencies(client, job, args.verbose)
     print_modules(client, job, args.steps, args.verbose, args.module)

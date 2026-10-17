@@ -140,7 +140,8 @@ A restarted job is history, a `parallel_failed` job is a victim, steps after the
 
 `--steps N` failing steps per module (2; `0`: no step lines, only the job and its failed modules, each with
 `+N failing steps not shown`); `--settings '^(QEMU|HDD)'` adds settings by key (default: BACKEND,
-CASEDIR, NEEDLES_DIR, YAML_SCHEDULE); `-v` whole traces, ulog names, all settings of the scenario, longer
+CASEDIR, NEEDLES_DIR, YAML_SCHEDULE; `TEST_GIT_HASH` and `NEEDLES_GIT_HASH` are no job settings, a regex
+that names them prints the `oqa-log.py ... --file vars.json` call that reads them); `-v` whole traces, ulog names, all settings of the scenario, longer
 comments. `--module NAME` alone keeps only that module's lines, whatever its result, and ends them with
 `+N of M steps not shown (--all-steps lists them)`. `--all-steps` lists at most 300 steps and ends a longer
 list with `... N more steps not shown: --step-range <next>-`; `--step-range A-B` (or `A-`) lists the steps

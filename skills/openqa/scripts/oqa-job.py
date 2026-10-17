@@ -779,7 +779,8 @@ def print_modules(client, job, max_steps, verbose, wanted=None):
     print(f"modules={len(modules)}{counts}")
     if wanted is not None:
         modules = [find_module(job, wanted)]
-    failed = [m for m in modules if m.get("result") == "failed"]
+    # A module killed when the job was cancelled or timed out ends "canceled", without a die step.
+    failed = [m for m in modules if m.get("result") in ("failed", "canceled")]
     soft = [m for m in modules if m.get("result") == "softfailed"]
     url = f"{client.host}/tests/{job['id']}"
     source = url.partition("://")[2]
@@ -788,7 +789,7 @@ def print_modules(client, job, max_steps, verbose, wanted=None):
         flags = [
             flag for flag in ("fatal", "important", "milestone") if module.get(flag)
         ]
-        line = f"module={tok(name, 80)} result=failed"
+        line = f"module={tok(name, 80)} result={tok(module.get('result'), 30)}"
         if verbose or module.get("category"):
             line += f" category={tok(module.get('category'), 40)}"
         if flags:

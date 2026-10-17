@@ -215,7 +215,12 @@ lines=N`; `hits=-` when it holds none, no line when the job has no such file. `[
 with a source file, `BUG: soft lockup` and the like, `Oops:`), as programs print `WARNING:` too, and a
 `BTRFS` line's `Transaction aborted`; the signatures of `autoinst-log.txt` apply there too, and
 `--file serial_terminal.txt --errors` uses the same set. Each block keeps its first 3 hits per label, and
-every `# Test died` line whatever its label, as non-fatal hits come first, and at most `--max-lines` lines. With only a `Test died` hit and no serial-terminal hit, a hint points at
+every `# Test died` line whatever its label, as non-fatal hits come first, and at most `--max-lines` lines.
+After the error lines, in what they leave of `--max-lines`, come at most 3 `[info @<module>]` lines (`info:N`
+in the header): a module's last `record_info` call before its `# Test died` or `test <module> failed` line,
+where tests log what they found (a solver `Conflict`, a check's `result="fail"`). A module's other
+`record_info` calls are left out, and so are the `:::` lines, which are os-autoinst's own console and needle
+plumbing besides the die line. With only a `Test died` hit and no serial-terminal hit, a hint points at
 `serial_terminal.txt` and the module's ulogs.
 
 `--grep` prints the first `--max-matches` matches (10) with `--context` lines around each, and of those at

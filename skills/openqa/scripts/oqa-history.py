@@ -138,6 +138,24 @@ def build_of(row):
     return _oqa.tok(row.get("build"), 40)
 
 
+def failed_set(row):
+    return {str(name) for name in row.get("failedmodules") or ()}
+
+
+def module_cell(names, width=60):
+    """The failed modules sorted, as many as fit the table's column, then "+<n>" for the rest:
+    openQA lists them in the order their results were stored, which varies between calls."""
+    names = sorted(_oqa.clean(name, width) for name in names or ())
+    shown, cell = len(names), ",".join(names)
+    while len(cell) > width and shown > 1:
+        shown -= 1
+        cell = ",".join([*names[:shown], f"+{len(names) - shown}"])
+    if len(cell) > width:
+        rest = f",+{len(names) - 1}"
+        cell = _oqa.clean(names[0], width - len(rest)) + rest
+    return cell or None
+
+
 def describe(rows, more):
     """rows: finished runs, newest first, rows[0] is the current job."""
     total, failed = len(rows), sum(bad(row) for row in rows)
@@ -158,23 +176,27 @@ def describe(rows, more):
     else:
         last_good = "none"
 
-    signature = sorted(rows[0].get("failedmodules") or ())
-    alike = next(
-        (
-            i
-            for i, row in enumerate(rows[:streak])
-            if sorted(row.get("failedmodules") or ()) != signature
-        ),
-        streak,
-    )
+    signature = failed_set(rows[0])
+
+    def holds(row):
+        # A module that failed in older runs only, softfailing, passing or not reached
+        # now, does not move where the current failures start.
+        failed = failed_set(row)
+        return failed == signature or bool(signature) and failed > signature
+
+    alike = next((i for i, row in enumerate(rows[:streak]) if not holds(row)), streak)
+    also = sorted(set().union(*map(failed_set, rows[:alike])) - signature)
     if alike == streak:
-        same = "same failed modules throughout"
+        same = "the current failed modules" if also else "same failed modules"
+        same += " throughout"
     else:
         origin = rows[alike - 1]
         same = (
             f"failed modules CHANGE within the streak: the current ones go back only to "
             f"{origin['id']} build {build_of(origin)}, probably more than one issue"
         )
+    if also:
+        same += f", older runs also failed {_oqa.toks(also, 60, 4)}"
     builds = len({row.get("build") for row in rows[:streak]})
     earlier = failed - streak
     if streak == total:
@@ -365,7 +387,7 @@ def row_cells(row, run=None, workers=None, references=None):
         started,
         worker,
         result,
-        row.get("failedmodules") or None,
+        module_cell(row.get("failedmodules")),
         bugs or None,
         label,
         row.get("clone"),

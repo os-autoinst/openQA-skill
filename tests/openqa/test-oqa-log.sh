@@ -74,6 +74,20 @@ actual=$(log http://openqa.example.org/tests/1 --tail 1)
 check "plain http to a remote host is refused" 2 $?
 actual=$(log 4242 --file missing.txt --tail 1)
 check "missing file is a runtime error" 2 $?
+gone="error: file gone (HTML page served): autoinst-log.txt; the job's files were probably cleaned up"
+for mode in --errors "--tail 3" "--grep ."; do
+	# shellcheck disable=SC2086 # the mode is two words on purpose
+	actual=$(log 4275 $mode)
+	check "an HTML page served for a log is no log ($mode): exit 2, nothing of it printed" "2 $gone" "$? $actual"
+done
+actual=$(log 4275 --file ulogs/logs.tar.gz --members)
+check "an HTML page served for an archive is no archive" \
+	"2 error: file gone (HTML page served): logs.tar.gz; the job's files were probably cleaned up" "$? $actual"
+actual=$(log 4275 --file ulogs/report.html --tail 2)
+check "an uploaded .html file is read as it is" "0 1" "$? $(grep -c '^2: <html><body><h1>LTP report</h1></body></html>$' <<<"$actual")"
+actual=$(log 4253 --runtimes --compare 4275)
+contains "--runtimes --compare: an HTML page for the compare log counts as missing" \
+	"note: no autoinst-log.txt for 4275 (cleaned up?); shown without it" "$actual"
 
 # --- --list ---------------------------------------------------------------------
 actual=$(log 4242 --list)

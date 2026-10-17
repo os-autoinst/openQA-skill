@@ -241,7 +241,10 @@ and each other, and go with no other mode. `--grep` (like `--match` of
 oqa-sweep.py) compiles the pattern as given: a nested quantifier such as
 `(a+)+b` can hang on a single line, the same way `grep -E` would, and the script cannot time it out.
 Prefer anchored patterns without nested quantifiers. Names from `--list` go to `--file`, which validates
-them; do not paste one into a shell.
+them; do not paste one into a shell. An HTML page served for a file whose name does not end in `.html`
+(openQA's answer for an expired or purged file, maybe after a redirect) is never read as log text:
+`error: file gone (HTML page served): <name>`, exit 2, and for `--compare` and the serial logs of
+`--errors` it counts as a missing file.
 
 `--lines A-B` reads lines A to B (`1 <= A <= B`), numbered as `--grep` and `--errors` number them, so a
 hit can be read in its surroundings: of the range at most `--max-lines` lines, the first ones, and a

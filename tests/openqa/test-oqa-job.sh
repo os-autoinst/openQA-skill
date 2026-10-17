@@ -852,11 +852,9 @@ EOF
 )" "$? $(grep -E '^(clone chain|SUPERSEDED|requests)' <<<"$actual")"
 
 # --- a restart chain longer than the clone chain line --------------------------------
-# chain_97x JOB ARGS...: the clone chain lines of JOB in 970 -> ... -> 977, restarted hourly from 01:00
-chain_97x() {
-	local tmp
-	tmp=$(mktemp -d)
-	python3 - "$tmp" <<'PY'
+# jobs 970 -> ... -> 977, restarted hourly from 01:00
+chain_dir=$(mktemp -d)
+python3 - "$chain_dir" <<'PY'
 import json, sys
 for n in range(970, 978):
     job = {
@@ -872,8 +870,9 @@ for n in range(970, 978):
     json.dump({"job": details}, open(f"{sys.argv[1]}/api_v1_jobs_{n}_details.json", "w"))
     json.dump([], open(f"{sys.argv[1]}/api_v1_jobs_{n}_comments.json", "w"))
 PY
-	python3 "$script" --host https://openqa.example.org --fixture-dir "$tmp" "$@" | grep -E '^(clone chain|SUPERSEDED|note|requests)'
-	rm -rf "$tmp"
+# chain_97x JOB ARGS...: the clone chain lines of JOB
+chain_97x() {
+	python3 "$script" --host https://openqa.example.org --fixture-dir "$chain_dir" "$@" | grep -E '^(clone chain|SUPERSEDED|note|requests)'
 }
 check "a chain longer than five restarts: the newest is its true end, from the first job as from a later one" \
 	"SUPERSEDED: restarted, newest=977 result=passed started=2030-01-02T08:00Z|SUPERSEDED: restarted, newest=977 result=passed started=2030-01-02T08:00Z" \
@@ -894,5 +893,19 @@ check "--before before the first restart started: not superseded" \
 check "--before past the chain line: the restarts after it are walked, not followed to today's newest" \
 	"SUPERSEDED: restarted, newest=976 result=failed started=2030-01-02T07:00Z" \
 	"$(chain_97x 970 --before 2030-01-02T07:45+00:00 | grep '^SUPERSEDED')"
+actual=$(
+	cd "$scripts" && python3 - "$chain_dir" <<'PY' 2>&1 | grep -E '^(SUPERSEDED|note)'
+import importlib.util, sys
+spec = importlib.util.spec_from_file_location("oqa_job", "oqa-job.py")
+mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+mod.NEWEST_HOPS = 1
+sys.argv = ["oqa-job.py", "--host", "https://openqa.example.org", "--fixture-dir", sys.argv[1], "970", "--before", "2030-01-02T09:00Z"]
+mod.main()
+PY
+)
+check "--before: a walk that runs out of hops says the job it names may not be the newest" \
+	"SUPERSEDED: restarted, newest=976 result=failed started=2030-01-02T07:00Z|note: newest= is the last of 1 restarts walked past the chain line; later ones may have started by --before" \
+	"$(paste -sd'|' <<<"$actual")"
+rm -rf "$chain_dir"
 
 exit $fail

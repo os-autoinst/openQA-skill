@@ -377,6 +377,19 @@ keeps "-r of other commands" 'zypper -r repo-oss-update in vim\ngrep -r SUSEConn
 # shellcheck disable=SC2016 # literal slots, as documentation writes them
 keeps "a registration code slot in documentation" 'SUSEConnect -r <regcode>\nSUSEConnect -r $SCC_REGCODE\nregistercloudguest -r ${REGCODE}\n'
 
+# --- an Azure subscription id, an account identifier with its own rule name -----------
+sub="0a1b2c3d""-4e5f-6a7b-8c9d-""0e1f2a3b4c5d"
+for line in "GET /metadata/identity/oauth2/token?resource=https%3A%2F%2Fmanagement.azure.com%2Fsubscriptions%2F$sub%2FresourceGroups%2Frg" \
+	"az vm show --ids /subscriptions/$sub/resourceGroups/openqa-rg/providers/Microsoft.Compute/virtualMachines/vm" \
+	"subscriptionId=$sub" "  \"subscriptionId\": \"$sub\"," "ARM_SUBSCRIPTION_ID=$sub"; do
+	actual=$(printf '%s\n' "$line" | python3 "$scripts/_secrets.py" 2>/dev/null)
+	check "a subscription id goes, the rest of the line stays: ${line%%"$sub"*}" \
+		"${line/"$sub"/[REDACTED:azure-subscription]}" "$actual"
+done
+check "a subscription id is counted under its own name" "redacted 1: azure-subscription=1" \
+	"$(printf 'subscriptionId=%s\n' "$sub" | python3 "$scripts/_secrets.py" 2>&1 >/dev/null)"
+keeps "a UUID that is not a subscription" "root=UUID=$sub ro\nThe subscription $sub expired\n"
+
 # A rule alternative is dead unless its own literal passes the TRIGGERS pre-filter.
 actual=$(python3 -c "
 import sys; sys.path.insert(0, '$scripts')
@@ -408,6 +421,7 @@ for rule, literal, line in (
     ('regcode', 'suseconnect', 'SUSEConnect -r Sup3rS3cretX'),
     ('regcode', 'transactional-update register', 'transactional-update register -r Sup3rS3cretX'),
     ('regcode', 'registercloudguest', 'registercloudguest -r Sup3rS3cretX'),
+    ('azure-subscription', 'subscriptions/', '/subscriptions/0a1b2c3d-4e5f-6a7b-8c9d-0e1f2a3b4c5d/'),
     ('google-oauth-token', 'ya29', 'ya29.A0AfH6SMBc0123456789abcdQRST'),
     ('google-api-key', 'aiza', 'AIzaSyA1234567890abcdefghijklmnopqrstuv'),
     ('slack-webhook', 'hooks.slack', 'hooks.slack.com/services/' + 'T0000AAAA/B0000BBBB/abcdefghijklmnopqrstuvwx'),

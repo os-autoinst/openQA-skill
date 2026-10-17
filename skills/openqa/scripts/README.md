@@ -385,6 +385,9 @@ rebuilt at the same version),
 read from one file each job uploaded: `*rpm-qa.txt` (LTP's `log_versions`), else `*version.log` (xfstests),
 else `*kernel-pkg.txt` (`rpm -qi`), found in the downloads tab, `<module>#1-*` of a module loaded twice
 included; four requests. `versions: not found`: neither job uploaded one. A suite built from Git is not there (its `git clone`, LTP's `LTP version` step).
+`os-autoinst (last_good <id> -> this job): <old> -> <new>` (or `<version> (unchanged)`) is the worker's
+os-autoinst, from the `Current version is` line isotovideo logs in the setup notes, read in the first 64 kB of
+each `autoinst-log.txt`: two requests, one when last good's logs are gone; `?`: not found there.
 Test commits that touch a file under `tests/` named like one of this job's failed modules (`<module>.pm|py`, any
 directory: failed module names carry no category) start with `[failed module <module>]`; those touching another
 file of the failing step's stack trace with `[call path <file>]` (the `# Test died` step of the first failed

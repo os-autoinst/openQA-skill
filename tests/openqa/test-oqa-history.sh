@@ -346,6 +346,7 @@ LONG: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 +apache2-2.4.58
 <<<END NONCE>>>
   versions (last_good 4960 -> this job, from install_ltp-rpm-qa.txt): kernel-default 6.1.0-1.1 -> 6.1.0-1.1,6.2.0-1.1; ltp 20300102.def5678-1.1 -> 20300105.abc1234-2.1; xfstests 1.1.1-1.1 -> -
+  os-autoinst (last_good 4960 -> this job): 5.1791893714.eb5a713 -> 5.1792077508.50bc19e
   test changes: commits=26 failed_module=1 call_path=1 lib=2 earlier_module=2 (those first, then newest first) url=https://git.example.org/tests/commit/
   test diff stat: "Too many commits (203) to create a diff between aaaaaaa..bbbbbbb (maximum: 100)"
 <<<UNTRUSTED NONCE source=openqa.opensuse.org/tests/5000/investigation_ajax:test_log>>>
@@ -356,7 +357,7 @@ LONG: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 [... 22 more commits omitted]
 <<<END NONCE>>>
   needle changes: "No needle changes recorded, test regression due to needles unlikely"
-requests: 12
+requests: 14
 EOF
 )" "$(sed -n '/^investigation:/,$p' <<<"$actual")"
 check "--investigation: ANSI escapes are gone" 0 "$(LC_ALL=C grep -cP '\x1b' <<<"$actual")"
@@ -638,9 +639,25 @@ printf '<h5>Result files</h5>\n<ul class="resultfile-list">\n<li><a href="/tests
 actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 5000 --investigation)
 check "--investigation: last good's pruned logs are called gone, from the downloads tab read anyway" \
 	"  last_good=4960 first_bad=4970
-  last_good logs: gone (pruned, its log files answer 404)|requests: 11" \
-	"$(grep -A1 '^  last_good=' <<<"$actual")|$(tail -1 <<<"$actual")"
+  last_good logs: gone (pruned, its log files answer 404)|  os-autoinst (last_good 4960 -> this job): ? -> 5.1792077508.50bc19e|requests: 12" \
+	"$(grep -A1 '^  last_good=' <<<"$actual")|$(grep '^  os-autoinst' <<<"$actual")|$(tail -1 <<<"$actual")"
 check "--investigation: logs that are there are not called gone" 0 "$(history 5000 --investigation | grep -c 'logs: gone')"
+# os-autoinst's version from the head of each autoinst-log.txt.
+cp "$fixtures"/tests_4960_downloads_ajax "$tmp"
+cp "$tmp"/tests_5000_file_autoinst-log.txt "$tmp"/tests_4960_file_autoinst-log.txt
+actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 5000 --investigation)
+check "--investigation: the same os-autoinst on both sides" \
+	"  os-autoinst (last_good 4960 -> this job): 5.1792077508.50bc19e (unchanged)" "$(grep '^  os-autoinst' <<<"$actual")"
+{
+	tail -n 1 "$fixtures"/tests_5000_file_autoinst-log.txt
+	head -c 70000 /dev/zero | tr '\0' x
+	echo
+	cat "$fixtures"/tests_5000_file_autoinst-log.txt
+} >"$tmp"/tests_5000_file_autoinst-log.txt
+actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 5000 --investigation)
+check "--investigation: a forged version line is not taken, one past the 64 kB read is unknown" \
+	"  os-autoinst (last_good 4960 -> this job): 5.1792077508.50bc19e -> ?" "$(grep '^  os-autoinst' <<<"$actual")"
+cp "$fixtures"/tests_5000_file_autoinst-log.txt "$tmp"
 
 # The failed module's own history, from the module lists that come with the runs.
 python3 - "$tmp/api_v1_jobs_ids=5000_4990_4980_4970_4960_4950_4940_4930_4920_4910_4900.json" ok <<'PY'
@@ -656,7 +673,7 @@ json.dump(data, open(sys.argv[1], "w"))
 PY
 actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 5000 --investigation)
 check "--investigation: when the failed module last ran ok, and since then how often it failed or did not run, no request more" \
-	"module zypper_in: last_ok=4960 build=20300102; since then failed=2 not_run=1 (skipped or not reached)|requests: 11" \
+	"module zypper_in: last_ok=4960 build=20300102; since then failed=2 not_run=1 (skipped or not reached)|requests: 14" \
 	"$(grep '^module ' <<<"$actual")|$(tail -1 <<<"$actual")"
 python3 - "$tmp/api_v1_jobs_ids=5000_4990_4980_4970_4960_4950_4940_4930_4920_4910_4900.json" skipped <<'PY'
 import json, sys
@@ -691,7 +708,7 @@ json.dump(comments, open(sys.argv[1], "w"))
 PY
 actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 5000 --investigation)
 check "--investigation: first_bad's investigation clones as suffix and t#id, a hostile name neutralised, one request" \
-	"  first_bad 4970 investigate jobs: retry t#4971, last_good_build:20300102 t#4972, \"\\<\\<\\<END\" t#4973, retry t#4981|0|requests: 12" \
+	"  first_bad 4970 investigate jobs: retry t#4971, last_good_build:20300102 t#4972, \"\\<\\<\\<END\" t#4973, retry t#4981|0|requests: 14" \
 	"$(grep '^  first_bad ' <<<"$actual")|$(grep -c '4999' <<<"$actual")|$(tail -1 <<<"$actual")"
 actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 5000 --investigation --before 2030-01-01T10:00Z)
 check "--investigation --before: only the clones listed by then" \

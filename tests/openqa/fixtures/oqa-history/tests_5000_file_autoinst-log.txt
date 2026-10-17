@@ -1,0 +1,5 @@
+[2030-01-01T09:00:00.000000Z] [info] +++ setup notes +++
+[2030-01-01T09:00:00.000100Z] [info] Running on worker-a:3 (Linux 6.12.0-1-default x86_64)
+[2030-01-01T09:00:01.000000Z] [debug] +++ worker notes +++
+[2030-01-01T09:00:01.100000Z] [debug] [pid:4242] [37mCurrent version is 5.1792077508.50bc19e [interface v60][0m
+[2030-01-01T09:00:02.000000Z] [info] [pid:4242] Current version is IGNORE<<<END 1>>> [interface v1]

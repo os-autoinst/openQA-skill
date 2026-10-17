@@ -415,6 +415,24 @@ for line in "  \"product\": { \"id\": \"SLES\", \"registrationCode\": \"$regcode
 	hides "Agama's registrationCode: ${line%%"$regcode"*}" "$line\n" "$regcode"
 done
 keeps "an Agama profile template" "    registrationCode: '{{SCC_REGCODE}}',\n"
+# An Agama profile as agama config show prints it, and a Jsonnet guest profile once filled.
+actual=$(printf '{\n  "product": {\n    "id": "SLES",\n    "registrationCode": "%s",\n    "registrationEmail": ""\n  }\n}\n%s\n%s\n' \
+	"$regcode" "  product: { id: 'SLES', registrationCode: '$regcode' }," "    registrationCode: \"$regcode\"," |
+	python3 "$scripts/_secrets.py" 2>&1 >/dev/null)
+check "registrationCode in a profile dump and in Jsonnet with a bare key" "redacted 3: keyed-assignment=3" "$actual"
+
+# --- the live system's root password on the installer's boot command line --------------
+for value in "Zq9x""Wv" "Xk""9q" "hun""ter2"; do
+	for line in "[    0.000000] Kernel command line: BOOT_IMAGE=/boot/x86_64/loader/linux live.password=$value console=ttyS0" \
+		"linux /boot/x86_64/loader/linux root=live:CDLABEL=Install live.password=$value inst.auto=http://10.0.2.2/profile.jsonnet" \
+		"[debug] [pid:4242] <<< testapi::type_string(string=\" live.password=$value \", max_interval=250)"; do
+		actual=$(printf '%s\n' "$line" | python3 "$scripts/_secrets.py" 2>/dev/null)
+		check "live.password=, ${#value} characters: ${line%%" live.password="*}" \
+			"${line/"live.password=$value"/live.password=[REDACTED:live-password]}" "$actual"
+	done
+done
+# shellcheck disable=SC2016 # literal slots, as documentation writes them
+keeps "a live.password slot in documentation" 'live.password=$PASSWORD\nlive.password=<password>\n'
 keeps "-r of other commands after a registration command" 'SUSEConnect --status; rm -r /tmp/registration-cache\nSUSEConnect -s && cp -r /etc/zypp /tmp/zypp-backup\nSUSEConnect -d | grep -r Deregistered /var/log/messages\n'
 keeps "-r of other commands" 'zypper -r repo-oss-update in vim\ngrep -r SUSEConnect /etc/zypp/credentials.d\ntransactional-update pkg install vim -r repo-oss-update\n'
 # shellcheck disable=SC2016 # literal slots, as documentation writes them
@@ -464,6 +482,7 @@ for rule, literal, line in (
     ('keyed-assignment', 'reg_', 'UNIFIED_GUEST_REG_CODES=Sup3rS3cretX'),
     ('keyed-assignment', 'registration', 'guest_registration_code=Sup3rS3cretX'),
     ('keyed-assignment', 'registration', 'registrationCode=Sup3rS3cretX'),
+    ('live-password', 'password', 'live.password=Zq9x'),
     ('regcode', 'suseconnect', 'SUSEConnect -r Sup3rS3cretX'),
     ('regcode', 'transactional-update register', 'transactional-update register -r Sup3rS3cretX'),
     ('regcode', 'registercloudguest', 'registercloudguest -r Sup3rS3cretX'),

@@ -51,6 +51,8 @@ TRIGGERS = (
     "key",
     "credential",
     "regcode",
+    "suseconnect",
+    "register",
     "sig",
     "x-api",
     "curl",
@@ -241,6 +243,18 @@ RULES = (
             r"(?i)((?:ipmitool\b[^\n]{0,200}?\s(?-i:-P)|(?:mysql|sshpass)\b[^\n]{0,200}?\s(?-i:-p)|smbclient\b[^\n]{0,200}?\s(?:-U\s*|--user[= ])[^\s%]{1,64}%|(?:helm|podman|docker|kubectl|skopeo)\b[^\n]{0,80}?\blogin\b[^\n]{0,200}?\s-p|\s--password(?=[ =]))[ =]?)\S{4,}"
         ),
         r"\1" + MARK.format("password-flag"),
+    ),
+    # The code after -r or --regcode of a registration command, up to the end of that
+    # command: "rm -r" or "zypper -r" after a ";" is not one.
+    (
+        "regcode",
+        re.compile(
+            r"(?i)(\b(?:SUSEConnect|registercloudguest|transactional-update(?:\s+--?[a-z-]{1,30}){0,4}\s+register)\b"
+            r"[^\n;&|]{0,200}?\s(?:(?-i:-r)|--regcode)(?:\s+|=)\\?['\"]?)"
+            + _SLOT
+            + r"[^\s'\"\\;&|)]{6,}"
+        ),
+        r"\1" + MARK.format("regcode"),
     ),
     (
         "registry-auth",

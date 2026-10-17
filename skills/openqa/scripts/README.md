@@ -191,6 +191,11 @@ the screen it failed on. The same step of a good run: `--module NAME --all-steps
 
 Logs are MBs; grepping `error|failed` drowns in `timeout=` noise.
 
+Every call downloads its file again, up to `--max-bytes`: the 5 to 10 calls of one triage fetch the same
+`autoinst-log.txt` 5 to 10 times. There is no cache, as it would keep raw logs, credentials included, on
+disk, and need one more request per call to learn that a job is done and its files no longer change. Fewer
+calls cost less: one `--grep` with an alternation and `--context`, or `--around-module`, before `--lines`.
+
     oqa-log.py JOB [--file NAME] --list | --errors | --around-module M | --grep REGEX | --tail N
     oqa-log.py JOB --grep REGEX --around-module M    # matches inside one module's span only
     oqa-log.py JOB [--file NAME] --lines A-B [--grep REGEX]    # a line range, numbered as --grep numbers it

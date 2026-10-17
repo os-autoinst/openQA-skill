@@ -391,6 +391,11 @@ for line in "    UNIFIED_GUEST_REG_CODES=$codes" "   \"UNIFIED_GUEST_REG_EXTS_CO
 	# the codes after the first comma, which a value cut at the comma would leave
 	hides "registration codes held in a setting: ${line%%"$codes"*}" "$line\n" "${codes#*,}"
 done
+for line in "  \"product\": { \"id\": \"SLES\", \"registrationCode\": \"$regcode\" }," \
+	"    registrationCode: '$regcode'," "agama config set product.registrationCode=$regcode"; do
+	hides "Agama's registrationCode: ${line%%"$regcode"*}" "$line\n" "$regcode"
+done
+keeps "an Agama profile template" "    registrationCode: '{{SCC_REGCODE}}',\n"
 keeps "-r of other commands after a registration command" 'SUSEConnect --status; rm -r /tmp/registration-cache\nSUSEConnect -s && cp -r /etc/zypp /tmp/zypp-backup\nSUSEConnect -d | grep -r Deregistered /var/log/messages\n'
 keeps "-r of other commands" 'zypper -r repo-oss-update in vim\ngrep -r SUSEConnect /etc/zypp/credentials.d\ntransactional-update pkg install vim -r repo-oss-update\n'
 # shellcheck disable=SC2016 # literal slots, as documentation writes them
@@ -439,6 +444,7 @@ for rule, literal, line in (
     ('keyed-assignment', 'pass', 'DB_PASS=Sup3rS3cretX'),
     ('keyed-assignment', 'reg_', 'UNIFIED_GUEST_REG_CODES=Sup3rS3cretX'),
     ('keyed-assignment', 'registration', 'guest_registration_code=Sup3rS3cretX'),
+    ('keyed-assignment', 'registration', 'registrationCode=Sup3rS3cretX'),
     ('regcode', 'suseconnect', 'SUSEConnect -r Sup3rS3cretX'),
     ('regcode', 'transactional-update register', 'transactional-update register -r Sup3rS3cretX'),
     ('regcode', 'registercloudguest', 'registercloudguest -r Sup3rS3cretX'),

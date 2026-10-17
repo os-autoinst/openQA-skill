@@ -129,8 +129,9 @@ _REGEX_CLASS = re.compile(r"\A\\{1,2}[sSdDwW][*+?{]")
 # _HIDE_SECRETS_REGEX, which nothing in the test distribution actually sets. And
 # oqa-job.py reads settings off /api/v1/jobs/<id>, a different surface from vars.json
 # with no such guarantee, so the check has to happen here.
-# SCC_REGCODE, UNIFIED_GUEST_REG_CODES and _REG_EXTS_CODES, guest_registration_code.
-_REGCODE_NAME = r"REG_?CODE|REG_EXTS_CODE|REGISTRATION_(?:EXTENSIONS_)?CODE"
+# SCC_REGCODE, UNIFIED_GUEST_REG_CODES and _REG_EXTS_CODES, guest_registration_code,
+# Agama's registrationCode.
+_REGCODE_NAME = r"REG_?CODE|REG_EXTS_CODE|REGISTRATION_?(?:EXTENSIONS_)?CODE"
 _SECRET_KEY = re.compile(
     r"(?i)_SECRET_|PASSW|SECRET|TOKEN|"
     + _REGCODE_NAME

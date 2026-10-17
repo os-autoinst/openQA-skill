@@ -114,11 +114,10 @@ _PATH = re.compile(r"\A[~.]{0,2}/[\w./+-]*\Z")
 _TEMPLATE = re.compile(
     r"\A(?:[$%]\{[^}]*\}|\$\([^)]*\)|\{\{[^}]*\}\}|<[^>]*>|%\w+%|\$\w+)\Z"
 )
-# openQA invalidates JOBTOKEN when the job finishes, so it is dead by the time anyone
-# reads the log; redacting it only trains people to ignore the warnings. os-autoinst tags
-# each message between its own processes with a random json_cmd_token, thousands per log.
+# os-autoinst tags each message between its own processes with a random json_cmd_token,
+# thousands per log.
 _ALLOW_KEYS = re.compile(
-    r"\A(JOBTOKEN|JSON_CMD_TOKEN|NAME|CASEDIR|NEEDLES_DIR)\Z", re.IGNORECASE
+    r"\A(JSON_CMD_TOKEN|NAME|CASEDIR|NEEDLES_DIR)\Z", re.IGNORECASE
 )
 # A regex, as in wait_serial(qr/Password:\s*$/).
 _REGEX_CLASS = re.compile(r"\A\\{1,2}[sSdDwW][*+?{]")
@@ -289,6 +288,18 @@ RULES = (
             r"(?i)(--api-?(?:key|secret)(?:\s+|=)['\"]?)" + _SLOT + r"[^\s'\"]{6,}"
         ),
         r"\1" + MARK.format("api-flag"),
+    ),
+    # The job's JOBTOKEN (vars.json, the worker's settings dump, the X-API-JobToken header)
+    # opens its command server and the openQA API while the job runs; openQA invalidates
+    # it when the job ends, so its own rule name keeps it apart from leaked credentials.
+    (
+        "job-token",
+        re.compile(
+            r"(?i)((?<![A-Z0-9_])JOBTOKEN\\?['\"]?\s*(?:=>|[:=])\s*\\?['\"]?)"
+            + _SLOT
+            + r"[A-Za-z0-9_-]{6,}"
+        ),
+        r"\1" + MARK.format("job-token"),
     ),
     # openQA's job_settings route passes a setting NAME as ?key=, and a JMESPath filter
     # reads Tags[?Key==`Name`]; neither is a value.

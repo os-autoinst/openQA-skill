@@ -164,7 +164,8 @@ the rest, and `note: N comment(s) created after --before hidden` counts them.
     comment=963649 by=reviewer_a class=carried-over created=2026-09-19T08:12 bugrefs=poo#201672 carried_over_from=5962127
     requests: 4
 
-When set: `reason="..."`, `state=` (not done), `clone chain: 470:incomplete@2030-01-01T21:10Z -> [500:failed@2030-01-02T03:04Z]`
+When set: `reason="..."` (whole up to 480 characters, a longer one cut in the middle so openQA's
+`[Auto-restarting ...]` note at its end stays), `state=` (not done), `clone chain: 470:incomplete@2030-01-01T21:10Z -> [500:failed@2030-01-02T03:04Z]`
 (each member's start time in UTC, none before it started), `SUPERSEDED: restarted, newest=ID result=...
 started=...`, `culprit=ID (...)` for victims, needle steps with
 `tags=` and `candidates=N best=name:91% (worst area each)`, `SUSPECT_BUGREF=` (module name parsed as bugref),

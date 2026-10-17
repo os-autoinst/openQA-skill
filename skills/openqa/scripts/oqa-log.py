@@ -1224,7 +1224,11 @@ def main():
         help="last N lines (Range request when possible)",
     )
     modes.add_argument(
-        "--grep", metavar="REGEX", help="lines matching a Python regular expression"
+        "--grep",
+        metavar="REGEX",
+        help="lines matching a Python regular expression; it is matched against the first "
+        f"{MATCH_WIDTH} characters of the sanitised line with its full '[date] [level] "
+        "[pid:N]' prefix, as --verbose prints it, not the compact 'HH:MM:SS' form",
     )
     modes.add_argument(
         "--errors",

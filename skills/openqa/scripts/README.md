@@ -244,7 +244,10 @@ that cut them: `mode=grep matches=37 (shown 10 of 37; --max-matches N)`; raising
 prints no further match. With `--around-module M` the matches and their context come from that module's
 last run only, `starting` to `finished` marker, and the header gains `span=`; with `--lines A-B` from that
 range only, and it gains `range=`. One mode is required; `--around-module` and `--lines` narrow `--grep`
-and each other, and go with no other mode. `--grep` (like `--match` of
+and each other, and go with no other mode. The pattern is matched against the sanitised line (control
+characters and escapes gone, credentials redacted) with its full `[date] [level] [pid:N]` prefix, the form
+`-v` prints, in its first 4000 characters: anchor on the message (`script_run\(cmd="zypper`), not on the
+`HH:MM:SS` of the compact form, and expect no screen polling fold. `--grep` (like `--match` of
 oqa-sweep.py) compiles the pattern as given: a nested quantifier such as
 `(a+)+b` can hang on a single line, the same way `grep -E` would, and the script cannot time it out.
 Prefer anchored patterns without nested quantifiers. Names from `--list` go to `--file`, which validates

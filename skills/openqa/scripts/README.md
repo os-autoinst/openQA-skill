@@ -177,8 +177,10 @@ list its clones as `<suffix> t#<id>`), automated, carried-over.
 
 A step text is cut at 8 lines. When it is longer and holds verdict lines, those are shown instead of its
 head, then `[verdict lines only; N other lines not shown]`: `TFAIL`, `TBROK`, `TWARN`, `TCONF`, a TAP or
-KTAP `not ok`, `Failures:` and, when the text names an `.out.bad`, the `+`/`-` lines of that diff
-(xfstests); for a died test also its message and the lines with `failed`, `error` or `not found`.
+KTAP `not ok`, `Failures:`, when the text names an `.out.bad` the `+`/`-` lines of that diff
+(xfstests), zypper's solver `Problem:`, `Solution N:` and `deinstallation of` lines (`-v` shows such a
+text whole, up to 4000 characters); for a died test also its message and the lines with `failed`, `error`
+or `not found`.
 They are picked from the first MiB of the text and counted over all of it: the died message first, then the
 failures, `TCONF` and `TWARN` last; the first 8 are shown in file order, and a longer text adds
 `[verdict lines searched in the first 1048576 characters only]`. A text of at most 8 lines but over 4000

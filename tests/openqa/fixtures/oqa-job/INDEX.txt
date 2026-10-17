@@ -87,3 +87,7 @@ api_v1_jobs_880_details.json
     GET /api/v1/jobs/880/details (a zypper solver conflict recorded by record_info "Conflict")
 api_v1_jobs_880_comments.json
     GET /api/v1/jobs/880/comments
+api_v1_jobs_890_details.json
+    GET /api/v1/jobs/890/details (record_info steps of a public-cloud module, an xfstests subtest that failed without a failing step)
+api_v1_jobs_890_comments.json
+    GET /api/v1/jobs/890/comments

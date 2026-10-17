@@ -484,9 +484,16 @@ only: `--set`, `--schedule` or `--needles-fork` without `--pr`, `--fork` or `--t
 so). Crossed run, the old tests on the new build or the reverse: `--test-hash SHA` (7-40 lowercase hex, the
 full `TEST_GIT_HASH` of the other run fetches at once) adds `CASEDIR=<TEST_GIT_URL>#<SHA>`, `TEST_GIT_URL`
 read from the job's `vars.json` (one GET to that host, https unless localhost; nothing else of the file is
-kept); label `tests-<first 12 of SHA>`; refused (exit 2) when `vars.json` cannot be read or its
-`TEST_GIT_URL` is not a plain http(s) URL, which is then not echoed. Settings come before `TEST+=`, so a
-`KEY:<TEST>=` scope names the source job's `TEST`. Neither form takes `--pr` or `--fork/--branch`.
+kept but whether `PUBLIC_CLOUD` or `PUBLIC_CLOUD_PROVIDER` is set); label `tests-<first 12 of SHA>`; refused
+(exit 2) when `vars.json` cannot be read or its `TEST_GIT_URL` is not a plain http(s) URL, which is then not
+echoed. Settings come before `TEST+=`, so a `KEY:<TEST>=` scope names the source job's `TEST`. Neither form
+takes `--pr` or `--fork/--branch`.
+
+A public-cloud job cloned without its chained parents (`--skip-chained-deps`, and always by the `--pr`
+helper) looks up the cloud image its upload parent published under the job's settings; the cloud deletes
+such images after a while, and the clone then fails for a reason unrelated to the change. Only the crossed
+run reads `vars.json`, so only it prints that `hazard:`; for the other forms check the job's settings
+yourself, and when the image may be gone clone the parent too (no `--skip-chained-deps`, so not `--pr`).
 Fork unknown: literal `--fork '<user>' --branch '<branch>'`; a `note:` says to replace them. An argument
 that carries a credential is refused (exit 2) with the rule's name, never the value, and so is a `--set`
 whose key names one (`SCC_REGCODE`, `*PASSWORD*`), whatever its value or form (`KEY=` to delete is fine): a

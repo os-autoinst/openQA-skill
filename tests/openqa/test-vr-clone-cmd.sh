@@ -246,6 +246,23 @@ PY
 		"$rc $(grep -c 's3cret\|example/re\|passwd\|github\.com\|\[bad' <<<"$err") ${#out}"
 done
 has "crossed: an unusable TEST_GIT_URL is named, not echoed" "TEST_GIT_URL is not a plain http(s) Git URL (not echoed)" "$err"
+cloud=https://openqa.example.org/tests/4243
+pc_hazard="hazard: public-cloud job with --skip-chained-deps: the image its upload parent published may have been deleted since"
+run --fixture-dir "$vars" --job "$cloud" --test-hash "$sha" --skip-chained-deps
+check "crossed: a public-cloud job without its upload parent warns that the image may be gone" "1 1 0" \
+	"$rc $(grep -cxF "$pc_hazard" <<<"$out") $(grep -c 'EC2\|download\.example\|jobtoken' <<<"$out$err")"
+run --fixture-dir "$vars" --job "$cloud" --test-hash "$sha"
+check "crossed: a public-cloud job cloned with its upload parent has no such hazard" "0 0" \
+	"$rc $(grep -c 'public-cloud' <<<"$out")"
+python3 - "$vars/tests_4243_file_vars.json" "$work/vars/tests_4243_file_vars.json" <<'PY'
+import json, sys
+data = json.load(open(sys.argv[1]))
+data.update(PUBLIC_CLOUD="0", PUBLIC_CLOUD_PROVIDER="")
+json.dump(data, open(sys.argv[2], "w"))
+PY
+run --fixture-dir "$work/vars" --job "$cloud" --test-hash "$sha" --skip-chained-deps
+check "crossed: PUBLIC_CLOUD=0 and an empty provider are no public-cloud job" "0 0" \
+	"$rc $(grep -c 'public-cloud' <<<"$out")"
 
 # --- dependency and host flags ---
 run --job "$lab" "${fork[@]}"

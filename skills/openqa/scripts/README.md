@@ -155,7 +155,8 @@ started=...`, `culprit=ID (...)` for victims, needle steps with
 itself died: logs it would have uploaded may be missing; its message is the `post_fail_hook failed: ` line of
 `autoinst-log.txt`). `frame=`: first stack frame outside os-autoinst. `ulogs[<module>]=<module>-a,<module>-b`:
 that module's uploaded logs by the file names `oqa-log.py --file` takes. `class=`: human, bot (first
-non-heading line), automated, carried-over.
+non-heading line; an `Investigate retry job` comment adds its verdict, an `Automatic investigation jobs`
+list its clones as `<suffix> t#<id>`), automated, carried-over.
 
 A step text is cut at 8 lines. When it is longer and holds verdict lines, those are shown instead of its
 head, then `[verdict lines only; N other lines not shown]`: `TFAIL`, `TBROK`, `TWARN`, `TCONF`, a TAP or

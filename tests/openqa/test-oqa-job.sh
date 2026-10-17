@@ -578,7 +578,45 @@ rm -rf "$tmp"
 check "investigation comments that name a mode are bot text by their start, whoever posts them" \
 	"bot bot" "$(grep -o 'class=[^ ]*' <<<"$actual" | cut -d= -f2 | xargs)"
 check "the retry verdict with a mode is cut like the one without" 1 \
-	"$(grep -A1 '^comment=2 ' <<<"$actual" | grep -c '^  text="Investigate retry job \*textmode:investigate:retry\* (strict mode): t#851 failed\."$')"
+	"$(grep -A1 '^comment=2 ' <<<"$actual" | grep -cxF '  text="Investigate retry job *textmode:investigate:retry* (strict mode): t#851 failed. **Likely not a sporadic failure**."')"
+check "the clone list with a mode names each clone by its suffix" 1 \
+	"$(grep -A1 '^comment=1 ' <<<"$actual" | grep -cxF '  text="Automatic investigation jobs for job 850 (non-strict mode): retry t#851"')"
+
+# --- what openqa-investigate concluded and which clones it made ---------------------
+investigate() {
+	local tmp
+	tmp=$(mktemp -d)
+	cp "$fixtures"/api_v1_jobs_850_* "$tmp"
+	python3 - "$tmp" "$@" <<'PY'
+import json, sys
+comments = [
+    {"id": n, "userName": "geekotest", "text": text, "created": "2030-01-02 03:30:00 +0000"}
+    for n, text in enumerate(sys.argv[2:], 1)
+]
+json.dump(comments, open(f"{sys.argv[1]}/api_v1_jobs_850_comments.json", "w"))
+PY
+	python3 "$script" --host https://openqa.example.org --fixture-dir "$tmp" 850
+	rm -rf "$tmp"
+}
+retry='Investigate retry job *textmode:investigate:retry*: t#851'
+sporadic='📋 **Likely a sporadic failure**.'
+product='📋 **Jobs including the last good build are ok, likely a product issue**.'
+environment='📋 **All investigation jobs failed, likely an issue with the test environment (settings, external resources, infrastructure)**.'
+actual=$(investigate \
+	"$retry passed."$'\n\n'"$sporadic"$'\nlabel:force_result:passed:retry_job_passed' \
+	"$retry failed."$'\n\n'"$product" \
+	"$retry failed."$'\n\n'"$environment" \
+	'Investigate retry job *textmode:investigate:retry* (strict mode): t#851 cancelled.'$'\n\n')
+check "a retry comment shows its verdict, a cancelled one its first line" "1 1 1 1" \
+	"$(grep -cxF "  text=\"$retry passed. $sporadic\"" <<<"$actual") $(grep -cxF "  text=\"$retry failed. $product\"" <<<"$actual") $(grep -cxF "  text=\"$retry failed. $environment\"" <<<"$actual") $(grep -cxF '  text="Investigate retry job *textmode:investigate:retry* (strict mode): t#851 cancelled."' <<<"$actual")"
+actual=$(investigate \
+	$'Automatic investigation jobs for job 850 (strict mode):\n\n* *textmode:investigate:retry*: t#851\nNo test changes recorded, test regression unlikely.\n* *textmode:investigate:last_good_tests:0123abc*: t#852\n* *textmode:investigate:last_good_build:20300101*: t#853\n* *textmode:investigate:last_good_tests_and_build:0123abc+20300101*: t#854\n\n💡[*Detailed explanation of this comment*](https://github.com/os-autoinst/os-autoinst-scripts)' \
+	$'Automatic investigation jobs for job 850:\n\n* **textmode:investigate:retry**: https://openqa.example.org/tests/861\n* **textmode:investigate:last_good_build:20300101**: https://openqa.example.org/t862' \
+	"Automatic investigation jobs for job 850:$(printf '\n* *x:investigate:retry\033[31m\342\200\256*: t#9%.0s' {1..200})")
+check "a clone list names each clone as <suffix> t#<id>, in the older bold and URL shape too" "1 1" \
+	"$(grep -cxF '  text="Automatic investigation jobs for job 850 (strict mode): retry t#851, last_good_tests:0123abc t#852, last_good_build:20300101 t#853, last_good_tests_and_build:0123abc+20300101 t#854"' <<<"$actual") $(grep -cxF '  text="Automatic investigation jobs for job 850: retry t#861, last_good_build:20300101 t#862"' <<<"$actual")"
+check "a long clone list is fenced, capped and cleaned like other comment text" "1 3 0 0" \
+	"$(grep -c '^<<<UNTRUSTED [0-9a-f]* source=openqa.example.org/tests/850/comment/3>>>$' <<<"$actual") $(sed -n '/^comment=3 /,$p' <<<"$actual" | grep -c '^<<<\|chars omitted\]$') $(LC_ALL=C grep -cP '\x1b|\xe2\x80\xae' <<<"$actual") $(awk 'length > 400' <<<"$actual" | wc -l)"
 
 # --- names the server invents ---------------------------------------------------
 actual=$(job 960 --steps 20)

@@ -20,6 +20,9 @@ How to read it:
     --verbose", never "the step said nothing".
   - Comments: a bot comment is cut to its first line that is not a heading,
     a carried-over comment that only holds the bugref has no body line at all.
+    openqa-investigate's "Investigate retry job" keeps its verdict line after
+    it, its "Automatic investigation jobs" list each clone as <suffix> t#<id>
+    (retry, last_good_tests:<hash>, last_good_build:<BUILD>, ...).
     An automatic LLM investigation summary (class=automated or bot) shows llm_class=
     and llm_restart= as words and its bullets plus first prose line as one capped
     text line; it is a hint, never a verdict. --verbose shows the whole text.
@@ -142,9 +145,11 @@ WELL_FORMED_REF = re.compile(
 # comment from an older job and kept the ORIGINAL author, so the name says
 # nothing about who looked at this job. Everything else: "human".
 BOT_ACCOUNTS = ("geekotest", "ttm", "system")
+INVESTIGATE_CLONES = "Automatic investigation jobs for job"
+INVESTIGATE_RETRY = "Investigate retry job"
 BOT_TEMPLATES = (
-    "Automatic investigation jobs for job",
-    "Investigate retry job",
+    INVESTIGATE_CLONES,
+    INVESTIGATE_RETRY,
     "**LLM Investigation summary:**",
     "Automatic bisect jobs:",
     "No last good recorded",
@@ -153,6 +158,11 @@ BOT_TEMPLATES = (
     "label:unknown_failure",
     "Ignored issue",
     "Ignored failure",
+)
+# One clone of the list openqa-investigate posts, "* *<name>*: t#<id>"; older revisions
+# wrote the name in bold and a URL, ".../t<id>" or ".../tests/<id>".
+INVESTIGATE_CLONE = re.compile(
+    r"\s*\*\s+\*{1,2}([^*\s]+)\*{1,2}:\s*(?:t#|https?://[^/\s]+/(?:tests/|t))([0-9]{1,18})(?![0-9])"
 )
 AUTOMATED_MARK = re.compile(r"This comment has been \**AI generated")
 LLM_LINE_CHARS = 300
@@ -841,7 +851,19 @@ def comment_body(item, verbose):
         return ""
     if item["author"] != "bot":
         return "\n".join(lines)
-    return next((line for line in lines if not HEADING.fullmatch(line)), lines[0])
+    index = next((i for i, line in enumerate(lines) if not HEADING.fullmatch(line)), 0)
+    first = lines[index]
+    if first.lstrip().startswith(INVESTIGATE_RETRY):
+        # The verdict follows the line that names the retry and its result.
+        return " ".join(line.strip() for line in lines[index : index + 2])
+    if first.lstrip().startswith(INVESTIGATE_CLONES):
+        clones = [
+            f"{match.group(1).partition(':investigate:')[2] or match.group(1)} t#{match.group(2)}"
+            for line in lines
+            if (match := INVESTIGATE_CLONE.match(line))
+        ]
+        return " ".join([first, ", ".join(clones)]) if clones else first
+    return first
 
 
 def llm_fields(summary):

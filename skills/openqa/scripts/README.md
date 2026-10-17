@@ -355,7 +355,8 @@ waited for a worker counts where it ran; one whose start is unknown comes first,
 run of the streak lacked one of this job's failed modules; one that failed in older runs only (it softfails,
 passes or is not reached now) is no change: `older runs also failed <module>`. On a change, `first_bad` adds
 `(failed modules as now since <id>, N runs)`. A run whose ok result a `label:force_result` comment made counts
-as not ok (`note: ok result(s) of <ids> forced by a comment, counted as not ok`). Older runs unlike this job are
+as not ok (`note: ok result(s) of <ids> forced by a comment, counted as not ok`), for `--exit-code` too. Older
+runs unlike this job are
 left out of `last_good`, `first_bad`, the streak and the hint (`left out, unlike this job: <id> (<why>)`): a
 manual clone without the job group and, from the settings `/api/v1/jobs` gives with `--workers` or
 `--investigation`, a run with another `CASEDIR` or `NEEDLES_DIR`, or an `ISO` or `HDD_1` that differs beyond

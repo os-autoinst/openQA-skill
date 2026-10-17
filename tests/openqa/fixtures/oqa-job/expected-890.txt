@@ -1,0 +1,24 @@
+job=890 host=https://openqa.example.org result=failed started=2030-01-02T03:04:05 duration=30m00s
+scenario=exampleos-15.6-Cloud-x86_64-cloud-xfstests@64bit build=20300102 group=12
+settings: BACKEND=qemu
+modules=2 failed=2
+module=register_instance result=failed category=publiccloud
+  step=4 kind=test-died:command-failure link=https://openqa.example.org/tests/890#step/register_instance/4
+    text="# Test died: command 'sudo SUSEConnect --status-text' failed at lib/publiccloud/instance.pm line 230."
+module=generic-091 result=failed category=xfstests
+  step=1 kind=info title="INFO" link=https://openqa.example.org/tests/890#step/generic-091/1
+<<<UNTRUSTED NONCE source=openqa.example.org/tests/890/step/1>>>
+name: generic/091
+test result: FAILED
+time: 12
+<<<END NONCE>>>
+  step=2 kind=info title="output" link=https://openqa.example.org/tests/890#step/generic-091/2
+<<<UNTRUSTED NONCE source=openqa.example.org/tests/890/step/2>>>
+    +fsx: mapped read error at offset 0x1000: EIO
+Failures: generic/091
+[verdict lines only; 12 other lines not shown]
+<<<END NONCE>>>
+  no failing step recorded: read serial0.txt
+logs=autoinst-log.txt,serial0.txt ulogs=0
+review: reviewed=no comments=0
+requests: 2

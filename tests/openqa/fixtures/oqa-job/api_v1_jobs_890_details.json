@@ -1,0 +1,112 @@
+{
+ "job": {
+  "assets": {},
+  "children": {
+   "Chained": [],
+   "Directly chained": [],
+   "Parallel": []
+  },
+  "parents": {
+   "Chained": [],
+   "Directly chained": [],
+   "Parallel": []
+  },
+  "clone_id": null,
+  "group": "Example Public Cloud",
+  "group_id": 12,
+  "id": 890,
+  "logs": [
+   "autoinst-log.txt",
+   "serial0.txt"
+  ],
+  "ulogs": [],
+  "name": "exampleos-15.6-Cloud-x86_64-Build20300102-cloud-xfstests@64bit",
+  "result": "failed",
+  "settings": {
+   "ARCH": "x86_64",
+   "BACKEND": "qemu",
+   "BUILD": "20300102",
+   "DISTRI": "exampleos",
+   "FLAVOR": "Cloud",
+   "MACHINE": "64bit",
+   "TEST": "cloud-xfstests",
+   "VERSION": "15.6"
+  },
+  "state": "done",
+  "t_started": "2030-01-02T03:04:05",
+  "t_finished": "2030-01-02T03:34:05",
+  "test": "cloud-xfstests",
+  "testresults": [
+   {
+    "name": "register_instance",
+    "result": "failed",
+    "category": "publiccloud",
+    "details": [
+     {
+      "num": 1,
+      "result": "ok",
+      "title": "Instance",
+      "text": "m-1.txt",
+      "text_data": "instance: example-vm-1 (203.0.113.10)\nimage: exampleos-15-6-v20300101-x86_64"
+     },
+     {
+      "num": 2,
+      "result": "ok",
+      "title": "wait_serial",
+      "text": "m-2.txt",
+      "text_data": "# wait_serial expected: qr/ok/\n# Result:\nok\n"
+     },
+     {
+      "num": 3,
+      "result": "ok",
+      "title": "registercloudguest",
+      "text": "m-3.txt",
+      "text_data": "Registration with the update server failed:\nError: SCC returned 'Unknown Registration Code.' (401)\nCheck the instance's network and the update server logs"
+     },
+     {
+      "num": 4,
+      "result": "fail",
+      "title": "Failed",
+      "text": "m-4.txt",
+      "text_data": "# Test died: command 'sudo SUSEConnect --status-text' failed at lib/publiccloud/instance.pm line 230.\n"
+     }
+    ]
+   },
+   {
+    "name": "generic-091",
+    "result": "failed",
+    "category": "xfstests",
+    "details": [
+     {
+      "num": 1,
+      "result": "ok",
+      "title": "INFO",
+      "text": "m-1.txt",
+      "text_data": "name: generic/091\ntest result: FAILED\ntime: 12\n"
+     },
+     {
+      "num": 2,
+      "result": "ok",
+      "title": "output",
+      "text": "m-2.txt",
+      "text_data": "generic/091 12s ... - output mismatch (see /opt/xfstests/results//generic/091.out.bad)\n    --- tests/generic/091.out\t2030-01-01 00:00:00.000000000 +0000\n    +++ /opt/xfstests/results//generic/091.out.bad\t2030-01-02 03:10:00.000000000 +0000\n    @@ -1,7 +1,8 @@\n     QA output created by 091\n    +fsx: mapped read error at offset 0x1000: EIO\n     fsx -N 10000 -l 500000 -r PSIZE -t BSIZE -w BSIZE -Z -R -W\n     fsx -N 10000 -o 8192 -l 500000 -r PSIZE -t BSIZE -w BSIZE -Z -R -W\n     fsx -N 10000 -o 32768 -l 500000 -r PSIZE -t BSIZE -w BSIZE -Z -R -W\n    ...\n    (Run 'diff -u /opt/xfstests/tests/generic/091.out /opt/xfstests/results//generic/091.out.bad'  to see the entire diff)\nRan: generic/091\nFailures: generic/091\nFailed 1 of 1 tests"
+     },
+     {
+      "num": 3,
+      "result": "ok",
+      "title": "out.bad",
+      "text": "m-3.txt",
+      "text_data": "QA output created by 091\nfsx: mapped read error at offset 0x1000: EIO\n"
+     },
+     {
+      "num": 4,
+      "result": "ok",
+      "title": "dmesg",
+      "text": "m-4.txt",
+      "text_data": "[ 812.000001] run fstests generic/091 at 2030-01-02 03:09:48\n"
+     }
+    ]
+   }
+  ]
+ }
+}

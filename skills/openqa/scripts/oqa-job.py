@@ -36,7 +36,9 @@ How to read it:
     counts the other lines. They come from the first MiB of the text, the died message
     first, then the failures, TCONF and TWARN last; the first 8 of them are shown in
     file order. --verbose shows a solver problem whole, up to 4000 characters.
-    kind=parser-result-failed: a parse_extra_log result.
+    kind=parser-result-failed: a parse_extra_log result. kind=info: a module that
+    failed without a failing step shows its INFO and output steps, else its last
+    step with text.
   - parallel_failed and skipped jobs are victims. The culprit hint names the
     failed/incomplete/timeout_exceeded job of the cluster that finished first.
   - Steps after the "Failed" text step of a module belong to post_fail_hook
@@ -178,6 +180,8 @@ SHOT_NAME = re.compile(r"[\w#+-][\w.#+-]{0,120}", re.ASCII)
 HEADING = re.compile(r"\s*(?:#{1,6}\s.*|\*\*[^*]+\*\*:?|__[^_]+__:?)\s*")
 FORCE_RESULT = re.compile(r"force_result:([a-z_]+)")
 MAX_ALL_STEPS = 300
+MAX_TEXT_STEPS = 20  # step texts --all-steps --verbose shows, the last ones
+INFO_TITLES = ("INFO", "output")
 
 DIED_NEEDLE = re.compile(r"no candidate needle with tag")
 CARP_FRAME = re.compile(r"^\s+\S.* called at \S+ line \d+")
@@ -277,7 +281,11 @@ def reduce_details(obj):
     if "num" in obj and "result" in obj:
         if obj["result"] not in BAD_STEPS:
             keys = ("num", "result", "title", "screenshot")
-            return {key: obj.get(key) for key in keys if key == "title" or key in obj}
+            step = {key: obj.get(key) for key in keys if key == "title" or key in obj}
+            if "text" in obj and isinstance(obj.get("text_data"), str):
+                # record_info text: why a module failed without a failing step.
+                step["text_data"] = obj["text_data"]
+            return step
         keys = (
             "num",
             "result",
@@ -565,6 +573,8 @@ def step_link(client, job_id, module, number):
 
 
 def step_kind(step):
+    if step.get("result") not in BAD_STEPS:
+        return "info"
     text = step_text(step)
     title = str(step.get("title") or "")
     if step.get("needles") or (step.get("screenshot") and step.get("tags")):
@@ -682,6 +692,13 @@ def find_module(job, wanted):
     return module
 
 
+def info_steps(steps):
+    """Why a module failed without a failing step: the INFO and output steps an xfstests
+    subtest records, else its last step with text."""
+    texts = [s for s in steps if str(s.get("text_data") or "").strip()]
+    return [s for s in texts if s.get("title") in INFO_TITLES] or texts[-1:]
+
+
 def hidden_steps(steps, shown):
     return f"  +{len(steps) - shown} of {len(steps)} steps not shown (--all-steps lists them)"
 
@@ -734,6 +751,8 @@ def print_modules(client, job, max_steps, verbose, wanted=None):
         shown = bad[:max_steps]
         if max_steps and died is not None and steps[died] not in shown:
             shown = [*shown[: max_steps - 1], steps[died]]
+        if not shown:
+            shown = info_steps(body)[:max_steps]
         for step in shown:
             shot = step_shot(steps, step)
             print_step(client, job["id"], name, step, source, verbose, shot)
@@ -782,8 +801,9 @@ def print_modules(client, job, max_steps, verbose, wanted=None):
             print(hidden_steps(steps, 0))
 
 
-def print_all_steps(client, job, how, wanted):
-    """Every step of one module: num, result, title, screenshot file."""
+def print_all_steps(client, job, how, wanted, verbose):
+    """Every step of one module: num, result, title, screenshot file; with verbose the
+    capped text of each step that is not a wait_serial, as record_info writes it."""
     if how != "details":
         raise _oqa.OqaError(f"no steps to list: {how}")
     module = find_module(job, wanted)
@@ -799,6 +819,18 @@ def print_all_steps(client, job, how, wanted):
     ]
     headers = ("num", "result", "title", "shot")
     print(_oqa.table(rows, headers, max_rows=MAX_ALL_STEPS), end="")
+    if not verbose:
+        return
+    texts = [
+        step
+        for step in steps
+        if step.get("title") != "wait_serial" and isinstance(step.get("text_data"), str)
+    ]
+    if len(texts) > MAX_TEXT_STEPS:
+        print(f"+{len(texts) - MAX_TEXT_STEPS} earlier step texts not shown")
+    source = f"{client.host.partition('://')[2]}/tests/{job['id']}"
+    for step in texts[-MAX_TEXT_STEPS:]:
+        print_step(client, job["id"], wanted, step, source, verbose)
 
 
 def print_files(job, verbose):
@@ -1028,7 +1060,8 @@ def main():
         "--all-steps",
         action="store_true",
         help="list every step of --module NAME, passing ones too (num result title shot), "
-        "instead of the digest",
+        "instead of the digest; with --verbose also the capped text of the last "
+        f"{MAX_TEXT_STEPS} steps that are not wait_serial, record_info ones among them",
     )
     parser.add_argument(
         "--before",
@@ -1063,7 +1096,7 @@ def main():
     if args.module:
         find_module(job, args.module)
     if args.all_steps:
-        print_all_steps(client, job, how, args.module)
+        print_all_steps(client, job, how, args.module, args.verbose)
         print(f"requests: {client.requests}")
         return status
     print_identity(client, job, how, args.verbose)

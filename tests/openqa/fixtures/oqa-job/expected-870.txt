@@ -1,6 +1,7 @@
 job=870 host=https://openqa.example.org result=failed started=2030-01-02T03:04:05 duration=40m00s
 scenario=exampleos-Rolling-DVD-x86_64-ltp_syscalls@64bit build=20300102 group=9
 settings: BACKEND=qemu
+hint: settings changed since the last good run: oqa-history.py https://openqa.example.org/tests/870 --investigation
 modules=6 failed=6
 module=mmap22 result=failed category=kernel
   step=2 kind=step-failed title="mmap22" link=https://openqa.example.org/tests/870#step/mmap22/2

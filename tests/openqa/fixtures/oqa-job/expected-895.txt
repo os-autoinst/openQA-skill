@@ -1,6 +1,7 @@
 job=895 host=https://openqa.example.org result=failed started=2030-01-02T03:04:05 duration=10m00s
 scenario=exampleos-Rolling-DVD-x86_64-gnome@64bit build=20300102 group=7
 settings: BACKEND=qemu
+hint: settings changed since the last good run: oqa-history.py https://openqa.example.org/tests/895 --investigation
 modules=1 failed=1
 module=boot_to_desktop result=failed category=x11
   step=7 kind=needle-mismatch link=https://openqa.example.org/tests/895#step/boot_to_desktop/7 shot=https://openqa.example.org/tests/895/images/boot_to_desktop-7.png

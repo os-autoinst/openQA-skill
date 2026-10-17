@@ -171,6 +171,10 @@ BOT_TEMPLATES = (
 INVESTIGATE_CLONE = re.compile(
     r"\s*\*\s+\*{1,2}([^*\s]+)\*{1,2}:\s*(?:t#|https?://[^/\s]+/(?:tests/|t))([0-9]{1,18})(?![0-9])"
 )
+# openqa-investigate names its clones TEST:investigate:<kind> and sets
+# OPENQA_INVESTIGATE_ORIGIN=<host>/t<origin id>.
+INVESTIGATE_TEST = re.compile(r":investigate:(.+)\Z")
+INVESTIGATE_ORIGIN = re.compile(r"/t(?:ests/)?([0-9]{1,18})\Z")
 AUTOMATED_MARK = re.compile(r"This comment has been \**AI generated")
 LLM_LINE_CHARS = 300
 HOOK_NOTE = "(The hook script will not be executed.)"
@@ -396,6 +400,21 @@ def print_identity(client, job, how, verbose):
     print(line)
     if how != "details":
         print(f"note: {how}")
+
+
+def print_investigation(job):
+    settings = job.get("settings") or {}
+    kind = INVESTIGATE_TEST.search(str(settings.get("TEST") or ""))
+    if not kind:
+        return
+    origin = INVESTIGATE_ORIGIN.search(
+        str(settings.get("OPENQA_INVESTIGATE_ORIGIN") or "")
+    )
+    print(
+        f"INVESTIGATION CLONE: kind={tok(kind.group(1), 80)} "
+        f"origin={origin.group(1) if origin else '?'} (made by openqa-investigate: "
+        "take the history and the review window from the origin's scenario)"
+    )
 
 
 def print_settings(job, pattern, verbose):
@@ -1171,6 +1190,7 @@ def main():
         print(f"requests: {client.requests}")
         return status
     print_identity(client, job, how, args.verbose)
+    print_investigation(job)
     print_settings(job, args.settings, args.verbose)
     print_chain(client, job, args.verbose, args.before)
     print_dependencies(client, job, args.verbose)

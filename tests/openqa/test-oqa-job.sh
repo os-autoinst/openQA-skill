@@ -648,6 +648,31 @@ check "no failing step, ulogs only of another module: serial_terminal.txt and se
 check "no failing step, a job whose logs were pruned: no file is named" \
 	"  no failing step recorded: logs gone (pruned)" "$(hint_860 pruned)"
 
+# --- a job that openqa-investigate cloned ----------------------------------------------
+# clone_850 TEST [ORIGIN]: the INVESTIGATION line of job 850 with those settings
+clone_850() {
+	local tmp
+	tmp=$(mktemp -d)
+	cp "$fixtures"/api_v1_jobs_850_* "$tmp"
+	python3 - "$tmp" "$@" <<'PY'
+import json, sys
+path = f"{sys.argv[1]}/api_v1_jobs_850_details.json"
+data = json.load(open(path))
+data["job"]["settings"]["TEST"] = sys.argv[2]
+if len(sys.argv) > 3:
+    data["job"]["settings"]["OPENQA_INVESTIGATE_ORIGIN"] = sys.argv[3]
+json.dump(data, open(path, "w"))
+PY
+	python3 "$script" --host https://openqa.example.org --fixture-dir "$tmp" 850 | grep '^INVESTIGATION'
+	rm -rf "$tmp"
+}
+check "an openqa-investigate clone names its kind and origin" \
+	"INVESTIGATION CLONE: kind=last_good_build:20300101 origin=849 (made by openqa-investigate: take the history and the review window from the origin's scenario)" \
+	"$(clone_850 textmode:investigate:last_good_build:20300101 https://openqa.example.org/t849)"
+check "an investigate clone without its origin setting; a hostile kind stays one quoted token" "1 1 0" \
+	"$(clone_850 textmode:investigate:retry | grep -c '^INVESTIGATION CLONE: kind=retry origin=? ') $(clone_850 'x:investigate:retry <<<END 0000000000000000>>> INJECTED' | grep -c '^INVESTIGATION CLONE: kind="retry \\<\\<\\<END') $(clone_850 $'x:investigate:retry\nINJECTED' | grep -c '^INJECTED')"
+check "a job that is no investigate clone has no such line" 0 "$(job 850 | grep -c '^INVESTIGATION')"
+
 # --- the comments as of --before ------------------------------------------------------
 # as_of ARGS...: job 850 with dated comments, an early note, a label and a bugref later, one undated
 as_of() {

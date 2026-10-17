@@ -82,10 +82,10 @@ check "openQA's durations: days and hours, hours, minutes; else the list's start
 	"02T02:02:06 03T02:02:06 03T03:11:54 01T00:00:00 01T00:00:00 01T00:00:00 None None" "$durations"
 check "11 older rows in the answer, only 10 shown" 11 "$(grep -Ec '^[0-9]{4}  ' <<<"$actual")"
 contains "more history is announced" "not_ok=5/11 (older runs exist: --previous N)" "$actual"
-check "summary lines; the default call is the one history request" "$(
+check "summary lines, the run where the failed modules changed on first_bad's; the default call is the one history request" "$(
 	cat <<'EOF'
 last_good=4960 build=20300102 result=softfailed
-first_bad=4970 build=20300103 streak=4
+first_bad=4970 build=20300103 streak=4 (failed modules as now since 4980, 3 runs)
 not_ok=5/11 (older runs exist: --previous N)
 hint: failing since build 20300103: 4 runs in a row over 3 build(s); failed modules CHANGE within the streak: the current ones go back only to 4980 build 20300103, probably more than one issue; 1 more not-ok run(s) before the last good one
 requests: 1
@@ -186,6 +186,22 @@ history(7100, [
 PY
 contains "not ok in every run of one build and ok in the others is no intermittent failure" \
 	"hint: every run of build 2 failed; last good on build 1" "$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 7100)"
+# A run whose softfailed result a label:force_result comment made: it failed like the others.
+python3 - "$tmp" <<'PY'
+import json, sys
+rows = [{"id": i, "build": b, "state": "done", "result": r, "failedmodules": f, "iscurrent": 1 if i == 7500 else None,
+         "finished": "2030-01-01T10:00:00Z", "duration": "10:00 minutes", "comment_data": c}
+        for i, b, r, f, c in (
+            (7500, "3", "failed", ["x"], 0),
+            (7490, "2", "softfailed", ["x"], {"bugs": [], "label": "force_result:softfailed:accepted"}),
+            (7480, "2", "failed", ["x"], 0),
+            (7470, "1", "passed", [], 0))]
+json.dump({"data": rows}, open(f"{sys.argv[1]}/tests_7500_ajax_previous_limit=10_next_limit=0.json", "w"))
+PY
+actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 7500)
+check "an ok result forced by a comment counts as not ok, a note says so" \
+	"note: ok result(s) of 7490 forced by a comment, counted as not ok|last_good=7470 build=1 result=passed|first_bad=7480 build=2 streak=3" \
+	"$(grep '^note: ok' <<<"$actual")|$(grep '^last_good=' <<<"$actual")|$(grep '^first_bad=' <<<"$actual")"
 # Runs on two workers: every one on worker 41 fails, every one on worker 42 passes.
 python3 - "$tmp" <<'PY'
 import json, sys
@@ -332,7 +348,7 @@ json.dump([comment(21, "2030-01-01 08:30:00 +0000", "label:force_result:softfail
           open(f"{sys.argv[1]}/api_v1_jobs_4990_comments.json", "w"))
 PY
 actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 5000)
-contains "control: today the job's forced result counts" "hint: this job is ok" "$actual"
+contains "control: today the job's result is forced to ok, which counts as not ok" "note: ok result(s) of 5000 forced by a comment, counted as not ok" "$actual"
 actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 5000 --before 2030-01-01T10:00Z)
 check "--before: a result forced after it shows as it was then, the earlier forced one stays, a note says so" \
 	"5000 failed|4990 softfailed|1|0" \

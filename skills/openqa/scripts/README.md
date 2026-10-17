@@ -351,7 +351,9 @@ fails, the 25-run chunks read before the failure kept. Without them: `note: no w
 it`. `--previous` runs to look at (10, openQA's carry-over depth). All-empty columns are dropped.
 `failed_modules` is sorted and holds what fits, then `+N` for the rest. The hint's `failed modules CHANGE` means a
 run of the streak lacked one of this job's failed modules; one that failed in older runs only (it softfails,
-passes or is not reached now) is no change: `older runs also failed <module>`. When the not-ok runs are exactly
+passes or is not reached now) is no change: `older runs also failed <module>`. On a change, `first_bad` adds
+`(failed modules as now since <id>, N runs)`. A run whose ok result a `label:force_result` comment made counts
+as not ok (`note: ok result(s) of <ids> forced by a comment, counted as not ok`). When the not-ok runs are exactly
 the runs of this job's build, interleaved with ok runs of another, the hint is `every run of build X failed;
 last good on build Y`, not `intermittent`. With the worker column and runs on two workers or more, `workers:
 <worker> ok=N not_ok=M, ...` tallies them, the most failing first; when every run on one worker failed and every

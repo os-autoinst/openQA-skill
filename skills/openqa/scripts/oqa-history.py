@@ -214,6 +214,7 @@ def describe(rows, more, machines=None):
 
     alike = next((i for i, row in enumerate(rows[:streak]) if not holds(row)), streak)
     also = sorted(set().union(*map(failed_set, rows[:alike])) - signature)
+    mode = ""
     if alike == streak:
         same = "the current failed modules" if also else "same failed modules"
         same += " throughout"
@@ -223,6 +224,7 @@ def describe(rows, more, machines=None):
             f"failed modules CHANGE within the streak: the current ones go back only to "
             f"{origin['id']} build {build_of(origin)}, probably more than one issue"
         )
+        mode = f" (failed modules as now since {origin['id']}, {alike} runs)"
     if also:
         same += f", older runs also failed {_oqa.toks(also, 60, 4)}"
     builds = len({row.get("build") for row in rows[:streak]})
@@ -255,7 +257,7 @@ def describe(rows, more, machines=None):
         hint = f"first failure: the {total - 1} previous runs were ok, new in {since}"
     return [
         f"last_good={last_good}",
-        f"first_bad={first_bad['id']} build={build_of(first_bad)} streak={streak}",
+        f"first_bad={first_bad['id']} build={build_of(first_bad)} streak={streak}{mode}",
         rate,
         f"hint: {hint}",
     ]
@@ -1149,6 +1151,24 @@ def main():
         notes.append(
             f"result(s) of {','.join(map(str, forced))} forced later, shown as at --before"
         )
+
+    def label(row):
+        if row["id"] in references:
+            return references[row["id"]][1]
+        data = row.get("comment_data")
+        return data.get("label") if isinstance(data, dict) else None
+
+    # A reviewer's force_result does not make the run pass: count it with the failures.
+    forced_ok = [
+        row["id"]
+        for row in (current, *older)
+        if not bad(row) and str(label(row) or "").startswith("force_result:")
+    ]
+    if forced_ok:
+        notes.append(
+            f"ok result(s) of {','.join(map(str, forced_ok))} forced by a comment, "
+            "counted as not ok"
+        )
     if notes:
         print("note: " + "; ".join(notes))
 
@@ -1158,7 +1178,11 @@ def main():
         when = "was running at --before" if args.before else f"is {state}"
         print(f"hint: job {job_id} {when}, no result to classify yet")
     else:
-        finished = [current, *(row for row in older if row.get("state") == "done")]
+        finished = [
+            {**row, "result": "forced"} if row["id"] in forced_ok else row
+            for row in (current, *older)
+            if row.get("state") == "done"
+        ]
         machines = {}
         for row in finished if workers is not None else ():
             run = runs.get(row["id"])

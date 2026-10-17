@@ -283,8 +283,6 @@ actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 7400 --workers)
 check "--workers: a tally per worker; failing on one worker only, passing on the others, is bound to it; a hostile name neutralised" \
 	"workers: \"w41\\<\\<\\<END 7>>>:1\" ok=0 not_ok=2, w42:1 ok=3 not_ok=0|hint: bound to one machine: every run on \"w41\\<\\<\\<END 7>>>:1\" failed, every run on the other workers was ok|0" \
 	"$(grep '^workers: ' <<<"$actual")|$(grep '^hint: ' <<<"$actual")|$(LC_ALL=C grep -cP '\x1b|<<<END' <<<"$actual")"
-python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 7500 --exit-code >/dev/null
-check "--exit-code follows the classification: a job whose ok result was forced exits 1" 1 $?
 check "without worker data no tally and no machine hint" "0 1" \
 	"$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 7400 | grep -Ec '^workers: |machine') $(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 7400 | grep -c 'hint: intermittent')"
 actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 7000)
@@ -430,6 +428,8 @@ json.dump([comment(21, "2030-01-01 08:30:00 +0000", "label:force_result:softfail
 PY
 actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 5000)
 contains "control: today the job's result is forced to ok, which counts as not ok" "note: ok result(s) of 5000 forced by a comment, counted as not ok" "$actual"
+python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 5000 --exit-code >/dev/null
+check "--exit-code follows the classification: this job's ok result was forced, it exits 1" 1 $?
 actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 5000 --before 2030-01-01T10:00Z)
 check "--before: a result forced after it shows as it was then, the earlier forced one stays, a note says so" \
 	"5000 failed|4990 softfailed|1|0" \

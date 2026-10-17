@@ -50,6 +50,8 @@ from _sanitize import ArgumentParser
 OK_RESULTS = _oqa.RESULT_GROUPS["ok"]
 # Not-ok runs in a row from which a failure is called persistent rather than intermittent.
 PERSISTENT_STREAK = 3
+# Runs after the job read with --before, the nearest first.
+NEXT_BEFORE = 20
 # A job's module list is part of each row of /api/v1/jobs: LTP jobs take ~130 kB each.
 IDS_PER_REQUEST = 25
 MAX_WORKERS = 20
@@ -234,9 +236,11 @@ def describe(rows, more):
     ]
 
 
-def history(client, job_id, previous):
+def history(client, job_id, previous, following=0):
+    """following: how many runs after the job to ask for, the nearest first; openQA adds the
+    latest run whatever this is."""
     data = client.get_json(
-        f"/tests/{job_id}/ajax", {"previous_limit": previous, "next_limit": 0}
+        f"/tests/{job_id}/ajax", {"previous_limit": previous, "next_limit": following}
     )
     rows = [
         row
@@ -985,7 +989,9 @@ def main():
 
     args.host, job_id = _oqa.parse_job_url(args.job, args.host)
     client = _oqa.client_from_args(args, "oqa-history", max_requests=MAX_REQUESTS)
-    current, newer, older, more = history(client, job_id, args.previous)
+    # --before shows the runs after the job that had started by then, its restart among them.
+    following = NEXT_BEFORE if args.before else 0
+    current, newer, older, more = history(client, job_id, args.previous, following)
     rows = [*newer, current, *older]
     full = args.workers or args.investigation
     # The list carries every run's modules, megabytes for long suites: only when needed.

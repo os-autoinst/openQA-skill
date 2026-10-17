@@ -356,7 +356,8 @@ the runs of this job's build, interleaved with ok runs of another, the hint is `
 last good on build Y`, not `intermittent`.
 
 `--before TIME` (ISO 8601 such as `2030-01-02T10:00Z`, UTC without an offset): the history as it stood then,
-for a review as of a ticket's date. Runs that started later are cut (`note: N run(s) that started after
+for a review as of a ticket's date. The same request also asks for the 20 runs after the job, nearest first,
+so those that had started by then show, its restart among them. Runs that started later are cut (`note: N run(s) that started after
 --before cut`); a run still going then shows as `running` and counts in none of `last_good`, `first_bad`,
 `streak`, `not_ok`; a restart that is not among the runs kept leaves `clone` empty; bugrefs and label come
 from the comments created by then (one request per run carrying either, 30 at most, `?` beyond; `note: N

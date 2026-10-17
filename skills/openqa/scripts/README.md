@@ -201,8 +201,9 @@ Logs are MBs; grepping `error|failed` drowns in `timeout=` noise.
 `--context` (2), `--max-matches` (10), `-i`, `--max-bytes` (16 MiB downloaded per file); `-v` full line prefix, whole traces, console plumbing and screen
 polling lines. `--exit-code`: 1 when `--errors`/`--grep` matched, the module never started, or `--runtimes`
 found a module still running at the end or one that took 2x and 60 s more than in `--compare`.
-`[date] [level] [pid]` prints as `HH:MM:SS` (level kept unless debug/info). `--around-module` ends just after
-`# Test died` and folds assert_screen polling (no match / no change / check_asserted_screen took / stall)
+`[date] [level] [pid]` prints as `HH:MM:SS` (level kept unless debug/info). `--around-module` capped by
+`--max-lines` ends after the `# Test died` message and its stack frames up to the first one called from
+os-autoinst or Perl (3 to 11 lines after it), and it folds assert_screen polling (no match / no change / check_asserted_screen took / stall)
 into one `~` line: counts, first..last time. A ranged tail is numbered from the end (`-1` = last line).
 
 `--errors` on `autoinst-log.txt` (the default `--file`, no `--member`) also reads `serial_terminal.txt` when

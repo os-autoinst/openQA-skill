@@ -192,6 +192,37 @@ def why_unlike(row, current, runs):
     return None
 
 
+def module_result(run, module):
+    """The result of a module in a run's module list, None when it is not there; False
+    without the list."""
+    modules = run.get("modules") if isinstance(run, dict) else None
+    if not isinstance(modules, list):
+        return False
+    return next(
+        (
+            m.get("result")
+            for m in modules
+            if isinstance(m, dict) and m.get("name") == module
+        ),
+        None,
+    )
+
+
+def why_weaker(row, current, runs, module):
+    """Why an older run is a weaker comparison, or None: another build stream (the build
+    with its digits masked, so 20300105 and 20300104 are one stream, kernel-livepatch-31
+    and kernel-default-5 two), or an ok run in which this job's failed module did not
+    run ok."""
+    if re.sub(r"\d+", "#", str(row.get("build"))) != re.sub(
+        r"\d+", "#", str(current.get("build"))
+    ):
+        return f"another build stream: {build_of(row)}"
+    result = module_result((runs or {}).get(row["id"]), module) if module else False
+    if not bad(row) and result is not False and result not in OK_RESULTS:
+        return f"{_oqa.tok(module)} did not run"
+    return None
+
+
 def one_machine(rows, machines):
     """The worker every not-ok run ran on, when every run there was not ok and every run
     elsewhere ok; None otherwise or without the workers."""
@@ -206,10 +237,19 @@ def one_machine(rows, machines):
     )
 
 
-def describe(rows, more, machines=None, unlike=None):
+def describe(rows, more, machines=None, unlike=None, weaker=None):
     """rows: finished runs, newest first, rows[0] is the current job; machines: {id: worker}
-    when the workers were read; unlike: {id: why} of the runs left out of the comparison."""
-    unlike = unlike or {}
+    when the workers were read; unlike: {id: why} of the runs left out of the comparison;
+    weaker: {id: why} of those left out only before an ok run that is neither."""
+    unlike, weaker = dict(unlike or {}), weaker or {}
+    firm = [row for row in rows[1:] if row["id"] not in unlike]
+    good = next(
+        (i for i, row in enumerate(firm) if not bad(row) and row["id"] not in weaker),
+        0,
+    )
+    unlike.update(
+        {row["id"]: weaker[row["id"]] for row in firm[:good] if row["id"] in weaker}
+    )
     left = [row for row in rows[1:] if row["id"] in unlike]
     rows = [rows[0], *(row for row in rows[1:] if row["id"] not in unlike)]
     total, failed = len(rows), sum(bad(row) for row in rows)
@@ -228,6 +268,8 @@ def describe(rows, more, machines=None, unlike=None):
 
     if streak < total:
         last_good = run_text(rows[streak])
+        if rows[streak]["id"] in weaker:
+            last_good += f" ({weaker[rows[streak]['id']]})"
     else:
         last_good = "none"
         other = next((row for row in left if not bad(row)), None)
@@ -730,17 +772,9 @@ def module_history(module, older, runs):
     failed or did not run; None without every one of those runs' module lists."""
     failed = absent = 0
     for row in older:
-        modules = ((runs or {}).get(row["id"]) or {}).get("modules")
-        if not isinstance(modules, list):
+        result = module_result((runs or {}).get(row["id"]), module)
+        if result is False:
             return None
-        result = next(
-            (
-                m.get("result")
-                for m in modules
-                if isinstance(m, dict) and m.get("name") == module
-            ),
-            None,
-        )
         if result in OK_RESULTS:
             since = f"last_ok={row['id']} build={build_of(row)}; since then "
             break
@@ -1241,9 +1275,19 @@ def main():
         tally = worker_tally(finished, machines)
         if tally:
             print(f"workers: {tally}")
-        others = {row["id"]: why_unlike(row, current, runs) for row in finished[1:]}
-        others = {job: why for job, why in others.items() if why}
-        for line in describe(finished, more, machines, others):
+        mine = (runs or {}).get(job_id)
+        module = first_failed(mine, current) if mine else None
+        others = {
+            row["id"]: why
+            for row in finished[1:]
+            if (why := why_unlike(row, current, runs))
+        }
+        weaker = {
+            row["id"]: why
+            for row in finished[1:]
+            if (why := why_weaker(row, current, runs, module))
+        }
+        for line in describe(finished, more, machines, others, weaker):
             print(line)
         status = 1 if bad(current) else 0
     if args.investigation:

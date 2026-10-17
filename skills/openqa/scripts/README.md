@@ -357,7 +357,10 @@ as not ok (`note: ok result(s) of <ids> forced by a comment, counted as not ok`)
 left out of `last_good`, `first_bad`, the streak and the hint (`left out, unlike this job: <id> (<why>)`): a
 manual clone without the job group and, from the settings `/api/v1/jobs` gives with `--workers` or
 `--investigation`, a run with another `CASEDIR` or `NEEDLES_DIR`, or an `ISO` or `HDD_1` that differs beyond
-the build; `last_good=none like this job (<run>: <why>)` when only such a run was ok. When the not-ok runs are exactly
+the build; `last_good=none like this job (<run>: <why>)` when only such a run was ok. Runs of another build
+stream (the build with its digits masked: `kernel-livepatch-31` and `kernel-default-5` are two) and, with the
+module lists, an ok run in which this job's first failed module did not run ok are left out only before a run
+that is neither; with no such run the last good stays, flagged `(<why>)`. When the not-ok runs are exactly
 the runs of this job's build, interleaved with ok runs of another, the hint is `every run of build X failed;
 last good on build Y`, not `intermittent`. With the worker column and runs on two workers or more, `workers:
 <worker> ok=N not_ok=M, ...` tallies them, the most failing first; when every run on one worker failed and every

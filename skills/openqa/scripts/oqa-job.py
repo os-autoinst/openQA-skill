@@ -1275,7 +1275,13 @@ def main():
         return status
     print_identity(client, job, how, args.verbose)
     print_investigation(job)
-    print_settings(job, args.settings, args.verbose, f"{client.host}/tests/{job_id}")
+    url = f"{client.host}/tests/{job_id}"
+    print_settings(job, args.settings, args.verbose, url)
+    if not ok:
+        # The settings line is a fixed subset; what changed is in the investigation data.
+        print(
+            f"hint: settings changed since the last good run: oqa-history.py {url} --investigation"
+        )
     print_chain(client, job, args.verbose, args.before)
     print_dependencies(client, job, args.verbose)
     print_modules(client, job, args.steps, args.verbose, args.module)

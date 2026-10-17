@@ -107,6 +107,9 @@ check "clone chain: each member with its start time in UTC, earlier runs first" 
 	"clone chain: 470:incomplete@2030-01-01T21:10Z -> 490:failed@2030-01-02T01:30Z -> [500:failed@2030-01-02T03:04Z]" \
 	"$(grep '^clone chain' <<<"$actual")"
 check "settings: allowlist plus --settings, nothing else" 0 "$(grep -c 'NAME=' <<<"$actual")"
+check "a job that is not ok points at the settings diff to its last good run, a passed one does not" \
+	"hint: settings changed since the last good run: oqa-history.py https://openqa.example.org/tests/500 --investigation|0" \
+	"$(grep '^hint: ' <<<"$actual")|$(job 800 | grep -c '^hint: ')"
 check "--settings for the git hashes the job settings lack: a note names the vars.json read, once" \
 	"note: TEST_GIT_HASH and NEEDLES_GIT_HASH are in vars.json, not in the job settings: oqa-log.py https://openqa.example.org/tests/500 --file vars.json --grep GIT_HASH|0|1" \
 	"$(job 500 --settings GIT_HASH | grep '^note: ')|$(grep -c 'vars.json, not' <<<"$actual")|$(job 500 --settings '^TEST_GIT' | grep -c '^note: TEST_GIT_HASH is in vars.json, ')"

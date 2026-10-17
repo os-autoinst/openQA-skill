@@ -361,6 +361,24 @@ requests: 14
 EOF
 )" "$(sed -n '/^investigation:/,$p' <<<"$actual")"
 check "--investigation: ANSI escapes are gone" 0 "$(LC_ALL=C grep -cP '\x1b' <<<"$actual")"
+tmp=$(mktemp -d)
+cp "$fixtures"/* "$tmp"
+python3 - "$tmp/tests_5000_investigation_ajax.json" <<'PY'
+import json, sys
+data = json.load(open(sys.argv[1]))
+value = lambda n: "value-" + "piece" + str(n)
+lines = [f'+   "SCC_REGCODE" : "{value(1)}",', f'-   "OLD_PASSWORD" : "{value(2)}",',
+         f'-   "API_PASSWORD" : "{value(3)}",', f'+   "API_PASSWORD" : "{value(4)}",']
+data["diff_to_last_good"] = "\n".join(lines) + "\n" + data["diff_to_last_good"]
+json.dump(data, open(sys.argv[1], "w"))
+PY
+actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 5000 --investigation --max-items 200 2>&1)
+rm -rf "$tmp"
+check "--investigation: a masked setting that was added or removed still says so, its values never shown" \
+	"SCC_REGCODE: - -> [REDACTED:secret-setting]
+OLD_PASSWORD: [REDACTED:secret-setting] -> -
+API_PASSWORD: [REDACTED:secret-setting] -> [REDACTED:secret-setting]|0" \
+	"$(grep -E '^(SCC_REGCODE|OLD_PASSWORD|API_PASSWORD):' <<<"$actual")|$(grep -c 'piece' <<<"$actual")"
 actual=$(history 5000 --investigation --max-items 200 --verbose)
 check "--verbose keeps per-run settings and 'not available' lines" "1 1 0" \
 	"$(grep -c '^TEST_GIT_HASH: aaaaaaa -> bbbbbbb$' <<<"$actual") $(grep -c '^  worker packages diff: "Diff of packages not available"$' <<<"$actual") $(grep -c 'per-run settings left out' <<<"$actual")"

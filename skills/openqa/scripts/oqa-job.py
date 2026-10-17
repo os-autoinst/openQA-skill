@@ -115,6 +115,8 @@ HEAD_BYTES = 1200
 INLINE = 240  # longest text printed as text="..." instead of a fenced block
 # (lines, bytes) of a comment body: default, --verbose
 COMMENT_CAPS = ((6, 700), (12, 1500))
+# openQA keeps 300 characters of a reason, then appends whether it restarts the job.
+REASON_CHARS = 480
 MAX_MODULES = 8
 MAX_COMMENTS = (6, 12)
 MAX_FILES = (8, 40)
@@ -358,6 +360,17 @@ def worker_name(client, job):
         return f"#{worker_id}"
 
 
+def reason_value(reason):
+    """The reason quoted on one line; a longer one loses its middle, as openQA appends
+    whether it restarts the job to the end."""
+    # Cleaned whole first: the cut cannot split a credential that redaction has not seen.
+    text = _oqa.clean(reason, REASON_CHARS * 4)
+    if len(text) > REASON_CHARS:
+        half = (REASON_CHARS - 5) // 2
+        text = f"{text[:half]} ... {text[-half:]}"
+    return _oqa.quoted(text, REASON_CHARS)
+
+
 def print_identity(client, job, how, verbose):
     settings = job.get("settings") or {}
     line = f"job={job['id']} host={client.host} result={tok(job.get('result'), 30)}"
@@ -368,7 +381,7 @@ def print_identity(client, job, how, verbose):
         line += f" worker={worker}"
     line += f" started={tok(job.get('t_started'), 30)} duration={duration(job)}"
     if verbose or job.get("reason"):
-        line += f" reason={_oqa.quoted(job.get('reason'), 200)}"
+        line += f" reason={reason_value(job.get('reason'))}"
     print(line)
     keys = ("DISTRI", "VERSION", "FLAVOR", "ARCH", "TEST")
     scenario = "-".join(str(settings.get(key)) for key in keys)

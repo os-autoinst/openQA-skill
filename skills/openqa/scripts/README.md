@@ -287,7 +287,10 @@ its escapes and control bytes stripped.
 hit can be read in its surroundings: of the range at most `--max-lines` lines, the first ones, and a
 `note:` with the range to read next. With `--around-module M` it shows the part of the module's span in
 A to B as `--around-module` shows it, plumbing left out and polling folded. A range past the end says how long the file is, or, when
-`--max-bytes` cut the read, `note: N lines read (cut at --max-bytes)`.
+`--max-bytes` cut the read, `note: N lines read (cut at --max-bytes)` with what reaches line A: line numbers
+count from the start, so `--lines` cannot skip what precedes A, while `--tail N` reads the end of a file of
+any size with ranged reads. A module that `--around-module` does not find before such a cut gets the same
+warning and `note: the module may start past the cut`.
 
 `--members` lists an uploaded tar archive (`.tar`, `.tar.gz`/`.tgz`, `.tar.bz2`/`.tbz2`, `.tar.xz`/`.txz`, also when
 split over several compressed streams; zstd and zip are refused) as `<size> <type> <name>`, names as stored and

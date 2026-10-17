@@ -1610,13 +1610,17 @@ def show(client, args, job_id, head, pattern):
                     print(
                         "modules started: " + _oqa.toks(seen, 80, 60).replace(",", " ")
                     )
-                elif not lines:
-                    print(notes[-1])
-                else:
+                elif lines:
                     print(
                         "note: this file has no module markers (autoinst-log.txt has them); "
                         "use --grep or --tail"
                     )
+                if truncated:
+                    notes.append(
+                        "note: the module may start past the cut; raise --max-bytes"
+                    )
+                for note in notes:
+                    print(note)
                 print(f"requests: {client.requests}")
                 return 1 if args.exit_code else 0
         window = span and span[:2]
@@ -1711,7 +1715,8 @@ def show(client, args, job_id, head, pattern):
                 entries = entries[: args.max_lines]
             if first > len(lines):
                 notes.append(
-                    f"note: {len(lines)} lines read (cut at --max-bytes)"
+                    f"note: {len(lines)} lines read (cut at --max-bytes); a larger "
+                    f"--max-bytes reaches line {first}, --tail N reads the end"
                     if truncated
                     else f"note: the file has {len(lines)} lines"
                 )

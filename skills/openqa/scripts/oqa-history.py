@@ -1179,6 +1179,8 @@ def main():
     ]
     runs = run_details(client, listed) if listed else None
     cut, references, later, forced = 0, {}, 0, {}
+    # openQA answers with the following+1 nearest runs after the job and the latest one.
+    nearest = sorted(row["id"] for row in newer)[: following + 1]
     if args.before:
         current, newer, older, cut = as_of(args.before, runs, current, newer, older)
         references, later, forced = comments_as_of(
@@ -1240,6 +1242,12 @@ def main():
     )
     if cut:
         notes.append(f"{cut} run(s) that started after --before cut")
+    kept = {row["id"] for row in newer}
+    if args.before and len(nearest) > following and nearest[-1] in kept:
+        notes.append(
+            f"only the {len(nearest)} runs nearest after this job read, more may "
+            "have started by --before"
+        )
     if later:
         notes.append(
             f"{later} bugref or label comment(s) created after --before ignored"

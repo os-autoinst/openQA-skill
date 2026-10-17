@@ -205,6 +205,14 @@ def describe(rows, more):
         hint = f"failing since {since}: {streak} runs in a row over {builds} build(s); {same}"
         if earlier:
             hint += f"; {earlier} more not-ok run(s) before the last good one"
+    elif earlier and all(
+        bad(row) == (row.get("build") == rows[0].get("build")) for row in rows
+    ):
+        # Runs of two builds interleaved: deterministic per build, as with a missing asset.
+        hint = (
+            f"every run of build {build_of(rows[0])} failed; "
+            f"last good on build {build_of(rows[streak])}"
+        )
     elif earlier:
         hint = (
             f"intermittent: only {streak} not-ok in a row now; "

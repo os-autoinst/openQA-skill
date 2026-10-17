@@ -351,7 +351,9 @@ fails, the 25-run chunks read before the failure kept. Without them: `note: no w
 it`. `--previous` runs to look at (10, openQA's carry-over depth). All-empty columns are dropped.
 `failed_modules` is sorted and holds what fits, then `+N` for the rest. The hint's `failed modules CHANGE` means a
 run of the streak lacked one of this job's failed modules; one that failed in older runs only (it softfails,
-passes or is not reached now) is no change: `older runs also failed <module>`.
+passes or is not reached now) is no change: `older runs also failed <module>`. When the not-ok runs are exactly
+the runs of this job's build, interleaved with ok runs of another, the hint is `every run of build X failed;
+last good on build Y`, not `intermittent`.
 
 `--before TIME` (ISO 8601 such as `2030-01-02T10:00Z`, UTC without an offset): the history as it stood then,
 for a review as of a ticket's date. Runs that started later are cut (`note: N run(s) that started after

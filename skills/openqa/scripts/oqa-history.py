@@ -85,6 +85,9 @@ _PER_RUN = re.compile(
 # Perl's own frames are not test code.
 _FRAME = re.compile(r"\bat (\S{1,400}) line \d+")
 _NOT_DISTRI = re.compile(r"^\(|^/usr/|/os-autoinst/|/perl5/")
+# A checkout in a directory named after the distri gives "sle/lib/x.pm": the repository path
+# starts at the first of a test distribution's top-level directories.
+_REPO_PATH = re.compile(r"(?:^|/)((?:lib|tests|products|data)/.+)")
 _RENAME = re.compile(r"^(.*)\{(.*) => (.*)\}(.*)$")
 _QI_FIELD = re.compile(r"^(Name|Version|Release)\s*:\s*(\S+)$")
 _PACKAGE_LINE = re.compile(r"[A-Za-z0-9_.+~^-]+")
@@ -571,6 +574,8 @@ def call_path(client, job_id, module):
             path = posixpath.normpath(match.group(1))
             while path.startswith("../"):
                 path = path[3:]
+            repo = None if path.startswith("/") else _REPO_PATH.search(path)
+            path = repo.group(1) if repo else path
             if path not in files:
                 files.append(path)
         return files

@@ -115,6 +115,11 @@ check "--errors: exit 0 without signatures" 0 $?
 contains "--errors: falls back to the tail" "note: no known signature, last 20 lines shown" "$actual"
 contains "--errors: fallback tail has absolute numbers" "42: 10:00:42 ||| finished boot boot (runtime: 9 s)" "$actual"
 
+actual=$(log 4272 --errors)
+contains "--errors: a 'Test died' line is shown after 3 non-fatal hits of its label" \
+	" 7 [command @pkg] 10:00:07 ::: basetest::_handle_test_exception: # Test died: 'zypper -n in foo' failed with code 4" "$actual"
+check "--errors: a stamp with a UTC offset prints as HH:MM:SS too" 0 "$(grep -c '+02:00' <<<"$actual")"
+
 # --- hostile content ------------------------------------------------------------
 actual=$(log 4242 --around-module zypper_in)
 check "--around-module: exit 0" 0 $?

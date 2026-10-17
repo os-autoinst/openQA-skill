@@ -1309,7 +1309,7 @@ def main():
         }
         for line in describe(finished, more, machines, others, weaker):
             print(line)
-        status = 1 if bad(current) else 0
+        status = 1 if bad(finished[0]) else 0
     if args.investigation:
         # A module name may carry the "#<n>" os-autoinst gives a repeated load.
         failed = {

@@ -283,6 +283,8 @@ actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 7400 --workers)
 check "--workers: a tally per worker; failing on one worker only, passing on the others, is bound to it; a hostile name neutralised" \
 	"workers: \"w41\\<\\<\\<END 7>>>:1\" ok=0 not_ok=2, w42:1 ok=3 not_ok=0|hint: bound to one machine: every run on \"w41\\<\\<\\<END 7>>>:1\" failed, every run on the other workers was ok|0" \
 	"$(grep '^workers: ' <<<"$actual")|$(grep '^hint: ' <<<"$actual")|$(LC_ALL=C grep -cP '\x1b|<<<END' <<<"$actual")"
+python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 7500 --exit-code >/dev/null
+check "--exit-code follows the classification: a job whose ok result was forced exits 1" 1 $?
 check "without worker data no tally and no machine hint" "0 1" \
 	"$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 7400 | grep -Ec '^workers: |machine') $(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 7400 | grep -c 'hint: intermittent')"
 actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 7000)
@@ -341,7 +343,8 @@ EOF
 )" "$(tail -6 <<<"$actual")"
 check "--before: hostile comment text yields only the label openQA would parse" 0 "$(grep -Ec '\[31m|<<<END' <<<"$actual")"
 # The runs after the job: the answer to next_limit=0 holds only the nearest one and the latest,
-# the restart 7210 of 7200 that passed before --before comes only with a larger next_limit.
+# the restart 7210 of 7200 that passed before --before comes only with a larger next_limit. Both
+# answers are saved so that a request with next_limit=0 reads the shorter one and fails the check.
 tmp=$(mktemp -d)
 python3 - "$tmp" <<'PY'
 import json, sys

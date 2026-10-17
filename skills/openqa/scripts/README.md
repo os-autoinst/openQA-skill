@@ -348,7 +348,9 @@ The table comes from one request: every finished run shows `started` (UTC), its 
 the lookup fails) and the start of a run still going, from one `/api/v1/jobs` request per 25 runs (it carries
 each run's module list, ~130 kB for an LTP run) and one per worker; `note: workers not read` when that list
 fails, the 25-run chunks read before the failure kept. Without them: `note: no worker column; --workers reads
-it`. `--previous` runs to look at (10, openQA's carry-over depth). All-empty columns are dropped.
+it`. `--previous` runs to look at (10, openQA's carry-over depth). All-empty columns are dropped. Runs before
+and after this job (by id, as openQA splits them) are each ordered by `started`, newest first, so a run that
+waited for a worker counts where it ran; one whose start is unknown comes first, in id order.
 `failed_modules` is sorted and holds what fits, then `+N` for the rest. The hint's `failed modules CHANGE` means a
 run of the streak lacked one of this job's failed modules; one that failed in older runs only (it softfails,
 passes or is not reached now) is no change: `older runs also failed <module>`. On a change, `first_bad` adds

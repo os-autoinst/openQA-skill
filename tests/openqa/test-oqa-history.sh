@@ -252,6 +252,20 @@ check "last good from the job's own build stream, the other stream's runs before
 check "only another stream passed: that run stays last good, flagged" \
 	"last_good=7940 build=kernel-default-5 result=passed (another build stream: kernel-default-5)" \
 	"$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 7950 | grep '^last_good=')"
+# 7975 was created before 7980 and 7990 but started after them: by start it passed between failures.
+python3 - "$tmp" <<'PY'
+import json, sys
+runs = ((8000, "failed", "12:10"), (7990, "failed", "11:10"), (7980, "failed", "10:10"), (7975, "passed", "11:40"),
+        (7960, "passed", "08:10"))
+rows = [{"id": i, "build": "1", "state": "done", "result": r, "failedmodules": ["x"] if r == "failed" else [],
+         "iscurrent": 1 if i == 8000 else None, "finished": f"2030-01-01T{t}:00Z", "duration": "10:00 minutes"}
+        for i, r, t in runs]
+json.dump({"data": rows}, open(f"{sys.argv[1]}/tests_8000_ajax_previous_limit=10_next_limit=0.json", "w"))
+PY
+actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 8000)
+check "runs are ordered by start, so a run that started late counts where it ran" \
+	"8000 7975 7990 7980 7960|first_bad=8000 build=1 streak=1|hint: intermittent: only 1 not-ok in a row now; look for a sporadic issue before blaming build 1" \
+	"$(awk '/^[0-9]+ / {print $1}' <<<"$actual" | paste -sd ' ')|$(grep -E '^(first_bad|hint)' <<<"$actual" | paste -sd '|')"
 # Runs on two workers: every one on worker 41 fails, every one on worker 42 passes.
 python3 - "$tmp" <<'PY'
 import json, sys

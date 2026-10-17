@@ -169,8 +169,23 @@ def module_cell(names, width=60):
     return cell or None
 
 
-def describe(rows, more):
-    """rows: finished runs, newest first, rows[0] is the current job."""
+def one_machine(rows, machines):
+    """The worker every not-ok run ran on, when every run there was not ok and every run
+    elsewhere ok; None otherwise or without the workers."""
+    places = {machines.get(row["id"]) for row in rows if bad(row)}
+    if len(places) != 1 or None in places:
+        return None
+    (place,) = places
+    known = [row for row in rows if machines.get(row["id"])]
+    alone = all(bad(row) == (machines[row["id"]] == place) for row in known)
+    return (
+        place if alone and any(machines[row["id"]] != place for row in known) else None
+    )
+
+
+def describe(rows, more, machines=None):
+    """rows: finished runs, newest first, rows[0] is the current job; machines: {id: worker}
+    when the workers were read."""
     total, failed = len(rows), sum(bad(row) for row in rows)
     rate = f"not_ok={failed}/{total}" + (
         " (older runs exist: --previous N)" if more else ""
@@ -225,6 +240,11 @@ def describe(rows, more):
         hint = (
             f"every run of build {build_of(rows[0])} failed; "
             f"last good on build {build_of(rows[streak])}"
+        )
+    elif earlier and (place := one_machine(rows, machines or {})):
+        hint = (
+            f"bound to one machine: every run on {place} failed, every run on the other "
+            "workers was ok"
         )
     elif earlier:
         hint = (
@@ -418,6 +438,28 @@ def worker_names(client, worker_ids):
     return names
 
 
+def worker_name(run, workers):
+    """host:instance of the worker a run ran on, "#<id>" when not looked up, else None."""
+    worker_id = _oqa.job_id_of(run.get("assigned_worker_id"))
+    return workers.get(worker_id, f"#{worker_id}") if worker_id else None
+
+
+def worker_tally(rows, machines, most=8):
+    """ "<worker> ok=N not_ok=M, ..." of the runs, the most failing first; None for one worker."""
+    tally = {}
+    for row in rows:
+        if machines.get(row["id"]):
+            tally.setdefault(machines[row["id"]], [0, 0])[bad(row)] += 1
+    if len(tally) < 2:
+        return None
+    items = sorted(tally.items(), key=lambda item: (-item[1][1], item[0]))
+    text = ", ".join(
+        f"{_oqa.tok(name)} ok={ok} not_ok={not_ok}"
+        for name, (ok, not_ok) in items[:most]
+    )
+    return text + (f", +{len(items) - most} more" if len(items) > most else "")
+
+
 def row_cells(row, run=None, workers=None, references=None):
     """run: the row's /api/v1/jobs entry, "?" when unknown, None when not read at all;
     workers: None when not read, which leaves the worker cell empty."""
@@ -436,8 +478,7 @@ def row_cells(row, run=None, workers=None, references=None):
     started = stamp.strftime("%Y-%m-%dT%H:%MZ") if stamp else (None if known else run)
     worker = None if workers is None else run
     if known and workers is not None:
-        worker_id = _oqa.job_id_of(run.get("assigned_worker_id"))
-        worker = workers.get(worker_id, f"#{worker_id}") if worker_id else None
+        worker = worker_name(run, workers)
     return (
         row["id"],
         row.get("build"),
@@ -1118,7 +1159,14 @@ def main():
         print(f"hint: job {job_id} {when}, no result to classify yet")
     else:
         finished = [current, *(row for row in older if row.get("state") == "done")]
-        for line in describe(finished, more):
+        machines = {}
+        for row in finished if workers is not None else ():
+            run = runs.get(row["id"])
+            machines[row["id"]] = worker_name(run, workers) if run else None
+        tally = worker_tally(finished, machines)
+        if tally:
+            print(f"workers: {tally}")
+        for line in describe(finished, more, machines):
             print(line)
         status = 1 if bad(current) else 0
     if args.investigation:

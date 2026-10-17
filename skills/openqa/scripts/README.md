@@ -353,7 +353,9 @@ it`. `--previous` runs to look at (10, openQA's carry-over depth). All-empty col
 run of the streak lacked one of this job's failed modules; one that failed in older runs only (it softfails,
 passes or is not reached now) is no change: `older runs also failed <module>`. When the not-ok runs are exactly
 the runs of this job's build, interleaved with ok runs of another, the hint is `every run of build X failed;
-last good on build Y`, not `intermittent`.
+last good on build Y`, not `intermittent`. With the worker column and runs on two workers or more, `workers:
+<worker> ok=N not_ok=M, ...` tallies them, the most failing first; when every run on one worker failed and every
+run on the others was ok, the hint is `bound to one machine`.
 
 `--before TIME` (ISO 8601 such as `2030-01-02T10:00Z`, UTC without an offset): the history as it stood then,
 for a review as of a ticket's date. The same request also asks for the 20 runs after the job, nearest first,

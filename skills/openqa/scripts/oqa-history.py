@@ -317,7 +317,7 @@ def describe(rows, more, machines=None, unlike=None, weaker=None):
         )
     elif earlier and (place := one_machine(rows, machines or {})):
         hint = (
-            f"bound to one machine: every run on {place} failed, every run on the other "
+            f"bound to one machine: every run on {_oqa.tok(place)} failed, every run on the other "
             "workers was ok"
         )
     elif earlier:

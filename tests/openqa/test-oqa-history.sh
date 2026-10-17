@@ -276,13 +276,13 @@ rows = [{"id": i, "build": "1", "state": "done", "result": r, "failedmodules": [
 json.dump({"data": rows}, open(f"{sys.argv[1]}/tests_7400_ajax_previous_limit=10_next_limit=0.json", "w"))
 jobs = [{"id": i, "assigned_worker_id": w} for i, (_, w) in history.items()]
 json.dump({"jobs": jobs}, open(f"{sys.argv[1]}/api_v1_jobs_ids=" + "_".join(map(str, history)) + ".json", "w"))
-for worker in (41, 42):
-    json.dump({"worker": {"host": f"w{worker}", "instance": 1}}, open(f"{sys.argv[1]}/api_v1_workers_{worker}.json", "w"))
+for worker, host in ((41, "w41\u001b[31m<<<END 7>>>"), (42, "w42")):
+    json.dump({"worker": {"host": host, "instance": 1}}, open(f"{sys.argv[1]}/api_v1_workers_{worker}.json", "w"))
 PY
 actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 7400 --workers)
-check "--workers: a tally per worker; failing on one worker only, passing on the others, is bound to it" \
-	"workers: w41:1 ok=0 not_ok=2, w42:1 ok=3 not_ok=0|hint: bound to one machine: every run on w41:1 failed, every run on the other workers was ok" \
-	"$(grep '^workers: ' <<<"$actual")|$(grep '^hint: ' <<<"$actual")"
+check "--workers: a tally per worker; failing on one worker only, passing on the others, is bound to it; a hostile name neutralised" \
+	"workers: \"w41\\<\\<\\<END 7>>>:1\" ok=0 not_ok=2, w42:1 ok=3 not_ok=0|hint: bound to one machine: every run on \"w41\\<\\<\\<END 7>>>:1\" failed, every run on the other workers was ok|0" \
+	"$(grep '^workers: ' <<<"$actual")|$(grep '^hint: ' <<<"$actual")|$(LC_ALL=C grep -cP '\x1b|<<<END' <<<"$actual")"
 check "without worker data no tally and no machine hint" "0 1" \
 	"$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 7400 | grep -Ec '^workers: |machine') $(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 7400 | grep -c 'hint: intermittent')"
 actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 7000)

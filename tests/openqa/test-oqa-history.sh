@@ -159,6 +159,32 @@ check "--workers: the list gives the start of a run still going" "5190  20300107
 	"$(history 5100 --workers | sed -n 3p)"
 contains "intermittent hint" 'hint: intermittent: only 1 not-ok in a row now; look for a sporadic issue before blaming build 20300105' "$actual"
 
+# Failed modules: given in any order, many of them, one that failed only in older runs.
+tmp=$(mktemp -d)
+python3 - "$tmp" <<'PY'
+import json, sys
+def history(job, rows):
+    data = [{"id": i, "build": b, "state": "done", "result": r, "failedmodules": f, "iscurrent": 1 if i == job else None,
+             "finished": "2030-01-01T10:00:00Z", "duration": "10:00 minutes"} for i, b, r, f in rows]
+    json.dump({"data": data}, open(f"{sys.argv[1]}/tests_{job}_ajax_previous_limit=10_next_limit=0.json", "w"))
+history(7000, [
+    (7000, "3", "failed", ["zypper_in"]),
+    (6990, "3", "failed", ["zypper_in"]),
+    (6980, "2", "failed", ["zypper_in", "yast2_foo"]),
+    (6970, "2", "failed", ["yast2_foo", "zypper_in"]),
+    (6960, "1", "passed", []),
+    (6950, "0", "failed", [f"ltp_module_{i:02d}" for i in range(20, 0, -1)]),
+])
+PY
+actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 7000)
+check "failed modules: sorted, the same modules in another order read the same" "yast2_foo,zypper_in yast2_foo,zypper_in" \
+	"$(awk '$1 == 6980 || $1 == 6970 {print $5}' <<<"$actual" | tr '\n' ' ' | sed 's/ $//')"
+check "failed modules: as many as fit, then how many were cut" "ltp_module_01,ltp_module_02,ltp_module_03,ltp_module_04,+16" \
+	"$(awk '$1 == 6950 {print $5}' <<<"$actual")"
+contains "a module that failed in older runs only (it softfails now) is no change of the failed modules" \
+	"hint: failing since build 2: 4 runs in a row over 2 build(s); the current failed modules throughout, older runs also failed yast2_foo; 1 more not-ok run(s) before the last good one" "$actual"
+rm -rf "$tmp"
+
 actual=$(history 5200)
 contains "first failure hint" 'hint: first failure: the 3 previous runs were ok, new in build 20300105' "$actual"
 contains "first failure: last good" 'last_good=5190 build=20300104 result=passed' "$actual"

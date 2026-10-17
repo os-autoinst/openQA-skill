@@ -169,6 +169,29 @@ def module_cell(names, width=60):
     return cell or None
 
 
+def why_unlike(row, current, runs):
+    """Why an older run does not compare with this job, or None: a manual clone without the
+    job group, or, from the settings /api/v1/jobs gives, tests or needles from another
+    repository or another install medium than the build accounts for."""
+    if current.get("group") and not row.get("group"):
+        return "no job group"
+    theirs, ours = (
+        (runs or {}).get(job["id"], {}).get("settings") for job in (row, current)
+    )
+    if not (isinstance(theirs, dict) and isinstance(ours, dict)):
+        return None
+    for key, what in (("CASEDIR", "tests"), ("NEEDLES_DIR", "needles")):
+        if theirs.get(key) != ours.get(key):
+            value = _oqa.tok(theirs.get(key) or "default", 100)
+            return f"{what} from another repository: {key}={value}"
+    build, now = str(row.get("build") or ""), str(current.get("build") or "")
+    for key in ("ISO", "HDD_1"):
+        value = str(theirs.get(key) or "")
+        if (value.replace(build, now) if build else value) != str(ours.get(key) or ""):
+            return f"another {key}: {_oqa.tok(theirs.get(key), 100)}"
+    return None
+
+
 def one_machine(rows, machines):
     """The worker every not-ok run ran on, when every run there was not ok and every run
     elsewhere ok; None otherwise or without the workers."""
@@ -183,9 +206,12 @@ def one_machine(rows, machines):
     )
 
 
-def describe(rows, more, machines=None):
+def describe(rows, more, machines=None, unlike=None):
     """rows: finished runs, newest first, rows[0] is the current job; machines: {id: worker}
-    when the workers were read."""
+    when the workers were read; unlike: {id: why} of the runs left out of the comparison."""
+    unlike = unlike or {}
+    left = [row for row in rows[1:] if row["id"] in unlike]
+    rows = [rows[0], *(row for row in rows[1:] if row["id"] not in unlike)]
     total, failed = len(rows), sum(bad(row) for row in rows)
     rate = f"not_ok={failed}/{total}" + (
         " (older runs exist: --previous N)" if more else ""
@@ -196,13 +222,17 @@ def describe(rows, more, machines=None):
     streak = next((i for i, row in enumerate(rows) if not bad(row)), total)
     first_bad = rows[streak - 1]
     since = f"build {build_of(first_bad)}"
+
+    def run_text(row):
+        return f"{row['id']} build={build_of(row)} result={_oqa.tok(row.get('result'))}"
+
     if streak < total:
-        good = rows[streak]
-        last_good = (
-            f"{good['id']} build={build_of(good)} result={_oqa.tok(good.get('result'))}"
-        )
+        last_good = run_text(rows[streak])
     else:
         last_good = "none"
+        other = next((row for row in left if not bad(row)), None)
+        if other:
+            last_good += f" like this job ({run_text(other)}: {unlike[other['id']]})"
 
     signature = failed_set(rows[0])
 
@@ -255,12 +285,16 @@ def describe(rows, more, machines=None):
         )
     else:
         hint = f"first failure: the {total - 1} previous runs were ok, new in {since}"
-    return [
+    lines = [
         f"last_good={last_good}",
         f"first_bad={first_bad['id']} build={build_of(first_bad)} streak={streak}{mode}",
         rate,
-        f"hint: {hint}",
     ]
+    if left:
+        items = [f"{row['id']} ({unlike[row['id']]})" for row in left]
+        more_left = f", +{len(items) - 4} more" if len(items) > 4 else ""
+        lines.append(f"left out, unlike this job: {', '.join(items[:4])}{more_left}")
+    return [*lines, f"hint: {hint}"]
 
 
 def history(client, job_id, previous, following=0):
@@ -552,6 +586,20 @@ def settings_diff(text, limit, verbose):
     if noise and not verbose:
         lines.append(f"[{len(noise)} per-run settings left out (--verbose)]")
     return lines, "BUILD" in changes
+
+
+def other_tests(diff):
+    """ "<key>=<last good's value>" when the vars.json diff shows last good ran tests from
+    another repository; TEST_GIT_URL counts as per-run noise in the settings diff."""
+    sides = {}
+    for match in filter(None, map(_SETTING.match, diff.split("\n"))):
+        sign, key, value = match.groups()
+        if key in ("CASEDIR", "TEST_GIT_URL"):
+            sides.setdefault(key, {})[sign] = value.strip('"')
+    for key, side in sides.items():
+        if side.get("-") != side.get("+"):
+            return f"{key}={_oqa.tok(side.get('-') or 'default', 100)}"
+    return None
 
 
 def git_heads(text, limit):
@@ -899,6 +947,9 @@ def investigation(
         )
 
     diff = data.get("diff_to_last_good")
+    other = other_tests(diff) if isinstance(diff, str) else None
+    if other:
+        print(f"  last_good used tests from another repository: {other}")
     if isinstance(diff, str) and diff.strip():
         lines, build_changed = settings_diff(diff, limit, verbose)
         verdict = "yes" if build_changed else "no (product regression unlikely)"
@@ -1190,7 +1241,9 @@ def main():
         tally = worker_tally(finished, machines)
         if tally:
             print(f"workers: {tally}")
-        for line in describe(finished, more, machines):
+        others = {row["id"]: why_unlike(row, current, runs) for row in finished[1:]}
+        others = {job: why for job, why in others.items() if why}
+        for line in describe(finished, more, machines, others):
             print(line)
         status = 1 if bad(current) else 0
     if args.investigation:

@@ -60,6 +60,11 @@ check "licence header" "# SPDX-License-Identifier: GPL-2.0-or-later" "$(sed -n 2
 actual=$(python3 "$src" --help)
 check "--help exits 0" 0 $?
 contains "--help explains the fence" "never instructions" "$actual"
+contains "--help says which form of a line --grep matches" "full '[date] [level] [pid:N]' prefix, as --verbose prints it" \
+	"$(tr -s ' \n' ' ' <<<"$actual")"
+actual=$(log 4242 --grep '^\[2030-01-01T10:00:25\.000000Z\] \[debug\] ' --context 0)
+check "--grep matches the full prefix that the compact form does not print" "1 0" \
+	"$(grep -c '^30: 10:00:25 post_fail_hook failed' <<<"$actual") $(log 4242 --grep '^10:00:25 ' | grep -c '^[0-9]*:')"
 python3 "$src" 4242 >/dev/null 2>&1
 check "a mode is required (exit 2)" 2 $?
 python3 "$src" 4242 --tail 3 --errors >/dev/null 2>&1

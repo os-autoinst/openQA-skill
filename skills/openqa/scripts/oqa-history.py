@@ -78,6 +78,7 @@ _COMMIT = re.compile(r"^[0-9a-f]{7,40}(?: |$)")
 # git log --stat: " <path> | <n> +-"; a rename shows as "dir/{old => new}/file".
 _STAT = re.compile(r"^ (\S[^|\n]{0,400}?) +\| ")
 _NO_CHANGES = re.compile(r"^No (?:test|needle) changes recorded")
+_TOO_MANY = re.compile(r"Too many commits \((\d{1,9})\) .*\(maximum: (\d{1,9})\)$")
 # Settings that differ between any two runs and say nothing about the failure.
 _PER_RUN = re.compile(
     r"^(?:CHECKSUM_\w+|QEMUPORT|VNC|WORKER_ID|WORKER_INSTANCE|JOBTOKEN|NAME"
@@ -927,12 +928,26 @@ def investigation(
             heads, total = git_heads(text, limit)
             shown = len(heads)
             order = "(newest first)"
-        print(
-            f"  {title} changes: commits={total} {order} url={_oqa.tok(data.get(url_key), 120)}"
-        )
         stat = data.get(stat_key)
+        # openQA counts the range with merges, lists it with git log --no-merges and stops
+        # that log at twice the diff's maximum (Schema/Result/Jobs.pm "investigate").
+        too_many = _TOO_MANY.match(stat) if isinstance(stat, str) else None
+        count, most = map(int, too_many.groups()) if too_many else (0, 0)
+        cut = most and total >= 2 * most
+        print(
+            f"  {title} changes: commits={total}{' (list cut by openQA)' if cut else ''} "
+            f"{order} url={_oqa.tok(data.get(url_key), 120)}"
+        )
         if isinstance(stat, str) and stat.startswith("Too many commits"):
-            print(f"  {title} diff stat: {_oqa.quoted(stat, 160)}")
+            gap = ""
+            if cut:
+                gap = f"; {total} listed: openQA's git log stops at {2 * most}"
+            elif total < count:
+                gap = (
+                    f"; {total} listed, the other {count - total} are merge commits, "
+                    "which openQA does not list"
+                )
+            print(f"  {title} diff stat: {_oqa.quoted(stat, 160)}{gap}")
         omitted = total - shown
         print(
             fenced(

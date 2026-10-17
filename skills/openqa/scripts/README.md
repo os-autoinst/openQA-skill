@@ -398,7 +398,10 @@ read; a frame such as `sle/lib/x.pm`, from a checkout named after the distri, is
 failed one (the job's module list in run order) with `[earlier module <module>]`. They come first in that order,
 counted from the files as `failed_module=`, `call_path=`, `lib=` and `earlier_module=` (`?`: no step that died,
 or no module list) in the `test changes:` line (openQA's test log is `git log --stat`). git shortens a long path
-to `.../<tail>`: such a file still counts for a module or the call path, never for `lib/`. A module loaded under
+to `.../<tail>`: such a file still counts for a module or the call path, never for `lib/`. openQA lists the
+range with `git log --no-merges`, stopped at twice the diff stat's maximum, but counts it with merges in `Too
+many commits (N)`: the `diff stat` line then adds `<n> listed, the other <m> are merge commits`, or, when the
+log stopped, `openQA's git log stops at <n>` and `commits=<n> (list cut by openQA)`. A module loaded under
 another `name` is not matched. `-v` lists every test commit, each followed by its files.
 
     job=6273362 host=https://openqa.opensuse.org scenario=opensuse-Tumbleweed-JeOS-for-kvm-and-xen-x86_64-jeos-ltp-syscalls@uefi_virtio-2G

@@ -348,7 +348,7 @@ LONG: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
   versions (last_good 4960 -> this job, from install_ltp-rpm-qa.txt): kernel-default 6.1.0-1.1 -> 6.1.0-1.1,6.2.0-1.1; ltp 20300102.def5678-1.1 -> 20300105.abc1234-2.1; xfstests 1.1.1-1.1 -> -
   os-autoinst (last_good 4960 -> this job): 5.1791893714.eb5a713 -> 5.1792077508.50bc19e
   test changes: commits=26 failed_module=1 call_path=1 lib=2 earlier_module=2 (those first, then newest first) url=https://git.example.org/tests/commit/
-  test diff stat: "Too many commits (203) to create a diff between aaaaaaa..bbbbbbb (maximum: 100)"
+  test diff stat: "Too many commits (203) to create a diff between aaaaaaa..bbbbbbb (maximum: 100)"; 26 listed, the other 177 are merge commits, which openQA does not list
 <<<UNTRUSTED NONCE source=openqa.opensuse.org/tests/5000/investigation_ajax:test_log>>>
 [failed module zypper_in] 0000003abc Fix thing number 3
 [call path lib/zypper_helper.pm] [lib] 000001aabc Rework the zypper helper
@@ -490,6 +490,19 @@ check "--investigation: an empty subject, a shortened path and a rename into lib
 	"$(sed -n '/investigation_ajax:test_log>>>$/,/^<<<END/p' <<<"$actual" | sed -n '2,4p' | sed 's/ *$//')"
 contains "--investigation: a file of that name outside tests/ is not the module" "
 a000005 data look-alike" "$actual"
+# openQA's git log stops at twice the diff stat's maximum: 200 commits listed of 1048.
+python3 - "$fixtures" "$marks" <<'PY'
+import json, sys
+name = "tests_5000_investigation_ajax.json"
+data = json.load(open(f"{sys.argv[1]}/{name}"))
+data["test_log"] = "\n".join(f"d{i:06x} commit {i}\n tests/console/other.pm | 1 +" for i in range(200))
+data["test_diff_stat"] = "Too many commits (1048) to create a diff between aaaaaaa..bbbbbbb (maximum: 100)"
+json.dump(data, open(f"{sys.argv[2]}/{name}", "w"))
+PY
+actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$marks" 5000 --investigation)
+check "--investigation: a commit list that openQA cut says so" \
+	"1|  test diff stat: \"Too many commits (1048) to create a diff between aaaaaaa..bbbbbbb (maximum: 100)\"; 200 listed: openQA's git log stops at 200" \
+	"$(grep -c '^  test changes: commits=200 (list cut by openQA) ' <<<"$actual")|$(grep '^  test diff stat' <<<"$actual")"
 rm -rf "$marks"
 
 # Earlier modules on a crafted test log: job 5000 ran thing9, thing12#1 and thing1.4 before zypper_in, thing5 after it.

@@ -256,6 +256,17 @@ RULES = (
         ),
         r"\1" + MARK.format("password-flag"),
     ),
+    # The installer boot option sets the live system's root password, short or word-like
+    # as it may be; only openQA's public default stays, as it does everywhere else.
+    (
+        "live-password",
+        re.compile(
+            r"(?i)(\blive\.password=['\"]?)"
+            + _SLOT
+            + r"(?!nots3cr3t(?![^\s'\"\\]))[^\s'\"]+"
+        ),
+        r"\1" + MARK.format("live-password"),
+    ),
     # The code after -r or --regcode of a registration command, up to the end of that
     # command: "rm -r" or "zypper -r" after a ";" is not one.
     (

@@ -67,7 +67,8 @@ the build's; the default listing only.
     group=1 name="openSUSE Tumbleweed" build=20260919 ... failed=2 labeled=2 unreviewed=0 state=reviewed scenario_prefix=...
     6228572 failed BCI-x86_64-bci_ruby_podman modules=bci_test_podman bugrefs=gh#SUSE/BCI-tests#1142
 
-`review=?`: comments not read (`mode=api-fallback`, request cap).
+`review=?`: comments not read (`mode=api-fallback`, request cap; the requests the builds and groups still
+to list need are kept back).
 
 `--passed`: passed and softfailed jobs (both clone sources; 10; nothing restarted), `--module M`
 only those in which M itself passed. Line:

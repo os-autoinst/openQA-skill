@@ -22,7 +22,8 @@ included), restarts says how often the scenario was restarted in this build
 (a cheap hint for a sporadic failure), origin is the job this one was cloned
 from, parents lists dependency parents: for parallel_failed and skipped jobs
 triage the parent or sibling that failed, not this job. review=? means the
-comments were not read. Jobs that never ran because a parent failed
+comments were not read: the request cap, less what the builds and groups
+still to list need, was reached. Jobs that never ran because a parent failed
 (cancelled, skipped) are folded into one "victims" line per parent.
 --test REGEX keeps the jobs whose test name it matches (re.search, case-sensitive,
 the name without the @machine the overview may add), so one scenario's spread over
@@ -290,9 +291,10 @@ def _overview_job(scenario, leaf):
     }
 
 
-def api_jobs(client, group, entry, results, todo, pattern=None):
+def api_jobs(client, group, entry, results, todo, pattern=None, reserve=0):
     """scope=current drops restarted jobs; a scenario that was scheduled again
-    without a restart can still show its older failure here."""
+    without a restart can still show its older failure here. The comments reads
+    leave `reserve` requests to the entries and groups still to list."""
     params = [("groupid", group), ("build", entry["build"])]
     if entry.get("version") is not None:
         params.append(("version", entry["version"]))
@@ -330,7 +332,7 @@ def api_jobs(client, group, entry, results, todo, pattern=None):
     jobs.sort(key=_order)
     complete = True
     for job in jobs:
-        if client.requests >= client.max_requests:
+        if client.requests >= client.max_requests - reserve:
             complete = False
             break
         _review_state(client, job)
@@ -457,6 +459,7 @@ def sweep(client, group, args, results, reserve=0):
     listed = 0
     for index, entry in enumerate(entries):
         mode, note = MODE_OVERVIEW, None
+        later = (len(entries) - 1 - index) * ENTRY_RESERVE
         try:
             jobs, truncated = overview_jobs(
                 client, group, entry, results, args.todo, args.test
@@ -469,7 +472,7 @@ def sweep(client, group, args, results, reserve=0):
             mode = MODE_API
             print(f"note: /tests/overview.json not usable ({error}); using /api/v1")
             jobs, complete = api_jobs(
-                client, group, entry, results, args.todo, args.test
+                client, group, entry, results, args.todo, args.test, reserve + later
             )
             if not complete:
                 note = "warning: request cap reached, '?' marks jobs whose comments were not read"
@@ -485,7 +488,6 @@ def sweep(client, group, args, results, reserve=0):
             jobs.remove(job)
         shown = jobs[: args.limit]
         if mode == MODE_OVERVIEW and not args.no_llm:
-            later = (len(entries) - 1 - index) * ENTRY_RESERVE
             read_llm(client, shown, reserve + later)
         for job in shown:
             if args.no_llm or job["result"] not in LLM_RESULTS:

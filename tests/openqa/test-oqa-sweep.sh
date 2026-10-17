@@ -146,6 +146,43 @@ check "the comments reads of one version leave the requests of the versions stil
 	"0 3 0 requests: 60" \
 	"$? $(grep -c '^30 current not-ok jobs$' <<<"$budget") $(grep -c 'error\|note:' <<<"$budget") $(tail -n 1 <<<"$budget")"
 rm -r "$tmpb"
+tmpf=$(mktemp -d)
+python3 - "$tmpf" "$(dirname "$script")" <<'PY'
+import json, os, sys
+
+out = sys.argv[1]
+sys.path.insert(0, sys.argv[2])
+import _oqa
+
+
+def write(path, params, data):
+    with open(os.path.join(out, _oqa.fixture_name(path, params) + ".json"), "w") as file:
+        json.dump(data, file)
+
+
+# Group 60: an overview without results, so /api/v1 with 70 commented failures; group 61 after it.
+results = _oqa.expand_results(["not_ok"])
+write("/api/v1/job_groups/60/build_results", {"show_tags": 1},
+      {"group": {"name": "a"}, "build_results": [{"build": "B", "failed": 70, "total": 70}]})
+write("/tests/overview.json", [("groupid", 60), ("build", "B"), ("result", results)], {})
+settings = {"DISTRI": "os", "VERSION": "1", "FLAVOR": "DVD", "ARCH": "x86_64"}
+jobs = [{"id": i, "result": "failed", "settings": {**settings, "TEST": f"t{i}"},
+         "modules": [{"name": "m", "result": "failed"}]} for i in range(2000, 2070)]
+params = [("groupid", 60), ("build", "B"), ("scope", "current"), ("latest", 1), ("result", ",".join(results))]
+write("/api/v1/jobs", params, {"jobs": jobs})
+for job in jobs:
+    write(f"/api/v1/jobs/{job['id']}/comments", None, [{"id": job["id"], "text": "looking", "bugrefs": []}])
+write("/api/v1/job_groups/61/build_results", {"show_tags": 1},
+      {"group": {"name": "b"}, "build_results": [{"build": "C", "failed": 1, "total": 1}]})
+leaf = {"jobid": 3001, "overall": "failed", "comments": 0, "failures": ["m"]}
+write("/tests/overview.json", [("groupid", 61), ("build", "C"), ("result", results)],
+      {"results": {"os": {"1": {"DVD": {"u": {"x86_64": leaf}}}}}, "job_ids": [3001]})
+PY
+fallback=$(python3 "$script" --host https://openqa.example.org --fixture-dir "$tmpf" --group 60 --group 61 --limit 100 2>&1)
+check "the comments reads of the /api/v1 fallback leave the requests of the groups still to list alone" \
+	"0 1 16 1 1 requests: 59" \
+	"$? $(grep -c "^warning: request cap reached, '?' marks jobs whose comments were not read$" <<<"$fallback") $(grep -c ' review=?$' <<<"$fallback") $(grep -c '^group=61 ' <<<"$fallback") $(grep -c '^1 current not-ok jobs$' <<<"$fallback") $(tail -n 1 <<<"$fallback")"
+rm -r "$tmpf"
 
 actual=$(sweep --group 7 --todo)
 check "--todo keeps only unreviewed jobs" "$(cat "$fixtures/expected-group7-todo.txt")" "$actual"

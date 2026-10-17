@@ -622,18 +622,23 @@ def fetch_tail(client, path, wanted, limit):
     # ask for the size first and then for an absolute range.
     try:
         _, total, ranged = client.get_range(path, max_bytes=1)
+        if ranged:
+            return ranged_tail(client, path, total, wanted, limit)
+        note = "range=unsupported"
     except _oqa.OqaError as error:
-        # Only a file of 0 bytes has no byte 0 to send.
+        # A range past the end of the file, as any range of a file of 0 bytes is.
         if not str(error).startswith("HTTP 416:"):
             raise
-        return [], False, "bytes=0-0/0"
-    if not ranged:
-        lines, truncated = fetch_all(client, path, limit)
-        if truncated:
-            raise _oqa.OqaError(
-                f"no Range support and the file exceeds {limit} bytes; raise --max-bytes"
-            )
-        return lines, False, "range=unsupported"
+        note = "range=unsatisfiable"
+    lines, truncated = fetch_all(client, path, limit)
+    if truncated:
+        raise _oqa.OqaError(
+            f"no usable Range support and the file exceeds {limit} bytes; raise --max-bytes"
+        )
+    return lines, False, note
+
+
+def ranged_tail(client, path, total, wanted, limit):
     window = min(max(wanted * 256, 32 * 1024), limit)
     for _ in range(2):
         start = max(total - window, 0)
@@ -649,6 +654,25 @@ def fetch_tail(client, path, wanted, limit):
             break
         window = min(window * 8, limit)
     return lines, True, f"bytes={start}-{total}/{total}"
+
+
+def missing(client, job_id, error):
+    """The error for a file the job lacks, saying whether the job has any file left."""
+    if str(error).startswith("file gone"):
+        return error
+    try:
+        results, uploads = list_files(client, job_id)
+    except _oqa.OqaError:
+        return error
+    if not results and not uploads:
+        return _oqa.OqaError(
+            f"{error}; job {job_id} has no files at all: its logs were cleaned up, "
+            "or it has not run yet"
+        )
+    return _oqa.OqaError(
+        f"{error}; job {job_id} has no such file, --list shows the "
+        f"{len(results) + len(uploads)} it has"
+    )
 
 
 def list_files(client, job_id):
@@ -1342,7 +1366,14 @@ def main():
     args.host, job_id = _oqa.parse_job_url(args.job, args.host)
     client = _oqa.client_from_args(args, "oqa-log", max_requests=6)
     head = f"job={job_id} host={client.host}"
+    try:
+        return show(client, args, job_id, head, pattern)
+    except _oqa.NotFound as error:
+        raise missing(client, job_id, error) from None
 
+
+def show(client, args, job_id, head, pattern):
+    """Print what the parsed arguments ask for; return the exit status."""
     if args.list:
         results, uploads = list_files(client, job_id)
         print(f"{head} mode=list")

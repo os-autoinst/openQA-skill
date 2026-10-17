@@ -74,6 +74,10 @@ actual=$(log http://openqa.example.org/tests/1 --tail 1)
 check "plain http to a remote host is refused" 2 $?
 actual=$(log 4242 --file missing.txt --tail 1)
 check "missing file is a runtime error" 2 $?
+contains "a missing file: the job has others, --list names them" "; job 4242 has no such file, --list shows the 6 it has" "$actual"
+actual=$(log 4245 --errors)
+check "a job without any file: its logs were cleaned up (exit 2)" "2 1" \
+	"$? $(grep -c '; job 4245 has no files at all: its logs were cleaned up, or it has not run yet$' <<<"$actual")"
 gone="error: file gone (HTML page served): autoinst-log.txt; the job's files were probably cleaned up"
 for mode in --errors "--tail 3" "--grep ."; do
 	# shellcheck disable=SC2086 # the mode is two words on purpose
@@ -621,11 +625,60 @@ EOF
 )
 check "--tail on a file of 0 bytes: no HTTP 416 error, the file is said to be empty" "$(
 	cat <<'EOF'
-job=77 host=http://127.0.0.1:PORT mode=tail bytes=0-0/0
+job=77 host=http://127.0.0.1:PORT mode=tail range=unsatisfiable
 <<<UNTRUSTED NONCE source=127.0.0.1:PORT/tests/77/file/serial0.txt>>>
 <<<END NONCE>>>
 note: the file is empty
-requests: 1
+requests: 2
+exit 0
+EOF
+)" "$actual"
+actual=$(
+	cd "$scripts" && python3 - <<'EOF' 2>&1 | sed -E 's/^<<<(UNTRUSTED|END) [0-9a-f]{16}/<<<\1 NONCE/; s/127\.0\.0\.1:[0-9]+/127.0.0.1:PORT/g'
+import runpy, sys, threading
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+
+body = b"".join(b"line %d\n" % number for number in range(1, 21))
+
+class Handler(BaseHTTPRequestHandler):
+    def log_message(self, *args):
+        pass
+
+    def do_GET(self):
+        span = self.headers.get("Range")
+        start = int(span[6:].split("-")[0]) if span else 0
+        if start >= len(body):
+            self.send_response(416)
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+            return
+        data = body[start : start + 1] if span else body
+        self.send_response(206 if span else 200)
+        if span:
+            # a size larger than the file, as a stale one would be
+            self.send_header("Content-Range", f"bytes {start}-{start}/100000")
+        self.send_header("Content-Length", str(len(data)))
+        self.end_headers()
+        self.wfile.write(data)
+
+server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+threading.Thread(target=server.serve_forever, daemon=True).start()
+sys.argv = ["oqa-log.py", f"http://127.0.0.1:{server.server_address[1]}/tests/77", "--file", "ulogs/small.txt", "--tail", "2"]
+try:
+    runpy.run_path("oqa-log.py", run_name="__main__")
+except SystemExit as status:
+    print("exit", status.code)
+server.shutdown()
+EOF
+)
+check "--tail: a range past the end of a small file (HTTP 416) falls back to reading it whole" "$(
+	cat <<'EOF'
+job=77 host=http://127.0.0.1:PORT mode=tail range=unsatisfiable
+<<<UNTRUSTED NONCE source=127.0.0.1:PORT/tests/77/file/small.txt>>>
+19: line 19
+20: line 20
+<<<END NONCE>>>
+requests: 3
 exit 0
 EOF
 )" "$actual"

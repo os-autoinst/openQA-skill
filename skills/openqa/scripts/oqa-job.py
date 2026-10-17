@@ -1011,11 +1011,20 @@ def parse_time(value):
     text = re.sub(r" ?([+-]\d\d):?(\d\d)$", r"\1:\2", text)
     try:
         stamp = datetime.fromisoformat(text)
-    except ValueError:
+        if stamp.tzinfo is None:
+            stamp = stamp.replace(tzinfo=timezone.utc)
+        return stamp.astimezone(timezone.utc)
+    except (ValueError, OverflowError):
         return None
-    if stamp.tzinfo is None:
-        stamp = stamp.replace(tzinfo=timezone.utc)
-    return stamp.astimezone(timezone.utc)
+
+
+def created_value(value):
+    """When a comment was made, in UTC to the second as --before compares it; a value that
+    is no time is shown cut."""
+    stamp = parse_time(value)
+    if stamp:
+        return stamp.strftime("%Y-%m-%dT%H:%M:%SZ")
+    return tok(_oqa.clean(str(value), 20)[:16].replace(" ", "T"), 20)
 
 
 def before_time(value):
@@ -1075,10 +1084,9 @@ def print_comments(client, job_id, result, verbose, before=None):
     source = f"{client.host.partition('://')[2]}/tests/{job_id}"
     max_lines, max_bytes = COMMENT_CAPS[verbose]
     for comment, item in list(zip(comments, parsed))[-most:]:
-        created = _oqa.clean(str(comment.get("created")), 20)[:16].replace(" ", "T")
         line = (
             f"comment={tok(comment.get('id'), 20)} by={tok(comment.get('userName'), 40)} "
-            f"class={item['author']} created={tok(created, 20)}"
+            f"class={item['author']} created={created_value(comment.get('created'))}"
         )
         if item["refs"]:
             line += f" bugrefs={toks(item['refs'], 60)}"

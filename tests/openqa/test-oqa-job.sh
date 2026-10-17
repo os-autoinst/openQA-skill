@@ -697,14 +697,16 @@ check "--before: a later or undated comment is hidden with its bugrefs, the revi
 	cat <<'EOF'
 review: reviewed=yes label=force_result:softfailed:bsc#1300100 comments=2 plain=1 force_result_not_applied=softfailed
 note: 2 comment(s) created after --before hidden
-comment=1 by=reviewer_a class=human created=2030-01-02T04:00
-comment=2 by=reviewer_b class=human created=2030-01-03T09:05 labels=force_result:softfailed:bsc#1300100 flags=carryover
+comment=1 by=reviewer_a class=human created=2030-01-02T04:00:00Z
+comment=2 by=reviewer_b class=human created=2030-01-03T07:05:00Z labels=force_result:softfailed:bsc#1300100 flags=carryover
 EOF
 )" "$(grep -E '^(review|note|comment)' <<<"$actual")"
 actual=$(as_of --before 2030-01-03T08:00+02:00)
 check "--before with an offset: the label of 07:05 UTC is hidden too, the job is not reviewed" \
 	"review: reviewed=no comments=1 plain=1|note: 3 comment(s) created after --before hidden|0" \
 	"$(grep -E '^(review|note)' <<<"$actual" | paste -sd'|')|$(grep -c 'bsc#1300100\|poo#1\|carryover' <<<"$actual")"
+check "--before compares to the second: a label made at 07:05:00 UTC counts at 07:05:00, not at 07:04:59" "1 0" \
+	"$(as_of --before 2030-01-03T07:05:00Z | grep -c '^comment=2 .*created=2030-01-03T07:05:00Z ') $(as_of --before 2030-01-03T07:04:59Z | grep -c '^comment=2 ')"
 check "without --before every comment counts" 1 \
 	"$(as_of | grep -c '^review: reviewed=yes bugrefs=bsc#1300100,poo#1 label=force_result:softfailed:bsc#1300100 comments=4 plain=1 ')"
 job 850 --before yesterday >/dev/null 2>&1

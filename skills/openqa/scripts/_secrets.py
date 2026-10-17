@@ -53,6 +53,7 @@ TRIGGERS = (
     "regcode",
     "suseconnect",
     "register",
+    "subscription",
     "sig",
     "x-api",
     "curl",
@@ -311,6 +312,16 @@ RULES = (
             r"(?im)^(\s*(?:[#;]\s*)?key\s*=\s*['\"]?)(?!/)[A-Za-z0-9+/=_-]{6,}(?=['\"]?\s*$)"
         ),
         r"\1" + MARK.format("ini-key"),
+    ),
+    # An Azure subscription id names an account and grants nothing on its own; its own
+    # rule name keeps its count apart from those of credentials.
+    (
+        "azure-subscription",
+        re.compile(
+            r"(?i)(subscriptions(?:/|%2F)|subscription_?id\\?['\"]?\s*[:=]\s*\\?['\"]?)"
+            r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(?![0-9a-z-])"
+        ),
+        r"\1" + MARK.format("azure-subscription"),
     ),
 )
 

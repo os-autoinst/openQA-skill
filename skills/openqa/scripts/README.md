@@ -48,8 +48,10 @@ answers with an HTTP 4xx (a group of another instance) ends in exit 2 with an er
 not in an empty listing.
 
 Failed, incomplete and timeout_exceeded jobs also get an indented `llm-investigation-summary (automatic, unverified):`
-line (`class=product|test|infra why="<first bullet>"`; its restart advice only in `oqa-job.py`) when a comment holds an automatic LLM summary,
-and each build ends with an `llm-investigation-summary clusters` line (classes per failed module). Hints for
+line (`class=product|test|infra by=<accounts> why="<first bullet>"`; its restart advice only in `oqa-job.py`) when a comment holds an automatic LLM summary,
+and each build ends with an `llm-investigation-summary clusters` line (classes per failed module). `by=` names
+who posted the summaries, as anyone can post a look-alike; classes that disagree name theirs,
+`class=infra(<account>)|product(<account>)`. Hints for
 grouping, never verdicts. A missing summary, unreadable comments or a spent request budget print nothing;
 `--no-llm` skips the one comments request per failed job.
 

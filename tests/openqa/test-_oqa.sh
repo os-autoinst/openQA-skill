@@ -254,14 +254,24 @@ check "emphasis around the label, before or after its colon, or around the value
 	"$(printf 'product no None\n%.0s' 1 2 3 4)" "$actual"
 actual=$(py '
 import _oqa
-own = {"text": "**LLM Investigation summary:**\n\n* own\n\nClassification: Test issue"}
+own = {"userName": "bot", "text": "**LLM Investigation summary:**\n\n* own\n\nClassification: Test issue"}
 copied = {"text": "**LLM Investigation summary:**\n\n* copied\n\nClassification: Product bug\n\nboo#1\n\n(Automatic carryover from t#41)"}
 taken = {"text": "**LLM Investigation summary:**\n\n* taken\n\nboo#1\n\n(Automatic takeover from t#40)"}
 print(_oqa.llm_review([own, copied, taken]))
 print(_oqa.llm_review([copied]))
 ')
 check "a summary openQA carried over from another job is not taken for this job" \
-	"$(printf "%s\n" "{'class': 'test', 'restart': None, 'bullets': ['own'], 'prose': None}" None)" "$actual"
+	"$(printf "%s\n" "{'class': 'test', 'restart': None, 'bullets': ['own'], 'prose': None, 'by': ['bot'], 'class_by': {'test': ['bot']}}" None)" "$actual"
+actual=$(py '
+import _oqa
+def summary(user, verdict):
+    return {"userName": user, "text": "**TL;DR:**\n\n* m: x.\n\nClassification: " + verdict}
+found = _oqa.llm_review([summary("bot", "Infrastructure problem"), summary("person", "Product bug"),
+                         summary("bot", "Infrastructure problem"), {"text": "**LLM Investigation summary:**\n\n* m: y."}])
+print(found["class"], found["by"], found["class_by"])
+')
+check "the merged summary keeps who posted each one: a look-alike under a person's account is not the bot's" \
+	"infra|product ['bot', 'person', None] {'infra': ['bot'], 'product': ['person']}" "$actual"
 
 # --- clone chains -------------------------------------------------------------
 actual=$(oqa --fixture-dir "$fixtures" chain 100)

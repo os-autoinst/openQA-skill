@@ -36,7 +36,7 @@ scripts/oqa-sweep.py --host o3 --group 1 --todo
 
 **One line per current not-ok job**: id, result, scenario minus the header's `scenario_prefix`, then only fields that have a value: `modules=` (failed), `bugrefs=` (parsed), `label=` (newest), `comments=` (plain ones), `restarts=`, `origin=`, `parents=`. Neither `bugrefs=` nor `label=`: unreviewed, whatever `comments=` says. `review=?` (header: `mode=api-fallback`): comments not read, state unknown. `victims parent=<id>`: jobs that never ran; triage that parent. -> references/openqa-model.md "Reviewed definition"
 
-**Quick LLM review**: under a failed, incomplete or timeout_exceeded job an indented `llm-investigation-summary (automatic, unverified): class=<product|test|infra> why="..."` line, and per build one `llm-investigation-summary clusters` line (classes per failed module). Nothing is printed for a job without such a comment; `--no-llm` skips the extra comments request per failed job. Use it to group and order the work-list, not to close a job -> "Machine-written comments"
+**Quick LLM review**: under a failed, incomplete or timeout_exceeded job an indented `llm-investigation-summary (automatic, unverified): class=<product|test|infra> by=<accounts> why="..."` line, and per build one `llm-investigation-summary clusters` line (classes per failed module). Nothing is printed for a job without such a comment; `--no-llm` skips the extra comments request per failed job. Use it to group and order the work-list, not to close a job -> "Machine-written comments"
 
 `warning: the server truncated the overview`: narrow to one group, one build. `N lines shown (--limit N)`: raise `--limit`.
 
@@ -118,7 +118,7 @@ openqa-cli api --host https://openqa.opensuse.org -X POST jobs/<id>/restart
   - It sorts and clusters a group review (same module and class = probably one cause); it never closes a job or picks a bugref. A bugref the model wrote into it is parsed all the same, so the job counts as reviewed on an unverified ref.
   - Confirm each cluster on one job from its own artifacts before drafting a reference. A model often calls a needle mismatch `infra`: unconfirmed until the step, screenshot and history say so. -> references/job-triage.md "Decision tree"
   - `Restart: YES` is advisory and nothing acts on it. A restart is a write: propose it per job with the sporadic checks, never copied across a cluster. -> "Retrigger or comment"
-  - Two summaries on one job may disagree (`class=a|b`).
+  - Two summaries on one job may disagree (`class=a(<by>)|b(<by>)`). One under a person's account (`by=`) is that person's claim, not the automatic investigation.
   - In a triage, quote its class and say which evidence agrees or disagrees; a summary is never support on its own ("the bot concurs"). Read the one on the first bad job too.
 - `Unknown test issue, to be reviewed` (hook output or notification mail, not a job comment): no `auto_review` regex matched; the job is unreviewed.
 - A bot-applied ticket reference (`auto_review` match) counts as reviewed; verify the match in a full review.

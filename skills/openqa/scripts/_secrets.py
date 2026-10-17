@@ -312,6 +312,19 @@ RULES = (
         ),
         r"\1" + MARK.format("job-token"),
     ),
+    # The same token as the first path segment of a command-server URL (autoinst_url), and
+    # in the lines where os-autoinst starts and stops that server.
+    (
+        "job-token",
+        re.compile(
+            r"((?:https?|wss?)://[^\s/:@'\"]{1,253}:\d{2,5}/(?=[A-Za-z0-9]{16,64}/"
+            r"(?:uploadlog|upload_log|upload_asset|data|files|assets|current_script|vars"
+            r"|isotovideo|ws|broadcast)(?![\w-]))"
+            r"|(?:daemon reachable under|command server:) https?://[^\s/]{1,253}:\d{2,5}/)"
+            r"[A-Za-z0-9]{16,64}(?![A-Za-z0-9])"
+        ),
+        r"\1" + MARK.format("job-token"),
+    ),
     # openQA's job_settings route passes a setting NAME as ?key=, and a JMESPath filter
     # reads Tags[?Key==`Name`]; neither is a value.
     (

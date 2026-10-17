@@ -378,6 +378,18 @@ for mode in "--grep JOBTOKEN" "--grep $jobtoken" "--lines 1-5" "--tail 3" "--err
 done
 actual=$(python3 "$scripts/oqa-log.py" --fixture-dir "$work" https://openqa.example.org/tests/4242 --file vars.json --lines 1-5 2>&1)
 check "and shows the line it was on" 1 "$(grep -c '"JOBTOKEN" : "\[REDACTED:job-token\]"' <<<"$actual")"
+# autoinst_url() puts it right after host:port of every command-server URL.
+cmdsrv="http://10.0.2.2:20013/$jobtoken"
+for line in "[debug] [pid:4242] <<< testapi::assert_script_run(cmd=\"curl --form upload=@/var/log/zypper.log --form upname=zypper_up-zypper.log $cmdsrv/uploadlog/zypper_up-zypper.log\", timeout=90)" \
+	"# curl -f -O $cmdsrv/data/console/test.sh; echo xYz-\$?-" \
+	"autoyast=$cmdsrv/files/autoyast/autoinst.xml" "$cmdsrv/upload_asset/disk.qcow2" \
+	"ws://127.0.0.1:20013/$jobtoken/ws" "[info] [pid:4242] cmdsrv: daemon reachable under http://*:20013/$jobtoken/" \
+	"[debug] [pid:4242] stopping command server: http://127.0.0.1:20013/$jobtoken/"; do
+	actual=$(printf '%s\n' "$line" | python3 "$scripts/_secrets.py" 2>/dev/null)
+	check "a command-server URL loses its job token: ${line%%"$jobtoken"*}" \
+		"${line/"$jobtoken"/[REDACTED:job-token]}" "$actual"
+done
+keeps "a long path segment of an ordinary URL" 'http://registry.example.org:5000/containerimagesxyz/tags/list\nhttps://github.com/openSUSEQAToolsRepo/files/x\nhttp://10.0.2.2:20013/shortToken/data\n'
 
 # --- os-autoinst's own plumbing, thousands of lines per autoinst-log.txt ---------------
 keeps "os-autoinst's json_cmd_token" '[debug] [pid:4242] <<< consoles::serial_screen::type_string(text="\\n", key="ret", json_cmd_token="AbCdEfGh", cmd="backend_send_key")\n[debug] [pid:4242] read_json(7) json_cmd_token=HgFeDcBa\n'
@@ -547,6 +559,8 @@ for name, pattern, text in (
     ('regcode', rules['regcode'], 'SUSEConnect ' * 20000),
     ('regcode', rules['regcode'], 'transactional-update -n -n -n -n ' * 8000),
     ('regcode', rules['regcode'], 'SUSEConnect -r ' * 16000),
+    ('job-token', rules['job-token'], 'http://' + 'h' * 250000),
+    ('job-token', rules['job-token'], 'http://h:20013/' * 16000),
 ):
     start = time.monotonic()
     pattern.subn('', text)

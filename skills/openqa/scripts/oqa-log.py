@@ -1348,6 +1348,10 @@ def main():
         print(_oqa.fence(block, source), end="")
         if dropped:
             print(f"note: {dropped} members omitted at '--' (--max-lines)")
+        if not body:
+            print("note: the file is empty (0 bytes)")
+        elif not listed:
+            print("note: an empty archive: it holds only the end-of-archive blocks")
         print(f"requests: {client.requests}")
         return 0
     if args.member is not None:

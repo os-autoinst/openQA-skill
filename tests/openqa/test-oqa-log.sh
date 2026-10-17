@@ -125,6 +125,12 @@ check "--errors: the last record_info before each failure of its module, after t
 	"$(sed -n '/^<<<UNTRUSTED/,/^<<<END/p' <<<"$actual" | sed '1d;$d' | tail -n 2 | paste -sd '|')"
 check "--errors: record_info of a post_fail_hook or before another call is no info line; one fence" "0 2" \
 	"$(grep -c 'title="post"\|title="early"' <<<"$actual") $(grep -c '^<<<' <<<"$actual")"
+actual=$(log 4273 --errors)
+contains "--errors: an asset the cache service could not download is a setup hit" \
+	'5 [setup] [info] [#58] Download of "/var/lib/openqa/cache/openqa.example.org/foo.qcow2" failed: 404 Not Found' "$actual"
+actual=$(log 4273 --errors --file worker-log.txt)
+contains "--errors: an asset a worker without cache could not find is a setup hit" \
+	"2 [setup] 10:00:02 [error] HDD_1 handling Cannot find HDD_1 asset hdd/foo.qcow2!" "$actual"
 actual=$(log 4272 --errors --max-lines 9)
 check "--errors: info lines only fill what the error lines leave of --max-lines" "0 1" \
 	"$(grep -c '\[info' <<<"$actual") $(grep -c '^22 \[result\]' <<<"$actual")"

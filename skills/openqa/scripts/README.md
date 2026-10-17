@@ -220,7 +220,9 @@ After the error lines, in what they leave of `--max-lines`, come at most 3 `[inf
 in the header): a module's last `record_info` call before its `# Test died` or `test <module> failed` line,
 where tests log what they found (a solver `Conflict`, a check's `result="fail"`). A module's other
 `record_info` calls are left out, and so are the `:::` lines, which are os-autoinst's own console and needle
-plumbing besides the die line. With only a `Test died` hit and no serial-terminal hit, a hint points at
+plumbing besides the die line. `[setup]` covers an asset the worker could not get (`Download of "<asset>"
+failed: 404 Not Found`, `Failed to download`, `Cannot find <KEY> asset`), in `autoinst-log.txt` and in
+`--file worker-log.txt --errors`. With only a `Test died` hit and no serial-terminal hit, a hint points at
 `serial_terminal.txt` and the module's ulogs.
 
 `--grep` prints the first `--max-matches` matches (10) with `--context` lines around each, and of those at

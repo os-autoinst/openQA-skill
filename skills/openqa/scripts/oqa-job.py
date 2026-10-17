@@ -122,6 +122,7 @@ MAX_COMMENTS = (6, 12)
 MAX_FILES = (8, 40)
 MAX_RELATED = 25
 CHAIN_HOPS = 5
+NEWEST_HOPS = 20  # restarts --before walks past the chain line to find the newest
 DEPENDENCY_TYPES = ("Chained", "Directly chained", "Parallel")
 CULPRIT_RESULTS = ("failed", "incomplete", "timeout_exceeded")
 VICTIM_RESULTS = ("parallel_failed", "skipped")
@@ -432,7 +433,34 @@ def start_minute(job):
     return started.strftime("%Y-%m-%dT%H:%MZ")
 
 
-def print_chain(client, job, verbose):
+def as_of(link, before):
+    """A restart as it stood at `before`: None when it had not started, running when it
+    had not finished."""
+    started = parse_time(link.get("t_started"))
+    if started is None or started > before:
+        return None
+    finished = parse_time(link.get("t_finished"))
+    if link.get("state") == "done" and (finished is None or finished > before):
+        return {**link, "state": "running", "result": "none"}
+    return link
+
+
+def walk_newest(client, chain, before):
+    """The newest restart past the chain line that had started by `before`."""
+    newest, seen = chain[-1], {link["id"] for link in chain}
+    for _ in range(NEWEST_HOPS):
+        next_id = _oqa.job_id_of(newest.get("clone_id"))
+        if not next_id or next_id in seen:
+            break
+        seen.add(next_id)
+        later = as_of(client.job(next_id), before)
+        if later is None:
+            break
+        newest = later
+    return newest
+
+
+def print_chain(client, job, verbose, before=None):
     if not job.get("origin_id") and not job.get("clone_id"):
         if verbose:
             print("clone chain: none")
@@ -448,6 +476,17 @@ def print_chain(client, job, verbose):
             print("SUPERSEDED: restarted, the newest job is not known")
         print(f"note: clone chain not readable ({error})")
         return
+    cut = False
+    if before:
+        here = next(i for i, link in enumerate(chain) if link["id"] == job["id"])
+        kept = chain[: here + 1]
+        for link in chain[here + 1 :]:
+            link = as_of(link, before)
+            if link is None:
+                cut = True
+                break
+            kept.append(link)
+        chain = kept
     parts = []
     for link in chain:
         text = f"{link['id']}:{tok(link.get('result'), 30)}"
@@ -456,20 +495,27 @@ def print_chain(client, job, verbose):
             text += f"@{started}"
         parts.append(f"[{text}]" if link["id"] == job["id"] else text)
     more_old = "... -> " if chain[0].get("origin_id") else ""
-    more_new = " -> ..." if chain[-1].get("clone_id") else ""
+    more_new = " -> ..." if chain[-1].get("clone_id") and not cut else ""
     print(f"clone chain: {more_old}{' -> '.join(parts)}{more_new}")
+    if cut:
+        print("note: restarts that started after --before left out")
     if job.get("clone_id"):
         newest = chain[-1]
         if newest["id"] == job["id"]:
             # A chain that loops back would otherwise name this very job as the newest.
-            print(
-                "SUPERSEDED: restarted, the newest job is not known (the chain loops)"
-            )
+            if not cut:
+                print(
+                    "SUPERSEDED: restarted, the newest job is not known (the chain loops)"
+                )
             return
-        if newest.get("clone_id"):
-            # The chain line ends after CHAIN_HOPS restarts; openQA follows the rest in one request.
+        if newest.get("clone_id") and not cut:
+            # The chain line ends after CHAIN_HOPS restarts; openQA follows the rest in one
+            # request, but only to the newest of now.
             try:
-                newest = _oqa.latest_job(client, newest["id"])
+                if before:
+                    newest = walk_newest(client, chain, before)
+                else:
+                    newest = _oqa.latest_job(client, newest["id"])
             except _oqa.NotFound as error:
                 print("SUPERSEDED: restarted, the newest job is not known")
                 print(f"note: newest job not readable ({error})")
@@ -1088,9 +1134,10 @@ def main():
         "--before",
         type=before_time,
         metavar="TIME",
-        help="the comments as of TIME (ISO 8601, UTC unless it has an offset): comments "
-        "created later are hidden, and with them their bugrefs, labels, flags and the "
-        "review state they make",
+        help="the comments and restarts as of TIME (ISO 8601, UTC unless it has an "
+        "offset): comments created later are hidden, and with them their bugrefs, labels, "
+        "flags and the review state they make; restarts that started later are left out "
+        "of the clone chain and SUPERSEDED lines",
     )
     parser.add_argument(
         "--exit-code",
@@ -1122,7 +1169,7 @@ def main():
         return status
     print_identity(client, job, how, args.verbose)
     print_settings(job, args.settings, args.verbose)
-    print_chain(client, job, args.verbose)
+    print_chain(client, job, args.verbose, args.before)
     print_dependencies(client, job, args.verbose)
     print_modules(client, job, args.steps, args.verbose, args.module)
     print_files(job, args.verbose)

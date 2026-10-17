@@ -145,7 +145,9 @@ comments. `--module NAME` alone keeps only that module's lines, whatever its res
 `+N of M steps not shown (--all-steps lists them)`. `--before TIME` (ISO 8601, UTC unless it has an
 offset) reads the comments as they stood at TIME, as `oqa-history.py --before` does: a comment created
 later, or with no readable date, is hidden with its bugrefs, labels and flags, the review state is that of
-the rest, and `note: N comment(s) created after --before hidden` counts them.
+the rest, and `note: N comment(s) created after --before hidden` counts them. A restart that had not
+started by TIME is left out of `clone chain` and `SUPERSEDED` (`note: restarts that started after
+--before left out`), one still going then shows as `none` and `state=running`.
 
     job=6228436 host=https://openqa.opensuse.org result=failed worker=worker21:13 started=... duration=6m13s
     scenario=opensuse-Tumbleweed-DVD-x86_64-libssh@uefi build=20260919 group=38

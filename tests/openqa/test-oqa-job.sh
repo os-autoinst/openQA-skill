@@ -789,5 +789,18 @@ check "a chain longer than five restarts: the newest is its true end, from the f
 check "the chain line still ends after five restarts, one request finds the newest" \
 	"clone chain: [970:failed@2030-01-02T01:00Z] -> 971:failed@2030-01-02T02:00Z -> 972:failed@2030-01-02T03:00Z -> 973:failed@2030-01-02T04:00Z -> 974:failed@2030-01-02T05:00Z -> 975:failed@2030-01-02T06:00Z -> ...|requests: 9" \
 	"$(chain_97x 970 | grep -E '^(clone chain|requests)' | paste -sd'|')"
+check "--before: a restart that started later is no newest job; one still going then shows as running" "$(
+	cat <<'EOF'
+clone chain: [970:failed@2030-01-02T01:00Z] -> 971:failed@2030-01-02T02:00Z -> 972:none@2030-01-02T03:00Z
+note: restarts that started after --before left out
+SUPERSEDED: restarted, newest=972 result=none state=running started=2030-01-02T03:00Z
+EOF
+)" "$(chain_97x 970 --before 2030-01-02T03:15Z | grep -v '^requests')"
+check "--before before the first restart started: not superseded" \
+	"clone chain: [970:failed@2030-01-02T01:00Z]|note: restarts that started after --before left out" \
+	"$(chain_97x 970 --before 2030-01-02T01:45Z | grep -v '^requests' | paste -sd'|')"
+check "--before past the chain line: the restarts after it are walked, not followed to today's newest" \
+	"SUPERSEDED: restarted, newest=976 result=failed started=2030-01-02T07:00Z" \
+	"$(chain_97x 970 --before 2030-01-02T07:45+00:00 | grep '^SUPERSEDED')"
 
 exit $fail

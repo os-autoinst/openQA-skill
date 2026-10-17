@@ -147,12 +147,12 @@ is a fixed subset); `-v` whole traces, ulog names, all settings of the scenario,
 comments. `--module NAME` alone keeps only that module's lines, whatever its result, and ends them with
 `+N of M steps not shown (--all-steps lists them)`. `--all-steps` lists at most 300 steps and ends a longer
 list with `... N more steps not shown: --step-range <next>-`; `--step-range A-B` (or `A-`) lists the steps
-numbered A to B. `--before TIME` (ISO 8601, UTC unless it has an
-offset) reads the comments as they stood at TIME, as `oqa-history.py --before` does: a comment created
-later (`created=`, UTC to the second, is what is compared), or with no readable date, is hidden with its bugrefs, labels and flags, the review state is that of
-the rest, and `note: N comment(s) created after --before hidden` counts them. A restart that had not
-started by TIME is left out of `clone chain` and `SUPERSEDED` (`note: restarts that started after
---before left out`), one still going then shows as `none` and `state=running`.
+numbered A to B. `--before TIME` (ISO 8601, UTC unless it has an offset) reads the comments as they
+stood at TIME, as `oqa-history.py --before` does: a comment created later (`created=`, UTC to the second,
+is what is compared), or with no readable date, is hidden with its bugrefs, labels and flags, the review
+state is that of the rest, and `note: N comment(s) created after --before hidden` counts them. A restart
+that had not started by TIME is left out of `clone chain` and `SUPERSEDED` (`note: restarts that
+started after --before left out`), one still going then shows as `none` and `state=running`.
 
     job=6228436 host=https://openqa.opensuse.org result=failed worker=worker21:13 started=... duration=6m13s
     scenario=opensuse-Tumbleweed-DVD-x86_64-libssh@uefi build=20260919 group=38
@@ -172,15 +172,17 @@ started by TIME is left out of `clone chain` and `SUPERSEDED` (`note: restarts t
     requests: 4
 
 When set: `reason="..."` (whole up to 480 characters, a longer one cut in the middle so openQA's
-`[Auto-restarting ...]` note at its end stays), `state=` (not done), `clone chain: 470:incomplete@2030-01-01T21:10Z -> [500:failed@2030-01-02T03:04Z]`
-(each member's start time in UTC, none before it started; 5 restarts each way), `SUPERSEDED: restarted,
+`[Auto-restarting ...]` note at its end stays), `state=` (not done),
+`clone chain: 470:incomplete@2030-01-01T21:10Z -> [500:failed@2030-01-02T03:04Z]` (each member's start
+time in UTC, none before it started; 5 restarts each way), `SUPERSEDED: restarted,
 newest=ID result=... started=...` (the end of the restart chain, followed past those 5 with one more
 request), `INVESTIGATION CLONE: kind=<suffix> origin=ID` for a job openqa-investigate made (`TEST` ends in
 `:investigate:<suffix>`, the origin from its `OPENQA_INVESTIGATE_ORIGIN`, `?` without it: take history and
 review window from the origin's scenario), `culprit=ID (...)` for victims, needle steps with
 `tags=` and `candidates=N best=name:91% (worst area each)`; after a loop of checks for the same tags (a
 `send_key_until_needlematch` whose last screen is the one it overshot to) `loop: N checks for these tags in
-a row, best=name:94% at step=M link=... shot=...`, the near miss among them; `SUSPECT_BUGREF=` (module name parsed as bugref),
+a row, best=name:94% at step=M link=... shot=...`, the near miss among them;
+`SUSPECT_BUGREF=` (module name parsed as bugref),
 `force_result_not_applied=<r>`, `; the hook died at step=N` after `post_fail_hook steps not shown` (the hook
 itself died: logs it would have uploaded may be missing; its message is the `post_fail_hook failed: ` line of
 `autoinst-log.txt`). `frame=`: first stack frame outside os-autoinst. `ulogs[<module>]=<module>-a,<module>-b`:

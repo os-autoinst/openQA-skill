@@ -13,12 +13,26 @@ api_v1_jobs_7013_comments.json
     GET /api/v1/jobs/7013/comments
 api_v1_jobs_7014_comments.json
     GET /api/v1/jobs/7014/comments
+api_v1_jobs_7300_comments.json
+    GET /api/v1/jobs/7300/comments
+api_v1_jobs_7305_comments.json
+    GET /api/v1/jobs/7305/comments
+api_v1_jobs_7306_comments.json
+    GET /api/v1/jobs/7306/comments
+api_v1_jobs_7307_comments.json
+    GET /api/v1/jobs/7307/comments
+api_v1_jobs_7308_comments.json
+    GET /api/v1/jobs/7308/comments
 api_v1_jobs_8001_comments.json
     GET /api/v1/jobs/8001/comments
 api_v1_jobs_8002_comments.json
     GET /api/v1/jobs/8002/comments
 api_v1_jobs_8003_comments.json
     GET /api/v1/jobs/8003/comments
+api_v1_jobs_groupid=7_build=20300102_version=Rolling_limit=1000.json
+    GET /api/v1/jobs?groupid=7&build=20300102&version=Rolling&limit=1000
+api_v1_jobs_groupid=7_build=20300102_version=Rolling_test=gnome_limit=1000.json
+    GET /api/v1/jobs?groupid=7&build=20300102&version=Rolling&test=gnome&limit=1000
 api_v1_jobs_groupid=7_build=20300102_version=Rolling_scope=current_latest=1_result=passed_softfailed_limit=10.json
     GET /api/v1/jobs?groupid=7&build=20300102&version=Rolling&scope=current&latest=1&result=passed,softfailed&limit=10
 api_v1_jobs_groupid=7_build=20300102_version=Rolling_scope=current_latest=1_result=passed_softfailed_limit=2.json

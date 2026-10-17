@@ -1,0 +1,29 @@
+[
+ {
+  "bugrefs": [],
+  "created": "2030-01-02T12:00:00Z",
+  "id": 1,
+  "renderedMarkdown": null,
+  "text": "label:infra_issue",
+  "updated": "2030-01-02T12:00:00Z",
+  "userName": "reviewer_a"
+ },
+ {
+  "bugrefs": [],
+  "created": null,
+  "id": 2,
+  "renderedMarkdown": null,
+  "text": "label:no_time",
+  "updated": null,
+  "userName": "reviewer_a"
+ },
+ {
+  "bugrefs": [],
+  "created": "2030-01-02T09:59:59+00:00",
+  "id": 3,
+  "renderedMarkdown": null,
+  "text": "rerun",
+  "updated": "2030-01-02T09:59:59+00:00",
+  "userName": "reviewer_a"
+ }
+]

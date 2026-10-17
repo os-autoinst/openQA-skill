@@ -251,7 +251,8 @@ A to B as `--around-module` shows it, plumbing left out and polling folded. A ra
 
 `--members` lists an uploaded tar archive (`.tar`, `.tar.gz`/`.tgz`, `.tar.bz2`/`.tbz2`, `.tar.xz`/`.txz`, also when
 split over several compressed streams; zstd and zip are refused) as `<size> <type> <name>`, names as stored and
-quoted when unusual, first members first; `--member PATH` (a name from that list, a leading `./` does not
+quoted when unusual, first members first; `count=0` comes with a `note:` that says why: an empty file, or
+an empty archive (a module's `tar cjf` that found nothing to pack writes 46 bytes of bzip2); `--member PATH` (a name from that list, a leading `./` does not
 matter) feeds one regular-file member to `--grep`, `--tail`, `--errors`, `--around-module` or `--lines`, and the header line
 gains `file=` and `member=`. Of two members with one name the last is read, as tar does, with a `note:`. The
 archive is downloaded whole (at most `--max-bytes`, else refused rather than read cut) and decompressed as a

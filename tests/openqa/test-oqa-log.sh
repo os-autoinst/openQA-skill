@@ -742,6 +742,9 @@ import bz2
 cut = bz2.compress(raw(b"a.txt", octal(4), b"0", b"abc\n") + end)
 open(f"{sys.argv[1]}/tests_4271_file_cut.tar.bz2", "wb").write(cut[: len(cut) // 2])
 open(f"{sys.argv[1]}/tests_4263_file_x.tar.xz", "wb").write(b"\xfd7zXZ\x00" + b"garbage" * 100)
+# what tar cjf writes when it found nothing to pack: 10240 zero bytes, bzip2-compressed
+build("tests_4274_file_gdm.tar.bz2", "w:bz2", [])
+open(f"{sys.argv[1]}/tests_4274_file_zero.tar.gz", "wb").close()
 EOF
 alog() {
 	python3 "$scripts/oqa-log.py" --fixture-dir "$arch" "$@" 2>&1 |
@@ -795,6 +798,11 @@ check "--members: a header checksum mismatch is refused" \
 actual=$(alog 4271 --file cut.tar.bz2 --members)
 check "--members: compressed data that ends early is an error, not an empty listing" \
 	"2 error: not a readable tar archive: the compressed data ends early" "$? $actual"
+actual=$(alog 4274 --file gdm.tar.bz2 --members)
+check "--members: an empty bzip2 archive says why it lists nothing" "0 1 1" \
+	"$? $(grep -c 'mode=members count=0 ' <<<"$actual") $(grep -c '^note: an empty archive: it holds only the end-of-archive blocks$' <<<"$actual")"
+actual=$(alog 4274 --file zero.tar.gz --members)
+check "--members: a file of 0 bytes says so" "0 1" "$? $(grep -c '^note: the file is empty (0 bytes)$' <<<"$actual")"
 actual=$(alog 4269 --file multi.tar.xz --members)
 contains "--members: a tar split over two compressed streams is read whole" "mode=members count=2" "$actual"
 actual=$(alog 4270 --file dup.tar.xz --members)

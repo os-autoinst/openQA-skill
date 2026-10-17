@@ -354,6 +354,13 @@ for url in 'https://bugzilla.opensuse.org/show_bug.cgi?id=123' "$repo?arch=x86_6
 	keeps "an ordinary query: ${url#*\?}" "GET $url\n"
 done
 
+# --- os-autoinst's own plumbing, thousands of lines per autoinst-log.txt ---------------
+keeps "os-autoinst's json_cmd_token" '[debug] [pid:4242] <<< consoles::serial_screen::type_string(text="\\n", key="ret", json_cmd_token="AbCdEfGh", cmd="backend_send_key")\n[debug] [pid:4242] read_json(7) json_cmd_token=HgFeDcBa\n'
+# shellcheck disable=SC2016 # a regex, as os-autoinst logs it
+keeps "a password prompt regex" '[debug] [pid:4242] <<< testapi::wait_serial(regexp=qr/Password:\\s*$/ui, timeout=30)\n[debug] [pid:4242] <<< consoles::serial_screen::read_until(pattern="(?^ui:Password:\\\\s*\\$)", timeout=30)\n'
+hides "a real token beside a json_cmd_token" 'json_cmd_token="AbCdEfGh", api_token="Sup3rS3cretX"\n' Sup3rS3cretX
+hides "a password that starts with a backslash" 'ROOT_PASSWORD=\\Sup3rS3cretX\n' Sup3rS3cretX
+
 # --- a registration code on the command line of a registration command ---------------
 regcode="AbCd1234""EfGh5678"
 for line in "SUSEConnect -r $regcode" "SUSEConnect --regcode $regcode" "SUSEConnect --regcode=$regcode" \

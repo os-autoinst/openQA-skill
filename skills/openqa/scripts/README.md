@@ -111,11 +111,12 @@ Every third-party string the scripts print goes through it, stdout and stderr al
 credential-shaped value never reaches the transcript. `[REDACTED:<rule>]` marks what went;
 the diagnostic half is kept, so `https://alice:[REDACTED:url-userinfo]@host/` still names the
 account and the host, and `.../update/?[REDACTED:url-bare-query]` the repository whose token
-was the whole query string. A per-rule count goes to stderr: treat it as "this job's artefacts held
-a credential", and say so. Error messages are covered too: every script's parser is
-`_sanitize.ArgumentParser`, whose errors (they quote argv) are redacted after their `repr()`
-escapes are decoded; any other error quotes an argument or path only once it is sanitised or
-validated, and a job URL or host holding `@` is not echoed at all. Neither `sanitize()` nor
+was the whole query string. A per-rule count goes to stderr; which rules mean the job's
+artefacts held a credential -> references/redaction.md "Reading the output". Error messages
+are covered too: every script's parser is `_sanitize.ArgumentParser`, whose errors (they quote
+argv) are redacted after their `repr()` escapes are decoded; any other error quotes an argument
+or path only once it is sanitised or validated, and a job URL or host holding `@` is not echoed
+at all. Neither `sanitize()` nor
 `_sanitize.excerpt` shows the visible half of a credential cut by its size guard.
 
 Also usable directly, `stdin` to `stdout`, exit 1 when anything was redacted:

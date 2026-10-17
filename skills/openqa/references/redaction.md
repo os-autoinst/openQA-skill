@@ -24,7 +24,10 @@ Upstream is aware: poo#111314 (open since 2022) and poo#170308 (open since 2024)
 
 - **`[REDACTED:<rule>]`** replaced a value. The rule name says what it looked like; `secret-setting` means the setting's *name* gave it away, not its value.
 - **The diagnostic half is kept.** `https://alice:[REDACTED:url-userinfo]@host/` keeps the account and the host, which are the evidence; only the password goes.
-- **A redaction is never silent** — the scripts report a per-rule count on stderr. Treat that as "a credential was in this job's artefacts", and say so to the user.
+- **A redaction is never silent** — the scripts report a per-rule count on stderr. What a count means depends on the rule:
+  - **A credential was in this job's artefacts; say so to the user:** `private-key`, the token prefixes (`github-token`, `github-pat`, `gitlab-token`, `aws-key-id`, `slack-token`, `slack-webhook`, `google-oauth-token`, `google-api-key`, `jwt`), `url-userinfo`, `url-token`, `auth-header`, `api-key-header`, `api-flag`, `url-query`, `curl-user`, `password-flag`, `registry-auth`, `regcode`, `site`.
+  - **Judged by a nearby name or a loose shape:** `keyed-assignment`, `secret-setting`, `ini-key`, `url-bare-query`. Read the marked lines first: report a leak only where the key names a real credential (a password, a token, a registration code). A count from these rules alone is not a leak report.
+  - **Not a credential:** `azure-subscription` names an account.
 - **It applies everywhere, with no per-instance switch.** On a public instance a leaked secret is already world-readable, so redaction there protects the transcript rather than the secret.
 
 ## Before you post

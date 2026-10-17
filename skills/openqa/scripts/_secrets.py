@@ -113,8 +113,13 @@ _TEMPLATE = re.compile(
     r"\A(?:[$%]\{[^}]*\}|\$\([^)]*\)|\{\{[^}]*\}\}|<[^>]*>|%\w+%|\$\w+)\Z"
 )
 # openQA invalidates JOBTOKEN when the job finishes, so it is dead by the time anyone
-# reads the log; redacting it only trains people to ignore the warnings.
-_ALLOW_KEYS = re.compile(r"\A(JOBTOKEN|NAME|CASEDIR|NEEDLES_DIR)\Z", re.IGNORECASE)
+# reads the log; redacting it only trains people to ignore the warnings. os-autoinst tags
+# each message between its own processes with a random json_cmd_token, thousands per log.
+_ALLOW_KEYS = re.compile(
+    r"\A(JOBTOKEN|JSON_CMD_TOKEN|NAME|CASEDIR|NEEDLES_DIR)\Z", re.IGNORECASE
+)
+# A regex, as in wait_serial(qr/Password:\s*$/).
+_REGEX_CLASS = re.compile(r"\A\\{1,2}[sSdDwW][*+?{]")
 
 
 # openQA hides a setting from vars.json when its NAME matches this shape. It does not
@@ -147,7 +152,7 @@ def _is_placeholder(value):
     bare = value.strip("'\"")
     if len(bare) < 6 or bare.lower() in PLACEHOLDERS:
         return True
-    if _TEMPLATE.match(bare) or _PATH.match(bare):
+    if _TEMPLATE.match(bare) or _PATH.match(bare) or _REGEX_CLASS.match(bare):
         return True
     # A UUID is the common false positive. A hex digest is deliberately NOT vetoed: this
     # runs only after the key name said "credential", and a 32-hex API_KEY is a real key.

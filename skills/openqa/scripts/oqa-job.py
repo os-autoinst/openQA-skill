@@ -479,18 +479,19 @@ def as_of(link, before):
 
 
 def walk_newest(client, chain, before):
-    """The newest restart past the chain line that had started by `before`."""
+    """(newest, whole): the newest restart past the chain line that had started by
+    `before`, and False when NEWEST_HOPS ran out before the chain ended."""
     newest, seen = chain[-1], {link["id"] for link in chain}
     for _ in range(NEWEST_HOPS):
         next_id = _oqa.job_id_of(newest.get("clone_id"))
         if not next_id or next_id in seen:
-            break
+            return newest, True
         seen.add(next_id)
         later = as_of(client.job(next_id), before)
         if later is None:
-            break
+            return newest, True
         newest = later
-    return newest
+    return newest, not newest.get("clone_id")
 
 
 def print_chain(client, job, verbose, before=None):
@@ -533,7 +534,7 @@ def print_chain(client, job, verbose, before=None):
     if cut:
         print("note: restarts that started after --before left out")
     if job.get("clone_id"):
-        newest = chain[-1]
+        newest, whole = chain[-1], True
         if newest["id"] == job["id"]:
             # A chain that loops back would otherwise name this very job as the newest.
             if not cut:
@@ -546,7 +547,7 @@ def print_chain(client, job, verbose, before=None):
             # request, but only to the newest of now.
             try:
                 if before:
-                    newest = walk_newest(client, chain, before)
+                    newest, whole = walk_newest(client, chain, before)
                 else:
                     newest = _oqa.latest_job(client, newest["id"])
             except _oqa.NotFound as error:
@@ -559,6 +560,11 @@ def print_chain(client, job, verbose, before=None):
         if start_minute(newest):
             line += f" started={start_minute(newest)}"
         print(line)
+        if not whole:
+            print(
+                f"note: newest= is the last of {NEWEST_HOPS} restarts walked past the chain "
+                "line; later ones may have started by --before"
+            )
 
 
 def _relations(job):

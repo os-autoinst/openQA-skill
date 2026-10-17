@@ -30,6 +30,16 @@ the name without the @machine the overview may add), so one scenario's spread ov
 flavors and arches needs no full listing; the header counters stay those of the
 whole build.
 
+--before TIME (ISO 8601, UTC unless it has an offset; needs --build) shows the
+build as it stood then, for a review of an older failure: per scenario the newest
+job that had started by TIME, restarted later or not, with its result then
+(running when it finished later). Bugrefs and labels come from the comments
+created by TIME. A note line counts the jobs that started later, left out, and
+names the cost: one /api/v1/jobs request per build of at most 1000 jobs and
+8 MB with their module lists (a literal --test '^NAME$' is sent as test=NAME),
+plus the comments reads, capped as in the API fallback. as_of= replaces the
+header counters, which are those of now.
+
 --passed turns the list around: current passed and softfailed jobs of the
 build, either is a source to clone for a verification run; --module M keeps
 those in which M itself passed. Line: <id> <test@machine> result= arch= flavor=,
@@ -79,6 +89,7 @@ import json
 import os
 import re
 import sys
+from datetime import datetime, timezone
 
 # python3 -I leaves the script's own directory off sys.path; the sibling modules live there.
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -87,6 +98,7 @@ from _sanitize import ArgumentParser
 
 MODE_OVERVIEW = "overview"
 MODE_API = "api-fallback"
+MODE_BEFORE = "as-of"
 COUNTERS = ("total", "passed", "softfailed", "failed", "skipped", "unfinished")
 DEPENDENCY_TYPES = ("Chained", "Directly chained", "Parallel")
 LABEL = re.compile(r"\blabel:([\w:#/-]+)\b")
@@ -107,6 +119,10 @@ CLONE_SOURCES = ("passed", "softfailed")
 LITERAL_TEST = re.compile(r"\^([A-Za-z0-9_-]+)\$")
 # Clone sources searched for any other --test: openQA cuts at its limit before we can match.
 TEST_WINDOW = 100
+# One build's jobs for --before, restarts included, each with its module list.
+BEFORE_FETCH = 1000
+BEFORE_BYTES = _oqa.MAX_JSON_BYTES
+FINAL_STATES = ("done", "cancelled")
 MAX_SCHEDULE_GROUPS = 12
 # --match runs the user's regex over a name the server chose: an unbounded
 # subject turns an ordinary ".*a.*b" into minutes of backtracking.
@@ -125,6 +141,26 @@ class ShapeError(Exception):
 
 
 tok, toks = _oqa.tok, _oqa.toks
+
+
+def parse_time(value):
+    """An aware UTC datetime from ISO 8601 or openQA's "2030-01-02 10:00:00 +0000", or None;
+    a time without a zone is UTC, as openQA's t_started is."""
+    if not isinstance(value, str):
+        return None
+    text = re.sub(r"[zZ]$", "+00:00", value.strip())
+    text = re.sub(r" ?([+-]\d\d):?(\d\d)$", r"\1:\2", text)
+    try:
+        stamp = datetime.fromisoformat(text)
+    except ValueError:
+        return None
+    if stamp.tzinfo is None:
+        stamp = stamp.replace(tzinfo=timezone.utc)
+    return stamp.astimezone(timezone.utc)
+
+
+def _iso(stamp):
+    return stamp.strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 def matching_groups(client, pattern):
@@ -187,11 +223,13 @@ def pick_builds(client, group, build):
     return name, matching or [{"build": build}]
 
 
-def header(group, name, entry, mode, prefix):
+def header(group, name, entry, mode, prefix, as_of=None):
     parts = [f"group={group} name={_oqa.quoted(name)} build={tok(entry['build'])}"]
     if entry.get("version") is not None:
         parts.append(f"version={tok(entry['version'])}")
-    if "failed" not in entry:
+    if as_of:
+        parts.append(f"as_of={as_of}")
+    elif "failed" not in entry:
         parts.append("counters=unavailable (build not among the newest of the group)")
     else:
         failed, labeled = int(entry["failed"]), int(entry.get("labeled") or 0)
@@ -212,7 +250,7 @@ def header(group, name, entry, mode, prefix):
         parts.append(f"state={state}")
         if isinstance(entry.get("tag"), dict):
             parts.append(f"tag={tok(entry['tag'].get('description'))}")
-    if mode != MODE_OVERVIEW:
+    if mode not in (MODE_OVERVIEW, MODE_BEFORE):
         parts.append(f"mode={mode}")
     if prefix:
         parts.append(f"scenario_prefix={tok(prefix, 80)}")
@@ -304,53 +342,141 @@ def api_jobs(client, group, entry, results, todo, pattern=None, reserve=0):
     if entry.get("version") is not None:
         params.append(("version", entry["version"]))
     params += [("scope", "current"), ("latest", 1), ("result", ",".join(results))]
-    jobs = []
-    for job in client.get_json("/api/v1/jobs", params).get("jobs") or ():
-        settings = job.get("settings") or {}
-        keys = ("DISTRI", "VERSION", "FLAVOR", "ARCH", "TEST")
-        scenario = "-".join(str(settings.get(key)) for key in keys)
-        if settings.get("MACHINE"):
-            scenario += f"@{settings['MACHINE']}"
-        failed = [
-            str(module.get("name"))
-            for module in job.get("modules") or ()
-            if module.get("result") == "failed"
-        ]
-        jobs.append(
-            {
-                "id": int(job["id"]),
-                "result": job.get("result"),
-                "prefix": f"{settings.get('DISTRI')}-{settings.get('VERSION')}-",
-                "scenario": scenario,
-                "test": settings.get("TEST"),
-                "modules": sorted(failed),
-                "refs": None,
-                "label": None,
-                "comments": None,
-                "restarts": None,
-                "origin": job.get("origin_id"),
-                "parents": _parents(job),
-                "llm": None,
-            }
-        )
+    jobs = [
+        _api_job(job)
+        for job in client.get_json("/api/v1/jobs", params).get("jobs") or ()
+    ]
     jobs = _of_test(jobs, pattern)
     jobs.sort(key=_order)
-    complete = True
-    for job in jobs:
-        if client.requests >= client.max_requests - reserve:
-            complete = False
-            break
-        _review_state(client, job)
+    complete = _read_reviews(client, jobs, reserve)
     if todo:
         jobs = [job for job in jobs if not (job["refs"] or job["label"])]
     return jobs, complete
 
 
-def _review_state(client, job):
+def _api_job(job):
+    settings = job.get("settings") or {}
+    keys = ("DISTRI", "VERSION", "FLAVOR", "ARCH", "TEST")
+    scenario = "-".join(str(settings.get(key)) for key in keys)
+    if settings.get("MACHINE"):
+        scenario += f"@{settings['MACHINE']}"
+    failed = [
+        str(module.get("name"))
+        for module in job.get("modules") or ()
+        if module.get("result") == "failed"
+    ]
+    return {
+        "id": int(job["id"]),
+        "result": job.get("result"),
+        "prefix": f"{settings.get('DISTRI')}-{settings.get('VERSION')}-",
+        "scenario": scenario,
+        "test": settings.get("TEST"),
+        "modules": sorted(failed),
+        "refs": None,
+        "label": None,
+        "comments": None,
+        "restarts": None,
+        "origin": job.get("origin_id"),
+        "parents": _parents(job),
+        "llm": None,
+    }
+
+
+def _api_test(job):
+    return (job.get("settings") or {}).get("TEST")
+
+
+def jobs_before(client, group, entry, args, results, reserve):
+    """The build as it stood at --before: per scenario the newest job that had started by
+    then, as running when it finished later. Returns (jobs, note lines)."""
+    params = [("groupid", group), ("build", entry["build"])]
+    if entry.get("version") is not None:
+        params.append(("version", entry["version"]))
+    if name := _literal_test(args.test):
+        params.append(("test", name))
+    params.append(("limit", BEFORE_FETCH))
+    body = client.get_bytes(
+        "/api/v1/jobs", params, max_bytes=BEFORE_BYTES + 1, accept="application/json"
+    )
+    if len(body) > BEFORE_BYTES:
+        raise _oqa.OqaError(
+            f"the jobs of build {tok(entry['build'])} exceed {BEFORE_BYTES >> 20} MB: "
+            "narrow them with --test '^NAME$'"
+        )
+    try:
+        fetched = json.loads(body).get("jobs") or ()
+    except (RecursionError, ValueError):
+        raise _oqa.OqaError("response is not JSON: /api/v1/jobs") from None
+    fetched = [job for job in fetched if _oqa.job_id_of(job.get("id"))]
+    newest, later = {}, 0
+    for job in sorted(
+        _of_test(fetched, args.test, _api_test), key=lambda job: -job["id"]
+    ):
+        finished = parse_time(job.get("t_finished"))
+        # A job cancelled before it ran has no start, only its end.
+        started = parse_time(job.get("t_started")) or finished
+        if started is None or started > args.before:
+            later += 1
+            continue
+        settings = job.get("settings") or {}
+        scenario = tuple(str(settings.get(key)) for key in SCENARIO_KEYS)
+        if scenario in newest:
+            continue
+        newest[scenario] = _api_job(job)
+        if (
+            job.get("state") not in FINAL_STATES
+            or not finished
+            or finished > args.before
+        ):
+            newest[scenario].update(result="running", modules=[], refs=[], comments=0)
+    jobs = [job for job in newest.values() if job["result"] in (*results, "running")]
+    jobs.sort(key=_order)
+    reads = client.requests
+    done = [job for job in jobs if job["result"] != "running"]
+    complete = _read_reviews(client, done, reserve, args.before)
+    if args.todo:
+        jobs = [job for job in jobs if not (job["refs"] or job["label"])]
+    cost = (
+        f"1 /api/v1/jobs request ({len(fetched)} jobs, {(len(body) + 1023) // 1024} kB)"
+    )
+    cost += f" and {client.requests - reads} comments requests"
+    notes = [
+        f"note: as of {_iso(args.before)}: {later} job(s) that started later left out; cost: {cost}"
+    ]
+    if len(fetched) >= BEFORE_FETCH:
+        notes.append(
+            f"warning: only the newest {BEFORE_FETCH} jobs of the build were read, older "
+            "ones are missing (--test '^NAME$' narrows the request)"
+        )
+    if not complete:
+        notes.append(
+            "warning: request cap reached, '?' marks jobs whose comments were not read"
+        )
+    return jobs, notes
+
+
+def _read_reviews(client, jobs, reserve, before=None):
+    """Review state of each job in turn while `reserve` requests stay free; False when
+    the budget ran out first."""
+    for job in jobs:
+        if client.requests >= client.max_requests - reserve:
+            return False
+        _review_state(client, job, before)
+    return True
+
+
+def _review_state(client, job, before=None):
     """Same rule as openQA: a comment with a bugref counts as a bugref, else
-    its first label counts, else it is a plain comment."""
+    its first label counts, else it is a plain comment. With `before` only the
+    comments created by then count."""
     job.update(refs=[], comments=0)
     comments = client.get_json(f"/api/v1/jobs/{job['id']}/comments")
+    if before is not None:
+        comments = [
+            comment
+            for comment in comments
+            if (created := parse_time(comment.get("created"))) and created <= before
+        ]
     job["llm"] = _oqa.llm_review(comments)
     for comment in comments:
         text = str(comment.get("text") or "")
@@ -465,25 +591,31 @@ def sweep(client, group, args, results, reserve=0):
     for index, entry in enumerate(entries):
         mode, note = MODE_OVERVIEW, None
         later = (len(entries) - 1 - index) * ENTRY_RESERVE
-        try:
-            jobs, truncated = overview_jobs(
-                client, group, entry, results, args.todo, args.test
+        if args.before is not None:
+            mode = MODE_BEFORE
+            jobs, notes = jobs_before(
+                client, group, entry, args, results, reserve + later
             )
-            if truncated:
-                note = (
-                    "warning: the server truncated the overview, the list is incomplete"
+            note = "\n".join(notes)
+        else:
+            try:
+                jobs, truncated = overview_jobs(
+                    client, group, entry, results, args.todo, args.test
                 )
-        except (ShapeError, _oqa.OqaError) as error:
-            mode = MODE_API
-            print(f"note: /tests/overview.json not usable ({error}); using /api/v1")
-            jobs, complete = api_jobs(
-                client, group, entry, results, args.todo, args.test, reserve + later
-            )
-            if not complete:
-                note = "warning: request cap reached, '?' marks jobs whose comments were not read"
+                if truncated:
+                    note = "warning: the server truncated the overview, the list is incomplete"
+            except (ShapeError, _oqa.OqaError) as error:
+                mode = MODE_API
+                print(f"note: /tests/overview.json not usable ({error}); using /api/v1")
+                jobs, complete = api_jobs(
+                    client, group, entry, results, args.todo, args.test, reserve + later
+                )
+                if not complete:
+                    note = "warning: request cap reached, '?' marks jobs whose comments were not read"
         prefixes = {job["prefix"] for job in jobs}
         prefix = prefixes.pop() if len(prefixes) == 1 and len(jobs) > 1 else ""
-        print(header(group, name, entry, mode, prefix))
+        as_of = _iso(args.before) if args.before is not None else None
+        print(header(group, name, entry, mode, prefix, as_of))
         if note:
             print(note)
         jobs.sort(key=_order)
@@ -508,12 +640,18 @@ def sweep(client, group, args, results, reserve=0):
         clusters = llm_clusters(shown)
         if clusters:
             print(clusters)
-        kind = "jobs still to review" if args.todo else "current not-ok jobs"
+        if args.todo:
+            kind = "jobs still to review"
+        else:
+            kind = "not-ok jobs" if as_of else "current not-ok jobs"
         if args.include_softfailed:
             kind += " (softfailed included)"
         if args.test:
             kind += " whose test matches --test"
-        count = len(jobs) + sum(len(ids) for ids in victims.values())
+        running = sum(job["result"] == "running" for job in jobs) if as_of else 0
+        if as_of:
+            kind += f" as of --before, {running} running then"
+        count = len(jobs) - running + sum(len(ids) for ids in victims.values())
         cut = (
             f", {args.limit} lines shown (--limit N)" if len(jobs) > args.limit else ""
         )
@@ -554,7 +692,7 @@ def passed_jobs(client, group, entry, module, limit, pattern=None):
         and not job.get("clone_id")
         and (not module or _module_passed(job, module))
     ]
-    kept = _of_test(kept, pattern, lambda job: (job.get("settings") or {}).get("TEST"))
+    kept = _of_test(kept, pattern, _api_test)
     return kept[:limit], len(jobs) >= fetch
 
 
@@ -835,6 +973,15 @@ def test_regex(value):
         raise argparse.ArgumentTypeError(f"not a valid regex: {error}") from None
 
 
+def before_time(value):
+    stamp = parse_time(value)
+    if stamp is None:
+        raise argparse.ArgumentTypeError(
+            "expected an ISO 8601 time such as 2030-01-02T10:00Z"
+        )
+    return stamp
+
+
 def git_hash(value):
     if not GIT_HASH.fullmatch(value.lower()):
         raise argparse.ArgumentTypeError("must be 7 to 40 hex digits")
@@ -875,6 +1022,14 @@ def main():
         "searched in it, case-sensitive), e.g. '^ltp_syscalls$' for one scenario across "
         "flavors and arches; with --passed openQA filters such a literal name, any other "
         "regex searches the newest 100 clone sources",
+    )
+    parser.add_argument(
+        "--before",
+        type=before_time,
+        metavar="TIME",
+        help="the build as it stood at TIME (ISO 8601 such as 2030-01-02T10:00Z, UTC "
+        "unless it has an offset): per scenario the newest job that had started by then, "
+        "its result then, bugrefs and labels of comments created by then; needs --build",
     )
     parser.add_argument(
         "--limit",
@@ -934,6 +1089,18 @@ def main():
         "listing was produced)",
     )
     args = parser.parse_args()
+    if args.before is not None:
+        others = (args.uses_schedule, args.vr_build)
+        if args.passed or args.groups or others != (None, None):
+            parser.error(
+                "--before goes with the not-ok listing of --group ID --build B only: "
+                "--passed lists clone sources, which are current jobs"
+            )
+        if args.build is None:
+            parser.error(
+                "--before needs --build B: the group's newest build may not have "
+                "existed then"
+            )
     if args.vr_build is not None:
         others = (args.group, args.groups, args.build, args.match, args.passed)
         others += (args.module, args.todo, args.include_softfailed, args.no_llm)

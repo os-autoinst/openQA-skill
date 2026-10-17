@@ -25,7 +25,7 @@ One line per script, generated from the parsers: do not edit it by hand. What a 
 - `oqa-job.py JOB [--settings REGEX] [--steps N] [--module NAME] [--all-steps] [--exit-code] [--verbose]`
 - `oqa-log.py JOB [--file NAME] [--list | --tail N | --grep REGEX | --errors | --runtimes | --members | --lines A-B] [--around-module MODULE] [--member PATH] [--compare JOB] [--context N] [--max-matches N] [--ignore-case] [--max-lines N] [--max-line-chars N] [--max-bytes BYTES] [--verbose] [--exit-code]`
 - `oqa-ref.py REF [--body] [--files] [--notes N]`
-- `oqa-sweep.py [--group ID]... [--build BUILD] [--todo] [--include-softfailed] [--test REGEX] [--limit N] [--no-llm] [--passed] [--module NAME] [--groups] [--match REGEX] [--uses-schedule PATH] [--vr-build LABEL] [--test-git-hash SHA] [--exit-code]`
+- `oqa-sweep.py [--group ID]... [--build BUILD] [--todo] [--include-softfailed] [--test REGEX] [--before TIME] [--limit N] [--no-llm] [--passed] [--module NAME] [--groups] [--match REGEX] [--uses-schedule PATH] [--vr-build LABEL] [--test-git-hash SHA] [--exit-code]`
 - `pr-queue.py [--repo O/R] [--newest N] [--me LOGIN]`
 - `refsection.py [--list] FILE [TITLE...]`; exit 1: section missing or ambiguous
 - `review-lint.py [FILE] --lines N [--lib] [--replies N] [--late]`; exit 1: findings
@@ -38,6 +38,7 @@ One line per script, generated from the parsers: do not edit it by hand. What a 
 `jobs?result=failed&latest=1` also lists failures whose restart passed; the overview route does not.
 
     oqa-sweep.py --group ID [--group ID ...] [--build B] [--todo] [--test REGEX] | --groups [--match REGEX]
+    oqa-sweep.py --group ID --build B --before TIME [--todo] [--test REGEX]    # the build as it stood then
     oqa-sweep.py --group ID [--build B] --passed [--module M] [--test REGEX] [--limit N]    # a source job to clone
     oqa-sweep.py --uses-schedule schedule/x/y.yaml (--group ID ... | --match REGEX)
     oqa-sweep.py --vr-build 'user/os-autoinst-distri-opensuse#123' [--test-git-hash SHA]    # a PR's verification runs
@@ -68,8 +69,19 @@ regex searches the newest 100 clone sources (the count line says when that windo
     group=1 name="openSUSE Tumbleweed" build=20260919 ... failed=2 labeled=2 unreviewed=0 state=reviewed scenario_prefix=...
     6228572 failed BCI-x86_64-bci_ruby_podman modules=bci_test_podman bugrefs=gh#SUSE/BCI-tests#1142
 
-`review=?`: comments not read (`mode=api-fallback`, request cap; the requests the builds and groups still
-to list need are kept back).
+`review=?`: comments not read (`mode=api-fallback` or `--before`, request cap; the requests the builds and
+groups still to list need are kept back).
+
+`--before TIME` (ISO 8601 such as `2030-01-02T10:00Z`, UTC without an offset; needs `--build`): the build as
+it stood then, for the breadth of an older failure (other arches, siblings) without the later restarts,
+reviews and results. Per scenario the newest job that had started by TIME, restarted later or not, with its
+result then: `running` when it finished later (no `modules=`; the count line says how many). Bugrefs,
+labels and LLM summaries come from the comments created by then. `as_of=` replaces the header counters,
+which are those of now; `note: as of <TIME>: N job(s) that started later left out; cost: 1 /api/v1/jobs
+request (<jobs>, <kB>) and <n> comments requests`. That one request per build carries every job of it with
+its module list (at most 1000 jobs, 8 MB, exit 2 beyond with advice; a `warning:` when 1000 came back):
+a literal `--test '^NAME$'` is sent as `test=NAME`, any other regex is applied after it. Not with
+`--passed` (clone sources are current jobs), `--groups`, `--uses-schedule` or `--vr-build`.
 
 `--passed`: passed and softfailed jobs (both clone sources; 10; nothing restarted), `--module M`
 only those in which M itself passed. Line:

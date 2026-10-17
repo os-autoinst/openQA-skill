@@ -1,0 +1,180 @@
+{
+ "jobs": [
+  {
+   "children": {
+    "Chained": [],
+    "Directly chained": [],
+    "Parallel": []
+   },
+   "clone_id": null,
+   "group": "Example Rolling",
+   "group_id": 7,
+   "id": 7311,
+   "modules": [
+    {
+     "category": "x",
+     "flags": [],
+     "name": "plasma",
+     "result": "passed"
+    }
+   ],
+   "name": "exampleos-Rolling-DVD-x86_64-Build20300102-kde@64bit",
+   "origin_id": 7302,
+   "parents": {
+    "Chained": [],
+    "Directly chained": [],
+    "Parallel": []
+   },
+   "result": "passed",
+   "settings": {
+    "ARCH": "x86_64",
+    "BUILD": "20300102",
+    "DISTRI": "exampleos",
+    "FLAVOR": "DVD",
+    "MACHINE": "64bit",
+    "TEST": "kde",
+    "VERSION": "Rolling"
+   },
+   "state": "done",
+   "t_finished": "2030-01-02T09:30:00",
+   "t_started": "2030-01-02T08:30:00",
+   "test": "kde"
+  },
+  {
+   "children": {
+    "Chained": [],
+    "Directly chained": [],
+    "Parallel": []
+   },
+   "clone_id": null,
+   "group": "Example Rolling",
+   "group_id": 7,
+   "id": 7310,
+   "modules": [
+    {
+     "category": "x",
+     "flags": [],
+     "name": "boot",
+     "result": "passed"
+    },
+    {
+     "category": "x",
+     "flags": [],
+     "name": "firefox",
+     "result": "passed"
+    }
+   ],
+   "name": "exampleos-Rolling-DVD-x86_64-Build20300102-gnome@64bit",
+   "origin_id": 7300,
+   "parents": {
+    "Chained": [],
+    "Directly chained": [],
+    "Parallel": []
+   },
+   "result": "passed",
+   "settings": {
+    "ARCH": "x86_64",
+    "BUILD": "20300102",
+    "DISTRI": "exampleos",
+    "FLAVOR": "DVD",
+    "MACHINE": "64bit",
+    "TEST": "gnome",
+    "VERSION": "Rolling"
+   },
+   "state": "done",
+   "t_finished": "2030-01-02T11:40:00",
+   "t_started": "2030-01-02T11:00:00",
+   "test": "gnome"
+  },
+  {
+   "children": {
+    "Chained": [],
+    "Directly chained": [],
+    "Parallel": []
+   },
+   "clone_id": null,
+   "group": "Example Rolling",
+   "group_id": 7,
+   "id": 7301,
+   "modules": [
+    {
+     "category": "x",
+     "flags": [],
+     "name": "boot",
+     "result": "passed"
+    },
+    {
+     "category": "x",
+     "flags": [],
+     "name": "firefox",
+     "result": "failed"
+    }
+   ],
+   "name": "exampleos-Rolling-DVD-aarch64-Build20300102-gnome@aarch64",
+   "parents": {
+    "Chained": [],
+    "Directly chained": [],
+    "Parallel": []
+   },
+   "result": "failed",
+   "settings": {
+    "ARCH": "aarch64",
+    "BUILD": "20300102",
+    "DISTRI": "exampleos",
+    "FLAVOR": "DVD",
+    "MACHINE": "aarch64",
+    "TEST": "gnome",
+    "VERSION": "Rolling"
+   },
+   "state": "done",
+   "t_finished": "2030-01-02T10:30:00",
+   "t_started": "2030-01-02T09:30:00",
+   "test": "gnome"
+  },
+  {
+   "children": {
+    "Chained": [],
+    "Directly chained": [],
+    "Parallel": []
+   },
+   "clone_id": 7310,
+   "group": "Example Rolling",
+   "group_id": 7,
+   "id": 7300,
+   "modules": [
+    {
+     "category": "x",
+     "flags": [],
+     "name": "boot",
+     "result": "passed"
+    },
+    {
+     "category": "x",
+     "flags": [],
+     "name": "firefox",
+     "result": "failed"
+    }
+   ],
+   "name": "exampleos-Rolling-DVD-x86_64-Build20300102-gnome@64bit",
+   "parents": {
+    "Chained": [],
+    "Directly chained": [],
+    "Parallel": []
+   },
+   "result": "failed",
+   "settings": {
+    "ARCH": "x86_64",
+    "BUILD": "20300102",
+    "DISTRI": "exampleos",
+    "FLAVOR": "DVD",
+    "MACHINE": "64bit",
+    "TEST": "gnome",
+    "VERSION": "Rolling"
+   },
+   "state": "done",
+   "t_finished": "2030-01-02T09:00:00",
+   "t_started": "2030-01-02T08:00:00",
+   "test": "gnome"
+  }
+ ]
+}

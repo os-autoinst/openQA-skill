@@ -24,6 +24,8 @@ PRODUCTION_HOSTS = ("openqa.opensuse.org", "openqa.suse.de", "openqa.debian.net"
 # A single argv string can be ~128 kB; nothing here needs more than a long SCHEDULE.
 MAX_ARG = 8192
 VARS_BYTES = 256 * 1024
+# What marks a public-cloud job in os-autoinst-distri-opensuse: is_public_cloud(), is_ec2() and siblings.
+PUBLIC_CLOUD_KEYS = ("PUBLIC_CLOUD", "PUBLIC_CLOUD_PROVIDER")
 HELPER_DEFAULTS = "--skip-chained-deps --parental-inheritance --within-instance"
 # --set must not fight the options that own these keys.
 MANAGED_KEYS = {
@@ -198,8 +200,9 @@ def github_casedir(user, repo, ref):
 
 
 def test_git_url(base_url, job_id, fixture_dir):
-    """TEST_GIT_URL from the job's vars.json, read from the host of the job URL. The file
-    also holds the job's token: nothing else of it is kept, and no value is echoed."""
+    """(TEST_GIT_URL, whether it is a public-cloud job) from the job's vars.json, read from
+    the host of the job URL. The file also holds the job's token: nothing else of it is
+    kept, and no value is echoed."""
     where = f"--test-hash: vars.json of job {job_id}"
     try:
         client = _oqa.Client(
@@ -226,7 +229,7 @@ def test_git_url(base_url, job_id, fixture_dir):
         raise UsageError(
             f"{where}: TEST_GIT_URL is not a plain http(s) Git URL (not echoed)"
         )
-    return url
+    return url, any(str(data.get(key) or "0") != "0" for key in PUBLIC_CLOUD_KEYS)
 
 
 def build(args):
@@ -283,6 +286,7 @@ def build(args):
         raise UsageError("--set NEEDLES_DIR conflicts with --needles-fork")
 
     hazards, notes = [], []
+    public_cloud = False
     extra = ["_GROUP=0"]
     overrides = ["_GROUP"]
 
@@ -313,7 +317,8 @@ def build(args):
         else:
             if args.test_hash:
                 label = f"tests-{args.test_hash[:12]}"
-                casedir = f"{test_git_url(base_url, job_id, args.fixture_dir)}#{args.test_hash}"
+                url, public_cloud = test_git_url(base_url, job_id, args.fixture_dir)
+                casedir = f"{url}#{args.test_hash}"
             else:
                 keys = [s["key"].removesuffix("[]") for s in settings]
                 keys += ["SCHEDULE"] * (args.schedule is not None)
@@ -427,6 +432,11 @@ def build(args):
             hazards.append(
                 "parent publishes assets and --skip-chained-deps is missing: the cloned parent "
                 "re-publishes the production file name"
+            )
+        if public_cloud and args.skip_chained_deps:
+            hazards.append(
+                "public-cloud job with --skip-chained-deps: the image its upload parent "
+                "published may have been deleted since"
             )
     command += [job_url] + extra
     if _USER_PLACEHOLDER in (args.fork, args.needles_fork) or _BRANCH_PLACEHOLDER in (

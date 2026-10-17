@@ -40,7 +40,7 @@ review: reviewed=yes bugrefs=poo#123456,bootloader_uefi#1,gh#example/repo#77 lab
 comment=11 by=geekotest class=bot created=2030-01-02T03:04
   text="1. point 1"
 comment=12 by=hookbot class=bot created=2030-01-02T03:04
-  text="Investigate retry job *textmode:investigate:retry*: t#510 failed."
+  text="Investigate retry job *textmode:investigate:retry*: t#510 failed. **Likely not a sporadic failure**."
 comment=13 by=reviewer_a class=carried-over created=2030-01-02T03:04 bugrefs=poo#123456 carried_over_from=400
 comment=14 by=reviewer_b class=automated created=2030-01-02T03:04
   text="grub menu not shown."

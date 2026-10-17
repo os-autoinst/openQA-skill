@@ -1,0 +1,94 @@
+{
+ "jobs": [
+  {
+   "children": {
+    "Chained": [],
+    "Directly chained": [],
+    "Parallel": []
+   },
+   "clone_id": null,
+   "group_id": 7,
+   "id": 7101,
+   "modules": [
+    {
+     "category": "x",
+     "flags": [],
+     "name": "boot",
+     "result": "passed"
+    },
+    {
+     "category": "x",
+     "flags": [],
+     "name": "zypper_up",
+     "result": "passed"
+    }
+   ],
+   "name": "exampleos-Rolling-DVD-x86_64-Build20300102-textmode@64bit",
+   "parents": {
+    "Chained": [
+     7100
+    ],
+    "Directly chained": [],
+    "Parallel": []
+   },
+   "result": "passed",
+   "settings": {
+    "ARCH": "x86_64",
+    "BUILD": "20300102",
+    "DISTRI": "exampleos",
+    "FLAVOR": "DVD",
+    "HDD_1": "exampleos-Rolling-x86_64-20300102-textmode@64bit.qcow2",
+    "MACHINE": "64bit",
+    "TEST": "textmode",
+    "VERSION": "Rolling"
+   },
+   "state": "done",
+   "test": "textmode"
+  },
+  {
+   "children": {
+    "Chained": [],
+    "Directly chained": [],
+    "Parallel": []
+   },
+   "clone_id": null,
+   "group_id": 7,
+   "id": 7102,
+   "modules": [
+    {
+     "category": "x",
+     "flags": [],
+     "name": "zypper_up",
+     "result": "passed"
+    }
+   ],
+   "name": "exampleos-Rolling-DVD-x86_64-Build20300102-mm-client@64bit-2G",
+   "parents": {
+    "Chained": [
+     7100,
+     true,
+     -1,
+     0,
+     10000000000000000000
+    ],
+    "Directly chained": [],
+    "Parallel": [
+     7105
+    ]
+   },
+   "result": "passed",
+   "settings": {
+    "ARCH": "x86_64",
+    "BUILD": "20300102",
+    "DISTRI": "exampleos",
+    "FLAVOR": "DVD",
+    "HDD_1": "exampleos-Rolling-x86_64-20300102-textmode@64bit.qcow2",
+    "MACHINE": "64bit-2G",
+    "TEST": "mm-client",
+    "VERSION": "Rolling"
+   },
+   "state": "done",
+   "test": "mm-client"
+  }
+ ]
+}

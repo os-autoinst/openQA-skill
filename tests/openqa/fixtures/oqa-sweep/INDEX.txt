@@ -23,6 +23,10 @@ api_v1_jobs_groupid=7_build=20300102_version=Rolling_scope=current_latest=1_resu
     GET /api/v1/jobs?groupid=7&build=20300102&version=Rolling&scope=current&latest=1&result=passed,softfailed&limit=10
 api_v1_jobs_groupid=7_build=20300102_version=Rolling_scope=current_latest=1_result=passed_softfailed_limit=2.json
     GET /api/v1/jobs?groupid=7&build=20300102&version=Rolling&scope=current&latest=1&result=passed,softfailed&limit=2
+api_v1_jobs_groupid=7_build=20300102_version=Rolling_scope=current_latest=1_result=passed_softfailed_limit=100.json
+    GET /api/v1/jobs?groupid=7&build=20300102&version=Rolling&scope=current&latest=1&result=passed,softfailed&limit=100
+api_v1_jobs_groupid=7_build=20300102_version=Rolling_scope=current_latest=1_result=passed_softfailed_test=textmode_limit=10.json
+    GET /api/v1/jobs?groupid=7&build=20300102&version=Rolling&scope=current&latest=1&result=passed,softfailed&test=textmode&limit=10
 api_v1_jobs_groupid=7_build=20300102_version=Rolling_scope=current_latest=1_result=passed_softfailed_modules=no_such_mod_fd3494f1ee33.json
     GET /api/v1/jobs?groupid=7&build=20300102&version=Rolling&scope=current&latest=1&result=passed,softfailed&modules=no_such_module&modules_result=passed&limit=10
 api_v1_jobs_groupid=7_build=20300102_version=Rolling_scope=current_latest=1_result=passed_softfailed_modules=zypper_up_modules_result=passed_limit=10.json

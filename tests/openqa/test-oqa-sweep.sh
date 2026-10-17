@@ -200,7 +200,7 @@ check "--test in the API fallback: filtered before the comments are read" "8001 
 	"$(grep -E '^[0-9]{4} ' <<<"$actual" | cut -d' ' -f1 | xargs) $(tail -n 1 <<<"$actual")"
 check "--test matches the name without @machine, in the overview as in the API fallback" "7011|8002" \
 	"$(sweep --group 7 --test '^mm-client$' | grep -E '^[0-9]{4} ' | cut -d' ' -f1 | xargs)|$(sweep --group 8 --test '^mm-client$' | grep -E '^[0-9]{4} ' | cut -d' ' -f1 | xargs)"
-for other in '--passed' '--groups' '--uses-schedule schedule/x.yaml' '--vr-build u/r#1'; do
+for other in '--groups' '--uses-schedule schedule/x.yaml' '--vr-build u/r#1'; do
 	# shellcheck disable=SC2086 # one flag and its value
 	sweep --group 7 --test x $other >/dev/null 2>&1
 	check "--test with $other is a usage error" 2 $?
@@ -321,6 +321,30 @@ check "--passed --limit caps the lines and says so" "2 1" \
 	"$(grep -Ec '^[0-9]{4} ' <<<"$actual") $(grep -c '^2 current passed or softfailed jobs, more may exist (--limit N)$' <<<"$actual")"
 sweep --group 99 --passed >/dev/null 2>&1
 check "--passed: unknown group exits 2" 2 $?
+
+actual=$(sweep --group 7 --passed --test '^textmode$')
+check "--passed --test: a literal name is filtered by openQA, a job of another test it sends is dropped" \
+	"0 7101 1 requests: 2" \
+	"$? $(grep -Eo '^[0-9]{4} ' <<<"$actual" | xargs) $(grep -c '^1 current passed or softfailed jobs whose test matches --test$' <<<"$actual") $(tail -n 1 <<<"$actual")"
+actual=$(sweep --group 7 --passed --test '^(textmode|mm-client)$')
+check "--passed --test: a regex matches TEST without @machine over the newest 100 clone sources" "7101 7102 1" \
+	"$(grep -Eo '^[0-9]{4} ' <<<"$actual" | xargs) $(grep -c '^2 current passed or softfailed jobs whose test matches --test$' <<<"$actual")"
+tmpw=$(mktemp -d)
+python3 - "$tmpw" "$(dirname "$script")" <<'PY'
+import json, os, sys
+out = sys.argv[1]
+sys.path.insert(0, sys.argv[2])
+import _oqa
+write = lambda path, params, data: json.dump(data, open(os.path.join(out, _oqa.fixture_name(path, params) + ".json"), "w"))
+write("/api/v1/job_groups/70/build_results", {"show_tags": 1}, {"group": {"name": "g"}, "build_results": [{"build": "B"}]})
+params = [("groupid", 70), ("build", "B"), ("scope", "current"), ("latest", 1), ("result", "passed,softfailed"), ("limit", 100)]
+jobs = [{"id": i, "result": "passed", "settings": {"TEST": f"other{i}"}} for i in range(1, 101)]
+write("/api/v1/jobs", params, {"jobs": jobs})
+PY
+actual=$(python3 "$script" --host https://openqa.example.org --fixture-dir "$tmpw" --group 70 --build B --passed --test 'wanted')
+rm -r "$tmpw"
+check "--passed --test: a full window without a match says that only the newest 100 were searched" 1 \
+	"$(grep -c "^0 current passed or softfailed jobs whose test matches --test, only the newest 100 were searched ('^NAME\$' is filtered by openQA)$" <<<"$actual")"
 
 # --- groups listing -------------------------------------------------------------
 actual=$(sweep --groups)

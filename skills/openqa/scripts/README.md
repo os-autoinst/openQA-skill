@@ -38,7 +38,7 @@ One line per script, generated from the parsers: do not edit it by hand. What a 
 `jobs?result=failed&latest=1` also lists failures whose restart passed; the overview route does not.
 
     oqa-sweep.py --group ID [--group ID ...] [--build B] [--todo] [--test REGEX] | --groups [--match REGEX]
-    oqa-sweep.py --group ID [--build B] --passed [--module M] [--limit N]    # a source job to clone
+    oqa-sweep.py --group ID [--build B] --passed [--module M] [--test REGEX] [--limit N]    # a source job to clone
     oqa-sweep.py --uses-schedule schedule/x/y.yaml (--group ID ... | --match REGEX)
     oqa-sweep.py --vr-build 'user/os-autoinst-distri-opensuse#123' [--test-git-hash SHA]    # a PR's verification runs
 
@@ -59,7 +59,8 @@ grouping, never verdicts. A missing summary, unreadable comments or a spent requ
 `--test REGEX` only jobs whose test name it matches (searched, case-sensitive, in the name without the
 `@machine` the overview adds), e.g. `--test '^ltp_syscalls$'` for one scenario across
 flavors and arches, the count line then ends `whose test matches --test` and the header counters stay
-the build's; the default listing only.
+the build's; also with `--passed`, where openQA filters a literal `'^NAME$'` (`test=NAME`) and any other
+regex searches the newest 100 clone sources (the count line says when that window was full).
 `--exit-code`: also 1 when `--passed`, `--groups`, `--uses-schedule`, `--vr-build` list nothing.
 `victims parent=ID never_ran=N jobs=...`: jobs that never ran. Extras: `restarts=`, `origin=`, `parents=`
 (triage that parent).

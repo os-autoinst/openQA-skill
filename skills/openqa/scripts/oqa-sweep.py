@@ -34,7 +34,8 @@ whole build.
 build, either is a source to clone for a verification run; --module M keeps
 those in which M itself passed. Line: <id> <test@machine> result= arch= flavor=,
 then hdd= (HDD_1, the image the job boots), publishes= (PUBLISH_HDD_1) and
-parents= when set.
+parents= when set. --test keeps those whose TEST it matches: openQA filters a
+literal '^NAME$' (test=NAME), any other regex searches the newest 100 such jobs.
 
 --uses-schedule PATH answers "which scenarios does a change to this schedule
 file reach": in the groups given by --group ID and/or --match REGEX (on
@@ -102,6 +103,10 @@ ENTRY_RESERVE = 2
 # Per group still to be listed: build results and its first entry.
 GROUP_RESERVE = 1 + ENTRY_RESERVE
 CLONE_SOURCES = ("passed", "softfailed")
+# --test that openQA can filter itself: its test= is an exact match.
+LITERAL_TEST = re.compile(r"\^([A-Za-z0-9_-]+)\$")
+# Clone sources searched for any other --test: openQA cuts at its limit before we can match.
+TEST_WINDOW = 100
 MAX_SCHEDULE_GROUPS = 12
 # --match runs the user's regex over a name the server chose: an unbounded
 # subject turns an ordinary ".*a.*b" into minutes of backtracking.
@@ -256,7 +261,7 @@ def overview_jobs(client, group, entry, results, todo, pattern=None):
     return _of_test(jobs, pattern), bool(data.get("limit_exceeded"))
 
 
-def _of_test(jobs, pattern):
+def _of_test(jobs, pattern, name=lambda job: job["test"]):
     """The jobs whose test name --test matches; all of them without --test. The overview
     names a test on a machine other than the preferred one TEST@MACHINE, /api/v1 plain
     TEST: the match is on TEST in both."""
@@ -265,7 +270,7 @@ def _of_test(jobs, pattern):
     return [
         job
         for job in jobs
-        if pattern.search(str(job["test"]).split("@", 1)[0][:MATCH_CHARS])
+        if pattern.search(str(name(job)).split("@", 1)[0][:MATCH_CHARS])
     ]
 
 
@@ -517,9 +522,15 @@ def sweep(client, group, args, results, reserve=0):
     return listed
 
 
-def passed_jobs(client, group, entry, module, limit):
+def _literal_test(pattern):
+    match = pattern and LITERAL_TEST.fullmatch(pattern.pattern)
+    return match.group(1) if match else None
+
+
+def passed_jobs(client, group, entry, module, limit, pattern=None):
     """scope=current drops jobs that were restarted afterwards. Name and
-    result of the module are matched on the same row, so it is M that passed."""
+    result of the module are matched on the same row, so it is M that passed.
+    Returns (jobs, whether the server may have more)."""
     params = [("groupid", group), ("build", entry["build"])]
     if entry.get("version") is not None:
         params.append(("version", entry["version"]))
@@ -527,17 +538,24 @@ def passed_jobs(client, group, entry, module, limit):
     params.append(("result", ",".join(CLONE_SOURCES)))
     if module:
         params += [("modules", module), ("modules_result", "passed")]
-    params.append(("limit", limit))
+    fetch, name = limit, _literal_test(pattern)
+    if name:
+        params.append(("test", name))
+    elif pattern:
+        fetch = max(limit, TEST_WINDOW)
+    params.append(("limit", fetch))
     jobs = client.get_json("/api/v1/jobs", params).get("jobs") or ()
     # Checked again here: a server that ignores a filter must not widen the list.
-    return [
+    kept = [
         job
         for job in jobs
         if _oqa.job_id_of(job.get("id"))
         and job.get("result") in CLONE_SOURCES
         and not job.get("clone_id")
         and (not module or _module_passed(job, module))
-    ][:limit]
+    ]
+    kept = _of_test(kept, pattern, lambda job: (job.get("settings") or {}).get("TEST"))
+    return kept[:limit], len(jobs) >= fetch
 
 
 def _module_passed(job, module):
@@ -574,14 +592,22 @@ def sweep_passed(client, group, args):
     name, entries = pick_builds(client, group, args.build)
     listed = 0
     for entry in entries:
-        jobs = passed_jobs(client, group, entry, args.module, args.limit)
+        jobs, more = passed_jobs(
+            client, group, entry, args.module, args.limit, args.test
+        )
         print(header(group, name, entry, MODE_OVERVIEW, ""))
         for job in sorted(jobs, key=lambda job: job["id"]):
             print(passed_line(job))
         kind = "current passed or softfailed jobs"
         if args.module:
             kind += f" with module {tok(args.module, 60)} passed"
-        cut = ", more may exist (--limit N)" if len(jobs) == args.limit else ""
+        if args.test:
+            kind += " whose test matches --test"
+        cut = ", more may exist (--limit N)" if more else ""
+        windowed = args.test and not _literal_test(args.test)
+        if more and windowed and len(jobs) < args.limit:
+            window = max(args.limit, TEST_WINDOW)
+            cut = f", only the newest {window} were searched ('^NAME$' is filtered by openQA)"
         print(f"{len(jobs)} {kind}{cut}")
         listed += len(jobs)
     return listed
@@ -847,7 +873,8 @@ def main():
         metavar="REGEX",
         help="only jobs whose test name, without @machine, matches (a Python regex "
         "searched in it, case-sensitive), e.g. '^ltp_syscalls$' for one scenario across "
-        "flavors and arches",
+        "flavors and arches; with --passed openQA filters such a literal name, any other "
+        "regex searches the newest 100 clone sources",
     )
     parser.add_argument(
         "--limit",
@@ -942,10 +969,12 @@ def main():
         parser.error("--match needs --groups or --uses-schedule")
     if args.module and not args.passed:
         parser.error("--module needs --passed")
-    if args.test and (args.passed or not args.group or args.uses_schedule is not None):
-        parser.error("--test goes with --group ID [--build B] listing not-ok jobs only")
+    if args.test and (not args.group or args.uses_schedule is not None):
+        parser.error("--test goes with --group ID [--build B] [--passed] only")
     if args.passed and (args.groups or args.todo or args.include_softfailed):
-        parser.error("--passed goes with --group, --build, --module and --limit only")
+        parser.error(
+            "--passed goes with --group, --build, --module, --test and --limit only"
+        )
     if args.limit is None:
         args.limit = 10 if args.passed else 30
 

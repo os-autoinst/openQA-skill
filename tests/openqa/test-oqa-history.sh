@@ -127,7 +127,8 @@ python3 - "$tmp" <<'PY'
 import json, sys
 rows = [{"id": 6000 - i, "build": "1", "result": "passed", "state": "done", "iscurrent": 1 if i == 0 else None}
         for i in range(31)]
-json.dump({"data": rows}, open(f"{sys.argv[1]}/tests_6000_ajax_previous_limit=30_next_limit=0.json", "w"))
+for following in (0, 20):
+    json.dump({"data": rows}, open(f"{sys.argv[1]}/tests_6000_ajax_previous_limit=30_next_limit={following}.json", "w"))
 for part in (rows[:25], rows[25:]):
     name = "api_v1_jobs_ids=" + "_".join(str(row["id"]) for row in part)
     jobs = [{"id": row["id"], "t_started": "2030-01-01T10:00:00", "assigned_worker_id": 100 + row["id"] % 25} for row in part]
@@ -240,6 +241,24 @@ requests: 4
 EOF
 )" "$(tail -6 <<<"$actual")"
 check "--before: hostile comment text yields only the label openQA would parse" 0 "$(grep -Ec '\[31m|<<<END' <<<"$actual")"
+# The runs after the job: the answer to next_limit=0 holds only the nearest one and the latest,
+# the restart 7210 of 7200 that passed before --before comes only with a larger next_limit.
+tmp=$(mktemp -d)
+python3 - "$tmp" <<'PY'
+import json, sys
+row = lambda i, result, finished, clone=None: {"id": i, "build": "1", "state": "done", "result": result,
+    "failedmodules": ["boot"] if result == "failed" else [], "iscurrent": 1 if i == 7200 else None,
+    "finished": finished, "duration": "10:00 minutes", "clone": clone}
+rows = [row(7220, "passed", "2030-01-03T10:00:00Z"), row(7205, "passed", "2030-01-02T09:00:00Z"),
+        row(7200, "failed", "2030-01-02T08:00:00Z", 7210), row(7190, "passed", "2030-01-01T08:00:00Z")]
+for limit, extra in ((0, []), (20, [row(7210, "passed", "2030-01-02T10:00:00Z")])):
+    json.dump({"data": rows + extra}, open(f"{sys.argv[1]}/tests_7200_ajax_previous_limit=10_next_limit={limit}.json", "w"))
+PY
+actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 7200 --before 2030-01-02T12:00Z)
+rm -rf "$tmp"
+check "--before: the runs after the job up to it are read, the job's restart among them" \
+	"1 7210|note: 2 newer run(s) not counted, latest=7210; 1 run(s) that started after --before cut" \
+	"$(grep -c '^7210 ' <<<"$actual") $(awk '$1 == 7200 {print $NF}' <<<"$actual")|$(grep '^note: 2' <<<"$actual")"
 actual=$(history 5100 --before 2030-01-02T00:00+00:00)
 check "--before: a newer run that started later is cut and counted in the note" "0 1" \
 	"$(grep -c '^5190 ' <<<"$actual") $(grep -c '^note: 1 run(s) that started after --before cut$' <<<"$actual")"
@@ -266,6 +285,7 @@ name = "tests_5000_ajax_previous_limit=10_next_limit=0.json"
 data = json.load(open(f"{sys.argv[1]}/{name}"))
 data["data"][0]["clone"] = 5555
 json.dump(data, open(f"{sys.argv[2]}/{name}", "w"))
+json.dump(data, open(f"{sys.argv[2]}/{name.replace('=0.', '=20.')}", "w"))
 PY
 actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 5000 --before 2030-01-01T10:00Z)
 check "--before: comments that cannot be read leave bugrefs and label unknown" 1 \
@@ -284,6 +304,7 @@ name = f"{sys.argv[1]}/tests_5000_ajax_previous_limit=10_next_limit=0.json"
 data = json.load(open(name))
 data["data"][0].update(result="softfailed", comment_data={"bugs": [], "label": "force_result:softfailed"})
 json.dump(data, open(name, "w"))
+json.dump(data, open(name.replace("=0.", "=20."), "w"))
 comment = lambda i, created, text: {"id": i, "bugrefs": [], "created": created, "text": text}
 json.dump([comment(30, "2030-01-01 11:00:00 +0000", "label:force_result:softfailed:accepted")],
           open(f"{sys.argv[1]}/api_v1_jobs_5000_comments.json", "w"))

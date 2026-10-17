@@ -1,0 +1,318 @@
+{
+ "data": [
+  {
+   "DT_RowId": "job_result_5190",
+   "arch": "x86_64",
+   "build": "20300107",
+   "clone": null,
+   "comment_data": 0,
+   "deps": {
+    "children": {
+     "Chained": [],
+     "Directly chained": [],
+     "Parallel": []
+    },
+    "has_parents": 0,
+    "parents": {
+     "Chained": [],
+     "Directly chained": [],
+     "Parallel": []
+    },
+    "parents_ok": 1
+   },
+   "distri": "exampleos",
+   "duration": 0,
+   "failedmodules": [],
+   "finished": null,
+   "flavor": "DVD",
+   "group": 7,
+   "id": 5190,
+   "iscurrent": null,
+   "machine": "64bit",
+   "name": "exampleos-1-DVD-x86_64-Build20300107-textmode@64bit",
+   "restarts": 0,
+   "result": "none",
+   "result_stats": {
+    "failed": 0,
+    "none": 0,
+    "passed": 5,
+    "skipped": 0,
+    "softfailed": 0
+   },
+   "state": "running",
+   "test": "textmode@64bit",
+   "testtime": "2030-01-01T10:00:00Z",
+   "version": "1",
+   "islatest": 1
+  },
+  {
+   "DT_RowId": "job_result_5100",
+   "arch": "x86_64",
+   "build": "20300105",
+   "clone": null,
+   "comment_data": 0,
+   "deps": {
+    "children": {
+     "Chained": [],
+     "Directly chained": [],
+     "Parallel": []
+    },
+    "has_parents": 0,
+    "parents": {
+     "Chained": [],
+     "Directly chained": [],
+     "Parallel": []
+    },
+    "parents_ok": 1
+   },
+   "distri": "exampleos",
+   "duration": "30:00 minutes",
+   "failedmodules": [
+    "yast2_lan"
+   ],
+   "finished": "2030-01-01T10:30:00Z",
+   "flavor": "DVD",
+   "group": 7,
+   "id": 5100,
+   "iscurrent": 1,
+   "machine": "64bit",
+   "name": "exampleos-1-DVD-x86_64-Build20300105-textmode@64bit",
+   "restarts": 0,
+   "result": "failed",
+   "result_stats": {
+    "failed": 1,
+    "none": 0,
+    "passed": 5,
+    "skipped": 0,
+    "softfailed": 0
+   },
+   "state": "done",
+   "test": "textmode@64bit",
+   "testtime": "2030-01-01T10:00:00Z",
+   "version": "1"
+  },
+  {
+   "DT_RowId": "job_result_5090",
+   "arch": "x86_64",
+   "build": "20300104",
+   "clone": null,
+   "comment_data": 0,
+   "deps": {
+    "children": {
+     "Chained": [],
+     "Directly chained": [],
+     "Parallel": []
+    },
+    "has_parents": 0,
+    "parents": {
+     "Chained": [],
+     "Directly chained": [],
+     "Parallel": []
+    },
+    "parents_ok": 1
+   },
+   "distri": "exampleos",
+   "duration": "30:00 minutes",
+   "failedmodules": [],
+   "finished": "2030-01-01T09:30:00Z",
+   "flavor": "DVD",
+   "group": 7,
+   "id": 5090,
+   "iscurrent": null,
+   "machine": "64bit",
+   "name": "exampleos-1-DVD-x86_64-Build20300104-textmode@64bit",
+   "restarts": 0,
+   "result": "passed",
+   "result_stats": {
+    "failed": 0,
+    "none": 0,
+    "passed": 5,
+    "skipped": 0,
+    "softfailed": 0
+   },
+   "state": "done",
+   "test": "textmode@64bit",
+   "testtime": "2030-01-01T10:00:00Z",
+   "version": "1"
+  },
+  {
+   "DT_RowId": "job_result_5080",
+   "arch": "x86_64",
+   "build": "20300103",
+   "clone": null,
+   "comment_data": 0,
+   "deps": {
+    "children": {
+     "Chained": [],
+     "Directly chained": [],
+     "Parallel": []
+    },
+    "has_parents": 0,
+    "parents": {
+     "Chained": [],
+     "Directly chained": [],
+     "Parallel": []
+    },
+    "parents_ok": 1
+   },
+   "distri": "exampleos",
+   "duration": "30:00 minutes",
+   "failedmodules": [
+    "yast2_lan"
+   ],
+   "finished": "2030-01-01T08:30:00Z",
+   "flavor": "DVD",
+   "group": 7,
+   "id": 5080,
+   "iscurrent": null,
+   "machine": "64bit",
+   "name": "exampleos-1-DVD-x86_64-Build20300103-textmode@64bit",
+   "restarts": 0,
+   "result": "failed",
+   "result_stats": {
+    "failed": 1,
+    "none": 0,
+    "passed": 5,
+    "skipped": 0,
+    "softfailed": 0
+   },
+   "state": "done",
+   "test": "textmode@64bit",
+   "testtime": "2030-01-01T10:00:00Z",
+   "version": "1"
+  },
+  {
+   "DT_RowId": "job_result_5070",
+   "arch": "x86_64",
+   "build": "20300102",
+   "clone": null,
+   "comment_data": 0,
+   "deps": {
+    "children": {
+     "Chained": [],
+     "Directly chained": [],
+     "Parallel": []
+    },
+    "has_parents": 0,
+    "parents": {
+     "Chained": [],
+     "Directly chained": [],
+     "Parallel": []
+    },
+    "parents_ok": 1
+   },
+   "distri": "exampleos",
+   "duration": "30:00 minutes",
+   "failedmodules": [],
+   "finished": "2030-01-01T07:30:00Z",
+   "flavor": "DVD",
+   "group": 7,
+   "id": 5070,
+   "iscurrent": null,
+   "machine": "64bit",
+   "name": "exampleos-1-DVD-x86_64-Build20300102-textmode@64bit",
+   "restarts": 0,
+   "result": "passed",
+   "result_stats": {
+    "failed": 0,
+    "none": 0,
+    "passed": 5,
+    "skipped": 0,
+    "softfailed": 0
+   },
+   "state": "done",
+   "test": "textmode@64bit",
+   "testtime": "2030-01-01T10:00:00Z",
+   "version": "1"
+  },
+  {
+   "DT_RowId": "job_result_5060",
+   "arch": "x86_64",
+   "build": "20300101",
+   "clone": null,
+   "comment_data": 0,
+   "deps": {
+    "children": {
+     "Chained": [],
+     "Directly chained": [],
+     "Parallel": []
+    },
+    "has_parents": 0,
+    "parents": {
+     "Chained": [],
+     "Directly chained": [],
+     "Parallel": []
+    },
+    "parents_ok": 1
+   },
+   "distri": "exampleos",
+   "duration": "30:00 minutes",
+   "failedmodules": [],
+   "finished": "2030-01-01T06:30:00Z",
+   "flavor": "DVD",
+   "group": 7,
+   "id": 5060,
+   "iscurrent": null,
+   "machine": "64bit",
+   "name": "exampleos-1-DVD-x86_64-Build20300101-textmode@64bit",
+   "restarts": 0,
+   "result": "incomplete",
+   "result_stats": {
+    "failed": 0,
+    "none": 0,
+    "passed": 5,
+    "skipped": 0,
+    "softfailed": 0
+   },
+   "state": "done",
+   "test": "textmode@64bit",
+   "testtime": "2030-01-01T10:00:00Z",
+   "version": "1"
+  },
+  {
+   "DT_RowId": "job_result_5050",
+   "arch": "x86_64",
+   "build": "20291231",
+   "clone": null,
+   "comment_data": 0,
+   "deps": {
+    "children": {
+     "Chained": [],
+     "Directly chained": [],
+     "Parallel": []
+    },
+    "has_parents": 0,
+    "parents": {
+     "Chained": [],
+     "Directly chained": [],
+     "Parallel": []
+    },
+    "parents_ok": 1
+   },
+   "distri": "exampleos",
+   "duration": "30:00 minutes",
+   "failedmodules": [],
+   "finished": "2030-01-01T05:30:00Z",
+   "flavor": "DVD",
+   "group": 7,
+   "id": 5050,
+   "iscurrent": null,
+   "machine": "64bit",
+   "name": "exampleos-1-DVD-x86_64-Build20291231-textmode@64bit",
+   "restarts": 0,
+   "result": "passed",
+   "result_stats": {
+    "failed": 0,
+    "none": 0,
+    "passed": 5,
+    "skipped": 0,
+    "softfailed": 0
+   },
+   "state": "done",
+   "test": "textmode@64bit",
+   "testtime": "2030-01-01T10:00:00Z",
+   "version": "1"
+  }
+ ],
+ "info": []
+}

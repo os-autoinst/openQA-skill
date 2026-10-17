@@ -398,6 +398,17 @@ def row_times(row, runs):
     )
 
 
+def by_start(rows, runs):
+    """Newest start first, rows whose start is unknown on top in id order: a run created
+    early that waited for a worker ran after the runs that started before it."""
+
+    def key(row):
+        started = row_times(row, runs)[0]
+        return started is not None, -(started.timestamp() if started else 0), -row["id"]
+
+    return sorted(rows, key=key)
+
+
 def as_of(before, runs, current, newer, older):
     """The rows as they stood at `before`: a run that started later is cut, one still going
     then shows as running. Returns (current, newer, older, number cut)."""
@@ -1178,6 +1189,7 @@ def main():
             return {**row, "result": forced[row["id"]]} if row["id"] in forced else row
 
         current, newer, older = then(current), [*map(then, newer)], [*map(then, older)]
+    newer, older = by_start(newer, runs), by_start(older, runs)
     rows = [*newer, current, *older]
     workers = None
     if full and runs is not None:

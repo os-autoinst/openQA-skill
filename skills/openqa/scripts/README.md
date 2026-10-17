@@ -214,8 +214,8 @@ lines=N`; `hits=-` when it holds none, no line when the job has no such file. `[
 `kernel: `, a line without either only in the kernel's own wording (`WARNING: CPU: 2 PID: 812`, `WARNING:`
 with a source file, `BUG: soft lockup` and the like, `Oops:`), as programs print `WARNING:` too, and a
 `BTRFS` line's `Transaction aborted`; the signatures of `autoinst-log.txt` apply there too, and
-`--file serial_terminal.txt --errors` uses the same set. Each block keeps its first 3 hits per label and
-at most `--max-lines` lines. With only a `Test died` hit and no serial-terminal hit, a hint points at
+`--file serial_terminal.txt --errors` uses the same set. Each block keeps its first 3 hits per label, and
+every `# Test died` line whatever its label, as non-fatal hits come first, and at most `--max-lines` lines. With only a `Test died` hit and no serial-terminal hit, a hint points at
 `serial_terminal.txt` and the module's ulogs.
 
 `--grep` prints the first `--max-matches` matches (10) with `--context` lines around each, and of those at

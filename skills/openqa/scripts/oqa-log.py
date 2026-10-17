@@ -99,7 +99,7 @@ SLOWER_FACTOR = 2
 SLOWER_SECONDS = 60
 _TIMESTAMPED = re.compile(r"^\[\d{4}-\d\d-\d\dT")
 _PREFIX = re.compile(
-    r"^\[\d{4}-\d\d-\d\dT(\d\d:\d\d:\d\d)[\d.]*Z?\] \[(\w+)\] (?:\[pid:\d+\] )?"
+    r"^\[\d{4}-\d\d-\d\dT(\d\d:\d\d:\d\d)[\d.]*(?:Z|[+-]\d\d:?\d\d)?\] \[(\w+)\] (?:\[pid:\d+\] )?"
 )
 _DIED = re.compile(r"# Test died")
 # What os-autoinst logs about its own console plumbing for every testapi call.
@@ -705,7 +705,8 @@ def mode_errors(lines, verbose, signatures=SIGNATURES):
             if not pattern.search(probe):
                 continue
             counts[label] = counts.get(label, 0) + 1
-            if counts[label] <= PER_LABEL and index not in taken:
+            # Non-fatal hits of the same label must not hide the line that ended a module.
+            if (counts[label] <= PER_LABEL or _DIED.search(probe)) and index not in taken:
                 taken.add(index)
                 # The module name is log text: capped and quoted, or it forges
                 # a second "[label]" of its own.

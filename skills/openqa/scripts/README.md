@@ -219,7 +219,9 @@ after the die message, with the `--around-module M --lines A-B` that reads them.
 the job has one, as suite verdicts and kernel splats are there, and prints its hits after the first block,
 under their own header line and fence: `file=serial_terminal.txt mode=errors hits=suite:2,kernel:1
 lines=N`; `hits=-` when it holds none, no line when the job has no such file. `[suite]` marks `TFAIL`,
-`TBROK`, a TAP `not ok`, `Failures:`; `[kernel]` marks `WARNING:`, `BUG:`, `Oops:`, `Call Trace` (with the
+`TBROK`, a TAP `not ok`, `Failures:`; `[pytest]` a line starting `FAILED ` or `E   ` and a summary `=== N
+failed`; `[k8s]` a line starting `error: ` (kubectl), `Error from server`, helm's `Error: INSTALLATION
+FAILED:` or `UPGRADE FAILED:`, and these two in `autoinst-log.txt` too; `[kernel]` marks `WARNING:`, `BUG:`, `Oops:`, `Call Trace` (with the
 4 lines after it) after a printk time (`[   12.345678] `, maybe with a caller id `[  T812]`) or a journal's
 `kernel: `, a line without either only in the kernel's own wording (`WARNING: CPU: 2 PID: 812`, `WARNING:`
 with a source file, `BUG: soft lockup` and the like, `Oops:`), as programs print `WARNING:` too, and a

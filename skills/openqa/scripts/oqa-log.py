@@ -142,6 +142,20 @@ def _signature(label, alternatives, after=0, continuation=False):
     return label, re.compile("|".join(alternatives)), after, continuation
 
 
+# Verdict lines of the runners and cluster tools tests drive, in the wording each prints
+# (pytest's short summary and assertion lines, kubectl's and helm's error lines).
+RUNNER_SIGNATURES = (
+    _signature("pytest", [r"^FAILED ", r"^E   ", r"^=+ .*\b\d+ failed\b"]),
+    _signature(
+        "k8s",
+        [
+            r"^error: ",
+            r"Error from server\b",
+            r"^Error: (?:INSTALLATION|UPGRADE) FAILED: ",
+        ],
+    ),
+)
+
 SIGNATURES = (
     _signature("hook", [r"post_fail_hook failed: "]),
     _signature(
@@ -185,6 +199,7 @@ SIGNATURES = (
             r"^not ok\b",
         ],
     ),
+    *RUNNER_SIGNATURES,
     _signature(
         "backend", [r"Backend process died, backend errors are reported below"], 12
     ),
@@ -282,6 +297,7 @@ SERIAL_SIGNATURES = (
     _signature(
         "suite", [r"\bTFAIL\b", r"\bTBROK\b", r"^\s*(?:#\s*)?not ok\b", r"^Failures:"]
     ),
+    *RUNNER_SIGNATURES,
     *KERNEL_SIGNATURES,
     *SIGNATURES,
 )

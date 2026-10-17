@@ -337,6 +337,22 @@ check "--errors: no hint once serial0.txt explains the death" 0 "$(grep -c '^hin
 actual=$(log 4242 --errors)
 contains "--errors: a printk-stamped kernel panic in serial0.txt is a kernel hit" \
 	"3 [kernel] [   12.345] Kernel panic - not syncing: Attempted to kill init!" "$actual"
+actual=$(log 4279 --errors)
+check "--errors: pytest and kubectl verdicts in serial_terminal.txt; a plain 'error' or another tool's 'Error:' is none" "0 $(
+	cat <<'EOF'
+file=serial_terminal.txt mode=errors hits=pytest:4,k8s:1 lines=18
+<<<UNTRUSTED NONCE source=openqa.opensuse.org/tests/4279/file/serial_terminal.txt>>>
+ 9 [pytest] E       assert 500 == 201
+10 [pytest] E        +  where 500 = post()
+13 [pytest] FAILED tests/test_api.py::test_post - assert 500 == 201
+16 [k8s] Error from server (Forbidden): pods is forbidden: User "system:anonymous" cannot list resource "pods"
+<<<END NONCE>>>
+note: first 3 hits per label shown, --grep for more
+requests: 3
+EOF
+)" "$? $(sed -n '/^file=serial_terminal/,$p' <<<"$actual")"
+contains "--errors: helm's failure in autoinst-log.txt output lines is a k8s hit" \
+	"4 [k8s @helm] Error: INSTALLATION FAILED: cannot re-use a name that is still in use" "$actual"
 log 4257 --errors --file serial_terminal.txt --exit-code >/dev/null
 check "--errors --exit-code: program output alone in serial_terminal.txt is no hit (exit 0)" 0 $?
 actual=$(log 4258 --errors --file serial_terminal.txt)

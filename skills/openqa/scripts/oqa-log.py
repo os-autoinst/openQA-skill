@@ -319,6 +319,24 @@ def file_path(job_id, name, archive=False):
     return f"/tests/{job_id}/file/{name.removeprefix('ulogs/')}"
 
 
+# openQA can answer for an expired or purged file with an HTML page (200, or a redirect).
+_HTML_PAGE = re.compile(
+    rb"(?:\xef\xbb\xbf)?\s{0,64}(?:<!doctype html|<html)", re.IGNORECASE
+)
+
+
+def not_a_page(body, path):
+    """Return body, or refuse an HTML page served for a file that is no page."""
+    name = path.rsplit("/", 1)[1]
+    if _HTML_PAGE.match(body[:256]) and not re.search(r"\.html?$", name, re.IGNORECASE):
+        # NotFound: where a missing file is expected (--compare, serial logs), so is this.
+        raise _oqa.NotFound(
+            f"file gone (HTML page served): {_oqa.clean(name)}; "
+            "the job's files were probably cleaned up"
+        )
+    return body
+
+
 def to_lines(body, cut=False):
     sample = body[:4096]
     if sum(byte < 9 or 13 < byte < 27 for byte in sample) > len(sample) // 10:
@@ -575,7 +593,7 @@ def member_lines(body, wanted, limit):
 
 
 def fetch_archive(client, path, limit):
-    body = client.get_bytes(path, max_bytes=limit + 1)
+    body = not_a_page(client.get_bytes(path, max_bytes=limit + 1), path)
     if len(body) > limit:
         raise _oqa.OqaError(
             f"the archive is larger than --max-bytes ({limit}); a cut archive cannot be read"
@@ -584,7 +602,7 @@ def fetch_archive(client, path, limit):
 
 
 def fetch_all(client, path, limit):
-    body = client.get_bytes(path, max_bytes=limit + 1)
+    body = not_a_page(client.get_bytes(path, max_bytes=limit + 1), path)
     truncated = len(body) > limit
     return to_lines(body[:limit], truncated), truncated
 
@@ -607,7 +625,7 @@ def fetch_tail(client, path, wanted, limit):
         if start:
             body = client.get_range(path, start=start, max_bytes=window)[0]
         else:
-            body = client.get_bytes(path, max_bytes=window)
+            body = not_a_page(client.get_bytes(path, max_bytes=window), path)
         lines = to_lines(body)
         if not start:
             return lines, False, f"bytes=0-{total}/{total}"

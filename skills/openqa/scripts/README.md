@@ -219,7 +219,9 @@ lines=N`; `hits=-` when it holds none, no line when the job has no such file. `[
 `kernel: `, a line without either only in the kernel's own wording (`WARNING: CPU: 2 PID: 812`, `WARNING:`
 with a source file, `BUG: soft lockup` and the like, `Oops:`), as programs print `WARNING:` too, and a
 `BTRFS` line's `Transaction aborted`; the signatures of `autoinst-log.txt` apply there too, and
-`--file serial_terminal.txt --errors` uses the same set. Each block keeps its first 3 hits per label, and
+`--file serial_terminal.txt --errors` uses the same set. Then `serial0.txt`, the kernel console, the same
+way but for `[kernel]` lines only, `Kernel panic - not syncing` among them, as the SUT's programs print there
+too; `--file serial0.txt --errors` adds the signatures of `autoinst-log.txt`. Each block keeps its first 3 hits per label, and
 every `# Test died` line whatever its label, as non-fatal hits come first, and at most `--max-lines` lines.
 After the error lines, in what they leave of `--max-lines`, come at most 3 `[info @<module>]` lines (`info:N`
 in the header): a module's last `record_info` call before its `# Test died` or `test <module> failed` line,

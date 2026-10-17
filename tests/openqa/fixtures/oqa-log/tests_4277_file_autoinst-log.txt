@@ -1,0 +1,3 @@
+[2030-01-01T10:00:01.000000Z] [debug] [pid:1] ||| starting load_mod tests/kernel/load_mod.pm
+[2030-01-01T10:00:02.000000Z] [info] [pid:1] ::: basetest::runtest: # Test died: Machine is not responding
+[2030-01-01T10:00:03.000000Z] [debug] [pid:1] ||| finished load_mod kernel (runtime: 2 s)

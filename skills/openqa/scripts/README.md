@@ -197,7 +197,9 @@ Logs are MBs; grepping `error|failed` drowns in `timeout=` noise.
     oqa-log.py JOB --runtimes [--compare JOB]
     oqa-log.py JOB --file ulogs/<name>.tar.xz (--members | --member PATH --grep REGEX|--tail N|--errors)
 
-`--file` (`autoinst-log.txt`; uploaded logs: `ulogs/<name>`), `--max-lines` (60), `--max-line-chars` (200),
+`--file` (`autoinst-log.txt`; uploaded logs: `ulogs/<name>`), `--max-lines` (60), `--max-line-chars` (200;
+`--grep` 1000, as a hit is often a long command line whose decisive option comes last; a `note:` counts the
+lines cut),
 `--context` (2), `--max-matches` (10), `-i`, `--max-bytes` (16 MiB downloaded per file); `-v` full line prefix, whole traces, console plumbing and screen
 polling lines. `--exit-code`: 1 when `--errors`/`--grep` matched, the module never started, or `--runtimes`
 found a module still running at the end or one that took 2x and 60 s more than in `--compare`.

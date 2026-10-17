@@ -486,11 +486,15 @@ def settings_diff(text, limit, verbose):
         and old in change.get("-", "")
         and change["-"].replace(old, new) == change.get("+")
     ]
+
+    def shown(key, value):
+        # A side without the key says it was added or removed, which masking must not hide.
+        if value is None:
+            return "-"
+        return _secrets.setting_value(key, value, _oqa.tok(value, 100))
+
     lines = [
-        f"{key}: "
-        + _secrets.setting_value(key, change.get("-"), _oqa.tok(change.get("-"), 100))
-        + " -> "
-        + _secrets.setting_value(key, change.get("+"), _oqa.tok(change.get("+"), 100))
+        f"{key}: {shown(key, change.get('-'))} -> {shown(key, change.get('+'))}"
         for key, change in sorted(changes.items(), key=lambda item: item[0] != "BUILD")
         if key not in follows
     ]

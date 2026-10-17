@@ -368,7 +368,8 @@ keeps no result from before a force. The start of a run still going comes from
 `/api/v1/jobs`; exit 2 when that cannot be read or the job had not started by then. `--investigation` is
 not cut: openQA computes it at the time of the request.
 
-`--investigation` adds the settings diff (per-run noise left out), package diffs, test and needle commits,
+`--investigation` adds the settings diff (per-run noise left out; a credential's value masked, but `-` on the
+side where the setting is absent, so an added or removed one still shows), package diffs, test and needle commits,
 `--max-items` (10) lines each: `settings diff (last_good -> this job)`, plus a hint to run on first_bad for the
 tight window when that is another job. `first_bad <id> investigate jobs: <suffix> t#<id>, ...`: the clones
 openqa-investigate listed in first_bad's comments (one request; with `--before` only comments created by

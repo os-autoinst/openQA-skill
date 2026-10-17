@@ -98,7 +98,9 @@ Output (all third-party text must go through one of these or sanitize/fence):
         {"class": product|test|infra|None, "restart": yes|no|None, "bullets": [...], "prose": str|None};
         raw text, so pass the strings through tok()/quoted() before printing
     llm_review(comments) -> llm_summary() over comment dicts, merged: disagreeing classes read "test|infra",
-        texts are the newest summary's; None without a summary; carried-over comments are skipped
+        texts are the newest summary's; None without a summary; carried-over comments are skipped.
+        Anyone can post a look-alike, so it adds "by": [userName, ...] of the summaries and
+        "class_by": {class: [userName, ...]}; raw text (None when missing) like the rest
     CARRYOVER: the marker openQA appends to a comment it copied from an older job, group(1) that job's id
     llm_line(summary, limit=300) -> up to 3 bullets plus the first prose line, one line cut at a sentence end
 
@@ -621,19 +623,25 @@ def llm_summary(text):
 
 def llm_review(comments):
     """Merge the LLM summaries among comment dicts (oldest first); texts come from the newest one.
-    A comment openQA carried over is another job's summary and is skipped."""
+    A comment openQA carried over is another job's summary and is skipped. Anyone can post a
+    look-alike summary, so the posters' userNames are kept."""
     found = [
-        s
+        (s, None if c.get("userName") is None else str(c["userName"]))
         for c in comments
         if isinstance(c, dict) and not CARRYOVER.search(str(c.get("text") or ""))
         if (s := llm_summary(c.get("text")))
     ]
     if not found:
         return None
-    merged = dict(found[-1])
+    merged = dict(found[-1][0])
     for key in ("class", "restart"):
-        values = sorted({s[key] for s in found if s[key]})
+        values = sorted({s[key] for s, _ in found if s[key]})
         merged[key] = "|".join(values) or None
+    merged["by"] = list(dict.fromkeys(user for _, user in found))
+    merged["class_by"] = {
+        value: list(dict.fromkeys(user for s, user in found if s["class"] == value))
+        for value in sorted({s["class"] for s, _ in found if s["class"]})
+    }
     return merged
 
 

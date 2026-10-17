@@ -57,9 +57,11 @@ head=yes|no|?. A TEST suffix all runs share (@user/repo#branch) is printed once
 as test_suffix= and cut from the lines.
 
 Failed, incomplete and timeout_exceeded jobs on the printed lines also get one indented line
-"llm-investigation-summary (automatic, unverified): class= why=" when a comment holds an
-automatic LLM investigation summary (class: product|test|infra, why: its first bullet), and each
-build ends with one "llm-investigation-summary clusters" line counting classes per failed module.
+"llm-investigation-summary (automatic, unverified): class= by= why=" when a comment holds an
+automatic LLM investigation summary (class: product|test|infra, by: the accounts that posted
+summaries, why: its first bullet), and each build ends with one "llm-investigation-summary
+clusters" line counting classes per failed module. Anyone can post a look-alike summary, so
+classes that disagree name their posters: class=infra(geekotest)|product(someone).
 It is a hint to group failures, never a verdict. A job without such a comment, comments that
 cannot be read or an exhausted request budget print nothing. Costs one comments request per
 printed job with plain comments (none in the API fallback, which has read them); --no-llm skips it.
@@ -92,6 +94,7 @@ VICTIMS_SHOWN = 6
 LLM_RESULTS = ("failed", "incomplete", "timeout_exceeded")
 LLM_LABEL = "llm-investigation-summary"
 LLM_WHY_CHARS = 120
+LLM_BY_CHARS = 40
 LLM_CLUSTERS_SHOWN = 10
 # Requests kept back per build entry still to be listed: overview, a comments read.
 ENTRY_RESERVE = 2
@@ -403,11 +406,19 @@ def read_llm(client, jobs, reserve):
 
 
 def llm_line(summary):
-    """class is a fixed word set; only why= is server text, and quoted() cleans it. The restart advice
-    is left out: summaries of one cluster disagree on it, and oqa-job.py shows it for the job in triage."""
+    """class is a fixed word set; the posters (by=, and per class when classes disagree) and why= are
+    server text, cleaned by toks() and quoted(). The restart advice is left out: summaries of one
+    cluster disagree on it, and oqa-job.py shows it for the job in triage."""
     parts = [f"  {LLM_LABEL} (automatic, unverified):"]
     if summary["class"]:
-        parts.append(f"class={summary['class']}")
+        classes = summary["class"].split("|")
+        if len(classes) > 1:
+            classes = [
+                f"{name}({toks(summary['class_by'][name], LLM_BY_CHARS)})"
+                for name in classes
+            ]
+        parts.append("class=" + "|".join(classes))
+    parts.append(f"by={toks(summary['by'], LLM_BY_CHARS)}")
     why = (summary["bullets"] or [summary["prose"]])[0]
     if why:
         parts.append(f"why={_oqa.quoted(why, LLM_WHY_CHARS)}")

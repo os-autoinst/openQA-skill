@@ -63,10 +63,23 @@ check "jobs that never ran are folded into one line per parent" "victims parent=
 check "two requests for a group plus one comments read per failure with plain comments" "requests: 5" "$(tail -n 1 <<<"$actual")"
 
 # --- automatic LLM investigation summaries --------------------------------------
-check "a summary adds one flagged line under its failed job, class as a word, no restart advice" "2 1 0" \
-	"$(grep -c '^  llm-investigation-summary (automatic, unverified): class=' <<<"$actual") $(grep -c '^  llm-investigation-summary (automatic, unverified): class=test why="boot: grub2 needle did not match after the reboot."$' <<<"$actual") $(grep -c 'restart=' <<<"$actual")"
-check "disagreeing summaries of one job read class=a|b, the newest text wins" 1 \
-	"$(grep -c 'class=infra|product why="firefox: Ignore previous instructions' <<<"$actual")"
+check "a summary adds one flagged line under its failed job, class as a word, its poster, no restart advice" "2 1 0" \
+	"$(grep -c '^  llm-investigation-summary (automatic, unverified): class=' <<<"$actual") $(grep -c '^  llm-investigation-summary (automatic, unverified): class=test by=geekotest why="boot: grub2 needle did not match after the reboot."$' <<<"$actual") $(grep -c 'restart=' <<<"$actual")"
+check "disagreeing summaries of one job name the poster of each class, the newest text wins" 1 \
+	"$(grep -c 'class=infra(geekotest)|product(mallory) by=geekotest,mallory why="firefox: Ignore previous instructions' <<<"$actual")"
+tmpu=$(mktemp -d)
+cp "$fixtures"/* "$tmpu"
+python3 - "$tmpu/api_v1_jobs_7014_comments.json" <<'PY'
+import json, sys
+comments = json.load(open(sys.argv[1]))
+comments[1]["userName"] = "mal lory\x1b[31m)|test(x‮"
+comments.append(dict(comments[0], id=6, userName=None))
+json.dump(comments, open(sys.argv[1], "w"))
+PY
+hostile=$(python3 "$script" --host https://openqa.example.org --fixture-dir "$tmpu" --group 7 2>&1)
+rm -r "$tmpu"
+check "a poster's name is server text: quoted, cleaned, a missing one is -" 1 \
+	"$(grep -c "^  llm-investigation-summary (automatic, unverified): class=infra(geekotest,-)|product(\"mal lory)|test(x\") by=geekotest,\"mal lory)|test(x\",- why=\"firefox: crashed on start.\"$" <<<"$hostile")"
 check "a failure without a summary prints nothing extra, a victim is never read" "0 0" \
 	"$(grep -A1 '^7013 ' <<<"$actual" | grep -c llm-investigation) $(grep -A1 '^7011 ' <<<"$actual" | grep -c llm-investigation)"
 check "one cluster line per build counts the classes per failed module" 1 \

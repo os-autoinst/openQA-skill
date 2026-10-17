@@ -94,6 +94,11 @@ _PACKAGE_LINE = re.compile(r"[A-Za-z0-9_.+~^-]+")
 # The downloads tab links the "#" of a module loaded twice as "%23": generate_report%231-dmesg.txt.
 _UPLOAD_NAME = r"[A-Za-z0-9_](?:[A-Za-z0-9._+@=~-]|%23)*"
 _DURATION = re.compile(r"(?:(\d{1,5}) days )?(\d{1,5}):(\d\d) (hours|minutes)")
+INVESTIGATE_CLONES = "Automatic investigation jobs for job"
+# As oqa-job.py INVESTIGATE_CLONE: "* *<name>*: t#<id>", older revisions bold with a URL.
+_CLONE = re.compile(
+    r"\s*\*\s+\*{1,2}([^*\s]+)\*{1,2}:\s*(?:t#|https?://[^/\s]+/(?:tests/|t))([0-9]{1,18})(?![0-9])"
+)
 # lib/OpenQA/Utils.pm LABEL_REGEX; Schema/Result/Comments.pm "force_result"
 _LABEL = re.compile(r"\blabel:([\w:#/-]+)\b")
 _FORCE_RESULT = re.compile(r"force_result:(\w+)")
@@ -366,6 +371,31 @@ def comments_as_of(client, before, rows):
             # openQA keeps no result from before a force: failed modules still say "failed".
             forced[row["id"]] = then or ("failed" if row.get("failedmodules") else "?")
     return found, later, forced
+
+
+def investigate_jobs(client, job_id, before=None):
+    """ "<suffix> t#<id>" of the clones openqa-investigate listed in the job's comments, those
+    created by `before` when given; None when the comments cannot be read."""
+    try:
+        comments = client.get_json(f"/api/v1/jobs/{job_id}/comments")
+    except _oqa.OqaError:
+        return None
+    clones = []
+    for comment in comments if isinstance(comments, list) else ():
+        if not isinstance(comment, dict):
+            continue
+        created = parse_time(comment.get("created"))
+        if before and (created is None or created > before):
+            continue
+        lines = str(comment.get("text") or "").split("\n")
+        if not any(line.lstrip().startswith(INVESTIGATE_CLONES) for line in lines):
+            continue
+        for match in filter(None, map(_CLONE.match, lines)):
+            name = match.group(1).partition(":investigate:")[2] or match.group(1)
+            clone = f"{_oqa.tok(name, 60)} t#{match.group(2)}"
+            if clone not in clones:
+                clones.append(clone)
+    return clones
 
 
 def worker_names(client, worker_ids):
@@ -759,7 +789,9 @@ def fenced(client, job_id, title, lines, max_bytes=16384):
     return _oqa.fence(block, source)
 
 
-def investigation(client, job_id, limit, verbose, failed=(), job=None, module=None):
+def investigation(
+    client, job_id, limit, verbose, failed=(), job=None, module=None, before=None
+):
     try:
         data = client.get_json(f"/tests/{job_id}/investigation_ajax")
     except _oqa.NotFound as error:
@@ -772,9 +804,15 @@ def investigation(client, job_id, limit, verbose, failed=(), job=None, module=No
     if data.get("error"):
         print(f"  server says: {_oqa.quoted(data['error'], 160)}")
         return
-    print(
-        f"  last_good={link_id(data.get('last_good'))} first_bad={link_id(data.get('first_bad'))}"
+    first_bad = link_id(data.get("first_bad"))
+    print(f"  last_good={link_id(data.get('last_good'))} first_bad={first_bad}")
+    clones = (
+        investigate_jobs(client, int(first_bad), before)
+        if first_bad.isdigit()
+        else None
     )
+    if clones:
+        print(f"  first_bad {first_bad} investigate jobs: {', '.join(clones)}")
     if not isinstance(data.get("last_good"), dict):
         print(
             "  nothing to compare: openQA found no passed or softfailed run of this scenario "
@@ -786,7 +824,6 @@ def investigation(client, job_id, limit, verbose, failed=(), job=None, module=No
     # The log cleanup deletes autoinst-log.txt with the other logs and uploads.
     if good_files is not None and "autoinst-log.txt" not in good_files:
         print("  last_good logs: gone (pruned, its log files answer 404)")
-    first_bad = link_id(data.get("first_bad"))
     if first_bad.isdigit() and first_bad != str(job_id):
         print(
             f"  hint: the diffs end at THIS job; run on first_bad {first_bad} for the tight window"
@@ -1052,7 +1089,14 @@ def main():
         if own:
             print(own)
         investigation(
-            client, job_id, args.max_items, args.verbose, sorted(failed), job, module
+            client,
+            job_id,
+            args.max_items,
+            args.verbose,
+            sorted(failed),
+            job,
+            module,
+            args.before,
         )
     print(f"requests: {client.requests}")
     return status if args.exit_code else 0

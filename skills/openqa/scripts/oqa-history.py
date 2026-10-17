@@ -91,6 +91,10 @@ _NOT_DISTRI = re.compile(r"^\(|^/usr/|/os-autoinst/|/perl5/")
 # starts at the first of a test distribution's top-level directories.
 _REPO_PATH = re.compile(r"(?:^|/)((?:lib|tests|products|data)/.+)")
 _RENAME = re.compile(r"^(.*)\{(.*) => (.*)\}(.*)$")
+# os-autoinst script/isotovideo "_get_version_string", logged in the setup notes, within the
+# first 30 kB of autoinst-log.txt on o3.
+_ISOTOVIDEO = re.compile(r"Current version is ([\w.+~-]{1,80}) \[interface v\d{1,4}\]")
+HEAD_BYTES = 64 << 10
 _QI_FIELD = re.compile(r"^(Name|Version|Release)\s*:\s*(\S+)$")
 _PACKAGE_LINE = re.compile(r"[A-Za-z0-9_.+~^-]+")
 # The downloads tab links the "#" of a module loaded twice as "%23": generate_report%231-dmesg.txt.
@@ -787,6 +791,18 @@ def versions_line(client, job_id, good_id, good_files):
     )
 
 
+def isotovideo_version(client, job_id):
+    """The os-autoinst version a job ran with, "?" when unknown."""
+    try:
+        head = client.get_range(
+            f"/tests/{job_id}/file/autoinst-log.txt", max_bytes=HEAD_BYTES
+        )[0]
+    except _oqa.OqaError:
+        return "?"
+    match = _ISOTOVIDEO.search(head.decode("utf-8", "replace"))
+    return _oqa.tok(match.group(1)) if match else "?"
+
+
 def fenced(client, job_id, title, lines, max_bytes=16384):
     block = _oqa.sanitize("\n".join(lines), max_line=240, max_bytes=max_bytes)
     source = f"{client.host.split('//')[1]}/tests/{job_id}/investigation_ajax:{title}"
@@ -826,7 +842,8 @@ def investigation(
     good_id = link_id(data.get("last_good"))
     good_files = uploads(client, int(good_id)) if good_id.isdigit() else None
     # The log cleanup deletes autoinst-log.txt with the other logs and uploads.
-    if good_files is not None and "autoinst-log.txt" not in good_files:
+    gone = good_files is not None and "autoinst-log.txt" not in good_files
+    if gone:
         print("  last_good logs: gone (pruned, its log files answer 404)")
     if first_bad.isdigit() and first_bad != str(job_id):
         print(
@@ -869,6 +886,10 @@ def investigation(
         )
     if good_id.isdigit():
         print(versions_line(client, job_id, int(good_id), good_files))
+        old = "?" if gone else isotovideo_version(client, int(good_id))
+        new = isotovideo_version(client, job_id)
+        change = f"{new} (unchanged)" if old == new != "?" else f"{old} -> {new}"
+        print(f"  os-autoinst (last_good {good_id} -> this job): {change}")
 
     for key, stat_key, title, url_key in (
         ("test_log", "test_diff_stat", "test", "testgiturl"),
@@ -963,7 +984,7 @@ def main():
         "--investigation",
         action="store_true",
         help="add a capped summary of the investigation data: last good, first bad, "
-        "changed settings, package diffs, kernel and test suite versions, test and needle "
+        "changed settings, package diffs, kernel, test suite and os-autoinst versions, test and needle "
         "commit subjects; reads the workers too",
     )
     parser.add_argument(

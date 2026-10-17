@@ -373,7 +373,8 @@ Test commits that touch a file under `tests/` named like one of this job's faile
 directory: failed module names carry no category) start with `[failed module <module>]`; those touching another
 file of the failing step's stack trace with `[call path <file>]` (the `# Test died` step of the first failed
 module's `details-<module>.json`, one more request; os-autoinst's own frames and the post-fail hook's are not
-read); those touching or renaming into `lib/` with `[lib]`; those touching a module that ran before the first
+read; a frame such as `sle/lib/x.pm`, from a checkout named after the distri, is read from its `lib/`, `tests/`,
+`products/` or `data/` on); those touching or renaming into `lib/` with `[lib]`; those touching a module that ran before the first
 failed one (the job's module list in run order) with `[earlier module <module>]`. They come first in that order,
 counted from the files as `failed_module=`, `call_path=`, `lib=` and `earlier_module=` (`?`: no step that died,
 or no module list) in the `test changes:` line (openQA's test log is `git log --stat`). git shortens a long path

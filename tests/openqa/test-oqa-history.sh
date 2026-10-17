@@ -493,6 +493,19 @@ actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$marks" 5000 --investi
 contains "call path: absolute frames match by their tail, a file of that name elsewhere does not" \
 	"test changes: commits=9 failed_module=1 call_path=4 lib=6 " "$actual"
 check "call path: an absolute frame is named by the repository path" 2 "$(grep -c '^\[call path lib/zypper_helper.pm\] \[lib\] c00000[13]' <<<"$actual")"
+# A checkout in a directory named after the distri gives frames such as "exampleos/lib/utils.pm".
+python3 - "$fixtures/tests_5000_file_details-zypper_in.json" "$marks/tests_5000_file_details-zypper_in.json" <<'PY'
+import json, sys
+data = json.load(open(sys.argv[1]))
+step = data["details"][1]
+for old, new in ((" at lib/", " at exampleos/lib/"), (" at tests/", " at exampleos/tests/"),
+                 ("products/exampleos/../../", "exampleos/products/exampleos/../../")):
+    step["text_data"] = step["text_data"].replace(old, new)
+json.dump(data, open(sys.argv[2], "w"))
+PY
+actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$marks" 5000 --investigation --max-items 20)
+check "call path: a frame under a directory named after the distri matches by its repository path" "1 2 1" \
+	"$(grep -c 'test changes: commits=9 failed_module=1 call_path=4 lib=6 ' <<<"$actual") $(grep -c '^\[call path lib/zypper_helper.pm\] \[lib\] c00000[13]' <<<"$actual") $(grep -c '^\[call path lib/utils.pm\] \[lib\] c000005' <<<"$actual")"
 python3 - "$marks/tests_5000_file_details-zypper_in.json" <<'PY'
 import json, sys
 data = json.load(open(sys.argv[1]))

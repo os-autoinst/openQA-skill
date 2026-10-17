@@ -94,8 +94,9 @@ _PACKAGE_LINE = re.compile(r"[A-Za-z0-9_.+~^-]+")
 # The downloads tab links the "#" of a module loaded twice as "%23": generate_report%231-dmesg.txt.
 _UPLOAD_NAME = r"[A-Za-z0-9_](?:[A-Za-z0-9._+@=~-]|%23)*"
 _DURATION = re.compile(r"(?:(\d{1,5}) days )?(\d{1,5}):(\d\d) (hours|minutes)")
-# lib/OpenQA/Utils.pm LABEL_REGEX
+# lib/OpenQA/Utils.pm LABEL_REGEX; Schema/Result/Comments.pm "force_result"
 _LABEL = re.compile(r"\blabel:([\w:#/-]+)\b")
+_FORCE_RESULT = re.compile(r"force_result:(\w+)")
 
 
 def positive(value):
@@ -329,8 +330,9 @@ def has_reference(row):
 def comments_as_of(client, before, rows):
     """{id: (bugrefs, label)} from the comments created by `before`, for the rows that carry
     a bugref or a label now; "?" for those not read. Also the number of later comments that
-    carried one."""
-    found, later = {}, 0
+    carried one, and {id: result then} of the finished rows whose result a later
+    label:force_result comment changed."""
+    found, later, forced = {}, 0, {}
     for count, row in enumerate(row for row in rows if has_reference(row)):
         comments = None
         if count < MAX_COMMENT_JOBS:
@@ -341,21 +343,29 @@ def comments_as_of(client, before, rows):
         if not isinstance(comments, list):
             found[row["id"]] = ("?", "?")
             continue
-        bugs, label = [], None
+        bugs, label, then, changed = [], None, None, False
         comments = [c for c in comments if isinstance(c, dict)]
         for comment in sorted(comments, key=lambda c: _oqa.job_id_of(c.get("id")) or 0):
             refs = comment.get("bugrefs")
             refs = [str(ref) for ref in refs] if isinstance(refs, list) else []
             labels = _LABEL.findall(str(comment.get("text") or ""))
             created = parse_time(comment.get("created"))
+            force = next(filter(None, map(_FORCE_RESULT.match, labels)), None)
             if created is None or created > before:
                 later += bool(refs or labels)
-            elif refs:
+                changed = changed or bool(force)
+                continue
+            if force:
+                then = force.group(1)
+            if refs:
                 bugs += [ref for ref in refs if ref not in bugs]
             elif labels:
                 label = labels[0]
         found[row["id"]] = (sorted(bugs) or None, label)
-    return found, later
+        if changed and row.get("state") == "done":
+            # openQA keeps no result from before a force: failed modules still say "failed".
+            forced[row["id"]] = then or ("failed" if row.get("failedmodules") else "?")
+    return found, later, forced
 
 
 def worker_names(client, worker_ids):
@@ -946,12 +956,17 @@ def main():
         row["id"] for row in rows if full or (args.before and not row.get("finished"))
     ]
     runs = run_details(client, listed) if listed else None
-    cut, references, later = 0, {}, 0
+    cut, references, later, forced = 0, {}, 0, {}
     if args.before:
         current, newer, older, cut = as_of(args.before, runs, current, newer, older)
-        references, later = comments_as_of(
+        references, later, forced = comments_as_of(
             client, args.before, [*newer, current, *older]
         )
+
+        def then(row):
+            return {**row, "result": forced[row["id"]]} if row["id"] in forced else row
+
+        current, newer, older = then(current), [*map(then, newer)], [*map(then, older)]
     rows = [*newer, current, *older]
     workers = None
     if full and runs is not None:
@@ -1005,6 +1020,10 @@ def main():
     if later:
         notes.append(
             f"{later} bugref or label comment(s) created after --before ignored"
+        )
+    if forced:
+        notes.append(
+            f"result(s) of {','.join(map(str, forced))} forced later, shown as at --before"
         )
     if notes:
         print("note: " + "; ".join(notes))

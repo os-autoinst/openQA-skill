@@ -274,6 +274,30 @@ check "--before: a restart that is not among the runs then is left out" "5000 -"
 actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 5000)
 check "without --before the restart is shown" "5000 5555" "$(awk '$1 == 5000 {print $1, $NF}' <<<"$actual")"
 rm -rf "$tmp"
+# Results forced by a label:force_result comment: 5000 to softfailed after --before, 4990 to
+# softfailed before it and back to failed after it.
+tmp=$(mktemp -d)
+cp "$fixtures"/* "$tmp"
+python3 - "$tmp" <<'PY'
+import json, sys
+name = f"{sys.argv[1]}/tests_5000_ajax_previous_limit=10_next_limit=0.json"
+data = json.load(open(name))
+data["data"][0].update(result="softfailed", comment_data={"bugs": [], "label": "force_result:softfailed"})
+json.dump(data, open(name, "w"))
+comment = lambda i, created, text: {"id": i, "bugrefs": [], "created": created, "text": text}
+json.dump([comment(30, "2030-01-01 11:00:00 +0000", "label:force_result:softfailed:accepted")],
+          open(f"{sys.argv[1]}/api_v1_jobs_5000_comments.json", "w"))
+json.dump([comment(21, "2030-01-01 08:30:00 +0000", "label:force_result:softfailed"),
+           comment(22, "2030-01-01 11:00:00 +0000", "label:force_result:failed")],
+          open(f"{sys.argv[1]}/api_v1_jobs_4990_comments.json", "w"))
+PY
+actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 5000)
+contains "control: today the job's forced result counts" "hint: this job is ok" "$actual"
+actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 5000 --before 2030-01-01T10:00Z)
+check "--before: a result forced after it shows as it was then, the earlier forced one stays, a note says so" \
+	"5000 failed|4990 softfailed|1|0" \
+	"$(awk '$1 == 5000 {print $1, $4}' <<<"$actual")|$(awk '$1 == 4990 {print $1, $4}' <<<"$actual")|$(grep -c '^note: .*result(s) of 5000,4990 forced later, shown as at --before' <<<"$actual")|$(grep -c 'this job is ok' <<<"$actual")"
+rm -rf "$tmp"
 
 # --- --investigation -------------------------------------------------------------------
 actual=$(history 5000 --investigation --max-items 4)

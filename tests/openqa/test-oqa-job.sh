@@ -614,6 +614,8 @@ path = f"{sys.argv[1]}/api_v1_jobs_860_details.json"
 data = json.load(open(path))
 if sys.argv[2] == "no-ulogs-field":
     del data["job"]["ulogs"]
+elif sys.argv[2] == "pruned":
+    data["job"]["logs"], data["job"]["ulogs"] = [], []
 else:
     data["job"]["logs"].append("serial_terminal.txt")
     data["job"]["ulogs"] = ["service_check-results.txt"]
@@ -627,6 +629,8 @@ check "no failing step, an answer without a ulogs field: the module's ulogs may 
 	"  no failing step recorded: read the ulogs suite_results-* and serial0.txt" "$(hint_860 no-ulogs-field)"
 check "no failing step, ulogs only of another module: serial_terminal.txt and serial0.txt, no ulogs" \
 	"  no failing step recorded: read serial_terminal.txt and serial0.txt" "$(hint_860 other-ulogs)"
+check "no failing step, a job whose logs were pruned: no file is named" \
+	"  no failing step recorded: logs gone (pruned)" "$(hint_860 pruned)"
 
 # --- the comments as of --before ------------------------------------------------------
 # as_of ARGS...: job 850 with dated comments, an early note, a label and a bugref later, one undated

@@ -412,6 +412,37 @@ check "--all-steps --verbose: the last 20 step texts, the earlier ones counted" 
 	"+5 earlier step texts not shown|20|    text=\"note 25\"" \
 	"$(grep '^+' <<<"$actual")|$(grep -c '^  step=' <<<"$actual")|$(tail -n 2 <<<"$actual" | head -n 1)"
 
+# --- --all-steps of a long module, a step range at a time ---------------------------
+long_dir=$(mktemp -d)
+cp "$fixtures"/api_v1_jobs_890_* "$long_dir"
+python3 - "$long_dir" <<'PY'
+import json, sys
+path = f"{sys.argv[1]}/api_v1_jobs_890_details.json"
+data = json.load(open(path))
+data["job"]["testresults"][0]["details"] = [
+    {"num": n, "result": "ok", "screenshot": f"m-{n}.png"} for n in range(1, 606)
+]
+json.dump(data, open(path, "w"))
+PY
+# long_steps ARGS...: --all-steps of the 605 steps of module register_instance
+long_steps() {
+	python3 "$script" --host https://openqa.example.org --fixture-dir "$long_dir" 890 --module register_instance --all-steps "$@" 2>&1
+}
+actual=$(long_steps)
+check "--all-steps: 300 rows, then how to list the rest" "300|... 305 more steps not shown: --step-range 301-" \
+	"$(grep -c '^[0-9]' <<<"$actual")|$(grep '^\.\.\. ' <<<"$actual")"
+actual=$(long_steps --step-range 301-)
+check "--step-range A-: the next 300 rows from A, then the rest again" "301 600|... 5 more steps not shown: --step-range 601-" \
+	"$(grep '^[0-9]' <<<"$actual" | sed -n '1p;$p' | cut -d' ' -f1 | xargs)|$(grep '^\.\.\. ' <<<"$actual")"
+actual=$(long_steps --step-range 591-605)
+check "--step-range A-B: steps A to B only, no cut marker" "15 591 605 0" \
+	"$(grep -c '^[0-9]' <<<"$actual") $(grep '^[0-9]' <<<"$actual" | sed -n '1p;$p' | cut -d' ' -f1 | xargs) $(grep -c '^\.\.\. ' <<<"$actual")"
+long_steps --step-range 9-3 >/dev/null
+check "--step-range with B before A is a usage error" 2 $?
+job 890 --module register_instance --step-range 1-2 >/dev/null 2>&1
+check "--step-range needs --all-steps" 2 $?
+rm -rf "$long_dir"
+
 # --- numbers with thousands of digits: int() refuses them, a line must not carry them -----
 actual=$(job 830 2>&1)
 check "endless numbers: digest complete, exit 0, no line over 340 characters" "0 1 1" \

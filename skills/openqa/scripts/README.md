@@ -203,11 +203,20 @@ calls cost less: one `--grep` with an alternation and `--context`, or `--around-
     oqa-log.py JOB --runtimes [--compare JOB]
     oqa-log.py JOB --file ulogs/<name>.tar.xz (--members | --member PATH --grep REGEX|--tail N|--errors)
 
-`--file` (`autoinst-log.txt`; uploaded logs: `ulogs/<name>`), `--max-lines` (60), `--max-line-chars` (200;
-`--grep` 1000, as a hit is often a long command line whose decisive option comes last; a `note:` counts the
-lines cut),
-`--context` (2), `--max-matches` (10), `-i`, `--max-bytes` (16 MiB downloaded per file); `-v` full line prefix, whole traces, console plumbing and screen
-polling lines. `--exit-code`: 1 when `--errors`/`--grep` matched, the module never started, or `--runtimes`
+`--file` (`autoinst-log.txt`; uploaded logs: `ulogs/<name>`), `--context` (2), `-i`; `-v` full line prefix,
+whole traces, console plumbing and screen polling lines, and it lifts none of the caps:
+
+| Cap | Default | Cuts | Marked by | Lifted by |
+|---|---|---|---|---|
+| `--max-bytes` | 16 MiB | the bytes read of one file | `warning: ... (--max-bytes)` | a larger value |
+| `--max-lines` | 60, `--tail N`: N | the lines printed | `--`, `note: ... (--max-lines)` | a larger value |
+| `--max-matches` | 10 | `--grep` matches | `(shown K of N; --max-matches N)` | a larger value |
+| `--max-line-chars` | 200, `--grep` 1000 | each line | `[... N chars omitted; --max-line-chars 0]` | 0 |
+| hits per label | 3 | `--errors` hits | `note: first 3 hits per label shown` | `--grep` |
+| fence | 128 KiB | one block | `[... N chars omitted]` | none |
+
+`--grep` cuts at 1000 as a hit is often a long command line whose decisive option comes last.
+`--exit-code`: 1 when `--errors`/`--grep` matched, the module never started, or `--runtimes`
 found a module still running at the end or one that took 2x and 60 s more than in `--compare`.
 `[date] [level] [pid]` prints as `HH:MM:SS` (level kept unless debug/info). `--around-module` capped by
 `--max-lines` ends after the `# Test died` message and its stack frames up to the first one called from

@@ -759,4 +759,35 @@ requests: 5
 EOF
 )" "$? $(grep -E '^(clone chain|SUPERSEDED|requests)' <<<"$actual")"
 
+# --- a restart chain longer than the clone chain line --------------------------------
+# chain_97x JOB ARGS...: the clone chain lines of JOB in 970 -> ... -> 977, restarted hourly from 01:00
+chain_97x() {
+	local tmp
+	tmp=$(mktemp -d)
+	python3 - "$tmp" <<'PY'
+import json, sys
+for n in range(970, 978):
+    job = {
+        "id": n, "state": "done", "result": "passed" if n == 977 else "failed", "test": "chain",
+        "settings": {"DISTRI": "exampleos", "TEST": "chain"},
+        "t_started": f"2030-01-02T0{n - 969}:00:00", "t_finished": f"2030-01-02T0{n - 969}:30:00",
+        "origin_id": n - 1 if n > 970 else None, "clone_id": n + 1 if n < 977 else None,
+    }
+    json.dump({"job": job}, open(f"{sys.argv[1]}/api_v1_jobs_{n}.json", "w"))
+    if n == 977:
+        json.dump({"job": {**job, "followed_id": 975}}, open(f"{sys.argv[1]}/api_v1_jobs_975_follow=1.json", "w"))
+    details = {**job, "logs": [], "ulogs": [], "testresults": []}
+    json.dump({"job": details}, open(f"{sys.argv[1]}/api_v1_jobs_{n}_details.json", "w"))
+    json.dump([], open(f"{sys.argv[1]}/api_v1_jobs_{n}_comments.json", "w"))
+PY
+	python3 "$script" --host https://openqa.example.org --fixture-dir "$tmp" "$@" | grep -E '^(clone chain|SUPERSEDED|note|requests)'
+	rm -rf "$tmp"
+}
+check "a chain longer than five restarts: the newest is its true end, from the first job as from a later one" \
+	"SUPERSEDED: restarted, newest=977 result=passed started=2030-01-02T08:00Z|SUPERSEDED: restarted, newest=977 result=passed started=2030-01-02T08:00Z" \
+	"$(chain_97x 970 | grep '^SUPERSEDED')|$(chain_97x 974 | grep '^SUPERSEDED')"
+check "the chain line still ends after five restarts, one request finds the newest" \
+	"clone chain: [970:failed@2030-01-02T01:00Z] -> 971:failed@2030-01-02T02:00Z -> 972:failed@2030-01-02T03:00Z -> 973:failed@2030-01-02T04:00Z -> 974:failed@2030-01-02T05:00Z -> 975:failed@2030-01-02T06:00Z -> ...|requests: 9" \
+	"$(chain_97x 970 | grep -E '^(clone chain|requests)' | paste -sd'|')"
+
 exit $fail

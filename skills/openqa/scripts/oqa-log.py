@@ -111,6 +111,11 @@ _DIED = re.compile(r"# Test died")
 _TEST_FAILED = re.compile(r"(?:^|\] )test \S+ failed\b")
 # testapi.pm record_info: bmwqemu::log_call "<<< testapi::record_info(title=..., output=...)"
 _INFO = re.compile(r"<<< testapi::record_info\(")
+# A module that records a soft failure, or forces one over its failure, has a known issue.
+_SOFT = re.compile(
+    r'<<< testapi::(?:record_soft_failure\(|record_info\([^\n]*\bresult="softfail")'
+)
+_FORCED = re.compile(r"<<< testapi::force_soft_failure\(")
 # What os-autoinst logs about its own console plumbing for every testapi call.
 _PLUMBING = re.compile(
     r"^\[[^\]]+\] \[\w+\] (?:\[pid:\d+\] )?"
@@ -142,6 +147,8 @@ def _signature(label, alternatives, after=0, continuation=False):
     return label, re.compile("|".join(alternatives)), after, continuation
 
 
+# blktests: "<group>/<nnn> (<description>)   [failed]"
+_BLKTESTS = r"^\w+/\d{3}\b[^\n]{0,300}\[failed\]"
 # Verdict lines of the runners and cluster tools tests drive, in the wording each prints
 # (pytest's short summary and assertion lines, kubectl's and helm's error lines).
 RUNNER_SIGNATURES = (
@@ -154,9 +161,27 @@ RUNNER_SIGNATURES = (
             r"^Error: (?:INSTALLATION|UPGRADE) FAILED: ",
         ],
     ),
+    # gcc/clang "<file>:<line>:<col>: error:", GNU make, CMake
+    _signature(
+        "build",
+        [
+            r"^\S+?:\d+:\d+: (?:fatal )?error: ",
+            r"\bfatal error: ",
+            r"make(?:\[\d+\])?: \*\*\* \[[^\]\n]{1,300}\] Error \d+",
+            r"^CMake Error\b",
+        ],
+    ),
+    # a sudo that asks for a password waits until the command times out
+    _signature("sudo", [r"\[sudo\] password for ", r"sudo: a password is required"]),
+    _signature(
+        "network", [r"Could not resolve host", r"Temporary failure in name resolution"]
+    ),
+    # the error block of OpenTofu/Terraform (boxed or -no-color) and of other CLI tools
+    _signature("cli", [r"^(?:\u2502 )?Error: "]),
 )
 
 SIGNATURES = (
+    _signature("fail", [r'<<< testapi::record_info\([^\n]*\bresult="fail"']),
     _signature("hook", [r"post_fail_hook failed: "]),
     _signature(
         "needle", [r"no candidate needle with tag\(s\) '[^']*' matched"], 3, True
@@ -176,6 +201,8 @@ SIGNATURES = (
             r"command '.*' (?:failed|timed out)",
             r"script (?:timeout: |failed with : )",
             r"' failed with code \d+",
+            # distribution.pm; a multi-line or long command leaves "timed out" off this line
+            r"typing command '",
             r"did not finish in \d+ seconds",
             r"output does not match the regex",
             r"output not validating",
@@ -197,6 +224,7 @@ SIGNATURES = (
             r"\bTFAIL\b",
             r"\bTBROK\b",
             r"^not ok\b",
+            _BLKTESTS,
         ],
     ),
     *RUNNER_SIGNATURES,
@@ -295,7 +323,14 @@ KERNEL_SIGNATURES = (
 # What a suite or the kernel prints to the serial terminal, which autoinst-log.txt does not hold.
 SERIAL_SIGNATURES = (
     _signature(
-        "suite", [r"\bTFAIL\b", r"\bTBROK\b", r"^\s*(?:#\s*)?not ok\b", r"^Failures:"]
+        "suite",
+        [
+            r"\bTFAIL\b",
+            r"\bTBROK\b",
+            r"^\s*(?:#\s*)?not ok\b",
+            r"^Failures:",
+            _BLKTESTS,
+        ],
     ),
     *RUNNER_SIGNATURES,
     *KERNEL_SIGNATURES,
@@ -776,14 +811,34 @@ def mode_grep(lines, pattern, context, max_matches, span=None):
     return entries, len(hits)
 
 
+def softfailed(lines):
+    """One byte per line, 1 inside a module run with a known issue: it recorded a soft
+    failure and neither died nor failed, or forced one over its failure."""
+    flags = bytearray(len(lines))
+    begin, soft, bad, forced = None, False, False, False
+    for index, text in enumerate([*lines, None]):
+        probe = text[:MATCH_WIDTH] if text is not None else ""
+        if text is None or _STARTING.search(probe):
+            if begin is not None and (forced or (soft and not bad)):
+                flags[begin:index] = b"\x01" * (index - begin)
+            begin, soft, bad, forced = index, False, False, False
+        elif begin is not None:
+            soft = soft or bool(_SOFT.search(probe))
+            forced = forced or bool(_FORCED.search(probe))
+            bad = bad or bool(_DIED.search(probe) or _TEST_FAILED.search(probe))
+    return flags
+
+
 def mode_errors(lines, verbose, signatures=SIGNATURES):
     """Return (entries, info entries, counts per label, last started module, finished?).
 
-    An info entry is the last record_info call of a module before its "# Test died"
-    or "test <module> failed" line: what the test itself logged about the failure."""
-    entries, counts, taken = [], {}, set()
+    Shown per label: the first PER_LABEL hits, every "# Test died" line and, for how the
+    run ended, the last hit. Hits inside a module with a known issue (softfailed) come
+    after the others and only fill what those leave of PER_LABEL. An info entry is the
+    last record_info call of a module before its "# Test died" or "test <module> failed"
+    line: what the test itself logged about the failure."""
+    counts, hits, infos = {}, [], []
     started = finished = info = None
-    infos = []
     for index, text in enumerate(lines):
         probe = text[:MATCH_WIDTH]
         match = _STARTING.search(probe)
@@ -798,17 +853,11 @@ def mode_errors(lines, verbose, signatures=SIGNATURES):
         if started and _INFO.search(probe):
             info = index
         elif info is not None and (_DIED.search(probe) or _TEST_FAILED.search(probe)):
-            infos.append((info + 1, f" [info @{_oqa.tok(started[1].group(1), 60)}]"))
+            infos.append((info, f" [info @{_oqa.tok(started[1].group(1), 60)}]"))
             info = None
         for label, pattern, after, continuation in signatures:
-            if not pattern.search(probe):
-                continue
-            counts[label] = counts.get(label, 0) + 1
-            # Non-fatal hits of the same label must not hide the line that ended a module.
-            if (
-                counts[label] <= PER_LABEL or _DIED.search(probe)
-            ) and index not in taken:
-                taken.add(index)
+            if pattern.search(probe):
+                counts[label] = counts.get(label, 0) + 1
                 # The module name is log text: capped and quoted, or it forges
                 # a second "[label]" of its own.
                 inside = (
@@ -816,34 +865,60 @@ def mode_errors(lines, verbose, signatures=SIGNATURES):
                     if started and finished is None
                     else ""
                 )
-                entries.append((index + 1, f" [{label}{inside}]", text))
-                trim = continuation and not verbose
-                extras = []
-                for extra in range(
-                    index + 1,
-                    min(index + (TRACE_SCAN if continuation else after), len(lines) - 1)
-                    + 1,
-                ):
-                    if continuation and _TIMESTAMPED.match(lines[extra]):
+                hits.append((index, label, inside, after, continuation))
+                break
+    soft = softfailed(lines)
+    last = {hit[1]: hit for hit in hits if not soft[hit[0]]}
+    shown, chosen, deferred = {}, [], []
+    for hit in hits:
+        if soft[hit[0]]:
+            continue
+        shown[hit[1]] = shown.get(hit[1], 0) + 1
+        # Non-fatal hits of the same label must not hide the line that ended a module.
+        if (
+            shown[hit[1]] <= PER_LABEL
+            or _DIED.search(lines[hit[0]][:MATCH_WIDTH])
+            or (hit[1] in ("died", *_OUTCOME) and last[hit[1]] is hit)
+        ):
+            chosen.append(hit)
+    for hit in hits:
+        if soft[hit[0]]:
+            shown[hit[1]] = shown.get(hit[1], 0) + 1
+            if shown[hit[1]] <= PER_LABEL:
+                deferred.append(hit)
+    entries, taken = [], set()
+    for group, mark in ((chosen, ""), (deferred, " softfailed")):
+        for index, label, inside, after, continuation in group:
+            if index in taken:
+                continue
+            taken.add(index)
+            entries.append((index + 1, f" [{label}{inside}{mark}]", lines[index]))
+            trim = continuation and not verbose
+            extras = []
+            for extra in range(
+                index + 1,
+                min(index + (TRACE_SCAN if continuation else after), len(lines) - 1)
+                + 1,
+            ):
+                if continuation and _TIMESTAMPED.match(lines[extra]):
+                    break
+                if extra not in taken:
+                    extras.append(extra)
+            if trim and any("# stack trace" in lines[extra] for extra in extras):
+                taken.update(extras)
+                for extra in extras:
+                    frame = _oqa.distri_frame([lines[extra]])
+                    if frame:
+                        entries.append((extra + 1, " |", frame))
                         break
-                    if extra not in taken:
-                        extras.append(extra)
-                if trim and any("# stack trace" in lines[extra] for extra in extras):
-                    taken.update(extras)
-                    for extra in extras:
-                        frame = _oqa.distri_frame([lines[extra]])
-                        if frame:
-                            entries.append((extra + 1, " |", frame))
-                            break
-                else:
-                    for extra in extras if verbose else extras[:after]:
-                        taken.add(extra)
-                        entries.append((extra + 1, " |", lines[extra]))
-            break
+            else:
+                for extra in extras if verbose else extras[:after]:
+                    taken.add(extra)
+                    entries.append((extra + 1, " |", lines[extra]))
+    infos = [(n + 1, label, lines[n]) for n, label in infos if n not in taken]
     if infos:
         counts["info"] = len(infos)
-    shown = [(n, label, lines[n - 1]) for n, label in infos if n - 1 not in taken]
-    return entries, shown[:PER_LABEL], counts, started, finished
+    return entries, infos[:PER_LABEL], counts, started, finished
 
 
 def mode_module(lines, name):

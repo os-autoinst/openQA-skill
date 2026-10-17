@@ -1,0 +1,20 @@
+[2030-01-01T10:00:01.000000Z] [debug] [pid:1] ||| starting softy tests/console/softy.pm
+[2030-01-01T10:00:02.000000Z] [debug] [pid:1] <<< testapi::record_soft_failure(reason="known issue")
+[2030-01-01T10:00:03.000000Z] [debug] [pid:1] command 'systemctl status foo0' failed
+[2030-01-01T10:00:04.000000Z] [debug] [pid:1] command 'systemctl status foo1' failed
+[2030-01-01T10:00:05.000000Z] [debug] [pid:1] command 'systemctl status foo2' failed
+[2030-01-01T10:00:06.000000Z] [debug] [pid:1] command 'systemctl status foo3' failed
+[2030-01-01T10:00:07.000000Z] [debug] [pid:1] ||| finished softy console (runtime: 5 s)
+[2030-01-01T10:00:08.000000Z] [debug] [pid:1] ||| starting compile tests/kernel/compile.pm
+[2030-01-01T10:00:09.000000Z] [debug] [pid:1] >>> testapi::wait_serial: make-done-2-: ok
+Result: passed (a check of the SUT, quoted)
+foo.c:12:5: error: 'bar' undeclared (first use in this function)
+make[1]: *** [Makefile:20: foo.o] Error 1
+CMake Error at CMakeLists.txt:10 (find_package):
+[2030-01-01T10:00:10.000000Z] [warn] [pid:1] !!! distribution::_handle_cmd_typing_error: typing command 'cat > /tmp/x <<EOF
+line two' timed out
+[2030-01-01T10:00:11.000000Z] [info] [pid:1] ::: basetest::runtest: # Test died: command 'make' failed at x
+[2030-01-01T10:00:12.000000Z] [debug] [pid:1] ||| finished compile kernel (runtime: 4 s)
+[2030-01-01T10:00:13.000000Z] [info] [pid:1] Isotovideo exit status: 1
+4700: EXIT 1
+[2030-01-01T10:00:14.000000Z] [info] [pid:1] Result: died

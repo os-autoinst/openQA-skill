@@ -1,0 +1,14 @@
+# ./check nvme/002
+nvme/002 (create many subsystems and test discovery)         [failed]
+    runtime  ...  12.345s
+nvme/003 (test if we're sending keep-alives)                  [passed]
+# sudo -u tester zypper ref
+[sudo] password for tester: 
+# curl -sf https://download.example.org/x
+curl: (6) Could not resolve host: download.example.org
+# tofu apply -auto-approve
+╷
+│ Error: creating EC2 Instance: UnauthorizedOperation
+│ 
+╵
+# echo the build had no fatal errors; echo [failed] is a word

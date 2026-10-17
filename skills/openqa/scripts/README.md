@@ -219,17 +219,26 @@ after the die message, with the `--around-module M --lines A-B` that reads them.
 the job has one, as suite verdicts and kernel splats are there, and prints its hits after the first block,
 under their own header line and fence: `file=serial_terminal.txt mode=errors hits=suite:2,kernel:1
 lines=N`; `hits=-` when it holds none, no line when the job has no such file. `[suite]` marks `TFAIL`,
-`TBROK`, a TAP `not ok`, `Failures:`; `[pytest]` a line starting `FAILED ` or `E   ` and a summary `=== N
-failed`; `[k8s]` a line starting `error: ` (kubectl), `Error from server`, helm's `Error: INSTALLATION
-FAILED:` or `UPGRADE FAILED:`, and these two in `autoinst-log.txt` too; `[kernel]` marks `WARNING:`, `BUG:`, `Oops:`, `Call Trace` (with the
+`TBROK`, a TAP `not ok`, `Failures:`, a blktests `<group>/<nnn> ... [failed]`; these tool labels apply in
+`autoinst-log.txt` too: `[pytest]` a line starting `FAILED ` or `E   ` and a summary `=== N failed`;
+`[k8s]` a line starting `error: ` (kubectl), `Error from server`, helm's `Error: INSTALLATION FAILED:` or
+`UPGRADE FAILED:`; `[build]` `<file>:<line>:<col>: error:`, `fatal error:`, `make: *** [...] Error N`, `CMake
+Error`; `[sudo]` `[sudo] password for `, `sudo: a password is required`; `[network]` `Could not resolve
+host`, `Temporary failure in name resolution`; `[cli]` a line starting `Error: ` or `│ Error: `, the error
+block of OpenTofu/Terraform and of other tools. `[kernel]` marks `WARNING:`, `BUG:`, `Oops:`, `Call Trace` (with the
 4 lines after it) after a printk time (`[   12.345678] `, maybe with a caller id `[  T812]`) or a journal's
 `kernel: `, a line without either only in the kernel's own wording (`WARNING: CPU: 2 PID: 812`, `WARNING:`
 with a source file, `BUG: soft lockup` and the like, `Oops:`), as programs print `WARNING:` too, and a
 `BTRFS` line's `Transaction aborted`; the signatures of `autoinst-log.txt` apply there too, and
 `--file serial_terminal.txt --errors` uses the same set. Then `serial0.txt`, the kernel console, the same
 way but for `[kernel]` lines only, `Kernel panic - not syncing` among them, as the SUT's programs print there
-too; `--file serial0.txt --errors` adds the signatures of `autoinst-log.txt`. Each block keeps its first 3 hits per label, and
-every `# Test died` line whatever its label, as non-fatal hits come first, and at most `--max-lines` lines.
+too; `--file serial0.txt --errors` adds the signatures of `autoinst-log.txt`, where `[fail]` is a
+`record_info` with `result="fail"` and `[command]` includes a `typing command '...` that timed out. Each
+block keeps at most `--max-lines` lines and per label its first 3 hits, but every `# Test died` line, as
+non-fatal hits come first, and the last hit of `died`, `module`, `signal`, `stop` and `result`, how the run
+ended. Hits inside a module with a known issue (it recorded a soft failure and neither died nor failed, or
+forced one over its failure) come after the others, marked `softfailed`, and only fill what those leave of
+the 3.
 After the error lines, in what they leave of `--max-lines`, come at most 3 `[info @<module>]` lines (`info:N`
 in the header): a module's last `record_info` call before its `# Test died` or `test <module> failed` line,
 where tests log what they found (a solver `Conflict`, a check's `result="fail"`). A module's other

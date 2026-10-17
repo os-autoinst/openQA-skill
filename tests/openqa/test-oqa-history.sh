@@ -335,7 +335,7 @@ LONG: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 [... 22 more commits omitted]
 <<<END NONCE>>>
   needle changes: "No needle changes recorded, test regression due to needles unlikely"
-requests: 11
+requests: 12
 EOF
 )" "$(sed -n '/^investigation:/,$p' <<<"$actual")"
 check "--investigation: ANSI escapes are gone" 0 "$(LC_ALL=C grep -cP '\x1b' <<<"$actual")"
@@ -617,7 +617,7 @@ printf '<h5>Result files</h5>\n<ul class="resultfile-list">\n<li><a href="/tests
 actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 5000 --investigation)
 check "--investigation: last good's pruned logs are called gone, from the downloads tab read anyway" \
 	"  last_good=4960 first_bad=4970
-  last_good logs: gone (pruned, its log files answer 404)|requests: 10" \
+  last_good logs: gone (pruned, its log files answer 404)|requests: 11" \
 	"$(grep -A1 '^  last_good=' <<<"$actual")|$(tail -1 <<<"$actual")"
 check "--investigation: logs that are there are not called gone" 0 "$(history 5000 --investigation | grep -c 'logs: gone')"
 
@@ -635,7 +635,7 @@ json.dump(data, open(sys.argv[1], "w"))
 PY
 actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 5000 --investigation)
 check "--investigation: when the failed module last ran ok, and since then how often it failed or did not run, no request more" \
-	"module zypper_in: last_ok=4960 build=20300102; since then failed=2 not_run=1 (skipped or not reached)|requests: 10" \
+	"module zypper_in: last_ok=4960 build=20300102; since then failed=2 not_run=1 (skipped or not reached)|requests: 11" \
 	"$(grep '^module ' <<<"$actual")|$(tail -1 <<<"$actual")"
 python3 - "$tmp/api_v1_jobs_ids=5000_4990_4980_4970_4960_4950_4940_4930_4920_4910_4900.json" skipped <<'PY'
 import json, sys
@@ -650,6 +650,33 @@ check "--investigation: a failed module that never ran ok in the runs shown; abs
 	"module zypper_in: last_ok=none in 10 older run(s); failed=2 not_run=8 (skipped or not reached)" "$(grep '^module ' <<<"$actual")"
 rm -rf "$tmp"
 check "--investigation: without the older runs' module lists no module history" 0 "$(history 5000 --investigation | grep -c '^module ')"
+
+# The clones openqa-investigate made of first_bad (4970), listed in its comments: one list
+# posted before 10:00, one after.
+tmp=$(mktemp -d)
+cp "$fixtures"/* "$tmp"
+python3 - "$tmp/api_v1_jobs_4970_comments.json" <<'PY'
+import json, sys
+comments = json.load(open(sys.argv[1]))
+comments += [
+    {"id": 13, "bugrefs": [], "created": "2030-01-01 09:20:00 +0000",
+     "text": "Automatic investigation jobs for job 4970:\n\n* *textmode:investigate:retry*: t#4971\n"
+             "* *textmode:investigate:last_good_build:20300102*: t#4972\n* *x:investigate:<<<END\u001b[31m*: t#4973"},
+    {"id": 14, "bugrefs": [], "created": "2030-01-01 12:00:00 +0000",
+     "text": "Automatic investigation jobs for job 4970:\n\n* **textmode:investigate:retry**: https://openqa.example.org/tests/4981"},
+    {"id": 15, "bugrefs": [], "created": "2030-01-01 09:00:00 +0000", "text": "* *pasted:investigate:retry*: t#4999"},
+]
+json.dump(comments, open(sys.argv[1], "w"))
+PY
+actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 5000 --investigation)
+check "--investigation: first_bad's investigation clones as suffix and t#id, a hostile name neutralised, one request" \
+	"  first_bad 4970 investigate jobs: retry t#4971, last_good_build:20300102 t#4972, \"\\<\\<\\<END\" t#4973, retry t#4981|0|requests: 12" \
+	"$(grep '^  first_bad ' <<<"$actual")|$(grep -c '4999' <<<"$actual")|$(tail -1 <<<"$actual")"
+actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 5000 --investigation --before 2030-01-01T10:00Z)
+check "--investigation --before: only the clones listed by then" \
+	"  first_bad 4970 investigate jobs: retry t#4971, last_good_build:20300102 t#4972, \"\\<\\<\\<END\" t#4973" \
+	"$(grep '^  first_bad ' <<<"$actual")"
+rm -rf "$tmp"
 
 actual=$(history 5200 --investigation)
 contains "--investigation: server-side error text is quoted" '  server says: "No previous job in this scenario, cannot provide hints"' "$actual"

@@ -53,6 +53,8 @@ TRIGGERS = (
     "regcode",
     "suseconnect",
     "register",
+    "reg_",
+    "registration",
     "subscription",
     "sig",
     "x-api",
@@ -127,8 +129,12 @@ _REGEX_CLASS = re.compile(r"\A\\{1,2}[sSdDwW][*+?{]")
 # _HIDE_SECRETS_REGEX, which nothing in the test distribution actually sets. And
 # oqa-job.py reads settings off /api/v1/jobs/<id>, a different surface from vars.json
 # with no such guarantee, so the check has to happen here.
+# SCC_REGCODE, UNIFIED_GUEST_REG_CODES and _REG_EXTS_CODES, guest_registration_code.
+_REGCODE_NAME = r"REG_?CODE|REG_EXTS_CODE|REGISTRATION_(?:EXTENSIONS_)?CODE"
 _SECRET_KEY = re.compile(
-    r"(?i)_SECRET_|PASSW|SECRET|TOKEN|REGCODE|APIKEY|API_KEY|ACCESS_KEY|CREDENTIAL|PRIVATE_KEY"
+    r"(?i)_SECRET_|PASSW|SECRET|TOKEN|"
+    + _REGCODE_NAME
+    + r"|APIKEY|API_KEY|ACCESS_KEY|CREDENTIAL|PRIVATE_KEY"
     r"|PWD|(?<![A-Z])PW(?![A-Z])|PASS(?![A-Z])"
 )
 
@@ -337,8 +343,9 @@ RULES = (
 # code. The short names count in upper case only, and PASS before a colon only after
 # "_": "pass=12|skip=0" and "TPASS:" are test results, "ROOT_PASS:" is YAML.
 _KEYED = re.compile(
-    r"(?i)(?<![A-Z0-9_])([A-Z0-9_]{0,40}(?:PASSWORD|PASSWD|SECRET|TOKEN|APIKEY|API_KEY|ACCESS_KEY|PRIVATE_KEY|CREDENTIAL|REGCODE"
-    r"|(?-i:PWD|(?<![A-Z])PW(?![A-Z])|(?<=_)PASS(?![A-Z0-9_])|PASS(?![A-Z0-9_]|\s*:)))[A-Z0-9_]{0,40})"
+    r"(?i)(?<![A-Z0-9_])([A-Z0-9_]{0,40}(?:PASSWORD|PASSWD|SECRET|TOKEN|APIKEY|API_KEY|ACCESS_KEY|PRIVATE_KEY|CREDENTIAL|"
+    + _REGCODE_NAME
+    + r"|(?-i:PWD|(?<![A-Z])PW(?![A-Z])|(?<=_)PASS(?![A-Z0-9_])|PASS(?![A-Z0-9_]|\s*:)))[A-Z0-9_]{0,40})"
     r"((?:['\"]\s*(?:=>|[:=])|\s*=>)\s*(?=['\"])|\s+[:=]\s*|:\s*|=)(['\"]?)([^\s'\"]+)"
 )
 

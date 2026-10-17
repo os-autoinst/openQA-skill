@@ -171,7 +171,8 @@ import sys; sys.path.insert(0, '$scripts')
 import _secrets
 for key in ('SCC_REGCODE', '_SECRET_DOCKER', 'ROOT_PASSWORD', 'JOBTOKEN', 'CASEDIR', 'BUILD',
             '_HANA_MASTER_PW', 'OPENWEBUI_ADMIN_PWD', 'MITIGATION_GIT_REPO_PASS', 'ADMINPASS',
-            'PASSTHROUGH_VF_COUNT'):
+            'PASSTHROUGH_VF_COUNT', 'UNIFIED_GUEST_REG_CODES', 'UNIFIED_GUEST_REG_EXTS_CODES',
+            'REG_CODE', 'REGION_CODE', 'EXIT_CODE'):
     print(key, _secrets.is_secret_key(key))
 ")
 check "openQA's own names, plus the regcodes and short password names it misses, minus the dead token" "$(
@@ -187,6 +188,11 @@ OPENWEBUI_ADMIN_PWD True
 MITIGATION_GIT_REPO_PASS True
 ADMINPASS True
 PASSTHROUGH_VF_COUNT False
+UNIFIED_GUEST_REG_CODES True
+UNIFIED_GUEST_REG_EXTS_CODES True
+REG_CODE True
+REGION_CODE False
+EXIT_CODE False
 EOF
 )" "$actual"
 
@@ -379,6 +385,12 @@ done
 for line in 'regcode=AbCd1234EfGh5678' '{"regcode": "AbCd1234EfGh5678"}'; do
 	hides "a registration code after its key: $line" "$line\n" AbCd1234EfGh5678
 done
+codes="AbCd1234""EfGh,IjKl5678""MnOp|"
+for line in "    UNIFIED_GUEST_REG_CODES=$codes" "   \"UNIFIED_GUEST_REG_EXTS_CODES\" : \"$codes\"," \
+	"          'guest_registration_code' => '$codes'," "ansible-playbook registration.yaml -e reg_code='$codes' -e email_address=''"; do
+	# the codes after the first comma, which a value cut at the comma would leave
+	hides "registration codes held in a setting: ${line%%"$codes"*}" "$line\n" "${codes#*,}"
+done
 keeps "-r of other commands after a registration command" 'SUSEConnect --status; rm -r /tmp/registration-cache\nSUSEConnect -s && cp -r /etc/zypp /tmp/zypp-backup\nSUSEConnect -d | grep -r Deregistered /var/log/messages\n'
 keeps "-r of other commands" 'zypper -r repo-oss-update in vim\ngrep -r SUSEConnect /etc/zypp/credentials.d\ntransactional-update pkg install vim -r repo-oss-update\n'
 # shellcheck disable=SC2016 # literal slots, as documentation writes them
@@ -425,6 +437,8 @@ for rule, literal, line in (
     ('keyed-assignment', 'pwd', 'DB_PWD=Sup3rS3cretX'),
     ('keyed-assignment', 'pw', 'DB_PW=Sup3rS3cretX'),
     ('keyed-assignment', 'pass', 'DB_PASS=Sup3rS3cretX'),
+    ('keyed-assignment', 'reg_', 'UNIFIED_GUEST_REG_CODES=Sup3rS3cretX'),
+    ('keyed-assignment', 'registration', 'guest_registration_code=Sup3rS3cretX'),
     ('regcode', 'suseconnect', 'SUSEConnect -r Sup3rS3cretX'),
     ('regcode', 'transactional-update register', 'transactional-update register -r Sup3rS3cretX'),
     ('regcode', 'registercloudguest', 'registercloudguest -r Sup3rS3cretX'),

@@ -354,7 +354,21 @@ for limit, extra in ((0, []), (20, [row(7210, "passed", "2030-01-02T10:00:00Z")]
     json.dump({"data": rows + extra}, open(f"{sys.argv[1]}/tests_7200_ajax_previous_limit=10_next_limit={limit}.json", "w"))
 PY
 actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 7200 --before 2030-01-02T12:00Z)
+# openQA answers next_limit=20 with the 21 nearest runs after the job and the latest: when the
+# farthest of those had started by --before, more may have too.
+python3 - "$tmp" <<'PY'
+import json, sys
+row = lambda i, finished: {"id": i, "build": "1", "state": "done", "result": "passed", "failedmodules": [],
+    "iscurrent": 1 if i == 8100 else None, "finished": finished, "duration": "10:00 minutes"}
+rows = [row(8100, "2030-01-02T08:00:00Z"), row(8150, "2030-01-03T10:00:00Z")]
+rows += [row(8100 + i, f"2030-01-02T{8 + i // 6:02d}:{i % 6 * 10:02d}:00Z") for i in range(1, 22)]
+json.dump({"data": rows}, open(f"{sys.argv[1]}/tests_8100_ajax_previous_limit=10_next_limit=20.json", "w"))
+PY
+more=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 8100 --before 2030-01-02T23:00Z)
 rm -rf "$tmp"
+check "--before: newest run named; past the runs read after the job, more may have started" \
+	"note: 21 newer run(s) not counted, latest=8121; 1 run(s) that started after --before cut; only the 21 runs nearest after this job read, more may have started by --before" \
+	"$(grep '^note: 21' <<<"$more")"
 check "--before: the runs after the job up to it are read, the job's restart among them" \
 	"1 7210|note: 2 newer run(s) not counted, latest=7210; 1 run(s) that started after --before cut" \
 	"$(grep -c '^7210 ' <<<"$actual") $(awk '$1 == 7200 {print $NF}' <<<"$actual")|$(grep '^note: 2' <<<"$actual")"

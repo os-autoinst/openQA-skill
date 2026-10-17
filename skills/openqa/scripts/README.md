@@ -370,7 +370,9 @@ run on the others was ok, the hint is `bound to one machine`.
 
 `--before TIME` (ISO 8601 such as `2030-01-02T10:00Z`, UTC without an offset): the history as it stood then,
 for a review as of a ticket's date. The same request also asks for the 20 runs after the job, nearest first,
-so those that had started by then show, its restart among them. Runs that started later are cut (`note: N run(s) that started after
+so those that had started by then show, its restart among them, and `latest=` names the newest of them; when
+the farthest of those had started too, `only the 21 runs nearest after this job read` says more may have. Runs
+that started later are cut (`note: N run(s) that started after
 --before cut`); a run still going then shows as `running` and counts in none of `last_good`, `first_bad`,
 `streak`, `not_ok`; a restart that is not among the runs kept leaves `clone` empty; bugrefs and label come
 from the comments created by then (one request per run carrying either, 30 at most, `?` beyond; `note: N

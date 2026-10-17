@@ -7,7 +7,7 @@ Repository 'oss' successfully added
 checksum e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
 root=UUID=123e4567-e89b-12d3-a456-426614174000 ro quiet
 TEST_GIT_HASH=3f718db6c0de4a2b1e5f8a9c7d6e5f4a3b2c1d0e
-"JOBTOKEN" : "FkZT9GDzQrravzhD",
+[2026-09-21T10:05:07.000000+02:00] [debug] [pid:3014] <<< consoles::serial_screen::type_string(text="\n", key="ret", json_cmd_token="FkZTQrra", cmd="backend_send_key")
 EXTRABOOTPARAMS=console=ttyS0 live.password=nots3cr3t
 SSH_AUTH_SOCK=/tmp/ssh-XXXX/agent.1234
 TOKEN=none

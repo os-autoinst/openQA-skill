@@ -136,7 +136,6 @@ actual=$(printf -- '-----BEGIN RSA PRIVATE KEY-----\nMIIEowIBAAKCAQEA\n' | pytho
 check "an unterminated key block fails closed" 0 "$(grep -c MIIEowIBAAKCAQEA <<<"$actual")"
 
 # --- what must survive, or the redactor destroys the evidence it exists to show ---
-keeps "JOBTOKEN, dead once the job finishes" '"JOBTOKEN" : "FkZT9GDzQrravzhD",\n'
 keeps "the conventional openQA password" 'EXTRABOOTPARAMS=... live.password=nots3cr3t\n'
 keeps "a sha256 digest" 'checksum e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\n'
 keeps "a uuid on the kernel command line" 'root=UUID=123e4567-e89b-12d3-a456-426614174000 ro\n'
@@ -175,12 +174,12 @@ for key in ('SCC_REGCODE', '_SECRET_DOCKER', 'ROOT_PASSWORD', 'JOBTOKEN', 'CASED
             'REG_CODE', 'REGION_CODE', 'EXIT_CODE'):
     print(key, _secrets.is_secret_key(key))
 ")
-check "openQA's own names, plus the regcodes and short password names it misses, minus the dead token" "$(
+check "openQA's own names, plus the regcodes, short password names and job token it misses" "$(
 	cat <<'EOF'
 SCC_REGCODE True
 _SECRET_DOCKER True
 ROOT_PASSWORD True
-JOBTOKEN False
+JOBTOKEN True
 CASEDIR False
 BUILD False
 _HANA_MASTER_PW True
@@ -359,6 +358,26 @@ for url in 'https://bugzilla.opensuse.org/show_bug.cgi?id=123' "$repo?arch=x86_6
 	"$repo?ABCDEFGH12345678=&page=2" "$repo?ABCDEFGH12345678=;page=2" "$repo?ABCDEFGH12345678=,x"; do
 	keeps "an ordinary query: ${url#*\?}" "GET $url\n"
 done
+
+# --- the job's own token, which vars.json and the worker log carry ----------------------
+jobtoken="Qz7xKp2L""m9vRt4Wd"
+for line in "   \"JOBTOKEN\" : \"$jobtoken\"," "    JOBTOKEN=$jobtoken" "X-API-JobToken: $jobtoken" \
+	"{\"JOBTOKEN\":\"$jobtoken\",\"TEST\":\"textmode\"}"; do
+	actual=$(printf '%s\n' "$line" | python3 "$scripts/_secrets.py" 2>/dev/null)
+	check "a job token goes, the rest of the line stays: ${line%%"$jobtoken"*}" \
+		"${line/"$jobtoken"/[REDACTED:job-token]}" "$actual"
+done
+# Every output path of oqa-log.py --file vars.json goes through the redactor.
+printf '{\n   "ARCH" : "x86_64",\n   "JOBTOKEN" : "%s",\n   "TEST" : "textmode"\n}\n' "$jobtoken" >"$work/tests_4242_file_vars.json"
+for mode in "--grep JOBTOKEN" "--grep $jobtoken" "--lines 1-5" "--tail 3" "--errors" "--grep ARCH --context 2"; do
+	# shellcheck disable=SC2086 # a mode is one or more arguments
+	actual=$(python3 "$scripts/oqa-log.py" --fixture-dir "$work" https://openqa.example.org/tests/4242 --file vars.json $mode 2>&1)
+	# the header line proves the mode ran, rather than failing with a usage error
+	check "oqa-log.py --file vars.json ${mode/"$jobtoken"/<token>} prints no job token" "1 0" \
+		"$(grep -c '^job=4242 host=https://openqa.example.org mode=' <<<"$actual") $(grep -c "$jobtoken" <<<"$actual")"
+done
+actual=$(python3 "$scripts/oqa-log.py" --fixture-dir "$work" https://openqa.example.org/tests/4242 --file vars.json --lines 1-5 2>&1)
+check "and shows the line it was on" 1 "$(grep -c '"JOBTOKEN" : "\[REDACTED:job-token\]"' <<<"$actual")"
 
 # --- os-autoinst's own plumbing, thousands of lines per autoinst-log.txt ---------------
 keeps "os-autoinst's json_cmd_token" '[debug] [pid:4242] <<< consoles::serial_screen::type_string(text="\\n", key="ret", json_cmd_token="AbCdEfGh", cmd="backend_send_key")\n[debug] [pid:4242] read_json(7) json_cmd_token=HgFeDcBa\n'

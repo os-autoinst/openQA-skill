@@ -151,8 +151,11 @@ contains "oversized line is cut" "chars omitted]" "$actual"
 check "no output line is longer than the cap plus marker" 0 "$(awk 'length($0) > 300' <<<"$actual" | wc -l)"
 
 actual=$(log 4242 --around-module zypper_in --max-lines 8)
-contains "--max-lines: says what was cut" "note: 3 lines omitted at '--' (--max-lines)" "$actual"
-check "--max-lines: the window ends just after the die line, post_fail_hook output is left out" "18 19 -- 23 24 25 26 27 28" \
+contains "--max-lines: says what was cut" "note: 4 lines omitted at '--' (--max-lines)" "$actual"
+check "--max-lines: the window ends after the die message and its frame in the test, post_fail_hook output is left out" "18 19 -- 24 25 26 27 28 29" \
+	"$(sed -n '/^<<<UNTRUSTED/,/^<<<END/p' <<<"$actual" | sed '1d;$d' | sed -E 's/^ *([0-9]+):.*/\1/' | xargs)"
+actual=$(log 4272 --around-module pkg --max-lines 8)
+check "--max-lines: the window keeps the die message's frames up to the first called from os-autoinst" "1 2 -- 7 8 9 10 11 12" \
 	"$(sed -n '/^<<<UNTRUSTED/,/^<<<END/p' <<<"$actual" | sed '1d;$d' | sed -E 's/^ *([0-9]+):.*/\1/' | xargs)"
 actual=$(log 4244 --around-module boot --max-lines 8)
 check "--max-lines without a die line: head and tail of the module" "1 1" \

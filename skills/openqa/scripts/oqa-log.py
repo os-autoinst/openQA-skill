@@ -36,9 +36,11 @@ MAX_LINES = 60
 PER_LABEL = 3
 MAX_LISTED = 80
 TRACE_SCAN = 12
-# around-module: lines kept from the start of the section, and after the die line
+# around-module: lines kept from the start of the section, and at least after the die line
 MODULE_HEAD = 8
 MODULE_AFTER = 3
+# A frame called from os-autoinst or Perl itself: the trace has left the test code.
+_RUNNER_FRAME = re.compile(r" called at (?:/usr/|\S*/(?:os-autoinst|perl5)/)")
 CUT_MARGIN = 2048  # longer than any credential a bounded redaction rule matches
 
 _FILE_NAME = re.compile(r"^(?:ulogs/)?[A-Za-z0-9_][A-Za-z0-9._+@=~#-]*$")
@@ -788,6 +790,18 @@ def mode_module(lines, name):
     return (begin, *end), seen
 
 
+def die_block_end(lines, died, last):
+    """Index of the last line of the die message: its continuation lines up to the first
+    frame called from os-autoinst or Perl, at least MODULE_AFTER and at most TRACE_SCAN."""
+    end = min(died + MODULE_AFTER, last)
+    for index in range(died + 1, min(died + TRACE_SCAN, last) + 1):
+        text = lines[index][:MATCH_WIDTH]
+        if _TIMESTAMPED.match(text) or _RUNNER_FRAME.search(text):
+            break
+        end = max(end, index)
+    return end
+
+
 def without_plumbing(entries):
     """Drop console plumbing lines with their continuation lines, and a
     [step:...] line that repeats the one before it."""
@@ -1162,7 +1176,8 @@ def main():
         "--around-module",
         metavar="MODULE",
         help="lines between the module's 'starting' and 'finished' markers (last run); "
-        "when capped by --max-lines the window ends just after the '# Test died' line, "
+        "when capped by --max-lines the window ends after the '# Test died' message and the "
+        "test's own stack frames, "
         "so post_fail_hook output is left out; with --grep: grep only those lines",
     )
     modes.add_argument(
@@ -1482,8 +1497,8 @@ def main():
             if died is not None:
                 mode += f" died={died + 1}"
                 if len(entries) > args.max_lines:
-                    # What follows the die line is post_fail_hook output.
-                    entries = entries[: died - begin + 1 + MODULE_AFTER]
+                    # What follows the die message is post_fail_hook output.
+                    entries = entries[: die_block_end(lines, died, end) - begin + 1]
             if not args.verbose:
                 total = len(entries)
                 entries = without_plumbing(entries)

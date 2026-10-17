@@ -1,0 +1,292 @@
+{
+ "job": {
+  "assets": {},
+  "children": {
+   "Chained": [],
+   "Directly chained": [],
+   "Parallel": []
+  },
+  "parents": {
+   "Chained": [],
+   "Directly chained": [],
+   "Parallel": []
+  },
+  "clone_id": null,
+  "group": "Example Rolling",
+  "group_id": 7,
+  "id": 895,
+  "logs": [
+   "autoinst-log.txt",
+   "serial0.txt"
+  ],
+  "ulogs": [],
+  "name": "exampleos-Rolling-DVD-x86_64-Build20300102-gnome@64bit",
+  "result": "failed",
+  "settings": {
+   "ARCH": "x86_64",
+   "BACKEND": "qemu",
+   "BUILD": "20300102",
+   "DISTRI": "exampleos",
+   "FLAVOR": "DVD",
+   "MACHINE": "64bit",
+   "TEST": "gnome",
+   "VERSION": "Rolling"
+  },
+  "state": "done",
+  "t_started": "2030-01-02T03:04:05",
+  "t_finished": "2030-01-02T03:14:05",
+  "test": "gnome",
+  "testresults": [
+   {
+    "name": "boot_to_desktop",
+    "result": "failed",
+    "category": "x11",
+    "details": [
+     {
+      "num": 1,
+      "result": "ok",
+      "screenshot": "boot_to_desktop-1.png",
+      "title": null
+     },
+     {
+      "num": 2,
+      "result": "unk",
+      "screenshot": "boot_to_desktop-2.png",
+      "tags": [
+       "generic-desktop"
+      ],
+      "needles": [
+       {
+        "name": "generic-desktop-20300101",
+        "json": "generic-desktop-20300101.json",
+        "error": 0.5,
+        "area": [
+         {
+          "similarity": 35,
+          "x": 0,
+          "y": 0,
+          "w": 100,
+          "h": 30
+         }
+        ]
+       },
+       {
+        "name": "generic-desktop-20300102",
+        "json": "generic-desktop-20300102.json",
+        "error": 0.5,
+        "area": [
+         {
+          "similarity": 20,
+          "x": 0,
+          "y": 0,
+          "w": 100,
+          "h": 30
+         }
+        ]
+       }
+      ],
+      "properties": [],
+      "frametime": [
+       "10.0",
+       "10.1"
+      ]
+     },
+     {
+      "num": 3,
+      "result": "unk",
+      "screenshot": "boot_to_desktop-3.png",
+      "tags": [
+       "generic-desktop"
+      ],
+      "needles": [
+       {
+        "name": "generic-desktop-20300101",
+        "json": "generic-desktop-20300101.json",
+        "error": 0.5,
+        "area": [
+         {
+          "similarity": 62,
+          "x": 0,
+          "y": 0,
+          "w": 100,
+          "h": 30
+         }
+        ]
+       },
+       {
+        "name": "generic-desktop-20300102",
+        "json": "generic-desktop-20300102.json",
+        "error": 0.5,
+        "area": [
+         {
+          "similarity": 40,
+          "x": 0,
+          "y": 0,
+          "w": 100,
+          "h": 30
+         }
+        ]
+       }
+      ],
+      "properties": [],
+      "frametime": [
+       "10.0",
+       "10.1"
+      ]
+     },
+     {
+      "num": 4,
+      "result": "unk",
+      "screenshot": "boot_to_desktop-4.png",
+      "tags": [
+       "generic-desktop"
+      ],
+      "needles": [
+       {
+        "name": "generic-desktop-20300101",
+        "json": "generic-desktop-20300101.json",
+        "error": 0.5,
+        "area": [
+         {
+          "similarity": 94,
+          "x": 0,
+          "y": 0,
+          "w": 100,
+          "h": 30
+         }
+        ]
+       },
+       {
+        "name": "generic-desktop-20300102",
+        "json": "generic-desktop-20300102.json",
+        "error": 0.5,
+        "area": [
+         {
+          "similarity": 61,
+          "x": 0,
+          "y": 0,
+          "w": 100,
+          "h": 30
+         }
+        ]
+       }
+      ],
+      "properties": [],
+      "frametime": [
+       "10.0",
+       "10.1"
+      ]
+     },
+     {
+      "num": 5,
+      "result": "unk",
+      "screenshot": "boot_to_desktop-5.png",
+      "tags": [
+       "generic-desktop"
+      ],
+      "needles": [
+       {
+        "name": "generic-desktop-20300101",
+        "json": "generic-desktop-20300101.json",
+        "error": 0.5,
+        "area": [
+         {
+          "similarity": 41,
+          "x": 0,
+          "y": 0,
+          "w": 100,
+          "h": 30
+         }
+        ]
+       },
+       {
+        "name": "generic-desktop-20300102",
+        "json": "generic-desktop-20300102.json",
+        "error": 0.5,
+        "area": [
+         {
+          "similarity": 30,
+          "x": 0,
+          "y": 0,
+          "w": 100,
+          "h": 30
+         }
+        ]
+       }
+      ],
+      "properties": [],
+      "frametime": [
+       "10.0",
+       "10.1"
+      ]
+     },
+     {
+      "num": 6,
+      "result": "unk",
+      "screenshot": "boot_to_desktop-6.png",
+      "tags": [
+       "generic-desktop"
+      ],
+      "needles": [
+       {
+        "name": "generic-desktop-20300101",
+        "json": "generic-desktop-20300101.json",
+        "error": 0.5,
+        "area": [
+         {
+          "similarity": 12,
+          "x": 0,
+          "y": 0,
+          "w": 100,
+          "h": 30
+         }
+        ]
+       }
+      ],
+      "properties": [],
+      "frametime": [
+       "10.0",
+       "10.1"
+      ]
+     },
+     {
+      "num": 7,
+      "result": "fail",
+      "screenshot": "boot_to_desktop-7.png",
+      "tags": [
+       "generic-desktop"
+      ],
+      "needles": [
+       {
+        "name": "generic-desktop-20300101",
+        "json": "generic-desktop-20300101.json",
+        "error": 0.5,
+        "area": [
+         {
+          "similarity": 18,
+          "x": 0,
+          "y": 0,
+          "w": 100,
+          "h": 30
+         }
+        ]
+       }
+      ],
+      "properties": [],
+      "frametime": [
+       "10.0",
+       "10.1"
+      ]
+     },
+     {
+      "num": 8,
+      "result": "fail",
+      "title": "Failed",
+      "text": "boot_to_desktop-8.txt",
+      "text_data": "# Test died: no candidate needle with tag(s) 'generic-desktop' matched\n"
+     }
+    ]
+   }
+  ]
+ }
+}

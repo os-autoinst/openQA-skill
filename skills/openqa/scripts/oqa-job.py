@@ -50,7 +50,9 @@ How to read it:
     the lowest area "similarity" of that needle as openQA reports it (a needle
     matches only when every area reaches its threshold, 96 % unless the area
     sets "match"). The "error" field of the raw details is another measure,
-    averaged over all areas.
+    averaged over all areas. "loop: N checks for these tags in a row" follows a step
+    that ends such checks, as send_key_until_needlematch leaves them: its best= is
+    the near miss among them, the last screen is the one the loop overshot to.
   - shot= on a step line is that step's screenshot. A step without one (a die
     message, a wait_serial) has last_shot=, the newest screenshot before it in
     the module: the screen when it failed. GET it to a file and look at it; the
@@ -287,7 +289,8 @@ def reduce_details(obj):
     keeps only the fields of failing steps and the worst area of each needle."""
     if "num" in obj and "result" in obj:
         if obj["result"] not in BAD_STEPS:
-            keys = ("num", "result", "title", "screenshot")
+            # tags and needles: a check_screen of a send_key_until_needlematch loop.
+            keys = ("num", "result", "title", "screenshot", "tags", "needles")
             step = {key: obj.get(key) for key in keys if key == "title" or key in obj}
             if "text" in obj and isinstance(obj.get("text_data"), str):
                 # record_info text: why a module failed without a failing step.
@@ -654,6 +657,27 @@ def step_text(step):
     return kept[: len(_oqa.sanitize(text[:TEXT_KEPT], max_line=0, max_bytes=0))]
 
 
+def needle_loop(steps, step):
+    """(checks, step, needle) of the best match among the needle checks for the same tags
+    in a row that end at `step`, as send_key_until_needlematch leaves them, whose last
+    screen is the one it overshot to; None for a single check."""
+    tags = step.get("tags")
+    end = next(i for i, other in enumerate(steps) if other is step)
+    start = end
+    while tags and start and steps[start - 1].get("tags") == tags:
+        start -= 1
+    rated = [
+        (needle["worst"], index, needle)
+        for index in range(start, end + 1)
+        for needle in steps[index].get("needles") or ()
+        if isinstance(needle, dict) and isinstance(needle.get("worst"), (int, float))
+    ]
+    if start == end or not rated:
+        return None
+    _, index, needle = max(rated, key=lambda rating: rating[:2])
+    return end - start + 1, steps[index], needle
+
+
 def step_link(client, job_id, module, number):
     return f"{client.host}/tests/{job_id}#step/{quote(module[:120], safe='#')}/{number}"
 
@@ -704,7 +728,7 @@ def step_shot(steps, step):
     return (key, name) if name else None
 
 
-def print_step(client, job_id, module, step, source, verbose, shot=None):
+def print_step(client, job_id, module, step, source, verbose, shot=None, loop=None):
     number = step.get("num")
     kind = step_kind(step)
     line = f"  step={tok(number, 10)} kind={kind}"
@@ -734,6 +758,17 @@ def print_step(client, job_id, module, step, source, verbose, shot=None):
         print(f"    candidates={len(needles)} best={shown} (worst area each)")
     elif step.get("screenshot") and step.get("tags"):
         print("    candidates=0 (no needle was close enough to be recorded)")
+    if loop:
+        checks, best, needle = loop
+        line = (
+            f"    loop: {checks} checks for these tags in a row, best="
+            f"{tok(needle.get('name'), 70)}:{tok(needle['worst'], 12)}% at step={tok(best.get('num'), 10)}"
+        )
+        if _oqa.job_id_of(best.get("num")):
+            line += f" link={step_link(client, job_id, module, best['num'])}"
+        if shot_name(best):
+            line += f" shot={client.host}/tests/{job_id}/images/{quote(shot_name(best), safe='')}"
+        print(line)
     text = step_text(step)
     if not text:
         return
@@ -842,7 +877,8 @@ def print_modules(client, job, max_steps, verbose, wanted=None):
             shown = info_steps(body)[:max_steps]
         for step in shown:
             shot = step_shot(steps, step)
-            print_step(client, job["id"], name, step, source, verbose, shot)
+            loop = needle_loop(steps, step)
+            print_step(client, job["id"], name, step, source, verbose, shot, loop)
         if len(bad) > len(shown):
             print(f"  +{len(bad) - len(shown)} failing steps not shown (--steps N)")
         if hook:

@@ -140,6 +140,14 @@ check "--steps 0: the job and its failed modules with their counts, no step line
 check "--steps 0: the module lines are those of the digest" \
 	"$(job 500 | grep '^module=')" "$(grep '^module=' <<<"$actual")"
 
+# --- send_key_until_needlematch: the near miss before the overshot screen --------------
+actual=$(job 895 | normalize)
+check "job 895 digest" "$(cat "$fixtures/expected-895.txt")" "$actual"
+check "a loop of needle checks for one tag: the best match of all of them, with its step, next to the last" \
+	"    loop: 6 checks for these tags in a row, best=generic-desktop-20300101:94% at step=4 link=https://openqa.example.org/tests/895#step/boot_to_desktop/4 shot=https://openqa.example.org/tests/895/images/boot_to_desktop-4.png" \
+	"$(grep '^    loop:' <<<"$actual")"
+check "a single needle check has no loop line" 0 "$(job 500 | grep -c '^    loop:')"
+
 # --- verdict lines of a long step text ----------------------------------------------
 actual=$(job 870 | normalize)
 check "job 870 digest" "$(cat "$fixtures/expected-870.txt")" "$actual"

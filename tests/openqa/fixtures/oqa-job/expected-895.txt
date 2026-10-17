@@ -1,0 +1,14 @@
+job=895 host=https://openqa.example.org result=failed started=2030-01-02T03:04:05 duration=10m00s
+scenario=exampleos-Rolling-DVD-x86_64-gnome@64bit build=20300102 group=7
+settings: BACKEND=qemu
+modules=1 failed=1
+module=boot_to_desktop result=failed category=x11
+  step=7 kind=needle-mismatch link=https://openqa.example.org/tests/895#step/boot_to_desktop/7 shot=https://openqa.example.org/tests/895/images/boot_to_desktop-7.png
+    tags=generic-desktop
+    candidates=1 best=generic-desktop-20300101:18% (worst area each)
+    loop: 6 checks for these tags in a row, best=generic-desktop-20300101:94% at step=4 link=https://openqa.example.org/tests/895#step/boot_to_desktop/4 shot=https://openqa.example.org/tests/895/images/boot_to_desktop-4.png
+  step=8 kind=test-died:needle-mismatch link=https://openqa.example.org/tests/895#step/boot_to_desktop/8 last_shot=https://openqa.example.org/tests/895/images/boot_to_desktop-7.png
+    text="# Test died: no candidate needle with tag(s) 'generic-desktop' matched"
+logs=autoinst-log.txt,serial0.txt ulogs=0
+review: reviewed=no comments=0
+requests: 2

@@ -144,7 +144,7 @@ CASEDIR, NEEDLES_DIR, YAML_SCHEDULE); `-v` whole traces, ulog names, all setting
 comments. `--module NAME` alone keeps only that module's lines, whatever its result, and ends them with
 `+N of M steps not shown (--all-steps lists them)`. `--before TIME` (ISO 8601, UTC unless it has an
 offset) reads the comments as they stood at TIME, as `oqa-history.py --before` does: a comment created
-later, or with no readable date, is hidden with its bugrefs, labels and flags, the review state is that of
+later (`created=`, UTC to the second, is what is compared), or with no readable date, is hidden with its bugrefs, labels and flags, the review state is that of
 the rest, and `note: N comment(s) created after --before hidden` counts them. A restart that had not
 started by TIME is left out of `clone chain` and `SUPERSEDED` (`note: restarts that started after
 --before left out`), one still going then shows as `none` and `state=running`.
@@ -163,7 +163,7 @@ started by TIME is left out of `clone chain` and `SUPERSEDED` (`note: restarts t
       ulogs[libssh]=libssh-journal.txt,libssh-commands.tgz
     logs=autoinst-log.txt,worker-log.txt,serial0.txt ulogs=16
     review: reviewed=yes bugrefs=poo#201672 comments=1
-    comment=963649 by=reviewer_a class=carried-over created=2026-09-19T08:12 bugrefs=poo#201672 carried_over_from=5962127
+    comment=963649 by=reviewer_a class=carried-over created=2026-09-19T08:12:31Z bugrefs=poo#201672 carried_over_from=5962127
     requests: 4
 
 When set: `reason="..."` (whole up to 480 characters, a longer one cut in the middle so openQA's

@@ -33,6 +33,9 @@ MAX_FETCH = 16 * 1024 * 1024
 MATCH_WIDTH = 4000
 FALLBACK_TAIL = 20
 MAX_LINES = 60
+LINE_CHARS = 200
+# A grep hit is often a long command line whose decisive option comes last.
+GREP_LINE_CHARS = 1000
 PER_LABEL = 3
 MAX_LISTED = 80
 TRACE_SCAN = 12
@@ -1240,9 +1243,9 @@ def main():
     parser.add_argument(
         "--max-line-chars",
         type=non_negative,
-        default=200,
         metavar="N",
-        help="cut longer lines, 0 = do not cut (default: 200)",
+        help=f"cut longer lines, 0 = do not cut (default: {LINE_CHARS}, with --grep: "
+        f"{GREP_LINE_CHARS})",
     )
     parser.add_argument(
         "--max-bytes",
@@ -1267,6 +1270,8 @@ def main():
     )
     args = parser.parse_args()
     args.max_lines = args.max_lines or args.tail or MAX_LINES
+    if args.max_line_chars is None:
+        args.max_line_chars = GREP_LINE_CHARS if args.grep is not None else LINE_CHARS
     others = (
         args.list,
         args.tail,
@@ -1518,6 +1523,18 @@ def main():
     entries, dropped = cap_entries(entries, args.max_lines, keep_head)
     if dropped:
         notes.append(f"note: {dropped} lines omitted at '--' (--max-lines)")
+    width = args.max_line_chars
+    longer = sum(
+        1
+        for entry in entries
+        if entry
+        and entry[1] != "~"
+        and len(entry[2] if args.verbose else compact(entry[2])) > width > 0
+    )
+    if longer:
+        notes.append(
+            f"note: {longer} lines cut at {width} characters; --max-line-chars 0 prints them whole"
+        )
     print(f"{head} mode={mode}")
     block = _oqa.sanitize(
         render(entries, args.max_line_chars, args.verbose), max_line=0, max_bytes=131072

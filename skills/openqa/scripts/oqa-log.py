@@ -102,6 +102,10 @@ _PREFIX = re.compile(
     r"^\[\d{4}-\d\d-\d\dT(\d\d:\d\d:\d\d)[\d.]*(?:Z|[+-]\d\d:?\d\d)?\] \[(\w+)\] (?:\[pid:\d+\] )?"
 )
 _DIED = re.compile(r"# Test died")
+# autotest.pm: a module that failed without dying, after its "finished" marker
+_TEST_FAILED = re.compile(r"(?:^|\] )test \S+ failed\b")
+# testapi.pm record_info: bmwqemu::log_call "<<< testapi::record_info(title=..., output=...)"
+_INFO = re.compile(r"<<< testapi::record_info\(")
 # What os-autoinst logs about its own console plumbing for every testapi call.
 _PLUMBING = re.compile(
     r"^\[[^\]]+\] \[\w+\] (?:\[pid:\d+\] )?"
@@ -221,7 +225,7 @@ SIGNATURES = (
         ],
     ),
     _signature("died", [r"# Test died"], 3, True),
-    _signature("module", [r"(?:^|\] )test \S+ failed\b"]),
+    _signature("module", [_TEST_FAILED.pattern]),
     _signature(
         "signal", [r"isotovideo received signal \S+", r"autotest received signal"]
     ),
@@ -687,26 +691,37 @@ def mode_grep(lines, pattern, context, max_matches, span=None):
 
 
 def mode_errors(lines, verbose, signatures=SIGNATURES):
-    """Return (entries, counts per label, last started module, finished?)."""
+    """Return (entries, info entries, counts per label, last started module, finished?).
+
+    An info entry is the last record_info call of a module before its "# Test died"
+    or "test <module> failed" line: what the test itself logged about the failure."""
     entries, counts, taken = [], {}, set()
-    started = finished = None
+    started = finished = info = None
+    infos = []
     for index, text in enumerate(lines):
         probe = text[:MATCH_WIDTH]
         match = _STARTING.search(probe)
         if match:
-            started, finished = (index, match), None
+            started, finished, info = (index, match), None, None
         elif (
             started
             and (match := _FINISHED.search(probe))
             and match.group(1) == started[1].group(1)
         ):
             finished = index
+        if started and _INFO.search(probe):
+            info = index
+        elif info is not None and (_DIED.search(probe) or _TEST_FAILED.search(probe)):
+            infos.append((info + 1, f" [info @{_oqa.tok(started[1].group(1), 60)}]"))
+            info = None
         for label, pattern, after, continuation in signatures:
             if not pattern.search(probe):
                 continue
             counts[label] = counts.get(label, 0) + 1
             # Non-fatal hits of the same label must not hide the line that ended a module.
-            if (counts[label] <= PER_LABEL or _DIED.search(probe)) and index not in taken:
+            if (
+                counts[label] <= PER_LABEL or _DIED.search(probe)
+            ) and index not in taken:
                 taken.add(index)
                 # The module name is log text: capped and quoted, or it forges
                 # a second "[label]" of its own.
@@ -739,7 +754,10 @@ def mode_errors(lines, verbose, signatures=SIGNATURES):
                         taken.add(extra)
                         entries.append((extra + 1, " |", lines[extra]))
             break
-    return entries, counts, started, finished
+    if infos:
+        counts["info"] = len(infos)
+    shown = [(n, label, lines[n - 1]) for n, label in infos if n - 1 not in taken]
+    return entries, shown[:PER_LABEL], counts, started, finished
 
 
 def mode_module(lines, name):
@@ -988,7 +1006,7 @@ def serial_errors(client, job_id, args):
         return [], False
     except _oqa.OqaError as error:
         return [f"note: {SERIAL_TERMINAL} not read ({error})"], False
-    entries, counts, _, _ = mode_errors(lines, args.verbose, SERIAL_SIGNATURES)
+    entries, _, counts, _, _ = mode_errors(lines, args.verbose, SERIAL_SIGNATURES)
     found = ",".join(f"{label}:{count}" for label, count in counts.items())
     out = [f"file={SERIAL_TERMINAL} mode=errors hits={found or '-'} lines={len(lines)}"]
     if truncated:
@@ -1397,15 +1415,18 @@ def main():
         elif args.errors:
             serial = args.file.removeprefix("ulogs/") == SERIAL_TERMINAL
             signatures = SERIAL_SIGNATURES if serial else SIGNATURES
-            entries, counts, started, finished = mode_errors(
+            entries, infos, counts, started, finished = mode_errors(
                 lines, args.verbose, signatures
             )
             found = ",".join(f"{label}:{count}" for label, count in counts.items())
             mode = f"errors hits={found or '-'}"
+            failures = set(counts) - {"info"}
+            # Low rank: info lines only fill what the error lines leave of --max-lines.
+            entries += infos[: max(args.max_lines - len(entries), 0)]
             serial_hits = False
             if args.file == DEFAULT_FILE and args.member is None:
                 extra, serial_hits = serial_errors(client, job_id, args)
-            status = 1 if counts or serial_hits else 0
+            status = 1 if failures or serial_hits else 0
             if any(count > PER_LABEL for count in counts.values()):
                 notes.append(
                     f"note: first {PER_LABEL} hits per label shown, --grep for more"
@@ -1416,14 +1437,14 @@ def main():
                     f"last_module={_oqa.tok(match.group(1))} script={_oqa.tok(match.group(2))} "
                     f"start={index + 1} finished={finished + 1 if finished else 'never'}"
                 )
-            only_died = not set(counts) - {"died", *_OUTCOME} and "died" in counts
+            only_died = not failures - {"died", *_OUTCOME} and "died" in failures
             if only_died and not serial_hits:
                 notes.append(
                     "hint: only a 'Test died' line: command output is not in autoinst-log.txt; "
                     "try --file serial_terminal.txt (or serial0.txt) with --grep/--tail, or "
                     "the module's ulogs (oqa-job.py prints ulogs[<module>]=)"
                 )
-            if not counts:
+            if not failures:
                 notes.append(
                     f"note: no known signature, last {FALLBACK_TAIL} lines shown"
                 )

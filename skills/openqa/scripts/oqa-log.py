@@ -611,7 +611,13 @@ def fetch_tail(client, path, wanted, limit):
     """Return (lines, numbered from the end?, note) for the last wanted lines."""
     # openQA answers a suffix range (bytes=-N) with the head of the file, so
     # ask for the size first and then for an absolute range.
-    _, total, ranged = client.get_range(path, max_bytes=1)
+    try:
+        _, total, ranged = client.get_range(path, max_bytes=1)
+    except _oqa.OqaError as error:
+        # Only a file of 0 bytes has no byte 0 to send.
+        if not str(error).startswith("HTTP 416:"):
+            raise
+        return [], False, "bytes=0-0/0"
     if not ranged:
         lines, truncated = fetch_all(client, path, limit)
         if truncated:
@@ -1122,7 +1128,9 @@ def show_runtimes(client, args, job_id, head):
     if body:
         block = _oqa.sanitize("\n".join(body), max_line=0, max_bytes=131072)
         print(_oqa.fence(block, f"{client.host.split('//')[1]}{path}"), end="")
-    if not runs:
+    if not lines:
+        notes.append("note: the file is empty")
+    elif not runs:
         notes.append(
             "note: no module markers ('||| starting'); no module ran, or not an os-autoinst log"
         )
@@ -1387,6 +1395,8 @@ def main():
         wanted = min(args.tail, args.max_lines)
         entries = mode_tail(lines, False, wanted)
         mode = f"tail member lines={len(lines)}"
+        if not lines:
+            notes.append("note: the member is empty")
         if truncated:
             notes.append(
                 f"warning: only the first {args.max_bytes} bytes of the member were read"
@@ -1396,7 +1406,9 @@ def main():
         lines, from_end, fetched = fetch_tail(client, path, wanted, args.max_bytes)
         entries = mode_tail(lines, from_end, wanted)
         mode = f"tail {fetched}" + (" numbering=from-end" if from_end else "")
-        if not entries:
+        if not lines and not from_end:
+            notes.append("note: the file is empty")
+        elif not entries:
             notes.append(
                 "note: no complete line in the tail window; the file may be one very "
                 "long line (try --grep, or --tail with a larger N)"
@@ -1410,6 +1422,8 @@ def main():
             notes.append(
                 f"warning: only the first {args.max_bytes} bytes were read (--max-bytes)"
             )
+        if not lines:
+            notes.append(f"note: the {'member' if args.member else 'file'} is empty")
         span = None
         if args.around_module is not None:
             span, seen = mode_module(lines, args.around_module)
@@ -1422,6 +1436,8 @@ def main():
                     print(
                         "modules started: " + _oqa.toks(seen, 80, 60).replace(",", " ")
                     )
+                elif not lines:
+                    print(notes[-1])
                 else:
                     print(
                         "note: this file has no module markers (autoinst-log.txt has them); "
@@ -1493,7 +1509,7 @@ def main():
                     "try --file serial_terminal.txt (or serial0.txt) with --grep/--tail, or "
                     "the module's ulogs (oqa-job.py prints ulogs[<module>]=)"
                 )
-            if not failures:
+            if not failures and lines:
                 notes.append(
                     f"note: no known signature, last {FALLBACK_TAIL} lines shown"
                 )

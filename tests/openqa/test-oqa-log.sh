@@ -572,6 +572,49 @@ GET /tests/77/file/autoinst-log.txt None None openQA-skill/oqa-log (read-only he
 EOF
 )" "$actual"
 
+# --- an empty file ----------------------------------------------------------------
+actual=$(
+	cd "$scripts" && python3 - <<'EOF' 2>&1 | sed -E 's/^<<<(UNTRUSTED|END) [0-9a-f]{16}/<<<\1 NONCE/; s/127\.0\.0\.1:[0-9]+/127.0.0.1:PORT/g'
+import runpy, sys, threading
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+
+class Handler(BaseHTTPRequestHandler):
+    def log_message(self, *args):
+        pass
+
+    def do_GET(self):
+        # a Range request on a file of 0 bytes cannot be satisfied
+        self.send_response(416 if self.headers.get("Range") else 200)
+        self.send_header("Content-Length", "0")
+        self.end_headers()
+
+server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+threading.Thread(target=server.serve_forever, daemon=True).start()
+sys.argv = ["oqa-log.py", f"http://127.0.0.1:{server.server_address[1]}/tests/77", "--file", "serial0.txt", "--tail", "2"]
+try:
+    runpy.run_path("oqa-log.py", run_name="__main__")
+except SystemExit as status:
+    print("exit", status.code)
+server.shutdown()
+EOF
+)
+check "--tail on a file of 0 bytes: no HTTP 416 error, the file is said to be empty" "$(
+	cat <<'EOF'
+job=77 host=http://127.0.0.1:PORT mode=tail bytes=0-0/0
+<<<UNTRUSTED NONCE source=127.0.0.1:PORT/tests/77/file/serial0.txt>>>
+<<<END NONCE>>>
+note: the file is empty
+requests: 1
+exit 0
+EOF
+)" "$actual"
+for mode in "--tail 3" --errors "--grep x" "--lines 1-2" "--around-module m" --runtimes; do
+	# shellcheck disable=SC2086 # the mode is two words on purpose
+	actual=$(log 4276 $mode)
+	check "an empty file is said to be empty ($mode), exit 0" "0 1 0" \
+		"$? $(grep -c '^note: the file is empty$' <<<"$actual") $(grep -c 'no complete line\|no known signature\|no module markers' <<<"$actual")"
+done
+
 # --- log text that attacks the script's own output --------------------------------
 actual=$(log 4251 --errors)
 check "--errors: a module name cannot forge a second '[label]' annotation" "1 0" \

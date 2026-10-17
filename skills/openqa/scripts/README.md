@@ -244,7 +244,8 @@ Prefer anchored patterns without nested quantifiers. Names from `--list` go to `
 them; do not paste one into a shell. An HTML page served for a file whose name does not end in `.html`
 (openQA's answer for an expired or purged file, maybe after a redirect) is never read as log text:
 `error: file gone (HTML page served): <name>`, exit 2, and for `--compare` and the serial logs of
-`--errors` it counts as a missing file.
+`--errors` it counts as a missing file. A file of 0 bytes, whose ranged read openQA answers with HTTP 416,
+gives `note: the file is empty` and exit 0 in every mode.
 
 `--lines A-B` reads lines A to B (`1 <= A <= B`), numbered as `--grep` and `--errors` number them, so a
 hit can be read in its surroundings: of the range at most `--max-lines` lines, the first ones, and a

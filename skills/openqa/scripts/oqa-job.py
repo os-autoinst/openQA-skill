@@ -926,9 +926,15 @@ def print_modules(client, job, max_steps, verbose, wanted=None):
             print(hidden_steps(steps, 0))
 
 
-def print_all_steps(client, job, how, wanted, verbose):
-    """Every step of one module: num, result, title, screenshot file; with verbose the
-    capped text of each step that is not a wait_serial, as record_info writes it."""
+def in_span(step, span):
+    number, (first, last) = _oqa.job_id_of(step.get("num")), span
+    return number is not None and first <= number and (last is None or number <= last)
+
+
+def print_all_steps(client, job, how, wanted, verbose, span=None):
+    """Every step of one module, or those numbered within span: num, result, title,
+    screenshot file; with verbose the capped text of each step that is not a wait_serial,
+    as record_info writes it."""
     if how != "details":
         raise _oqa.OqaError(f"no steps to list: {how}")
     module = find_module(job, wanted)
@@ -938,17 +944,24 @@ def print_all_steps(client, job, how, wanted, verbose):
         f"result={tok(module.get('result'), 30)} steps={len(steps)}"
     )
     print(f"shot: {client.host}/tests/{job['id']}/images/<shot>")
+    if span:
+        steps = [step for step in steps if in_span(step, span)]
     rows = [
         (step.get("num"), step.get("result"), step.get("title"), shot_name(step))
-        for step in steps
+        for step in steps[:MAX_ALL_STEPS]
     ]
     headers = ("num", "result", "title", "shot")
     print(_oqa.table(rows, headers, max_rows=MAX_ALL_STEPS), end="")
+    if len(steps) > MAX_ALL_STEPS:
+        print(
+            f"... {len(steps) - MAX_ALL_STEPS} more steps not shown: "
+            f"--step-range {tok(steps[MAX_ALL_STEPS].get('num'), 20)}-"
+        )
     if not verbose:
         return
     texts = [
         step
-        for step in steps
+        for step in steps[:MAX_ALL_STEPS]
         if step.get("title") != "wait_serial" and isinstance(step.get("text_data"), str)
     ]
     if len(texts) > MAX_TEXT_STEPS:
@@ -1150,6 +1163,13 @@ def non_negative(value):
     return number
 
 
+def step_range(value):
+    match = re.fullmatch(r"([0-9]{1,9})-([0-9]{0,9})", value)
+    if not match or (match.group(2) and int(match.group(2)) < int(match.group(1))):
+        raise argparse.ArgumentTypeError("expected A-B or A- with step numbers A <= B")
+    return int(match.group(1)), int(match.group(2)) if match.group(2) else None
+
+
 def regex(value):
     try:
         return re.compile(value)
@@ -1197,6 +1217,13 @@ def main():
         f"{MAX_TEXT_STEPS} steps that are not wait_serial, record_info ones among them",
     )
     parser.add_argument(
+        "--step-range",
+        type=step_range,
+        metavar="A-B",
+        help=f"with --all-steps: only the steps numbered A to B, or from A on with A-; "
+        f"still at most {MAX_ALL_STEPS} rows",
+    )
+    parser.add_argument(
         "--before",
         type=before_time,
         metavar="TIME",
@@ -1220,6 +1247,8 @@ def main():
     args = parser.parse_args()
     if args.all_steps and not args.module:
         parser.error("--all-steps needs --module NAME")
+    if args.step_range and not args.all_steps:
+        parser.error("--step-range needs --all-steps")
     args.host, job_id = _oqa.parse_job_url(args.job, args.host)
 
     client = _oqa.client_from_args(args, "oqa-job")
@@ -1230,7 +1259,7 @@ def main():
     if args.module:
         find_module(job, args.module)
     if args.all_steps:
-        print_all_steps(client, job, how, args.module, args.verbose)
+        print_all_steps(client, job, how, args.module, args.verbose, args.step_range)
         print(f"requests: {client.requests}")
         return status
     print_identity(client, job, how, args.verbose)

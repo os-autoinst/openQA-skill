@@ -22,7 +22,7 @@ One line per script, generated from the parsers: do not edit it by hand. What a 
 - `new-module.py --kind {console,container,python,service,transactional,x11,yam-validate} --path PATH --summary SUMMARY --maintainer MAINTAINER [--package PACKAGE] [--repo REPO] [--stdout]`
 - `oqa-comment-lint.py [FILE] [--text TEXT] [--private-suffix SUFFIX]...`; exit 1: at least one warning
 - `oqa-history.py JOB [--previous N] [--before TIME] [--workers] [--investigation] [--max-items N] [--exit-code] [--verbose]`
-- `oqa-job.py JOB [--settings REGEX] [--steps N] [--module NAME] [--all-steps] [--exit-code] [--verbose]`
+- `oqa-job.py JOB [--settings REGEX] [--steps N] [--module NAME] [--all-steps] [--step-range A-B] [--before TIME] [--exit-code] [--verbose]`
 - `oqa-log.py JOB [--file NAME] [--list | --tail N | --grep REGEX | --errors | --runtimes | --members] [--around-module MODULE] [--lines A-B] [--member PATH] [--compare JOB] [--context N] [--max-matches N] [--ignore-case] [--max-lines N] [--max-line-chars N] [--max-bytes BYTES] [--verbose] [--exit-code]`
 - `oqa-ref.py REF [--body] [--files] [--notes N]`
 - `oqa-sweep.py [--group ID]... [--build BUILD] [--todo] [--include-softfailed] [--test REGEX] [--before TIME] [--limit N] [--no-llm] [--passed] [--module NAME] [--groups] [--match REGEX] [--uses-schedule PATH] [--vr-build LABEL] [--test-git-hash SHA] [--exit-code]`
@@ -136,13 +136,15 @@ A restarted job is history, a `parallel_failed` job is a victim, steps after the
 (in a module that failed without dying: from its `Post-fail` step on).
 
     oqa-job.py JOB_URL|ID [--steps N] [--settings REGEX] [--module NAME] [--before TIME] [-v] [--exit-code]
-    oqa-job.py JOB_URL|ID --module NAME --all-steps    # every step of one module: num result title shot
+    oqa-job.py JOB_URL|ID --module NAME --all-steps [--step-range A-B]    # num result title shot per step
 
 `--steps N` failing steps per module (2; `0`: no step lines, only the job and its failed modules, each with
 `+N failing steps not shown`); `--settings '^(QEMU|HDD)'` adds settings by key (default: BACKEND,
 CASEDIR, NEEDLES_DIR, YAML_SCHEDULE); `-v` whole traces, ulog names, all settings of the scenario, longer
 comments. `--module NAME` alone keeps only that module's lines, whatever its result, and ends them with
-`+N of M steps not shown (--all-steps lists them)`. `--before TIME` (ISO 8601, UTC unless it has an
+`+N of M steps not shown (--all-steps lists them)`. `--all-steps` lists at most 300 steps and ends a longer
+list with `... N more steps not shown: --step-range <next>-`; `--step-range A-B` (or `A-`) lists the steps
+numbered A to B. `--before TIME` (ISO 8601, UTC unless it has an
 offset) reads the comments as they stood at TIME, as `oqa-history.py --before` does: a comment created
 later (`created=`, UTC to the second, is what is compared), or with no readable date, is hidden with its bugrefs, labels and flags, the review state is that of
 the rest, and `note: N comment(s) created after --before hidden` counts them. A restart that had not

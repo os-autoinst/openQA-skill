@@ -354,6 +354,29 @@ for url in 'https://bugzilla.opensuse.org/show_bug.cgi?id=123' "$repo?arch=x86_6
 	keeps "an ordinary query: ${url#*\?}" "GET $url\n"
 done
 
+# --- a registration code on the command line of a registration command ---------------
+regcode="AbCd1234""EfGh5678"
+for line in "SUSEConnect -r $regcode" "SUSEConnect --regcode $regcode" "SUSEConnect --regcode=$regcode" \
+	"+ SUSEConnect -p sle-module-web-scripting/15.6/x86_64 --gpg-auto-import-keys -r $regcode" \
+	"[debug] <<< testapi::assert_script_run(cmd=\"SUSEConnect --url https://scc.example.org -r $regcode\", timeout=200)" \
+	"Test died: command 'SUSEConnect -r $regcode' failed at sle/tests/console/suseconnect.pm line 37." \
+	"# suseconnect --debug -r $regcode; echo TaG-\$?-" \
+	"transactional-update -n register -p sle-module-live-patching/15.6/x86_64 -r $regcode" \
+	"transactional-update register --regcode $regcode -e user@example.org" \
+	"sudo registercloudguest --force-new -r '$regcode'" \
+	"cmd=\"sudo registercloudguest --force-new -r \\\"$regcode\\\"\""; do
+	actual=$(printf '%s\n' "$line" | python3 "$scripts/_secrets.py" 2>/dev/null)
+	check "a registration code goes, the rest of the line stays: ${line%%"$regcode"*}" \
+		"${line/"$regcode"/[REDACTED:regcode]}" "$actual"
+done
+for line in 'regcode=AbCd1234EfGh5678' '{"regcode": "AbCd1234EfGh5678"}'; do
+	hides "a registration code after its key: $line" "$line\n" AbCd1234EfGh5678
+done
+keeps "-r of other commands after a registration command" 'SUSEConnect --status; rm -r /tmp/registration-cache\nSUSEConnect -s && cp -r /etc/zypp /tmp/zypp-backup\nSUSEConnect -d | grep -r Deregistered /var/log/messages\n'
+keeps "-r of other commands" 'zypper -r repo-oss-update in vim\ngrep -r SUSEConnect /etc/zypp/credentials.d\ntransactional-update pkg install vim -r repo-oss-update\n'
+# shellcheck disable=SC2016 # literal slots, as documentation writes them
+keeps "a registration code slot in documentation" 'SUSEConnect -r <regcode>\nSUSEConnect -r $SCC_REGCODE\nregistercloudguest -r ${REGCODE}\n'
+
 # A rule alternative is dead unless its own literal passes the TRIGGERS pre-filter.
 actual=$(python3 -c "
 import sys; sys.path.insert(0, '$scripts')
@@ -382,6 +405,9 @@ for rule, literal, line in (
     ('keyed-assignment', 'pwd', 'DB_PWD=Sup3rS3cretX'),
     ('keyed-assignment', 'pw', 'DB_PW=Sup3rS3cretX'),
     ('keyed-assignment', 'pass', 'DB_PASS=Sup3rS3cretX'),
+    ('regcode', 'suseconnect', 'SUSEConnect -r Sup3rS3cretX'),
+    ('regcode', 'transactional-update register', 'transactional-update register -r Sup3rS3cretX'),
+    ('regcode', 'registercloudguest', 'registercloudguest -r Sup3rS3cretX'),
     ('google-oauth-token', 'ya29', 'ya29.A0AfH6SMBc0123456789abcdQRST'),
     ('google-api-key', 'aiza', 'AIzaSyA1234567890abcdefghijklmnopqrstuv'),
     ('slack-webhook', 'hooks.slack', 'hooks.slack.com/services/' + 'T0000AAAA/B0000BBBB/abcdefghijklmnopqrstuvwx'),
@@ -393,7 +419,7 @@ for rule, literal, line in (
 ")
 check "every command and key word reaches its rule through its own trigger" "" "$actual"
 
-# Each input targets one rule's repetition; all but the last two cost seconds before it was bounded.
+# Each input targets one rule's repetition; the first eight cost seconds before they were bounded.
 actual=$(python3 -c "
 import sys, time; sys.path.insert(0, '$scripts')
 import _secrets
@@ -409,6 +435,9 @@ for name, pattern, text in (
     ('google-api-key', rules['google-api-key'], 'AIza' * 80000),
     ('slack-webhook', rules['slack-webhook'], 'hooks.slack.com/services/' * 20000),
     ('url-bare-query', rules['url-bare-query'], 'https://h/?' + 'A1' * 130000 + '==='),
+    ('regcode', rules['regcode'], 'SUSEConnect ' * 20000),
+    ('regcode', rules['regcode'], 'transactional-update -n -n -n -n ' * 8000),
+    ('regcode', rules['regcode'], 'SUSEConnect -r ' * 16000),
 ):
     start = time.monotonic()
     pattern.subn('', text)

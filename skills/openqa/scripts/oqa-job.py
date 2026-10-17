@@ -873,13 +873,47 @@ def llm_fields(summary):
     )
 
 
-def print_comments(client, job_id, result, verbose):
+def parse_time(value):
+    """An aware UTC datetime from ISO 8601 or openQA's "2030-01-02 10:00:00 +0000", or None;
+    a time without a zone is UTC."""
+    if not isinstance(value, str):
+        return None
+    text = re.sub(r"[zZ]$", "+00:00", value.strip())
+    text = re.sub(r" ?([+-]\d\d):?(\d\d)$", r"\1:\2", text)
+    try:
+        stamp = datetime.fromisoformat(text)
+    except ValueError:
+        return None
+    if stamp.tzinfo is None:
+        stamp = stamp.replace(tzinfo=timezone.utc)
+    return stamp.astimezone(timezone.utc)
+
+
+def before_time(value):
+    stamp = parse_time(value)
+    if stamp is None:
+        raise argparse.ArgumentTypeError(
+            "expected an ISO 8601 time such as 2030-01-02T10:00Z"
+        )
+    return stamp
+
+
+def created_by(comment, before):
+    created = parse_time(comment.get("created"))
+    return created is not None and created <= before
+
+
+def print_comments(client, job_id, result, verbose, before=None):
     try:
         comments = client.get_json(f"/api/v1/jobs/{job_id}/comments")
     except _oqa.NotFound as error:
         print(f"review: reviewed=? (comments not readable: {error})")
         return
     comments = [comment for comment in comments if isinstance(comment, dict)]
+    later = 0
+    if before:
+        kept = [comment for comment in comments if created_by(comment, before)]
+        later, comments = len(comments) - len(kept), kept
     parsed = [parse_comment(comment) for comment in comments]
     refs, label, plain = [], None, 0
     for item in parsed:
@@ -904,6 +938,8 @@ def print_comments(client, job_id, result, verbose):
     if forced and forced[-1] != result:
         line += f" force_result_not_applied={forced[-1]}"
     print(line)
+    if later:
+        print(f"note: {later} comment(s) created after --before hidden")
     most = MAX_COMMENTS[verbose]
     if len(comments) > most:
         print(f"note: newest {most} of {len(comments)} comments shown")
@@ -987,6 +1023,14 @@ def main():
         "instead of the digest",
     )
     parser.add_argument(
+        "--before",
+        type=before_time,
+        metavar="TIME",
+        help="the comments as of TIME (ISO 8601, UTC unless it has an offset): comments "
+        "created later are hidden, and with them their bugrefs, labels, flags and the "
+        "review state they make",
+    )
+    parser.add_argument(
         "--exit-code",
         action="store_true",
         help="exit 1 when the job is not ok (default: exit 0 whenever the digest was produced)",
@@ -1020,7 +1064,7 @@ def main():
     print_dependencies(client, job, args.verbose)
     print_modules(client, job, args.steps, args.verbose, args.module)
     print_files(job, args.verbose)
-    print_comments(client, job_id, job.get("result"), args.verbose)
+    print_comments(client, job_id, job.get("result"), args.verbose, args.before)
     print(f"requests: {client.requests}")
     return status
 

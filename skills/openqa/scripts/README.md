@@ -135,14 +135,17 @@ credential that reached a log.
 A restarted job is history, a `parallel_failed` job is a victim, steps after the die step are post_fail_hook
 (in a module that failed without dying: from its `Post-fail` step on).
 
-    oqa-job.py JOB_URL|ID [--steps N] [--settings REGEX] [--module NAME] [-v] [--exit-code]
+    oqa-job.py JOB_URL|ID [--steps N] [--settings REGEX] [--module NAME] [--before TIME] [-v] [--exit-code]
     oqa-job.py JOB_URL|ID --module NAME --all-steps    # every step of one module: num result title shot
 
 `--steps N` failing steps per module (2; `0`: no step lines, only the job and its failed modules, each with
 `+N failing steps not shown`); `--settings '^(QEMU|HDD)'` adds settings by key (default: BACKEND,
 CASEDIR, NEEDLES_DIR, YAML_SCHEDULE); `-v` whole traces, ulog names, all settings of the scenario, longer
 comments. `--module NAME` alone keeps only that module's lines, whatever its result, and ends them with
-`+N of M steps not shown (--all-steps lists them)`.
+`+N of M steps not shown (--all-steps lists them)`. `--before TIME` (ISO 8601, UTC unless it has an
+offset) reads the comments as they stood at TIME, as `oqa-history.py --before` does: a comment created
+later, or with no readable date, is hidden with its bugrefs, labels and flags, the review state is that of
+the rest, and `note: N comment(s) created after --before hidden` counts them.
 
     job=6228436 host=https://openqa.opensuse.org result=failed worker=worker21:13 started=... duration=6m13s
     scenario=opensuse-Tumbleweed-DVD-x86_64-libssh@uefi build=20260919 group=38

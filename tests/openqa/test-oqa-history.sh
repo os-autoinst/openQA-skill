@@ -232,6 +232,26 @@ actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 7800)
 check "only an ok run unlike this job: no last good, that run named" \
 	"last_good=none like this job (7790 build=3 result=passed: no job group)|hint: always failing: no ok run in the last 2; same failed modules throughout" \
 	"$(grep -E '^(last_good|hint)' <<<"$actual" | paste -sd '|')"
+# Two build streams interleaved in one scenario; and a scenario where only the other stream passed.
+python3 - "$tmp" <<'PY'
+import json, sys
+def history(job, runs):
+    rows = [{"id": i, "build": b, "state": "done", "result": r, "failedmodules": ["x"] if r == "failed" else [],
+             "iscurrent": 1 if i == job else None, "finished": "2030-01-01T10:00:00Z", "duration": "10:00 minutes"}
+            for i, b, r in runs]
+    json.dump({"data": rows}, open(f"{sys.argv[1]}/tests_{job}_ajax_previous_limit=10_next_limit=0.json", "w"))
+history(7900, [(7900, "kernel-livepatch-31", "failed"), (7890, "kernel-default-5", "passed"),
+               (7880, "kernel-livepatch-30", "failed"), (7870, "kernel-default-4", "passed"),
+               (7860, "kernel-livepatch-29", "passed")])
+history(7950, [(7950, "kernel-livepatch-31", "failed"), (7940, "kernel-default-5", "passed")])
+PY
+actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 7900)
+check "last good from the job's own build stream, the other stream's runs before it left out" \
+	"last_good=7860 build=kernel-livepatch-29 result=passed|first_bad=7880 build=kernel-livepatch-30 streak=2|left out, unlike this job: 7890 (another build stream: kernel-default-5), 7870 (another build stream: kernel-default-4)" \
+	"$(grep -E '^(last_good|first_bad|left out)' <<<"$actual" | paste -sd '|')"
+check "only another stream passed: that run stays last good, flagged" \
+	"last_good=7940 build=kernel-default-5 result=passed (another build stream: kernel-default-5)" \
+	"$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 7950 | grep '^last_good=')"
 # Runs on two workers: every one on worker 41 fails, every one on worker 42 passes.
 python3 - "$tmp" <<'PY'
 import json, sys
@@ -797,6 +817,20 @@ PY
 actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 5000 --investigation)
 check "--investigation: a failed module that never ran ok in the runs shown; absent from a run's list is not run" \
 	"module zypper_in: last_ok=none in 10 older run(s); failed=2 not_run=8 (skipped or not reached)" "$(grep '^module ' <<<"$actual")"
+check "--investigation: an ok run in which the failed module did not run stays last good only flagged" \
+	"last_good=4960 build=20300102 result=softfailed (zypper_in did not run)" "$(grep '^last_good=' <<<"$actual")"
+python3 - "$tmp/api_v1_jobs_ids=5000_4990_4980_4970_4960_4950_4940_4930_4920_4910_4900.json" <<'PY'
+import json, sys
+data = json.load(open(sys.argv[1]))
+for job in data["jobs"]:
+    if job["id"] == 4950:
+        job["modules"].append({"name": "zypper_in", "result": "passed"})
+json.dump(data, open(sys.argv[1], "w"))
+PY
+actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 5000 --investigation)
+check "--investigation: last good is the newest ok run in which the failed module ran ok" \
+	"last_good=4950 build=20300101 result=passed|left out, unlike this job: 4960 (zypper_in did not run)" \
+	"$(grep -E '^(last_good|left out)' <<<"$actual" | paste -sd '|')"
 rm -rf "$tmp"
 check "--investigation: without the older runs' module lists no module history" 0 "$(history 5000 --investigation | grep -c '^module ')"
 

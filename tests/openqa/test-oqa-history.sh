@@ -186,6 +186,25 @@ history(7100, [
 PY
 contains "not ok in every run of one build and ok in the others is no intermittent failure" \
 	"hint: every run of build 2 failed; last good on build 1" "$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 7100)"
+# Runs on two workers: every one on worker 41 fails, every one on worker 42 passes.
+python3 - "$tmp" <<'PY'
+import json, sys
+history = {7400: ("failed", 41), 7390: ("passed", 42), 7380: ("failed", 41), 7370: ("passed", 42), 7360: ("passed", 42)}
+rows = [{"id": i, "build": "1", "state": "done", "result": r, "failedmodules": ["boot"] if r == "failed" else [],
+         "iscurrent": 1 if i == 7400 else None, "finished": "2030-01-01T10:00:00Z", "duration": "10:00 minutes"}
+        for i, (r, _) in history.items()]
+json.dump({"data": rows}, open(f"{sys.argv[1]}/tests_7400_ajax_previous_limit=10_next_limit=0.json", "w"))
+jobs = [{"id": i, "assigned_worker_id": w} for i, (_, w) in history.items()]
+json.dump({"jobs": jobs}, open(f"{sys.argv[1]}/api_v1_jobs_ids=" + "_".join(map(str, history)) + ".json", "w"))
+for worker in (41, 42):
+    json.dump({"worker": {"host": f"w{worker}", "instance": 1}}, open(f"{sys.argv[1]}/api_v1_workers_{worker}.json", "w"))
+PY
+actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 7400 --workers)
+check "--workers: a tally per worker; failing on one worker only, passing on the others, is bound to it" \
+	"workers: w41:1 ok=0 not_ok=2, w42:1 ok=3 not_ok=0|hint: bound to one machine: every run on w41:1 failed, every run on the other workers was ok" \
+	"$(grep '^workers: ' <<<"$actual")|$(grep '^hint: ' <<<"$actual")"
+check "without worker data no tally and no machine hint" "0 1" \
+	"$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 7400 | grep -Ec '^workers: |machine') $(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 7400 | grep -c 'hint: intermittent')"
 actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 7000)
 check "failed modules: sorted, the same modules in another order read the same" "yast2_foo,zypper_in yast2_foo,zypper_in" \
 	"$(awk '$1 == 6980 || $1 == 6970 {print $5}' <<<"$actual" | tr '\n' ' ' | sed 's/ $//')"

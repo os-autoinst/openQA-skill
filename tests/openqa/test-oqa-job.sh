@@ -890,22 +890,31 @@ EOF
 check "--before before the first restart started: not superseded" \
 	"clone chain: [970:failed@2030-01-02T01:00Z]|note: restarts that started after --before left out" \
 	"$(chain_97x 970 --before 2030-01-02T01:45Z | grep -v '^requests' | paste -sd'|')"
-check "--before past the chain line: the restarts after it are walked, not followed to today's newest" \
+check "--before past the chain line: the restarts after it are walked up to TIME, not followed to today's newest" \
 	"SUPERSEDED: restarted, newest=976 result=failed started=2030-01-02T07:00Z" \
-	"$(chain_97x 970 --before 2030-01-02T07:45+00:00 | grep '^SUPERSEDED')"
-actual=$(
-	cd "$scripts" && python3 - "$chain_dir" <<'PY' 2>&1 | grep -E '^(SUPERSEDED|note)'
+	"$(chain_97x 970 --before 2030-01-02T07:45+00:00 | grep -E '^(SUPERSEDED|note)')"
+check "--before past the chain line: a walk that reaches the end of the chain has no note" \
+	"SUPERSEDED: restarted, newest=977 result=passed started=2030-01-02T08:00Z" \
+	"$(chain_97x 970 --before 2030-01-02T09:00Z | grep -E '^(SUPERSEDED|note)')"
+# walk_hops N: the SUPERSEDED and note lines of job 970 as of 09:00 when --before walks at most N restarts
+walk_hops() {
+	(
+		cd "$scripts" || exit
+		python3 - "$chain_dir" "$1" <<'PY'
 import importlib.util, sys
 spec = importlib.util.spec_from_file_location("oqa_job", "oqa-job.py")
 mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
-mod.NEWEST_HOPS = 1
+mod.NEWEST_HOPS = int(sys.argv[2])
 sys.argv = ["oqa-job.py", "--host", "https://openqa.example.org", "--fixture-dir", sys.argv[1], "970", "--before", "2030-01-02T09:00Z"]
 mod.main()
 PY
-)
+	) 2>&1 | grep -E '^(SUPERSEDED|note)' | paste -sd'|'
+}
 check "--before: a walk that runs out of hops says the job it names may not be the newest" \
 	"SUPERSEDED: restarted, newest=976 result=failed started=2030-01-02T07:00Z|note: newest= is the last of 1 restarts walked past the chain line; later ones may have started by --before" \
-	"$(paste -sd'|' <<<"$actual")"
+	"$(walk_hops 1)"
+check "--before: hops that run out on the last job of the chain need no note" \
+	"SUPERSEDED: restarted, newest=977 result=passed started=2030-01-02T08:00Z" "$(walk_hops 2)"
 rm -rf "$chain_dir"
 
 exit $fail

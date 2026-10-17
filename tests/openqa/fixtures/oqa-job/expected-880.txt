@@ -1,0 +1,27 @@
+job=880 host=https://openqa.example.org result=failed started=2030-01-02T03:04:05 duration=20m00s
+scenario=exampleos-15.6-Updates-x86_64-qam-update@64bit build=20300102 group=11
+settings: BACKEND=qemu
+modules=1 failed=1
+module=zypper_in result=failed category=console
+  step=2 kind=step-failed title="Conflict" link=https://openqa.example.org/tests/880#step/zypper_in/2 last_shot=https://openqa.example.org/tests/880/images/zypper_in-1.png
+<<<UNTRUSTED NONCE source=openqa.example.org/tests/880/step/2>>>
+Problem: 1: the to be installed libexample2-2.1-150600.1.1.x86_64 conflicts with 'libexample1' provided by the installed libexample1-1.9-150500.3.2.x86_64
+Problem: 2: the to be installed example-tools-2.1-150600.1.1.x86_64 requires 'libexample2 >= 2.1', but this requirement cannot be provided
+Problem: 1: the to be installed libexample2-2.1-150600.1.1.x86_64 conflicts with 'libexample1' provided by the installed libexample1-1.9-150500.3.2.x86_64
+ Solution 1: Following actions will be done:
+  deinstallation of libexample1-1.9-150500.3.2.x86_64
+  deinstallation of example-legacy-1.9-150500.3.2.x86_64
+ Solution 2: do not install libexample2-2.1-150600.1.1.x86_64
+ Solution 3: break libexample2-2.1-150600.1.1.x86_64 by ignoring some of its dependencies
+[verdict lines only; 9 other lines not shown]
+<<<END NONCE>>>
+  step=3 kind=test-died:command-failure link=https://openqa.example.org/tests/880#step/zypper_in/3 last_shot=https://openqa.example.org/tests/880/images/zypper_in-1.png
+<<<UNTRUSTED NONCE source=openqa.example.org/tests/880/step/3>>>
+# Test died: 'zypper -n in example-tools' failed with code 4
+
+Related zypper logs:
+<<<END NONCE>>>
+  ulogs[zypper_in]=zypper_in-zypper.log
+logs=autoinst-log.txt,serial_terminal.txt,serial0.txt ulogs=1
+review: reviewed=no comments=0
+requests: 2

@@ -30,11 +30,13 @@ How to read it:
     Each clone chain member, and the newest on the SUPERSEDED line (started=), carries
     its start time in UTC, id:result@2030-01-02T03:04Z; one not started yet has none.
   - A step text longer than 8 lines that holds verdict lines (TFAIL, TBROK, TWARN,
-    TCONF, "not ok", "Failures:", the diff of an xfstests .out.bad; for a died test its
-    message and the lines with failed, error or not found) shows those instead of its
-    head, then counts the other lines. They come from the first MiB of the text, the
-    died message first, then the failures, TCONF and TWARN last; the first 8 of them
-    are shown in file order. kind=parser-result-failed: a parse_extra_log result.
+    TCONF, "not ok", "Failures:", the diff of an xfstests .out.bad, zypper's solver
+    "Problem:", "Solution N:" and "deinstallation of"; for a died test its message and
+    the lines with failed, error or not found) shows those instead of its head, then
+    counts the other lines. They come from the first MiB of the text, the died message
+    first, then the failures, TCONF and TWARN last; the first 8 of them are shown in
+    file order. --verbose shows a solver problem whole, up to 4000 characters.
+    kind=parser-result-failed: a parse_extra_log result.
   - parallel_failed and skipped jobs are victims. The culprit hint names the
     failed/incomplete/timeout_exceeded job of the cluster that finished first.
   - Steps after the "Failed" text step of a module belong to post_fail_hook
@@ -186,6 +188,9 @@ DIED_COMMAND = re.compile(
 # results, the .out.bad diff body (not its ---/+++ header), and for a died test its
 # message plus the lines that say what failed; TCONF and TWARN only after all those.
 SUITE_VERDICT = re.compile(r"\b(?:TFAIL|TBROK)\b|^\s*(?:#\s*)?not ok\b|^\s*Failures:")
+# A zypper solver problem: "Problem: 1: ..." as zypper prints it, "Problem 1:" as zypp logs it.
+SOLVER_PROBLEM = re.compile(r"\bProblem(?: \d+)?:")
+SOLVER_LINE = re.compile(r"\bProblem(?: \d+)?:|\bSolution \d+:|\bdeinstallation of ")
 WEAK_VERDICT = re.compile(r"\b(?:TWARN|TCONF)\b")
 DIFF_LINE = re.compile(r"^\s*[-+](?![-+]{2}\s)")
 DIED_VERDICT = re.compile(r"failed|error|not found", re.IGNORECASE)
@@ -210,6 +215,7 @@ def verdicts(lines, died):
             ranked.append((0, index))
         elif (
             SUITE_VERDICT.search(line)
+            or SOLVER_LINE.search(line)
             or (diff and DIFF_LINE.match(line))
             or (died and DIED_VERDICT.search(line))
         ):
@@ -656,9 +662,11 @@ def print_step(client, job_id, module, step, source, verbose, shot=None):
     if text.strip("\n"):
         # --verbose asked for the trace: verdict lines would leave it out.
         died = None if verbose and trace is not None else kind.startswith("test-died")
-        show_text(
-            text, f"{source}/step/{number}", HEAD_LINES, HEAD_BYTES, "    ", died, whole
-        )
+        caps = HEAD_LINES, HEAD_BYTES
+        if verbose and SOLVER_PROBLEM.search(text):
+            # The solver's decisive lines are spread over the whole text.
+            died, caps = None, (TEXT_KEPT, TEXT_KEPT)
+        show_text(text, f"{source}/step/{number}", *caps, "    ", died, whole)
     if frame:
         print(f"    frame={_oqa.quoted(frame, 200)}")
     if hidden:

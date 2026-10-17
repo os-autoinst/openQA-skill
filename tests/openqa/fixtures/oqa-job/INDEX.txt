@@ -83,3 +83,7 @@ api_v1_jobs_870_details.json
     GET /api/v1/jobs/870/details (kernel suite results: LTP, KTAP and xfstests parser steps, a died test with its output)
 api_v1_jobs_870_comments.json
     GET /api/v1/jobs/870/comments
+api_v1_jobs_880_details.json
+    GET /api/v1/jobs/880/details (a zypper solver conflict recorded by record_info "Conflict")
+api_v1_jobs_880_comments.json
+    GET /api/v1/jobs/880/comments

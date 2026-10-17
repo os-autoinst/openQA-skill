@@ -218,6 +218,17 @@ check "a short text cut at 4000 characters says so, with the lines it lost" "[st
 check "verdict lines are searched in the first MiB of a text, which says so; the count is still of all of it" \
 	"$(printf '%s\n' '[... 599993 more lines]' '[verdict lines searched in the first 1048576 characters only]')" "$(fence past_scan | tail -n 2)"
 
+# --- a zypper solver conflict ------------------------------------------------------
+actual=$(job 880 | normalize)
+check "job 880 digest" "$(cat "$fixtures/expected-880.txt")" "$actual"
+check "zypper conflict: the problem and solution lines past the eighth line are shown, the preamble counted" "3 3 2 1" \
+	"$(grep -c '^Problem: [12]: ' <<<"$actual") $(grep -c '^ Solution [123]: ' <<<"$actual") $(grep -c '^  deinstallation of ' <<<"$actual") $(grep -c '^\[verdict lines only; 9 other lines not shown\]$' <<<"$actual")"
+actual=$(job 880 --verbose)
+text=$(sed -n '/source=openqa.example.org\/tests\/880\/step\/2>>>$/,/^<<<END/p' <<<"$actual" | sed '1d;$d')
+check "zypper conflict, --verbose: the whole text, the solver's prompt last" \
+	"17|Choose from above solutions by number or skip, retry or cancel [1/2/3/s/r/c/d/?] (c): c|0" \
+	"$(wc -l <<<"$text")|$(tail -n 1 <<<"$text")|$(grep -c 'more lines\]\|verdict lines only' <<<"$actual")"
+
 # --- hostile content ------------------------------------------------------------
 check "no escape or control byte reaches the output" 0 "$(grep -c '[[:cntrl:]]' <<<"$(tr -d '\t' <<<"$raw")")"
 opened=$(grep -c '^<<<UNTRUSTED [0-9a-f]\{16\} source=openqa.example.org/tests/500/' <<<"$raw")

@@ -364,7 +364,12 @@ not cut: openQA computes it at the time of the request.
 
 `--investigation` adds the settings diff (per-run noise left out), package diffs, test and needle commits,
 `--max-items` (10) lines each: `settings diff (last_good -> this job)`, plus a hint to run on first_bad for the
-tight window when that is another job. `versions (last_good <id> -> this job, from <file>)` compares the kernel
+tight window when that is another job. `last_good logs: gone`: last good's downloads tab lists no
+`autoinst-log.txt`, so openQA's log cleanup took its logs and uploads. `nothing to compare`: openQA found no last
+good in all of the scenario's history, which `--previous` does not limit. Before it, `module <module>:
+last_ok=<id> build=<build>; since then failed=N not_run=M` follows the first failed module through the older
+runs' module lists (`not_run`: skipped, not reached after a fatal module, or not scheduled; `last_ok=none in N
+older run(s)`: no ok run among them); no line without those lists. `versions (last_good <id> -> this job, from <file>)` compares the kernel
 (`kernel-<flavor>[-base]`) and the test suites installed as packages (ltp, ltp-stable, blktests, xfstests,
 kirk) as `<package> <old> -> <new>` or `<package> <version> (unchanged)` (`-`: not installed, `?`: no list,
 or a suite in a kernel-only list; `suites ?` closes a line read only from such lists; `(release only)`: a suite

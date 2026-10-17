@@ -166,8 +166,9 @@ the rest, and `note: N comment(s) created after --before hidden` counts them.
 
 When set: `reason="..."` (whole up to 480 characters, a longer one cut in the middle so openQA's
 `[Auto-restarting ...]` note at its end stays), `state=` (not done), `clone chain: 470:incomplete@2030-01-01T21:10Z -> [500:failed@2030-01-02T03:04Z]`
-(each member's start time in UTC, none before it started), `SUPERSEDED: restarted, newest=ID result=...
-started=...`, `culprit=ID (...)` for victims, needle steps with
+(each member's start time in UTC, none before it started; 5 restarts each way), `SUPERSEDED: restarted,
+newest=ID result=... started=...` (the end of the restart chain, followed past those 5 with one more
+request), `culprit=ID (...)` for victims, needle steps with
 `tags=` and `candidates=N best=name:91% (worst area each)`, `SUSPECT_BUGREF=` (module name parsed as bugref),
 `force_result_not_applied=<r>`, `; the hook died at step=N` after `post_fail_hook steps not shown` (the hook
 itself died: logs it would have uploaded may be missing; its message is the `post_fail_hook failed: ` line of

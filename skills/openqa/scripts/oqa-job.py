@@ -466,6 +466,14 @@ def print_chain(client, job, verbose):
                 "SUPERSEDED: restarted, the newest job is not known (the chain loops)"
             )
             return
+        if newest.get("clone_id"):
+            # The chain line ends after CHAIN_HOPS restarts; openQA follows the rest in one request.
+            try:
+                newest = _oqa.latest_job(client, newest["id"])
+            except _oqa.NotFound as error:
+                print("SUPERSEDED: restarted, the newest job is not known")
+                print(f"note: newest job not readable ({error})")
+                return
         line = f"SUPERSEDED: restarted, newest={newest['id']} result={tok(newest.get('result'), 30)}"
         if newest.get("state") != "done":
             line += f" state={tok(newest.get('state'), 30)}"

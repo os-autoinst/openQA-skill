@@ -1152,7 +1152,8 @@ def main():
         help=f"log file (default: {DEFAULT_FILE}); e.g. serial0.txt, serial_terminal.txt, "
         "worker-log.txt, vars.json or ulogs/<name> for an uploaded log",
     )
-    # --around-module also narrows --grep, so it stays out of the group; main() checks the rest.
+    # --around-module and --lines also narrow --grep, so they stay out of the group; main()
+    # checks the rest.
     modes = parser.add_mutually_exclusive_group()
     modes.add_argument(
         "--list", action="store_true", help="list the files the job offers"
@@ -1181,7 +1182,8 @@ def main():
         help="lines between the module's 'starting' and 'finished' markers (last run); "
         "when capped by --max-lines the window ends after the '# Test died' message and the "
         "test's own stack frames, "
-        "so post_fail_hook output is left out; with --grep: grep only those lines",
+        "so post_fail_hook output is left out; with --grep: grep only those lines; with "
+        "--lines A-B: only that part of them, the first --max-lines",
     )
     modes.add_argument(
         "--runtimes",
@@ -1196,12 +1198,12 @@ def main():
         help="list the members of the tar archive --file names (size, type, name); read in "
         "memory as a stream, never unpacked to disk",
     )
-    modes.add_argument(
+    parser.add_argument(
         "--lines",
         type=line_range,
         metavar="A-B",
         help="lines A to B, numbered as --grep numbers them; at most --max-lines of them, "
-        "the first ones",
+        "the first ones; with --grep: grep only those lines; with --around-module: see there",
     )
     parser.add_argument(
         "--member",
@@ -1272,17 +1274,11 @@ def main():
     args.max_lines = args.max_lines or args.tail or MAX_LINES
     if args.max_line_chars is None:
         args.max_line_chars = GREP_LINE_CHARS if args.grep is not None else LINE_CHARS
-    others = (
-        args.list,
-        args.tail,
-        args.errors,
-        args.runtimes,
-        args.members,
-        args.lines,
-    )
-    if args.around_module is not None and any(others):
-        parser.error("--around-module goes alone or with --grep")
-    if not any(others) and args.grep is None and args.around_module is None:
+    others = (args.list, args.tail, args.errors, args.runtimes, args.members)
+    narrowed = args.around_module is not None or args.lines is not None
+    if narrowed and any(others):
+        parser.error("--around-module and --lines go alone, together or with --grep")
+    if not any(others) and args.grep is None and not narrowed:
         parser.error(
             "give one of --list, --tail, --grep, --errors, --around-module, --runtimes, "
             "--members, --lines"
@@ -1411,9 +1407,15 @@ def main():
                     )
                 print(f"requests: {client.requests}")
                 return 1 if args.exit_code else 0
+        window = span and span[:2]
+        if args.lines:
+            first, last = args.lines[0] - 1, args.lines[1] - 1
+            low, high = window or (0, len(lines) - 1)
+            window = (max(first, low), min(last, high))
+            module = f"--around-module {_oqa.tok(args.around_module)} " if span else ""
         if pattern:
             entries, total = mode_grep(
-                lines, pattern, args.context, args.max_matches, span and span[:2]
+                lines, pattern, args.context, args.max_matches, window
             )
             # The first matches are the ones to keep: cut the end, not the middle.
             found_lines = len(entries)
@@ -1425,6 +1427,8 @@ def main():
             mode = "grep"
             if span:
                 mode += f" span={span[0] + 1}-{span[1] + 1}"
+            if args.lines:
+                mode += f" range={args.lines[0]}-{args.lines[1]}"
             mode += f" matches={total}"
             if shown < total:
                 caps = ["--max-matches N"] if total > args.max_matches else []
@@ -1472,7 +1476,7 @@ def main():
                     f"note: no known signature, last {FALLBACK_TAIL} lines shown"
                 )
                 entries = mode_tail(lines, False, FALLBACK_TAIL)
-        elif args.lines:
+        elif args.lines and not span:
             first, last = args.lines
             entries = [
                 (i + 1, ":", lines[i]) for i in range(first - 1, min(last, len(lines)))
@@ -1495,15 +1499,27 @@ def main():
             died = next(
                 (i for i in range(begin, end + 1) if _DIED.search(lines[i])), None
             )
-            entries = [(i + 1, ":", lines[i]) for i in range(begin, end + 1)]
+            low, high = window
+            entries = [(i + 1, ":", lines[i]) for i in range(low, high + 1)]
             mode = (
                 f"module span={begin + 1}-{end + 1} finished={'yes' if done else 'no'}"
             )
             if died is not None:
                 mode += f" died={died + 1}"
-                if len(entries) > args.max_lines:
-                    # What follows the die message is post_fail_hook output.
-                    entries = entries[: die_block_end(lines, died, end) - begin + 1]
+            if args.lines:
+                mode += f" range={args.lines[0]}-{args.lines[1]}"
+                if not entries:
+                    notes.append("note: the range is outside the module's span")
+            elif died is not None and len(entries) > args.max_lines:
+                # What follows the die message is post_fail_hook output.
+                cut_at = die_block_end(lines, died, end)
+                entries = entries[: cut_at - begin + 1]
+                if cut_at < end:
+                    notes.append(
+                        f"note: lines {cut_at + 2}-{end + 1} after the die message left out; "
+                        f"--around-module {_oqa.tok(args.around_module)} "
+                        f"--lines {cut_at + 2}-{end + 1} reads them"
+                    )
             if not args.verbose:
                 total = len(entries)
                 entries = without_plumbing(entries)
@@ -1517,12 +1533,28 @@ def main():
                     notes.append(
                         f"note: {total - len(entries)} screen polling lines folded into '~' lines (--verbose)"
                     )
+            if args.lines and len(entries) > args.max_lines:
+                rest = entries[args.max_lines][0]
+                notes.append(
+                    f"note: {len(entries) - args.max_lines} lines omitted (--max-lines); go on "
+                    f"with {module}--lines {rest}-{args.lines[1]}"
+                )
+                entries = entries[: args.max_lines]
         mode += f" lines={len(lines)}"
 
     keep_head = min(MODULE_HEAD, args.max_lines // 4) if args.around_module else 0
     entries, dropped = cap_entries(entries, args.max_lines, keep_head)
     if dropped:
-        notes.append(f"note: {dropped} lines omitted at '--' (--max-lines)")
+        note = f"note: {dropped} lines omitted at '--' (--max-lines)"
+        if args.around_module is not None:
+            gap = entries.index(None)
+            low = entries[gap - 1][0] + 1 if gap else span[0] + 1
+            high = entries[gap + 1][0] - 1
+            note += (
+                f", lines {low}-{high}: --around-module {_oqa.tok(args.around_module)} "
+                f"--lines {low}-{high} reads them"
+            )
+        notes.append(note)
     width = args.max_line_chars
     longer = sum(
         1

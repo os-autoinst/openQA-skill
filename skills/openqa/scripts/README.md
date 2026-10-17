@@ -23,7 +23,7 @@ One line per script, generated from the parsers: do not edit it by hand. What a 
 - `oqa-comment-lint.py [FILE] [--text TEXT] [--private-suffix SUFFIX]...`; exit 1: at least one warning
 - `oqa-history.py JOB [--previous N] [--before TIME] [--workers] [--investigation] [--max-items N] [--exit-code] [--verbose]`
 - `oqa-job.py JOB [--settings REGEX] [--steps N] [--module NAME] [--all-steps] [--exit-code] [--verbose]`
-- `oqa-log.py JOB [--file NAME] [--list | --tail N | --grep REGEX | --errors | --runtimes | --members | --lines A-B] [--around-module MODULE] [--member PATH] [--compare JOB] [--context N] [--max-matches N] [--ignore-case] [--max-lines N] [--max-line-chars N] [--max-bytes BYTES] [--verbose] [--exit-code]`
+- `oqa-log.py JOB [--file NAME] [--list | --tail N | --grep REGEX | --errors | --runtimes | --members] [--around-module MODULE] [--lines A-B] [--member PATH] [--compare JOB] [--context N] [--max-matches N] [--ignore-case] [--max-lines N] [--max-line-chars N] [--max-bytes BYTES] [--verbose] [--exit-code]`
 - `oqa-ref.py REF [--body] [--files] [--notes N]`
 - `oqa-sweep.py [--group ID]... [--build BUILD] [--todo] [--include-softfailed] [--test REGEX] [--before TIME] [--limit N] [--no-llm] [--passed] [--module NAME] [--groups] [--match REGEX] [--uses-schedule PATH] [--vr-build LABEL] [--test-git-hash SHA] [--exit-code]`
 - `pr-queue.py [--repo O/R] [--newest N] [--me LOGIN]`
@@ -193,7 +193,8 @@ Logs are MBs; grepping `error|failed` drowns in `timeout=` noise.
 
     oqa-log.py JOB [--file NAME] --list | --errors | --around-module M | --grep REGEX | --tail N
     oqa-log.py JOB --grep REGEX --around-module M    # matches inside one module's span only
-    oqa-log.py JOB [--file NAME] --lines A-B    # a line range, numbered as --grep numbers it
+    oqa-log.py JOB [--file NAME] --lines A-B [--grep REGEX]    # a line range, numbered as --grep numbers it
+    oqa-log.py JOB --around-module M --lines A-B    # that part of the module, as --around-module shows it
     oqa-log.py JOB --runtimes [--compare JOB]
     oqa-log.py JOB --file ulogs/<name>.tar.xz (--members | --member PATH --grep REGEX|--tail N|--errors)
 
@@ -206,7 +207,8 @@ found a module still running at the end or one that took 2x and 60 s more than i
 `[date] [level] [pid]` prints as `HH:MM:SS` (level kept unless debug/info). `--around-module` capped by
 `--max-lines` ends after the `# Test died` message and its stack frames up to the first one called from
 os-autoinst or Perl (3 to 11 lines after it), and it folds assert_screen polling (no match / no change / check_asserted_screen took / stall)
-into one `~` line: counts, first..last time. A ranged tail is numbered from the end (`-1` = last line).
+into one `~` line: counts, first..last time. A `note:` names the lines such a cut left out, at `--` and
+after the die message, with the `--around-module M --lines A-B` that reads them. A ranged tail is numbered from the end (`-1` = last line).
 
 `--errors` on `autoinst-log.txt` (the default `--file`, no `--member`) also reads `serial_terminal.txt` when
 the job has one, as suite verdicts and kernel splats are there, and prints its hits after the first block,
@@ -233,8 +235,9 @@ most `--max-lines` lines (60, the `--` between distant matches included), cuttin
 first matches stay. When fewer matches are printed than found, the header says so and names the cap
 that cut them: `mode=grep matches=37 (shown 10 of 37; --max-matches N)`; raising `--max-lines` alone
 prints no further match. With `--around-module M` the matches and their context come from that module's
-last run only, `starting` to `finished` marker, and the header gains `span=`. One mode is required;
-`--around-module` is the one that also goes with another, `--grep`. `--grep` (like `--match` of
+last run only, `starting` to `finished` marker, and the header gains `span=`; with `--lines A-B` from that
+range only, and it gains `range=`. One mode is required; `--around-module` and `--lines` narrow `--grep`
+and each other, and go with no other mode. `--grep` (like `--match` of
 oqa-sweep.py) compiles the pattern as given: a nested quantifier such as
 `(a+)+b` can hang on a single line, the same way `grep -E` would, and the script cannot time it out.
 Prefer anchored patterns without nested quantifiers. Names from `--list` go to `--file`, which validates
@@ -242,7 +245,8 @@ them; do not paste one into a shell.
 
 `--lines A-B` reads lines A to B (`1 <= A <= B`), numbered as `--grep` and `--errors` number them, so a
 hit can be read in its surroundings: of the range at most `--max-lines` lines, the first ones, and a
-`note:` with the range to read next. A range past the end says how long the file is, or, when
+`note:` with the range to read next. With `--around-module M` it shows the part of the module's span in
+A to B as `--around-module` shows it, plumbing left out and polling folded. A range past the end says how long the file is, or, when
 `--max-bytes` cut the read, `note: N lines read (cut at --max-bytes)`.
 
 `--members` lists an uploaded tar archive (`.tar`, `.tar.gz`/`.tgz`, `.tar.bz2`/`.tbz2`, `.tar.xz`/`.txz`, also when

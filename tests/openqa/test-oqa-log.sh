@@ -365,7 +365,33 @@ check "--grep --around-module: a module that never started is said as for --arou
 	"job=4242 host=https://openqa.opensuse.org file=autoinst-log.txt mode=module started=never lines=41" \
 	"$(head -n 1 <<<"$actual")"
 log 4242 --tail 3 --around-module zypper_in >/dev/null
-check "--around-module goes with --grep only (exit 2)" 2 $?
+check "--around-module goes alone, with --lines or with --grep (exit 2 with --tail)" 2 $?
+actual=$(log 4242 --grep 'finished|starting' --lines 1-20 --context 0)
+check "--grep --lines: only matches inside the range, which the header names" "0 $(
+	cat <<'EOF'
+job=4242 host=https://openqa.opensuse.org mode=grep range=1-20 matches=3 lines=41
+ 4: 10:00:04 ||| starting boot_to_desktop tests/boot/boot_to_desktop.pm
+--
+17: 10:00:17 ||| finished boot_to_desktop boot (runtime: 31 s)
+18: 10:00:18 ||| starting zypper_in tests/console/zypper_in.pm
+EOF
+)" "$? $(grep -v '^<<<\|^requests' <<<"$actual")"
+actual=$(log 4242 --around-module zypper_in --max-lines 8)
+check "--around-module --max-lines: the notes name the lines left out and how to read them" "$(
+	cat <<'EOF'
+note: lines 30-31 after the die message left out; --around-module zypper_in --lines 30-31 reads them
+note: 4 lines omitted at '--' (--max-lines), lines 20-23: --around-module zypper_in --lines 20-23 reads them
+EOF
+)" "$(grep '^note:' <<<"$actual")"
+actual=$(log 4242 --around-module zypper_in --lines 20-29 --max-lines 4)
+check "--around-module --lines: that part of the module, the first --max-lines, and where to go on" \
+	"20 21 22 23|note: 6 lines omitted (--max-lines); go on with --around-module zypper_in --lines 24-29" \
+	"$(sed -n '/^<<<UNTRUSTED/,/^<<<END/p' <<<"$actual" | sed '1d;$d' | sed -E 's/^ *([0-9]+):.*/\1/' | xargs)|$(grep '^note: 6' <<<"$actual")"
+contains "--around-module --lines: the header names span and range" "mode=module span=18-31 finished=yes died=25 range=20-29 lines=41" "$actual"
+actual=$(log 4242 --around-module zypper_in --lines 1-5)
+contains "--around-module --lines outside the span says so" "note: the range is outside the module's span" "$actual"
+log 4242 --lines 1-2 --errors >/dev/null
+check "--lines does not go with --errors (exit 2)" 2 $?
 actual=$(log 4242 --lines 24-25)
 check "--lines: the range, numbered like --grep, compact prefix, escapes stripped" "0 $(
 	cat <<'EOF'
@@ -390,7 +416,7 @@ for range in 5-3 0-3 7 a-b; do
 	check "--lines $range is a usage error (exit 2)" 2 $?
 done
 log 4242 --lines 1-2 --tail 3 >/dev/null
-check "--lines is a mode of its own (exit 2 with --tail)" 2 $?
+check "--lines does not go with --tail (exit 2)" 2 $?
 actual=$(log 4242 --grep 'no such text anywhere')
 check "--grep: exit 0 without a match" 0 $?
 contains "--grep: no match header" "mode=grep matches=0 lines=41" "$actual"

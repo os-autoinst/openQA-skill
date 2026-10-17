@@ -558,6 +558,43 @@ check "no failing step, an answer without a ulogs field: the module's ulogs may 
 check "no failing step, ulogs only of another module: serial_terminal.txt and serial0.txt, no ulogs" \
 	"  no failing step recorded: read serial_terminal.txt and serial0.txt" "$(hint_860 other-ulogs)"
 
+# --- the comments as of --before ------------------------------------------------------
+# as_of ARGS...: job 850 with dated comments, an early note, a label and a bugref later, one undated
+as_of() {
+	local tmp
+	tmp=$(mktemp -d)
+	cp "$fixtures"/api_v1_jobs_850_* "$tmp"
+	python3 - "$tmp" <<'PY'
+import json, sys
+comments = [
+    {"id": 1, "userName": "reviewer_a", "text": "solver conflict, the update looks wrong", "created": "2030-01-02 04:00:00 +0000"},
+    {"id": 2, "userName": "reviewer_b", "text": "label:force_result:softfailed:bsc#1300100 flag:carryover", "created": "2030-01-03 09:05:00 +0200"},
+    {"id": 3, "userName": "reviewer_b", "text": "bsc#1300100", "bugrefs": ["bsc#1300100"], "created": "2030-01-03 09:00:00 +0000"},
+    {"id": 4, "userName": "reviewer_c", "text": "poo#1", "bugrefs": ["poo#1"], "created": "not a time"},
+]
+json.dump(comments, open(f"{sys.argv[1]}/api_v1_jobs_850_comments.json", "w"))
+PY
+	python3 "$script" --host https://openqa.example.org --fixture-dir "$tmp" 850 "$@"
+	rm -rf "$tmp"
+}
+actual=$(as_of --before 2030-01-03T07:30Z)
+check "--before: a later or undated comment is hidden with its bugrefs, the review state is the earlier one" "$(
+	cat <<'EOF'
+review: reviewed=yes label=force_result:softfailed:bsc#1300100 comments=2 plain=1 force_result_not_applied=softfailed
+note: 2 comment(s) created after --before hidden
+comment=1 by=reviewer_a class=human created=2030-01-02T04:00
+comment=2 by=reviewer_b class=human created=2030-01-03T09:05 labels=force_result:softfailed:bsc#1300100 flags=carryover
+EOF
+)" "$(grep -E '^(review|note|comment)' <<<"$actual")"
+actual=$(as_of --before 2030-01-03T08:00+02:00)
+check "--before with an offset: the label of 07:05 UTC is hidden too, the job is not reviewed" \
+	"review: reviewed=no comments=1 plain=1|note: 3 comment(s) created after --before hidden|0" \
+	"$(grep -E '^(review|note)' <<<"$actual" | paste -sd'|')|$(grep -c 'bsc#1300100\|poo#1\|carryover' <<<"$actual")"
+check "without --before every comment counts" 1 \
+	"$(as_of | grep -c '^review: reviewed=yes bugrefs=bsc#1300100,poo#1 label=force_result:softfailed:bsc#1300100 comments=4 plain=1 ')"
+job 850 --before yesterday >/dev/null 2>&1
+check "--before that is no time is a usage error" 2 $?
+
 # --- investigation comments that name their mode ----------------------------------
 tmp=$(mktemp -d)
 cp "$fixtures"/api_v1_jobs_850_* "$tmp"

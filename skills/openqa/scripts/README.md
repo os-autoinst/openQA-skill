@@ -173,7 +173,9 @@ newest=ID result=... started=...` (the end of the restart chain, followed past t
 request), `INVESTIGATION CLONE: kind=<suffix> origin=ID` for a job openqa-investigate made (`TEST` ends in
 `:investigate:<suffix>`, the origin from its `OPENQA_INVESTIGATE_ORIGIN`, `?` without it: take history and
 review window from the origin's scenario), `culprit=ID (...)` for victims, needle steps with
-`tags=` and `candidates=N best=name:91% (worst area each)`, `SUSPECT_BUGREF=` (module name parsed as bugref),
+`tags=` and `candidates=N best=name:91% (worst area each)`; after a loop of checks for the same tags (a
+`send_key_until_needlematch` whose last screen is the one it overshot to) `loop: N checks for these tags in
+a row, best=name:94% at step=M link=... shot=...`, the near miss among them; `SUSPECT_BUGREF=` (module name parsed as bugref),
 `force_result_not_applied=<r>`, `; the hook died at step=N` after `post_fail_hook steps not shown` (the hook
 itself died: logs it would have uploaded may be missing; its message is the `post_fail_hook failed: ` line of
 `autoinst-log.txt`). `frame=`: first stack frame outside os-autoinst. `ulogs[<module>]=<module>-a,<module>-b`:

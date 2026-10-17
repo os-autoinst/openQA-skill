@@ -1,0 +1,7 @@
+[2030-01-01T10:00:01.000000Z] [debug] [pid:1] ||| starting helm tests/containers/helm.pm
+[2030-01-01T10:00:02.000000Z] [debug] [pid:1] >>> testapi::wait_serial: helm-done-1-: ok
+helm install x ./chart; echo helm-done-$?-
+Error: INSTALLATION FAILED: cannot re-use a name that is still in use
+helm-done-1-
+[2030-01-01T10:00:03.000000Z] [info] [pid:1] ::: basetest::runtest: # Test died: helm install failed
+[2030-01-01T10:00:04.000000Z] [debug] [pid:1] ||| finished helm containers (runtime: 3 s)

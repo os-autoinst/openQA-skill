@@ -573,6 +573,35 @@ def first_failed(job, row):
     return str(names[0]) if names else None
 
 
+def module_history(module, older, runs):
+    """When this job's first failed module last ran ok, and in how many older runs since it
+    failed or did not run; None without every one of those runs' module lists."""
+    failed = absent = 0
+    for row in older:
+        modules = ((runs or {}).get(row["id"]) or {}).get("modules")
+        if not isinstance(modules, list):
+            return None
+        result = next(
+            (
+                m.get("result")
+                for m in modules
+                if isinstance(m, dict) and m.get("name") == module
+            ),
+            None,
+        )
+        if result in OK_RESULTS:
+            since = f"last_ok={row['id']} build={build_of(row)}; since then "
+            break
+        failed += result == "failed"
+        absent += result != "failed"
+    else:
+        since = f"last_ok=none in {len(older)} older run(s); "
+    return (
+        f"module {_oqa.tok(module)}: {since}failed={failed} not_run={absent} "
+        "(skipped or not reached)"
+    )
+
+
 def call_path(client, job_id, module):
     """Files of the stack trace of the failing step, outside os-autoinst; None when there
     is no readable step that died."""
@@ -657,9 +686,10 @@ def package_versions(text):
     return found
 
 
-def job_versions(client, job_id, prefer=None):
-    """(file name, {package: versions}) of one job, (None, None) without a package list."""
-    name = version_file(uploads(client, job_id), prefer)
+def job_versions(client, job_id, names, prefer=None):
+    """(file name, {package: versions}) of one job from the names of its uploads, (None, None)
+    without a package list."""
+    name = version_file(names, prefer)
     if not name:
         return None, None
     try:
@@ -669,10 +699,10 @@ def job_versions(client, job_id, prefer=None):
     return name, package_versions(text)
 
 
-def versions_line(client, job_id, good_id):
+def versions_line(client, job_id, good_id, good_files):
     """Kernel and test suite package versions of last good and this job, side by side."""
-    name, new = job_versions(client, job_id)
-    good_name, old = job_versions(client, good_id, name)
+    name, new = job_versions(client, job_id, uploads(client, job_id))
+    good_name, old = job_versions(client, good_id, good_files, name)
     if not new and not old:
         return "  versions: not found"
     # rpm -qi of the kernel cannot show a suite: there a missing one is unknown, not absent.
@@ -728,8 +758,16 @@ def investigation(client, job_id, limit, verbose, failed=(), job=None, module=No
         f"  last_good={link_id(data.get('last_good'))} first_bad={link_id(data.get('first_bad'))}"
     )
     if not isinstance(data.get("last_good"), dict):
-        print("  no last good job, so openQA has nothing to compare against")
+        print(
+            "  nothing to compare: openQA found no passed or softfailed run of this scenario "
+            "before this job, in all of its history, not only the --previous shown"
+        )
         return
+    good_id = link_id(data.get("last_good"))
+    good_files = uploads(client, int(good_id)) if good_id.isdigit() else None
+    # The log cleanup deletes autoinst-log.txt with the other logs and uploads.
+    if good_files is not None and "autoinst-log.txt" not in good_files:
+        print("  last_good logs: gone (pruned, its log files answer 404)")
     first_bad = link_id(data.get("first_bad"))
     if first_bad.isdigit() and first_bad != str(job_id):
         print(
@@ -770,9 +808,8 @@ def investigation(client, job_id, limit, verbose, failed=(), job=None, module=No
             ),
             end="",
         )
-    good_id = link_id(data.get("last_good"))
     if good_id.isdigit():
-        print(versions_line(client, job_id, int(good_id)))
+        print(versions_line(client, job_id, int(good_id), good_files))
 
     for key, stat_key, title, url_key in (
         ("test_log", "test_diff_stat", "test", "testgiturl"),
@@ -982,14 +1019,13 @@ def main():
             if name
         }
         job = (runs or {}).get(job_id)
+        module = first_failed(job, current)
+        done = [row for row in older if row.get("state") == "done"]
+        own = module and job and module_history(module, done, runs)
+        if own:
+            print(own)
         investigation(
-            client,
-            job_id,
-            args.max_items,
-            args.verbose,
-            sorted(failed),
-            job,
-            first_failed(job, current),
+            client, job_id, args.max_items, args.verbose, sorted(failed), job, module
         )
     print(f"requests: {client.requests}")
     return status if args.exit_code else 0

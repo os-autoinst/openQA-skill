@@ -573,7 +573,50 @@ rm -rf "$tmp"
 
 actual=$(history 5300 --investigation)
 contains "--investigation: no last good" '  last_good="not found" first_bad=5280' "$actual"
-contains "--investigation: nothing to compare" "no last good job, so openQA has nothing to compare against" "$actual"
+check "--investigation: no last good says plainly that nothing can be compared, whatever --previous" \
+	"  nothing to compare: openQA found no passed or softfailed run of this scenario before this job, in all of its history, not only the --previous shown" \
+	"$(sed -n '/^  last_good=/{n;p;}' <<<"$actual")"
+
+# Last good's logs pruned: its downloads tab lists vars.json alone, as on openQA after the log cleanup.
+tmp=$(mktemp -d)
+cp "$fixtures"/* "$tmp"
+printf '<h5>Result files</h5>\n<ul class="resultfile-list">\n<li><a href="/tests/4960/file/vars.json">vars.json</a>\n</ul>\n' >"$tmp"/tests_4960_downloads_ajax
+actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 5000 --investigation)
+check "--investigation: last good's pruned logs are called gone, from the downloads tab read anyway" \
+	"  last_good=4960 first_bad=4970
+  last_good logs: gone (pruned, its log files answer 404)|requests: 10" \
+	"$(grep -A1 '^  last_good=' <<<"$actual")|$(tail -1 <<<"$actual")"
+check "--investigation: logs that are there are not called gone" 0 "$(history 5000 --investigation | grep -c 'logs: gone')"
+
+# The failed module's own history, from the module lists that come with the runs.
+python3 - "$tmp/api_v1_jobs_ids=5000_4990_4980_4970_4960_4950_4940_4930_4920_4910_4900.json" ok <<'PY'
+import json, sys
+data = json.load(open(sys.argv[1]))
+results = {4990: "failed", 4980: "failed", 4970: "none", 4960: "passed" if sys.argv[2] == "ok" else "skipped"}
+for job in data["jobs"]:
+    if job["id"] != 5000:
+        job["modules"] = [{"name": "boot_to_desktop", "result": "passed"}]
+        if job["id"] in results:
+            job["modules"].append({"name": "zypper_in", "result": results[job["id"]]})
+json.dump(data, open(sys.argv[1], "w"))
+PY
+actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 5000 --investigation)
+check "--investigation: when the failed module last ran ok, and since then how often it failed or did not run, no request more" \
+	"module zypper_in: last_ok=4960 build=20300102; since then failed=2 not_run=1 (skipped or not reached)|requests: 10" \
+	"$(grep '^module ' <<<"$actual")|$(tail -1 <<<"$actual")"
+python3 - "$tmp/api_v1_jobs_ids=5000_4990_4980_4970_4960_4950_4940_4930_4920_4910_4900.json" skipped <<'PY'
+import json, sys
+data = json.load(open(sys.argv[1]))
+for job in data["jobs"]:
+    if job["id"] == 4960:
+        job["modules"][-1]["result"] = sys.argv[2]
+json.dump(data, open(sys.argv[1], "w"))
+PY
+actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 5000 --investigation)
+check "--investigation: a failed module that never ran ok in the runs shown; absent from a run's list is not run" \
+	"module zypper_in: last_ok=none in 10 older run(s); failed=2 not_run=8 (skipped or not reached)" "$(grep '^module ' <<<"$actual")"
+rm -rf "$tmp"
+check "--investigation: without the older runs' module lists no module history" 0 "$(history 5000 --investigation | grep -c '^module ')"
 
 actual=$(history 5200 --investigation)
 contains "--investigation: server-side error text is quoted" '  server says: "No previous job in this scenario, cannot provide hints"' "$actual"

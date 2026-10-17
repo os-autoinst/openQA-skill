@@ -258,7 +258,10 @@ them; do not paste one into a shell. An HTML page served for a file whose name d
 416 (a range past the end, as any range of a file of 0 bytes is), header `range=unsatisfiable`; a file of 0
 bytes gives `note: the file is empty` and exit 0 in every mode. A missing file (HTTP 404) is an error that
 says whether the job has any file left: none means its logs were cleaned up or it has not run yet; else
-`--list` names the ones it has.
+`--list` names the ones it has. A file less than two thirds of whose first 4 KiB is printable (escapes count,
+NULs, other control bytes and invalid UTF-8 do not) is refused as binary: compressed data and images are, a
+console capture padded with NULs and charset shifts (an IPMI SOL `hardware-console-log.txt`) is read with
+its escapes and control bytes stripped.
 
 `--lines A-B` reads lines A to B (`1 <= A <= B`), numbered as `--grep` and `--errors` number them, so a
 hit can be read in its surroundings: of the range at most `--max-lines` lines, the first ones, and a

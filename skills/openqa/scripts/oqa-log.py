@@ -347,8 +347,13 @@ def not_a_page(body, path):
 
 
 def to_lines(body, cut=False):
-    sample = body[:4096]
-    if sum(byte < 9 or 13 < byte < 27 for byte in sample) > len(sample) // 10:
+    # A console capture (IPMI SOL) is text padded with NULs and charset shifts; compressed
+    # or image data is less than half printable, as is invalid UTF-8.
+    sample = body[:4096].decode("utf-8", "replace")
+    printable = sum(
+        char != "�" and (char.isprintable() or char in "\t\n\r\x1b") for char in sample
+    )
+    if printable < len(sample) * 2 / 3:
         raise _oqa.OqaError("the file looks binary, refusing to print it")
     text = _oqa.sanitize(body.decode("utf-8", "replace"), max_line=0, max_bytes=0)
     if cut:

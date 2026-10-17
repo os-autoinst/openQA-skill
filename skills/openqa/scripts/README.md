@@ -360,7 +360,10 @@ for a review as of a ticket's date. Runs that started later are cut (`note: N ru
 --before cut`); a run still going then shows as `running` and counts in none of `last_good`, `first_bad`,
 `streak`, `not_ok`; a restart that is not among the runs kept leaves `clone` empty; bugrefs and label come
 from the comments created by then (one request per run carrying either, 30 at most, `?` beyond; `note: N
-bugref or label comment(s) created after --before ignored`). The start of a run still going comes from
+bugref or label comment(s) created after --before ignored`). A result that a `label:force_result:<result>`
+comment created later changed shows as it was then (`note: result(s) of <ids> forced later, shown as at
+--before`): an earlier such comment's result, else `failed` for a run with failed modules, else `?`, as openQA
+keeps no result from before a force. The start of a run still going comes from
 `/api/v1/jobs`; exit 2 when that cannot be read or the job had not started by then. `--investigation` is
 not cut: openQA computes it at the time of the request.
 

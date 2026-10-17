@@ -376,6 +376,22 @@ python3 - "$tmp" <<'PY'
 import json, sys
 path = f"{sys.argv[1]}/api_v1_jobs_890_details.json"
 data = json.load(open(path))
+module = data["job"]["testresults"][0]
+module["result"] = "canceled"
+module["details"].pop()
+json.dump(data, open(path, "w"))
+PY
+actual=$(python3 "$script" --host https://openqa.example.org --fixture-dir "$tmp" 890 | sed -n '/^module=register_instance /,/^module=/p')
+rm -rf "$tmp"
+check "a module killed when the job was cancelled is shown like a failed one, with its last step's text" \
+	"1 1 1 1" \
+	"$(grep -c '^module=register_instance result=canceled category=publiccloud$' <<<"$actual") $(grep -c '^  step=3 kind=info title="registercloudguest" ' <<<"$actual") $(grep -c "^Error: SCC returned 'Unknown Registration Code.' (401)$" <<<"$actual") $(grep -c '^  no failing step recorded: read serial0.txt$' <<<"$actual")"
+tmp=$(mktemp -d)
+cp "$fixtures"/api_v1_jobs_890_* "$tmp"
+python3 - "$tmp" <<'PY'
+import json, sys
+path = f"{sys.argv[1]}/api_v1_jobs_890_details.json"
+data = json.load(open(path))
 data["job"]["testresults"][0]["details"] = [
     {"num": n, "result": "ok", "title": f"info {n}", "text": f"m-{n}.txt", "text_data": f"note {n}"}
     for n in range(1, 26)

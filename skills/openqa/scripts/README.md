@@ -191,9 +191,11 @@ failures, `TCONF` and `TWARN` last; the first 8 are shown in file order, and a l
 characters is shown cut, with `[step text cut at 4000 characters; N more lines not shown]` when whole lines
 fell off.
 `kind=parser-result-failed`: a result openQA parsed from a suite's report (`parse_extra_log`: LTP, KTAP,
-JUnit), whatever its `fail` or `failed`. `kind=info`: a module that failed without a failing step (an
-xfstests subtest sets its own result) shows its `INFO` and `output` steps, else its last step with text,
-before `no failing step recorded: read <logs>` (`logs gone (pruned)` when the job has none left).
+JUnit), whatever its `fail` or `failed`. A module killed when the job was cancelled or timed out
+(`result=canceled`) is shown like a failed one. `kind=info`: a module that failed without a failing step
+(an xfstests subtest sets its own result, a canceled module) shows its `INFO` and `output` steps, else its
+last step with text, before `no failing step recorded: read <logs>` (`logs gone (pruned)` when the job
+has none left).
 `--all-steps -v` adds the text of the last 20 steps that are not a `wait_serial` (record_info ones among
 them; in public-cloud modules they often hold the cause) after the table.
 

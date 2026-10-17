@@ -255,6 +255,7 @@ SIGNATURES = (
 _OUTCOME = ("module", "signal", "stop", "result")
 
 SERIAL_TERMINAL = "serial_terminal.txt"
+SERIAL0 = "serial0.txt"
 # A kernel line has a printk time, maybe with a caller id ("[  T812]"), or a journal's "kernel: ".
 _KERNEL = r"(?:\[\s*\d+\.\d+\](?:\[\s*[TC]\d+\])?|\bkernel:)\s+"
 _OOPS = r"(?:Internal error: )?Oops(?::| - )"
@@ -265,11 +266,7 @@ _BARE_KERNEL = (
     r"|scheduling while atomic|sleeping function|Bad page|workqueue lockup)"
     rf"|{_OOPS})"
 )
-# What a suite or the kernel prints to the serial terminal, which autoinst-log.txt does not hold.
-SERIAL_SIGNATURES = (
-    _signature(
-        "suite", [r"\bTFAIL\b", r"\bTBROK\b", r"^\s*(?:#\s*)?not ok\b", r"^Failures:"]
-    ),
+KERNEL_SIGNATURES = (
     _signature(
         "kernel",
         [
@@ -279,7 +276,19 @@ SERIAL_SIGNATURES = (
         ],
     ),
     _signature("kernel", [rf"(?:^\s*|{_KERNEL})Call Trace\b"], 4),
+)
+# What a suite or the kernel prints to the serial terminal, which autoinst-log.txt does not hold.
+SERIAL_SIGNATURES = (
+    _signature(
+        "suite", [r"\bTFAIL\b", r"\bTBROK\b", r"^\s*(?:#\s*)?not ok\b", r"^Failures:"]
+    ),
+    *KERNEL_SIGNATURES,
     *SIGNATURES,
+)
+# The kernel's console, where the SUT's programs print too: the kernel's own lines only.
+SERIAL0_SIGNATURES = (
+    *KERNEL_SIGNATURES,
+    _signature("kernel", [rf"(?:^\s*|{_KERNEL})Kernel panic - not syncing"]),
 )
 
 
@@ -1041,18 +1050,18 @@ def runtime_rows(runs, other, last, other_last, cut=(False, False)):
     return [row for _, row in rows], slower, running
 
 
-def serial_errors(client, job_id, args):
-    """--errors over serial_terminal.txt: (lines to print, any hit?); nothing when the job has none."""
-    path = file_path(job_id, SERIAL_TERMINAL)
+def serial_errors(client, job_id, args, name, signatures):
+    """--errors over a serial log: (lines to print, any hit?); nothing when the job has none."""
+    path = file_path(job_id, name)
     try:
         lines, truncated = fetch_all(client, path, args.max_bytes)
     except _oqa.NotFound:
         return [], False
     except _oqa.OqaError as error:
-        return [f"note: {SERIAL_TERMINAL} not read ({error})"], False
-    entries, _, counts, _, _ = mode_errors(lines, args.verbose, SERIAL_SIGNATURES)
+        return [f"note: {name} not read ({error})"], False
+    entries, _, counts, _, _ = mode_errors(lines, args.verbose, signatures)
     found = ",".join(f"{label}:{count}" for label, count in counts.items())
-    out = [f"file={SERIAL_TERMINAL} mode=errors hits={found or '-'} lines={len(lines)}"]
+    out = [f"file={name} mode=errors hits={found or '-'} lines={len(lines)}"]
     if truncated:
         out.append(f"warning: only the first {args.max_bytes} bytes of it were read")
     if not counts:
@@ -1200,7 +1209,7 @@ def main():
         "timed-out command, serial failure, backend died, setup problem, result lines, "
         "plus the last started module; of autoinst-log.txt (the default --file) and, in a "
         f"block of its own, of {SERIAL_TERMINAL} when the job has one, where suite verdicts "
-        "and kernel splats are",
+        f"and kernel splats are, and of {SERIAL0}, the kernel console, for kernel splats",
     )
     parser.add_argument(
         "--around-module",
@@ -1478,8 +1487,11 @@ def main():
                 )
             status = 1 if total else 0
         elif args.errors:
-            serial = args.file.removeprefix("ulogs/") == SERIAL_TERMINAL
-            signatures = SERIAL_SIGNATURES if serial else SIGNATURES
+            name = args.file.removeprefix("ulogs/")
+            signatures = {
+                SERIAL_TERMINAL: SERIAL_SIGNATURES,
+                SERIAL0: (*SERIAL0_SIGNATURES, *SIGNATURES),
+            }.get(name, SIGNATURES)
             entries, infos, counts, started, finished = mode_errors(
                 lines, args.verbose, signatures
             )
@@ -1490,7 +1502,13 @@ def main():
             entries += infos[: max(args.max_lines - len(entries), 0)]
             serial_hits = False
             if args.file == DEFAULT_FILE and args.member is None:
-                extra, serial_hits = serial_errors(client, job_id, args)
+                for serial, kinds in (
+                    (SERIAL_TERMINAL, SERIAL_SIGNATURES),
+                    (SERIAL0, SERIAL0_SIGNATURES),
+                ):
+                    block, hits = serial_errors(client, job_id, args, serial, kinds)
+                    extra += block
+                    serial_hits = serial_hits or hits
             status = 1 if failures or serial_hits else 0
             if any(count > PER_LABEL for count in counts.values()):
                 notes.append(

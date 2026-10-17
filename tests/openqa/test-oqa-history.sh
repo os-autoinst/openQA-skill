@@ -175,7 +175,16 @@ history(7000, [
     (6960, "1", "passed", []),
     (6950, "0", "failed", [f"ltp_module_{i:02d}" for i in range(20, 0, -1)]),
 ])
+# Runs of two builds interleaved: every run of the newer one fails, every run of the older one passes.
+history(7100, [
+    (7100, "2", "failed", ["boot"]),
+    (7090, "1", "passed", []),
+    (7080, "2", "failed", ["boot"]),
+    (7070, "1", "passed", []),
+])
 PY
+contains "not ok in every run of one build and ok in the others is no intermittent failure" \
+	"hint: every run of build 2 failed; last good on build 1" "$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 7100)"
 actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 7000)
 check "failed modules: sorted, the same modules in another order read the same" "yast2_foo,zypper_in yast2_foo,zypper_in" \
 	"$(awk '$1 == 6980 || $1 == 6970 {print $5}' <<<"$actual" | tr '\n' ' ' | sed 's/ $//')"

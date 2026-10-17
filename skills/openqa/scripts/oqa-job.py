@@ -838,7 +838,9 @@ def print_modules(client, job, max_steps, verbose, wanted=None):
             for ulog in job.get("ulogs") or ()
             if str(ulog).startswith(f"{name}-")
         ]
-        if not bad:
+        if not bad and "logs" in job and not (job.get("logs") or job.get("ulogs")):
+            print("  no failing step recorded: logs gone (pruned)")
+        elif not bad:
             read = [f"the ulogs {tok(name, 60)}-*"] if own or "ulogs" not in job else []
             if "serial_terminal.txt" in (job.get("logs") or ()):
                 read.append("serial_terminal.txt")

@@ -500,7 +500,10 @@ actual=$(log 4242 --lines 50-60)
 check "--lines past the end says how long the file is" "0 1" "$? $(grep -c '^note: the file has 41 lines$' <<<"$actual")"
 actual=$(log 4242 --lines 30-40 --max-bytes 500)
 check "--lines past what --max-bytes read says so, not that the file is that long" "0 1 0" \
-	"$? $(grep -c '^note: 6 lines read (cut at --max-bytes)$' <<<"$actual") $(grep -c 'the file has' <<<"$actual")"
+	"$? $(grep -c '^note: 6 lines read (cut at --max-bytes); a larger --max-bytes reaches line 30, --tail N reads the end$' <<<"$actual") $(grep -c 'the file has' <<<"$actual")"
+actual=$(log 4242 --around-module zypper_in --max-bytes 500)
+check "--around-module: a module the --max-bytes cut kept out is not just 'never started'" "1 1" \
+	"$(grep -c '^warning: only the first 500 bytes were read (--max-bytes)$' <<<"$actual") $(grep -c '^note: the module may start past the cut; raise --max-bytes$' <<<"$actual")"
 for range in 5-3 0-3 7 a-b; do
 	log 4242 --lines "$range" >/dev/null
 	check "--lines $range is a usage error (exit 2)" 2 $?

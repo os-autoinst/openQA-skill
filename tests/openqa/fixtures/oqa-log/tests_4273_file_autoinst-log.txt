@@ -1,0 +1,7 @@
+[2030-01-01T10:00:01.000000Z] [info] [pid:9] +++ setup notes +++
+[2030-01-01T10:00:02.000000Z] [info] [pid:9] Downloading foo.qcow2, request #58 sent to Cache Service
+[2030-01-01T10:00:05.000000Z] [info] [pid:9] Download of foo.qcow2 processed:
+[info] [#58] Downloading "foo.qcow2" from "https://openqa.example.org/tests/9/asset/hdd/foo.qcow2"
+[info] [#58] Download of "/var/lib/openqa/cache/openqa.example.org/foo.qcow2" failed: 404 Not Found
+[2030-01-01T10:00:06.000000Z] [info] [pid:9] +++ worker notes +++
+[2030-01-01T10:00:07.000000Z] [info] [pid:9] Result: setup failure

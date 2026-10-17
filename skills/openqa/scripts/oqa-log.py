@@ -211,6 +211,9 @@ SIGNATURES = (
             r"fatal: Remote branch .* not found",
             r"fatal: repository not found",
             r"Failed to download",
+            # Downloader.pm of the cache service, quoted in the worker's "processed:" lines
+            r'Download of "[^"\n]{1,500}" failed: ',
+            r"Cannot find \w+ asset ",
             r"Failed to rsync tests",
             r"qemu-img: Could not open .*: No such file or directory",
             r"Maximum allowed test steps \(MAX_TEST_STEPS=\d+\) exceeded",

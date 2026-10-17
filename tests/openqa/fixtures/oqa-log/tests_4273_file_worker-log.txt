@@ -1,0 +1,3 @@
+[2030-01-01T10:00:01.000000Z] [info] [pid:9] Accepting job 4273 from openqa.example.org
+[2030-01-01T10:00:02.000000Z] [error] [pid:9] HDD_1 handling Cannot find HDD_1 asset hdd/foo.qcow2!
+[2030-01-01T10:00:03.000000Z] [info] [pid:9] Isotovideo exit status: 1

@@ -353,7 +353,11 @@ it`. `--previous` runs to look at (10, openQA's carry-over depth). All-empty col
 run of the streak lacked one of this job's failed modules; one that failed in older runs only (it softfails,
 passes or is not reached now) is no change: `older runs also failed <module>`. On a change, `first_bad` adds
 `(failed modules as now since <id>, N runs)`. A run whose ok result a `label:force_result` comment made counts
-as not ok (`note: ok result(s) of <ids> forced by a comment, counted as not ok`). When the not-ok runs are exactly
+as not ok (`note: ok result(s) of <ids> forced by a comment, counted as not ok`). Older runs unlike this job are
+left out of `last_good`, `first_bad`, the streak and the hint (`left out, unlike this job: <id> (<why>)`): a
+manual clone without the job group and, from the settings `/api/v1/jobs` gives with `--workers` or
+`--investigation`, a run with another `CASEDIR` or `NEEDLES_DIR`, or an `ISO` or `HDD_1` that differs beyond
+the build; `last_good=none like this job (<run>: <why>)` when only such a run was ok. When the not-ok runs are exactly
 the runs of this job's build, interleaved with ok runs of another, the hint is `every run of build X failed;
 last good on build Y`, not `intermittent`. With the worker column and runs on two workers or more, `workers:
 <worker> ok=N not_ok=M, ...` tallies them, the most failing first; when every run on one worker failed and every
@@ -377,7 +381,8 @@ side where the setting is absent, so an added or removed one still shows), packa
 `--max-items` (10) lines each: `settings diff (last_good -> this job)`, plus a hint to run on first_bad for the
 tight window when that is another job. `first_bad <id> investigate jobs: <suffix> t#<id>, ...`: the clones
 openqa-investigate listed in first_bad's comments (one request; with `--before` only comments created by
-then); no line when there are none. `last_good logs: gone`: last good's downloads tab lists no
+then); no line when there are none. `last_good used tests from another repository: <key>=<value>`: openQA's
+last good ran another `CASEDIR` or `TEST_GIT_URL`. `last_good logs: gone`: last good's downloads tab lists no
 `autoinst-log.txt`, so openQA's log cleanup took its logs and uploads. `nothing to compare`: openQA found no last
 good in all of the scenario's history, which `--previous` does not limit. Before it, `module <module>:
 last_ok=<id> build=<build>; since then failed=N not_run=M` follows the first failed module through the older

@@ -202,6 +202,36 @@ actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 7500)
 check "an ok result forced by a comment counts as not ok, a note says so" \
 	"note: ok result(s) of 7490 forced by a comment, counted as not ok|last_good=7470 build=1 result=passed|first_bad=7480 build=2 streak=3" \
 	"$(grep '^note: ok' <<<"$actual")|$(grep '^last_good=' <<<"$actual")|$(grep '^first_bad=' <<<"$actual")"
+# Ok runs unlike this job: a manual clone without a job group, a run from a fork, one on another ISO.
+python3 - "$tmp" <<'PY'
+import json, sys
+def history(job, runs, settings=None):
+    rows = [{"id": i, "build": b, "state": "done", "result": r, "failedmodules": ["x"] if r == "failed" else [],
+             "iscurrent": 1 if i == job else None, "group": g, "finished": "2030-01-01T10:00:00Z",
+             "duration": "10:00 minutes"} for i, b, r, g in runs]
+    json.dump({"data": rows}, open(f"{sys.argv[1]}/tests_{job}_ajax_previous_limit=10_next_limit=0.json", "w"))
+    if settings:
+        jobs = [{"id": i, "settings": settings.get(i, {"ISO": f"example-{b}-DVD.iso"})} for i, b, _, _ in runs]
+        json.dump({"jobs": jobs}, open(f"{sys.argv[1]}/api_v1_jobs_ids=" + "_".join(str(r[0]) for r in runs) + ".json", "w"))
+history(7600, [(7600, "4", "failed", 5), (7590, "3", "passed", None), (7580, "3", "failed", 5), (7570, "2", "passed", 5)])
+history(7700, [(7700, "4", "failed", 5), (7690, "3", "passed", 5), (7680, "3", "failed", 5), (7670, "2", "passed", 5),
+               (7660, "1", "passed", 5)],
+        {7690: {"ISO": "example-3-DVD.iso", "CASEDIR": "https://git.example.org/someone/distri.git#fix"},
+         7670: {"ISO": "custom.iso"}})
+history(7800, [(7800, "4", "failed", 5), (7790, "3", "passed", None), (7780, "3", "failed", 5)])
+PY
+actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 7600)
+check "an ok manual clone without a job group is no last good and does not cut the streak" \
+	"last_good=7570 build=2 result=passed|first_bad=7580 build=3 streak=2|left out, unlike this job: 7590 (no job group)" \
+	"$(grep -E '^(last_good|first_bad|left out)' <<<"$actual" | paste -sd '|')"
+actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 7700 --workers)
+check "--workers: ok runs from another test repository or on another ISO are left out" \
+	"last_good=7660 build=1 result=passed|left out, unlike this job: 7690 (tests from another repository: CASEDIR=https://git.example.org/someone/distri.git#fix), 7670 (another ISO: custom.iso)" \
+	"$(grep -E '^(last_good|left out)' <<<"$actual" | paste -sd '|')"
+actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 7800)
+check "only an ok run unlike this job: no last good, that run named" \
+	"last_good=none like this job (7790 build=3 result=passed: no job group)|hint: always failing: no ok run in the last 2; same failed modules throughout" \
+	"$(grep -E '^(last_good|hint)' <<<"$actual" | paste -sd '|')"
 # Runs on two workers: every one on worker 41 fails, every one on worker 42 passes.
 python3 - "$tmp" <<'PY'
 import json, sys
@@ -414,6 +444,21 @@ check "--investigation: a masked setting that was added or removed still says so
 OLD_PASSWORD: [REDACTED:secret-setting] -> -
 API_PASSWORD: [REDACTED:secret-setting] -> [REDACTED:secret-setting]|0" \
 	"$(grep -E '^(SCC_REGCODE|OLD_PASSWORD|API_PASSWORD):' <<<"$actual")|$(grep -c 'piece' <<<"$actual")"
+tmp=$(mktemp -d)
+cp "$fixtures"/* "$tmp"
+python3 - "$tmp/tests_5000_investigation_ajax.json" <<'PY'
+import json, sys
+data = json.load(open(sys.argv[1]))
+data["diff_to_last_good"] += ('\n-   "TEST_GIT_URL" : "https://git.example.org/someone/distri.git",'
+                              '\n+   "TEST_GIT_URL" : "https://git.example.org/os/distri.git",')
+json.dump(data, open(sys.argv[1], "w"))
+PY
+actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 5000 --investigation)
+rm -rf "$tmp"
+check "--investigation: openQA's last good from another test repository is flagged" \
+	"  last_good used tests from another repository: TEST_GIT_URL=https://git.example.org/someone/distri.git" \
+	"$(grep '^  last_good used' <<<"$actual")"
+check "--investigation: no such flag when the repository is the same" 0 "$(history 5000 --investigation | grep -c 'last_good used')"
 actual=$(history 5000 --investigation --max-items 200 --verbose)
 check "--verbose keeps per-run settings and 'not available' lines" "1 1 0" \
 	"$(grep -c '^TEST_GIT_HASH: aaaaaaa -> bbbbbbb$' <<<"$actual") $(grep -c '^  worker packages diff: "Diff of packages not available"$' <<<"$actual") $(grep -c 'per-run settings left out' <<<"$actual")"

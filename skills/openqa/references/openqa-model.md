@@ -157,7 +157,8 @@ Use `scope=current` (`clone_id IS NULL`); `scope=relevant` also keeps jobs whose
 
 ```sh
 H=https://openqa.opensuse.org B=<build>
-curl -s "$H/api/v1/jobs?groupid=1&build=$B&scope=current&result=failed,incomplete,timeout_exceeded&limit=200"
+curl -s "$H/api/v1/jobs?groupid=1&build=$B&scope=current&result=failed,incomplete,timeout_exceeded&limit=200" |
+  python3 -c 'import json,sys; [print(j["id"], j["test"], j["result"]) for j in json.load(sys.stdin)["jobs"]]'  # never print the rest: every job setting, registration codes included
 curl -s "$H/tests/overview.json?groupid=1&build=$B&result=not_ok"
 ```
 

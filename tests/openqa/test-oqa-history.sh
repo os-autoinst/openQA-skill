@@ -202,6 +202,35 @@ actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 7500)
 check "an ok result forced by a comment counts as not ok, a note says so" \
 	"note: ok result(s) of 7490 forced by a comment, counted as not ok|last_good=7470 build=1 result=passed|first_bad=7480 build=2 streak=3" \
 	"$(grep '^note: ok' <<<"$actual")|$(grep '^last_good=' <<<"$actual")|$(grep '^first_bad=' <<<"$actual")"
+# The same force hidden from openQA's label: under a later label:linked (8290), in a comment that also
+# has a bugref (8280); this job 8300 itself forced, then linked; 8260 has a bugref comment and no force.
+python3 - "$tmp" <<'PY'
+import json, sys
+linked = {"bugs": [], "label": "linked"}
+rows = [{"id": i, "build": b, "state": "done", "result": r, "failedmodules": ["x"] if i != 8260 else [],
+         "iscurrent": 1 if i == 8300 else None, "finished": "2030-01-01T10:00:00Z", "duration": "10:00 minutes",
+         "comment_data": c}
+        for i, b, r, c in ((8300, "3", "softfailed", linked), (8290, "2", "softfailed", linked),
+                           (8280, "2", "softfailed", {"bugs": [{"content": "bsc#1300100"}], "label": None}),
+                           (8270, "2", "failed", 0), (8260, "1", "passed", {"bugs": [{"content": "bsc#1300101"}], "label": None}))]
+json.dump({"data": rows}, open(f"{sys.argv[1]}/tests_8300_ajax_previous_limit=10_next_limit=0.json", "w"))
+def comments(job, *items):
+    json.dump([{"id": n, "text": t, "bugrefs": refs, "created": "2030-01-01 11:00:00 +0000"} for n, t, refs in items],
+              open(f"{sys.argv[1]}/api_v1_jobs_{job}_comments.json", "w"))
+comments(8300, (1, "label:force_result:softfailed:accepted", []), (2, "label:linked", []))
+comments(8290, (3, "label:force_result:softfailed:accepted", []), (4, "label:linked", []))
+comments(8280, (5, "label:force_result:softfailed:accepted bsc#1300100", ["bsc#1300100"]))
+comments(8260, (6, "bsc#1300101", ["bsc#1300101"]))
+PY
+actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 8300 --exit-code)
+status=$?
+check "a force under a later label or beside a bugref is found in the comments: counted as not ok, --exit-code 1" \
+	"1|note: ok result(s) of 8300,8290,8280 forced by a comment, counted as not ok|last_good=8260 build=1 result=passed|first_bad=8270 build=2 streak=4|requests: 5" \
+	"$status|$(grep -o 'ok result(s) of [^;]*not ok' <<<"$actual" | sed 's/^/note: /')|$(grep -E '^(last_good|first_bad)=' <<<"$actual" | paste -sd'|')|$(tail -n 1 <<<"$actual")"
+rm "$tmp"/api_v1_jobs_8290_comments.json
+check "comments that cannot be read leave the run ok, a note says so" \
+	"comments of 1 ok run(s) with a bugref or label not read, a force_result there not counted" \
+	"$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 8300 | grep -o 'comments of [^;]*counted')"
 # Ok runs unlike this job: a manual clone without a job group, a run from a fork, one on another ISO.
 python3 - "$tmp" <<'PY'
 import json, sys

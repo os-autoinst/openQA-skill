@@ -965,9 +965,10 @@ def print_all_steps(client, job, how, wanted, verbose, span=None):
     headers = ("num", "result", "title", "shot")
     print(_oqa.table(rows, headers, max_rows=MAX_ALL_STEPS), end="")
     if len(steps) > MAX_ALL_STEPS:
+        last = span[1] if span and span[1] is not None else ""
         print(
             f"... {len(steps) - MAX_ALL_STEPS} more steps not shown: "
-            f"--step-range {tok(steps[MAX_ALL_STEPS].get('num'), 20)}-"
+            f"--step-range {tok(steps[MAX_ALL_STEPS].get('num'), 20)}-{last}"
         )
     if not verbose:
         return

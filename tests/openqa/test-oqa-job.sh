@@ -443,6 +443,8 @@ check "--step-range A-: the next 300 rows from A, then the rest again" "301 600|
 actual=$(long_steps --step-range 591-605)
 check "--step-range A-B: steps A to B only, no cut marker" "15 591 605 0" \
 	"$(grep -c '^[0-9]' <<<"$actual") $(grep '^[0-9]' <<<"$actual" | sed -n '1p;$p' | cut -d' ' -f1 | xargs) $(grep -c '^\.\.\. ' <<<"$actual")"
+check "--step-range A-B longer than 300: the hint to the rest keeps B" "... 2 more steps not shown: --step-range 301-302" \
+	"$(long_steps --step-range 1-302 | grep '^\.\.\. ')"
 long_steps --step-range 9-3 >/dev/null
 check "--step-range with B before A is a usage error" 2 $?
 job 890 --module register_instance --step-range 1-2 >/dev/null 2>&1

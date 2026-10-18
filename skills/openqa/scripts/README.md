@@ -147,7 +147,7 @@ adds `hint: what changed since the last good run: oqa-history.py <url> --investi
 is a fixed subset); `-v` whole traces, ulog names, all settings of the scenario, longer
 comments. `--module NAME` alone keeps only that module's lines, whatever its result, and ends them with
 `+N of M steps not shown (--all-steps lists them)`. `--all-steps` lists at most 300 steps and ends a longer
-list with `... N more steps not shown: --step-range <next>-`; `--step-range A-B` (or `A-`) lists the steps
+list with `... N more steps not shown: --step-range <next>-` (`<next>-B` under `A-B`); `--step-range A-B` (or `A-`) lists the steps
 numbered A to B. `--before TIME` (ISO 8601, UTC unless it has an offset) reads the comments as they
 stood at TIME, as `oqa-history.py --before` does: a comment created later (`created=`, UTC to the second,
 is what is compared), or with no readable date, is hidden with its bugrefs, labels and flags, the review

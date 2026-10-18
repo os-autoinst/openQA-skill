@@ -91,7 +91,8 @@ def main():
     parser.add_argument(
         "path",
         help="the file's path as a stack frame names it, e.g. tests/console/foo.pm or "
-        "sle/lib/utils.pm; read from its lib/, tests/, products/ or data/ on",
+        "sle/lib/utils.pm; when it is no file of the repository, read from its lib/, "
+        "tests/, products/ or data/ on",
     )
     _oqa.add_common_args(parser)
     parser.add_argument(
@@ -112,8 +113,10 @@ def main():
         parser.error(
             "PATH must be a relative path in the repository, e.g. lib/utils.pm"
         )
+    # A frame from a checkout named after the distri, sle/lib/x.pm, is read from lib/ on; the
+    # path as given goes first, as t/data/x.yaml is a file of the repository itself.
     repo_path = _oqa.REPO_PATH.search(path)
-    path = repo_path.group(1) if repo_path else path
+    paths = [path, *([repo_path.group(1)] if repo_path and repo_path.start(1) else [])]
     if args.context is not None and args.line is None:
         parser.error("--context needs --line")
 
@@ -123,15 +126,19 @@ def main():
     raw = _oqa.Client(
         RAW_HOST, script="oqa-src", fixture_dir=args.fixture_dir, max_requests=3
     )
-    try:
-        body = raw.get_bytes(
-            f"/{owner}/{repo}/{commit}/{path}", max_bytes=MAX_BYTES + 1
-        )
-    except _oqa.NotFound:
+    for path in paths:
+        try:
+            body = raw.get_bytes(
+                f"/{owner}/{repo}/{commit}/{path}", max_bytes=MAX_BYTES + 1
+            )
+            break
+        except _oqa.NotFound:
+            continue
+    else:
         raise _oqa.OqaError(
-            f"{path} not found at {commit[:12]} of github.com/{owner}/{repo} "
+            f"{' or '.join(paths)} not found at {commit[:12]} of github.com/{owner}/{repo} "
             "(a private repository answers 404 too)"
-        ) from None
+        )
     if b"\0" in body[:8192]:
         raise _oqa.OqaError(f"{path} is a binary file, refusing to print it")
     cut = len(body) > MAX_BYTES

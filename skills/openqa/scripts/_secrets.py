@@ -268,14 +268,15 @@ RULES = (
         r"\1" + MARK.format("live-password"),
     ),
     # The code after -r or --regcode of a registration command, up to the end of that
-    # command: "rm -r" or "zypper -r" after a ";" is not one.
+    # command: "rm -r" or "zypper -r" after a ";" is not one. SUSEConnect --list-extensions
+    # prints "-r ADDITIONAL REGCODE", coloured on a terminal, where a code goes.
     (
         "regcode",
         re.compile(
             r"(?i)(\b(?:SUSEConnect|registercloudguest|transactional-update(?:\s+--?[a-z-]{1,30}){0,4}\s+register)\b"
             r"[^\n;&|]{0,200}?\s(?:(?-i:-r)|--regcode)(?:\s+|=)\\?['\"]?)"
             + _SLOT
-            + r"[^\s'\"\\;&|)]{6,}"
+            + r"(?!(?:\x1b\[[0-9;]{0,16}m)*ADDITIONAL REGCODE)[^\s'\"\\;&|)]{6,}"
         ),
         r"\1" + MARK.format("regcode"),
     ),

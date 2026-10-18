@@ -413,6 +413,8 @@ for line in "SUSEConnect -r $regcode" "SUSEConnect --regcode $regcode" "SUSEConn
 	check "a registration code goes, the rest of the line stays: ${line%%"$regcode"*}" \
 		"${line/"$regcode"/[REDACTED:regcode]}" "$actual"
 done
+keeps "SUSEConnect --list-extensions: the placeholder where a code goes, plain and coloured" \
+	'Activate with: SUSEConnect -p sle-module-live-patching/15.6/x86_64 -r ADDITIONAL REGCODE\nActivate with: SUSEConnect -p sle-ha/15.6/x86_64 -r \033[32m\033[1mADDITIONAL REGCODE\033[0m\n'
 for line in 'regcode=AbCd1234EfGh5678' '{"regcode": "AbCd1234EfGh5678"}'; do
 	hides "a registration code after its key: $line" "$line\n" AbCd1234EfGh5678
 done

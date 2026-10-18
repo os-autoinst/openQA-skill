@@ -16,6 +16,7 @@ frame, the first outside os-autoinst, instead of the trace.
 import argparse
 import bz2
 import calendar
+import contextlib
 import html
 import lzma
 import os
@@ -48,6 +49,8 @@ _RUNNER_FRAME = re.compile(r" called at (?:/usr/|\S*/(?:os-autoinst|perl5)/)")
 CUT_MARGIN = 2048  # longer than any credential a bounded redaction rule matches
 
 _FILE_NAME = re.compile(r"^(?:ulogs/)?[A-Za-z0-9_][A-Za-z0-9._+@=~#-]*$")
+SHOT_BYTES = 4 * 1024 * 1024
+_PNG = b"\x89PNG\r\n\x1a\n"
 # Anchored, so one backtracking pass: "\S+\Z" would be quadratic.
 _UP_TO_LAST_SPACE = re.compile(r".*\s", re.DOTALL)
 # Uploaded tar archives --members and --member may open (y2logs.tar.bz2, *.tar.xz, ...).
@@ -732,6 +735,56 @@ def missing(client, job_id, error):
     )
 
 
+def save_shot(client, job_id, name, out, limit):
+    """Save one step screenshot as <out>/<job>-<name>, never over an existing file; return
+    (path, size)."""
+    # A shot= link percent-encodes the "#" of a module loaded twice, and a "+".
+    name = name.replace("%23", "#").replace("%2B", "+")
+    if not (_oqa.SHOT_NAME.fullmatch(name) and name.endswith(".png")):
+        raise _oqa.OqaError(
+            f"not a screenshot name: {_oqa.clean(name)}; give the file name at the end of a "
+            "shot= or last_shot= link of oqa-job.py, e.g. boot-2.png"
+        )
+    if not os.path.isdir(out):
+        raise _oqa.OqaError(f"--out: not an existing directory: {_oqa.clean(out, 200)}")
+    try:
+        body = client.get_bytes(
+            f"/tests/{job_id}/images/{name}", max_bytes=limit + 1, accept="image/png"
+        )
+    except _oqa.NotFound:
+        raise _oqa.OqaError(
+            f"job {job_id} has no screenshot {name}; its names are on the shot= and "
+            "last_shot= links of oqa-job.py"
+        ) from None
+    if len(body) > limit:
+        raise _oqa.OqaError(
+            f"the screenshot is larger than {limit} bytes; nothing saved"
+        )
+    if not body.startswith(_PNG):
+        raise _oqa.OqaError("the answer is not a PNG image; nothing saved")
+    path = os.path.abspath(os.path.join(out, f"{job_id}-{name}"))
+    try:
+        # O_EXCL: an existing file, or a symlink planted there, is never written through.
+        handle = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+    except FileExistsError:
+        raise _oqa.OqaError(f"{_oqa.clean(path, 300)} exists; nothing saved") from None
+    except OSError as error:
+        raise _oqa.OqaError(
+            f"cannot create {_oqa.clean(path, 300)}: {_oqa.clean(error.strerror)}"
+        ) from None
+    try:
+        with os.fdopen(handle, "wb") as file:
+            file.write(body)
+    except OSError as error:
+        # A partial file would make every retry fail on O_EXCL.
+        with contextlib.suppress(OSError):
+            os.unlink(path)
+        raise _oqa.OqaError(
+            f"cannot write {_oqa.clean(path, 300)}: {_oqa.clean(error.strerror)}; nothing saved"
+        ) from None
+    return path, len(body)
+
+
 def list_files(client, job_id):
     """Names from the downloads tab; /details has them too but can be many MB."""
     body = client.get_bytes(
@@ -1390,6 +1443,13 @@ def main():
         help="list the members of the tar archive --file names (size, type, name); read in "
         "memory as a stream, never unpacked to disk",
     )
+    modes.add_argument(
+        "--shot",
+        metavar="NAME",
+        help="save the step screenshot NAME, the file name at the end of a shot= or last_shot= "
+        "link of oqa-job.py, as <job>-NAME in --out DIR and print its path; PNG only, at most "
+        f"{SHOT_BYTES} bytes (or --max-bytes), never over an existing file; not redacted",
+    )
     parser.add_argument(
         "--lines",
         type=line_range,
@@ -1402,6 +1462,12 @@ def main():
         metavar="PATH",
         help="with --grep, --tail, --errors, --around-module or --lines: read this "
         "regular-file member of the tar archive --file names (names from --members)",
+    )
+    parser.add_argument(
+        "--out",
+        metavar="DIR",
+        help="--shot: the existing directory to save the screenshot in; required, so nothing "
+        "is written unless asked",
     )
     parser.add_argument(
         "--compare",
@@ -1466,15 +1532,21 @@ def main():
     args.max_lines = args.max_lines or args.tail or MAX_LINES
     if args.max_line_chars is None:
         args.max_line_chars = GREP_LINE_CHARS if args.grep is not None else LINE_CHARS
-    others = (args.list, args.tail, args.errors, args.runtimes, args.members)
+    others = (args.list, args.tail, args.errors, args.runtimes, args.members, args.shot)
     narrowed = args.around_module is not None or args.lines is not None
     if narrowed and any(others):
         parser.error("--around-module and --lines go alone, together or with --grep")
     if not any(others) and args.grep is None and not narrowed:
         parser.error(
             "give one of --list, --tail, --grep, --errors, --around-module, --runtimes, "
-            "--members, --lines"
+            "--members, --lines, --shot"
         )
+    if (args.shot is None) != (args.out is None):
+        parser.error(
+            "--shot and --out go together: --out DIR is where the screenshot goes"
+        )
+    if args.shot is not None and args.file != DEFAULT_FILE:
+        parser.error("--shot reads the job's screenshots; drop --file")
     if args.compare is not None and not args.runtimes:
         parser.error("--compare needs --runtimes")
     if args.runtimes and args.file != DEFAULT_FILE:
@@ -1507,6 +1579,17 @@ def main():
 
 def show(client, args, job_id, head, pattern):
     """Print what the parsed arguments ask for; return the exit status."""
+    if args.shot is not None:
+        limit = min(args.max_bytes, SHOT_BYTES)
+        path, size = save_shot(client, job_id, args.shot, args.out, limit)
+        print(f"{head} mode=shot")
+        print(f"saved={_oqa.tok(path, 300)} bytes={size}")
+        print(
+            "note: not redacted; a screenshot can show a secret "
+            '-> references/redaction.md "What it is not"'
+        )
+        print(f"requests: {client.requests}")
+        return 0
     if args.list:
         results, uploads = list_files(client, job_id)
         print(f"{head} mode=list")

@@ -23,7 +23,7 @@ One line per script, generated from the parsers: do not edit it by hand. What a 
 - `oqa-comment-lint.py [FILE] [--text TEXT] [--private-suffix SUFFIX]...`; exit 1: at least one warning
 - `oqa-history.py JOB [--previous N] [--before TIME] [--workers] [--investigation] [--max-items N] [--exit-code] [--verbose]`
 - `oqa-job.py JOB [--settings REGEX] [--steps N] [--module NAME] [--all-steps] [--step-range A-B] [--before TIME] [--exit-code] [--verbose]`
-- `oqa-log.py JOB [--file NAME] [--list | --tail N | --grep REGEX | --errors | --runtimes | --members] [--around-module MODULE] [--lines A-B] [--member PATH] [--compare JOB] [--context N] [--max-matches N] [--ignore-case] [--max-lines N] [--max-line-chars N] [--max-bytes BYTES] [--verbose] [--exit-code]`
+- `oqa-log.py JOB [--file NAME] [--list | --tail N | --grep REGEX | --errors | --runtimes | --members | --shot NAME] [--around-module MODULE] [--lines A-B] [--member PATH] [--out DIR] [--compare JOB] [--context N] [--max-matches N] [--ignore-case] [--max-lines N] [--max-line-chars N] [--max-bytes BYTES] [--verbose] [--exit-code]`
 - `oqa-ref.py REF [--body] [--files] [--notes N]`
 - `oqa-src.py JOB PATH [--line N] [--context K]`
 - `oqa-sweep.py [--group ID]... [--build BUILD] [--todo] [--include-softfailed] [--test REGEX] [--before TIME] [--limit N] [--no-llm] [--passed] [--module NAME] [--groups] [--match REGEX] [--uses-schedule PATH] [--vr-build LABEL] [--test-git-hash SHA] [--exit-code]`
@@ -231,6 +231,7 @@ calls cost less: one `--grep` with an alternation and `--context`, or `--around-
     oqa-log.py JOB --around-module M --lines A-B    # that part of the module, as --around-module shows it
     oqa-log.py JOB --runtimes [--compare JOB]
     oqa-log.py JOB --file ulogs/<name>.tar.xz (--members | --member PATH --grep REGEX|--tail N|--errors)
+    oqa-log.py JOB --shot NAME --out DIR    # save one step screenshot, print its path
 
 `--file` (`autoinst-log.txt`; uploaded logs: `ulogs/<name>`), `--context` (2), `-i`; `-v` full line prefix,
 whole traces, console plumbing and screen polling lines, and it lifts none of the caps:
@@ -335,6 +336,15 @@ data that ends early, and stops once the archive expands beyond 8 x `--max-bytes
 at `--max-bytes`; links, directories, devices and sparse files are listed but never read. Typical archives:
 `<module>-problem_detection_logs.tar.xz` (journal errors, zypper and audit logs), `-y2logs.tar.bz2`,
 `-solverTestCase.tar.bz2`, `-sysconfig.tar.gz`.
+
+`--shot NAME --out DIR` saves one step screenshot for viewing: NAME is the file name at the end of a
+`shot=` or `last_shot=` link of oqa-job.py (`%23` read as `#`), one GET of `/tests/<id>/images/<NAME>`
+with `Accept: image/png` and no `Referer`. It is written as `DIR/<job>-<NAME>`, mode 0600, and its absolute
+path printed (`saved=<path> bytes=N`); `--out` is required, so nothing is written unless asked, and must be
+an existing directory. Refused, exit 2 and nothing written: an existing file or link at that path (never
+overwritten), an answer that does not start with the PNG signature (an HTML page for a purged job), one
+over 4 MiB (or `--max-bytes` when smaller). An image is not redacted and can show a secret on screen ->
+references/redaction.md "What it is not".
 
 `--runtimes` reads `autoinst-log.txt` only: seconds per module run from `||| finished <module> <category>
 (runtime: <n> s)`, hooks included (os-autoinst names a repeated load `<module>#1`; a name logged twice gets

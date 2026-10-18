@@ -31,7 +31,7 @@ Fetching (every call is one GET, counted against the per-run request cap):
         first line may be cut.
     client.get_bytes(path, params=None, *, max_bytes=256 KiB, accept="text/plain") -> bytes
         the first max_bytes of the body, undecoded; accept is one of
-        text/plain, text/html, application/json.
+        text/plain, text/html, application/json, image/png.
     client.get_range(path, params=None, *, start=0, max_bytes=256 KiB)
         -> (bytes, total, ranged): bytes start..start+max_bytes-1 of a file.
         total is the file size from Content-Range. ranged=False: the server
@@ -92,6 +92,7 @@ Output (all third-party text must go through one of these or sanitize/fence):
         outside os-autoinst, arguments dropped, or None; sanitise it like any other text
     REPO_PATH: group(1) is a frame's file path from the test distribution's lib/, tests/, products/
         or data/ on
+    SHOT_NAME: a step's screenshot file name that may go into a URL path and a file name (fullmatch)
     table(rows, headers, limit=60, max_rows=200, drop_empty=False) -> aligned
         plain-text table, every cell clean()ed, rows beyond max_rows only
         counted; drop_empty leaves out columns that are "-" in every row
@@ -147,6 +148,7 @@ __all__ = [
     "REPO_PATH",
     "RESULTS",
     "RESULT_GROUPS",
+    "SHOT_NAME",
     "Client",
     "NotFound",
     "OqaError",
@@ -179,7 +181,7 @@ DEFAULT_HOST = "https://openqa.opensuse.org"
 HOST_ALIASES = {"o3": DEFAULT_HOST}
 LOCAL_HOSTS = ("localhost", "127.0.0.1", "::1")
 
-ACCEPTED = ("text/plain", "text/html", "application/json")
+ACCEPTED = ("text/plain", "text/html", "application/json", "image/png")
 MAX_JSON_BYTES = 8 * 1024 * 1024
 MAX_TEXT_BYTES = 256 * 1024
 MAX_URL_CHARS = 8192
@@ -693,6 +695,7 @@ _FRAME = re.compile(r"^\s*([\w:]+)(?:\(.*\))?(?: called)? at (\S+) line (\d+)")
 # A checkout in a directory named after the distri gives "sle/lib/x.pm": the repository path
 # starts at the first of a test distribution's top-level directories.
 REPO_PATH = re.compile(r"(?:^|/)((?:lib|tests|products|data)/.+)")
+SHOT_NAME = re.compile(r"[\w#+-][\w.#+-]{0,120}", re.ASCII)
 
 
 def distri_frame(lines):

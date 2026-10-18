@@ -182,7 +182,6 @@ HOOK_NOTE = "(The hook script will not be executed.)"
 HOOK_START = "Post-fail"
 HOOK_DIED = "Failed\n(post)"
 
-SHOT_NAME = re.compile(r"[\w#+-][\w.#+-]{0,120}", re.ASCII)
 HEADING = re.compile(r"\s*(?:#{1,6}\s.*|\*\*[^*]+\*\*:?|__[^_]+__:?)\s*")
 FORCE_RESULT = re.compile(r"force_result:([a-z_]+)")
 MAX_ALL_STEPS = 300
@@ -722,7 +721,7 @@ def step_kind(step):
 def shot_name(step):
     """The step's screenshot when it is a plain file name, else None: it goes into a URL."""
     name = step.get("screenshot")
-    return name if isinstance(name, str) and SHOT_NAME.fullmatch(name) else None
+    return name if isinstance(name, str) and _oqa.SHOT_NAME.fullmatch(name) else None
 
 
 def step_shot(steps, step):

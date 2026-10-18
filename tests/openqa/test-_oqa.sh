@@ -60,7 +60,7 @@ check "pr-queue.py: one subprocess call, gh with an argument list, the environme
 	"$(grep -c 'subprocess\.run(' "$scripts/pr-queue.py") $(grep -A1 'subprocess\.run(' "$scripts/pr-queue.py" | grep -c '\["gh", \*args\],') $(grep -c 'os\.environ' "$scripts/pr-queue.py") $(grep -A1 '^def gh(' "$scripts/pr-queue.py" | grep -c '^    env = {.* os\.environ\.items() ') $(grep -A6 'subprocess\.run(' "$scripts/pr-queue.py" | grep -c 'env={\*\*env, ') $(grep -Ec 'subprocess\.(Popen|call|check_|getoutput|getstatusoutput)|shell[[:space:]]*=|executable|preexec_fn|os\.system|os\.popen|os\.exec|os\.spawn|posix_spawn|os\.fork|pty\.|multiprocessing|urllib|http\.client|from http import|\bsocket\b|urlopen|getenv|expanduser|netrc|pickle|\beval\(|\bexec\(' "$scripts/pr-queue.py")"
 check "no script reaches into a private name of _oqa or _sanitize" "" \
 	"$(grep -En '(_oqa|_sanitize|client)\._[a-z]|from _(oqa|sanitize) import .*\b_[a-z]' "$scripts"/*.py | grep -v '/_oqa\.py:')"
-check "the Accept header is one of three constants" "OqaError unsupported Accept value: text/plain X-Evil: 1" \
+check "the Accept header is one of four constants" "OqaError unsupported Accept value: text/plain X-Evil: 1" \
 	"$(py '
 import _oqa
 try:

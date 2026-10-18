@@ -111,8 +111,6 @@ LLM_BY_CHARS = 40
 LLM_CLUSTERS_SHOWN = 10
 # Requests kept back per build entry still to be listed: overview, a comments read.
 ENTRY_RESERVE = 2
-# Per group still to be listed: build results and its first entry.
-GROUP_RESERVE = 1 + ENTRY_RESERVE
 CLONE_SOURCES = ("passed", "softfailed")
 # --test that openQA can filter itself: its test= is an exact match.
 LITERAL_TEST = re.compile(r"\^([A-Za-z0-9_-]+)\$")
@@ -621,8 +619,9 @@ def llm_clusters(jobs):
     )
 
 
-def sweep(client, group, args, results, reserve=0):
-    name, entries = pick_builds(client, group, args.build)
+def sweep(client, group, args, results, reserve=0, picked=None):
+    """picked: (name, entries) of pick_builds() when already read."""
+    name, entries = picked or pick_builds(client, group, args.build)
     listed = 0
     for index, entry in enumerate(entries):
         mode, note = MODE_OVERVIEW, None
@@ -1186,11 +1185,16 @@ def main():
     elif args.passed:
         found = sum(sweep_passed(client, group, args) for group in args.group)
     else:
-        left = len(args.group)
+        # Every group's builds first: a build exists once per version, so a group still to
+        # come can need more than one entry's requests.
+        picked = [
+            (group, pick_builds(client, group, args.build)) for group in args.group
+        ]
+        left = sum(len(entries) for _, (_, entries) in picked)
         found = 0
-        for group in args.group:
-            left -= 1
-            found += sweep(client, group, args, results, left * GROUP_RESERVE)
+        for group, builds in picked:
+            left -= len(builds[1])
+            found += sweep(client, group, args, results, left * ENTRY_RESERVE, builds)
         found = not found
     print(f"requests: {client.requests}")
     return 1 if args.exit_code and not found else 0

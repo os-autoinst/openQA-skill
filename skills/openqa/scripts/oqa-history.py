@@ -31,7 +31,8 @@ Schema/ResultSet/Comments.pm "comment_data_for_jobs".
 
 Route: GET /tests/<id>/downloads_ajax, /tests/<id>/file/<name> and
 /tests/<id>/file/details-<module>.json (Controller/Test.pm "downloads", Controller/File.pm
-"test_file"): uploaded package lists, and the steps of a module with their text.
+"test_file"): uploaded package lists, else the head of serial_terminal.txt, and the steps
+of a module with their text.
 """
 
 import argparse
@@ -67,6 +68,10 @@ VERSION_SOURCES = (
     re.compile(r"(?:^|-)version\.log$"),
     re.compile(r"(?:^|-)kernel-pkg\.txt$"),
 )
+# Without such an upload: the head of the serial terminal, where xfstests prints its
+# version.log; within the first 11 kB on o3.
+SERIAL_TERMINAL = "serial_terminal.txt"
+SERIAL_HEAD_BYTES = 256 << 10
 KERNEL_PACKAGE = re.compile(
     r"kernel-(?:default|rt|64kb|azure|kvmsmall|vanilla|pae|longterm|zfcpdump|lpae)(?:-base)?"
 )
@@ -816,7 +821,7 @@ def uploads(client, job_id):
 
 
 def version_file(names, prefer=None):
-    if prefer in (names or ()):
+    if prefer in (names or ()) and prefer != SERIAL_TERMINAL:
         return prefer
     for pattern in VERSION_SOURCES:
         for name in names or ():
@@ -856,12 +861,31 @@ def package_versions(text):
     return found
 
 
+def serial_versions(client, job_id, names):
+    """(SERIAL_TERMINAL, {package: versions}) from the head of the job's serial terminal,
+    (None, None) when it has none or no package lines there."""
+    if SERIAL_TERMINAL not in (names or ()):
+        return None, None
+    try:
+        body = client.get_range(
+            f"/tests/{job_id}/file/{SERIAL_TERMINAL}", max_bytes=SERIAL_HEAD_BYTES
+        )[0]
+    except _oqa.OqaError:
+        return None, None
+    text = body.decode("utf-8", "replace")
+    if len(body) >= SERIAL_HEAD_BYTES:
+        # A line cut at the limit could read as a shorter version.
+        text = text.rpartition("\n")[0]
+    found = package_versions(text)
+    return (SERIAL_TERMINAL, found) if found else (None, None)
+
+
 def job_versions(client, job_id, names, prefer=None):
-    """(file name, {package: versions}) of one job from the names of its uploads, (None, None)
-    without a package list."""
+    """(file name, {package: versions}) of one job from the names of its uploads, else from
+    its serial terminal; (None, None) without either."""
     name = version_file(names, prefer)
     if not name:
-        return None, None
+        return serial_versions(client, job_id, names)
     try:
         text = client.get_text(f"/tests/{job_id}/file/{name}", max_bytes=LIST_BYTES)
     except _oqa.OqaError:
@@ -875,8 +899,12 @@ def versions_line(client, job_id, good_id, good_files):
     good_name, old = job_versions(client, good_id, good_files, name)
     if not new and not old:
         return "  versions: not found"
-    # rpm -qi of the kernel cannot show a suite: there a missing one is unknown, not absent.
-    kernel_only = [bool(f and VERSION_SOURCES[-1].search(f)) for f in (good_name, name)]
+    # rpm -qi of the kernel cannot show a suite, a serial terminal need not: there a missing
+    # one is unknown, not absent.
+    kernel_only = [
+        bool(f and (VERSION_SOURCES[-1].search(f) or f == SERIAL_TERMINAL))
+        for f in (good_name, name)
+    ]
     items = []
     packages = {*(new or {}), *(old or {})}
     for package in sorted(packages, key=lambda n: (n[:7] != "kernel-", n)):

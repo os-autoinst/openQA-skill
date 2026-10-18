@@ -450,11 +450,13 @@ runs' module lists (`not_run`: skipped, not reached after a fatal module, or not
 older run(s)`: no ok run among them); no line without those lists. `versions (last_good <id> -> this job, from <file>)` compares the kernel
 (`kernel-<flavor>[-base]`) and the test suites installed as packages (ltp, ltp-stable, blktests, xfstests,
 kirk) as `<package> <old> -> <new>` or `<package> <version> (unchanged)` (`-`: not installed, `?`: no list,
-or a suite in a kernel-only list; `suites ?` closes a line read only from such lists; `(release only)`: a suite
-rebuilt at the same version),
+or a suite in a kernel-only list or a serial terminal; `suites ?` closes a line read only from such sources;
+`(release only)`: a suite rebuilt at the same version),
 read from one file each job uploaded: `*rpm-qa.txt` (LTP's `log_versions`), else `*version.log` (xfstests),
 else `*kernel-pkg.txt` (`rpm -qi`), found in the downloads tab, `<module>#1-*` of a module loaded twice
-included; four requests. `versions: not found`: neither job uploaded one. A suite built from Git is not there (its `git clone`, LTP's `LTP version` step).
+included; four requests. A job without one is read in the first 256 KiB of its `serial_terminal.txt`, where
+xfstests prints its `version.log` and `rpm -qi` of the kernel (`from serial_terminal.txt`): one more request
+each, six at most. `versions: not found`: neither job has one. A suite built from Git is not there (its `git clone`, LTP's `LTP version` step).
 `os-autoinst (last_good <id> -> this job): <old> -> <new>` (or `<version> (unchanged)`) is the worker's
 os-autoinst, from the `Current version is` line isotovideo logs in the setup notes, read in the first 64 kB of
 each `autoinst-log.txt`: two requests, one when last good's logs are gone; `?`: not found there.

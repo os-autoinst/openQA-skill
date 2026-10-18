@@ -160,6 +160,32 @@ contains "--errors: an asset a worker without cache could not find is a setup hi
 actual=$(log 4272 --errors --max-lines 9)
 check "--errors: info lines only fill what the error lines leave of --max-lines" "0 1" \
 	"$(grep -c '\[info' <<<"$actual") $(grep -c '^22 \[result\]' <<<"$actual")"
+# 9001: a module that died, then one with a known issue and more hits; 9002: the backend
+# dies after the last module, which recorded a soft failure and finished.
+python3 - "$tmp" <<'EOF'
+import sys
+def write(job, rows):
+    with open(f"{sys.argv[1]}/tests_{job}_file_autoinst-log.txt", "w") as out:
+        for n, text in enumerate(rows):
+            out.write(f"[2030-01-01T10:00:{n:02d}.000000Z] [debug] [pid:1] {text}\n")
+write(9001, ["||| starting broken tests/console/broken.pm",
+             *[f"command 'false {n}' failed at tests/console/broken.pm line {n}." for n in range(3)],
+             "::: basetest::runtest: # Test died: command 'false 9' failed at tests/console/broken.pm line 9.",
+             "||| finished broken console (runtime: 5 s)", "||| starting flaky tests/console/flaky.pm",
+             '<<< testapi::record_soft_failure(reason="bsc#1")', *[f"Got serial hard failure soft {n}" for n in range(3)],
+             "||| finished flaky console (runtime: 5 s)"])
+write(9002, ["||| starting check tests/console/check.pm", '<<< testapi::record_soft_failure(reason="bsc#1 known")',
+             "||| finished check console (runtime: 1 s)", "::: OpenQA::Qemu::Proc::save_state: QEMU exited unexpectedly",
+             "Result: died"])
+EOF
+actual=$(python3 "$src" --fixture-dir "$tmp" 9001 --errors --max-lines 5 2>&1)
+check "--errors: under --max-lines the softfailed hits go first, the others stay, a note says so" \
+	"2 3 4 5 9|note: 2 softfailed or info lines left out (--max-lines)" \
+	"$(sed -n 's/^ *\([0-9]*\) \[.*/\1/p' <<<"$actual" | paste -sd ' ')|$(grep '^note: 2 ' <<<"$actual")"
+actual=$(python3 "$src" --fixture-dir "$tmp" 9002 --errors 2>&1)
+check "--errors: a softfailed module's span ends at its own finished line, a backend death after it is no softfailed hit" \
+	"4 [backend] 10:00:03 ::: OpenQA::Qemu::Proc::save_state: QEMU exited unexpectedly|0" \
+	"$(grep '^4 ' <<<"$actual")|$(grep -c 'softfailed\]' <<<"$actual")"
 
 # --- hostile content ------------------------------------------------------------
 actual=$(log 4242 --around-module zypper_in)

@@ -276,8 +276,9 @@ too; `--file serial0.txt --errors` adds the signatures of `autoinst-log.txt`, wh
 block keeps at most `--max-lines` lines and per label its first 3 hits, but every `# Test died` line, as
 non-fatal hits come first, and the last hit of `died`, `module`, `signal`, `stop` and `result`, how the run
 ended. Hits inside a module with a known issue (it recorded a soft failure and neither died nor failed, or
-forced one over its failure) come after the others, marked `softfailed`, and only fill what those leave of
-the 3.
+forced one over its failure), from its start to its own `finished` line, come after the others, marked
+`softfailed`, and only fill what those leave of the 3 and of `--max-lines` (`note: N softfailed or info lines
+left out`).
 After the error lines, in what they leave of `--max-lines`, come at most 3 `[info @<module>]` lines (`info:N`
 in the header): a module's last `record_info` call before its `# Test died` or `test <module> failed` line,
 where tests log what they found (a solver `Conflict`, a check's `result="fail"`). A module's other

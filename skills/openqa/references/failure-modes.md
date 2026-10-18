@@ -36,7 +36,7 @@ Commands reach the SUT as typed keys; `script_run` and its kin then wait on seri
 
 - **`typing command '<cmd>' timed out`:** on a serial terminal os-autoinst types the command and its marker, waits for their echo and only then presses Enter; the echo did not come back as typed (a narrow terminal scrolling the line, lost or extra characters, a lost console). Not the command's own failure: `serial_terminal.txt` shows what arrived and whether it ran at all (`check_typing_cmd => 0` only warns, then runs it). In many jobs at once: the framework side, as below.
 - **Input lost or garbled** (a cut command, `command not found` with a cut name, stray characters): keys sent before the target was ready (after a reset, a logout, an application quit), or a terminal's answerback bytes typed into the shell. TEST (timing), unless the product changed the timing.
-- **Done-marker missing or mismatched while the command visibly ran:** the test framework side, not the product. Compare the `os-autoinst` version with last good (`oqa-history.py --investigation`); a regression there is INFRA (tools) -> job-triage.md "Decision tree"
+- **Done-marker missing or mismatched while the command visibly ran:** the test framework side, not the product. Compare the `os-autoinst` version with last good (`oqa-history.py --investigation`); a regression there is INFRA (tools) -> job-triage.md "Decision tree"; unchanged: what cut into the line (kernel or service messages on the console, -> "Command failures")
 
 ## Log signatures
 

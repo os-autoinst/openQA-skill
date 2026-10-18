@@ -274,6 +274,12 @@ PY
 run --fixture-dir "$work/vars" --job "$cloud" --test-hash "$sha" --skip-chained-deps
 check "crossed: PUBLIC_CLOUD=0 and an empty provider are no public-cloud job" "0 0" \
 	"$rc $(grep -c 'public-cloud' <<<"$out")"
+run --fixture-dir "$vars" --job "$cloud" --set QEMURAM=4096 --skip-chained-deps
+check "settings only: a public-cloud job without its upload parent warns too" "1 1 0" \
+	"$rc $(grep -cxF "$pc_hazard" <<<"$out") $(grep -c 'EC2\|download\.example\|jobtoken' <<<"$out$err")"
+run --fixture-dir "$vars" --job https://openqa.example.org/tests/77 --set QEMURAM=4096 --skip-chained-deps
+check "settings only: a vars.json that cannot be read is a note, not a refusal" "0 1" \
+	"$rc $(grep -c '^note: public-cloud image not checked: --skip-chained-deps: vars.json of job 77: no saved response' <<<"$out")"
 
 # --- dependency and host flags ---
 run --job "$lab" "${fork[@]}"

@@ -660,8 +660,9 @@ takes `--pr` or `--fork/--branch`.
 
 A public-cloud job cloned without its chained parents (`--skip-chained-deps`, and always by the `--pr`
 helper) looks up the cloud image its upload parent published under the job's settings; the cloud deletes
-such images after a while, and the clone then fails for a reason unrelated to the change. Only the crossed
-run reads `vars.json`, so only it prints that `hazard:`; for the other forms check the job's settings
+such images after a while, and the clone then fails for a reason unrelated to the change. The crossed run
+and a settings-only clone with `--skip-chained-deps` read `vars.json` (the latter one GET, a `note:` when it
+cannot be read), so only they print that `hazard:`; for the fork and PR forms check the job's settings
 yourself, and when the image may be gone clone the parent too (no `--skip-chained-deps`, so not `--pr`).
 Fork unknown: literal `--fork '<user>' --branch '<branch>'`; a `note:` says to replace them. An argument
 that carries a credential is refused (exit 2) with the rule's name, never the value, and so is a `--set`

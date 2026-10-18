@@ -3,8 +3,9 @@
 # Build (never run) the clone command for an openQA verification run, with the known hazards handled.
 """Prints one command line, then at most 9 short lines about what it does.
 
-Nothing is executed. Only --test-hash uses the network: one GET of the job's vars.json
-through _oqa.py, from the host of the job URL. The printed command is for review.
+Nothing is executed. Only --test-hash, and a settings-only clone with --skip-chained-deps,
+use the network: one GET of the job's vars.json through _oqa.py, from the host of the job
+URL. The printed command is for review.
 """
 
 import argparse
@@ -199,11 +200,9 @@ def github_casedir(user, repo, ref):
     return f"https://github.com/{user}/{repo}.git#{ref}"
 
 
-def test_git_url(base_url, job_id, fixture_dir):
-    """(TEST_GIT_URL, whether it is a public-cloud job) from the job's vars.json, read from
-    the host of the job URL. The file also holds the job's token: nothing else of it is
-    kept, and no value is echoed."""
-    where = f"--test-hash: vars.json of job {job_id}"
+def job_vars(base_url, job_id, fixture_dir, where):
+    """The job's vars.json, read from the host of the job URL. The file also holds the job's
+    token: callers keep only what they need and echo no value."""
     try:
         client = _oqa.Client(
             base_url, script="vr-clone-cmd", fixture_dir=fixture_dir, max_requests=1
@@ -211,7 +210,18 @@ def test_git_url(base_url, job_id, fixture_dir):
         data = client.get_json(f"/tests/{job_id}/file/vars.json", max_bytes=VARS_BYTES)
     except _oqa.OqaError as error:
         raise UsageError(f"{where}: {error}") from None
-    url = data.get("TEST_GIT_URL") if isinstance(data, dict) else None
+    return data if isinstance(data, dict) else {}
+
+
+def public_cloud_job(data):
+    return any(str(data.get(key) or "0") != "0" for key in PUBLIC_CLOUD_KEYS)
+
+
+def test_git_url(base_url, job_id, fixture_dir):
+    """(TEST_GIT_URL, whether it is a public-cloud job) from the job's vars.json."""
+    where = f"--test-hash: vars.json of job {job_id}"
+    data = job_vars(base_url, job_id, fixture_dir, where)
+    url = data.get("TEST_GIT_URL")
     if not isinstance(url, str) or not url:
         raise UsageError(f"{where} has no TEST_GIT_URL")
     try:
@@ -229,7 +239,7 @@ def test_git_url(base_url, job_id, fixture_dir):
         raise UsageError(
             f"{where}: TEST_GIT_URL is not a plain http(s) Git URL (not echoed)"
         )
-    return url, any(str(data.get(key) or "0") != "0" for key in PUBLIC_CLOUD_KEYS)
+    return url, public_cloud_job(data)
 
 
 def build(args):
@@ -325,6 +335,13 @@ def build(args):
                 keys += ["NEEDLES_DIR"] * bool(args.needles_fork)
                 label = "set-" + "-".join(dict.fromkeys(keys))
                 casedir = None
+                if args.skip_chained_deps:
+                    where = f"--skip-chained-deps: vars.json of job {job_id}"
+                    try:
+                        data = job_vars(base_url, job_id, args.fixture_dir, where)
+                        public_cloud = public_cloud_job(data)
+                    except UsageError as error:
+                        notes.append(f"public-cloud image not checked: {error}")
             label = args.label or label
             suffix, what = "-" + label, "label"
         extra += [s["arg"] for s in settings]

@@ -261,7 +261,8 @@ after the die message, with the `--around-module M --lines A-B` that reads them.
 `--errors` on `autoinst-log.txt` (the default `--file`, no `--member`) also reads `serial_terminal.txt` when
 the job has one, as suite verdicts and kernel splats are there, and prints its hits after the first block,
 under their own header line and fence: `file=serial_terminal.txt mode=errors hits=suite:2,kernel:1
-lines=N`; `hits=-` when it holds none, no line when the job has no such file. `[suite]` marks `TFAIL`,
+lines=N`; `hits=-` when it holds none, no line when the job has no such file; each serial log so added is
+read up to 4 MiB (`warning: ... (--file <name> --errors reads up to --max-bytes)`). `[suite]` marks `TFAIL`,
 `TBROK`, a TAP `not ok`, `Failures:`, a blktests `<group>/<nnn> ... [failed]`; these tool labels apply in
 `autoinst-log.txt` too: `[pytest]` a line starting `FAILED ` or `E   ` and a summary `=== N failed`;
 `[k8s]` a line starting `error: ` (kubectl), `Error from server`, helm's `Error: INSTALLATION FAILED:` or

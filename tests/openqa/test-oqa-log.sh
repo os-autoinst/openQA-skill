@@ -195,6 +195,20 @@ printf '[2030-01-01T10:00:00.000000Z] [debug] [pid:1] ||| starting m tests/m.pm\
 actual=$(python3 "$src" --fixture-dir "$tmp" 9003 --errors --file serial0.txt 2>&1)
 check "--errors: serial0.txt soft lockup, kernel BUG at and a hung task are kernel hits; a program's look-alike is none" \
 	"mode=errors hits=kernel:6 lines=7|1 2 3" "$(grep -o 'mode=.*' <<<"$actual" | head -n 1)|$(sed -n 's/^\([0-9]*\) \[kernel\] .*/\1/p' <<<"$actual" | paste -sd ' ')"
+# A 5 MiB serial0.txt with a kernel line in its first MiB and one past 4 MiB.
+python3 - "$tmp" <<'EOF'
+import sys
+with open(f"{sys.argv[1]}/tests_9004_file_serial0.txt", "w") as out:
+    out.write("[    1.0] BUG: soft lockup - CPU#0 stuck for 22s!\n" + ("x" * 1023 + "\n") * 5120)
+    out.write("[  900.0] Kernel panic - not syncing: Fatal exception\n")
+EOF
+cp "$tmp/tests_9003_file_autoinst-log.txt" "$tmp/tests_9004_file_autoinst-log.txt"
+actual=$(python3 "$src" --fixture-dir "$tmp" 9004 --errors 2>&1)
+check "--errors: the serial logs it adds are read up to 4 MiB, a warning says how to read more" \
+	"file=serial0.txt mode=errors hits=kernel:1 lines=4096|warning: only the first 4194304 bytes of it were read (--file serial0.txt --errors reads up to --max-bytes)" \
+	"$(grep -E '^(file=serial0|warning: only)' <<<"$actual" | paste -sd'|')"
+check "--errors on serial0.txt itself reads up to --max-bytes" "mode=errors hits=kernel:2 lines=5122" \
+	"$(python3 "$src" --fixture-dir "$tmp" 9004 --errors --file serial0.txt 2>&1 | grep -o 'mode=.*' | head -n 1)"
 
 # --- hostile content ------------------------------------------------------------
 actual=$(log 4242 --around-module zypper_in)

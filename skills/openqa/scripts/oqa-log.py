@@ -32,6 +32,8 @@ from _sanitize import ArgumentParser
 
 DEFAULT_FILE = "autoinst-log.txt"
 MAX_FETCH = 16 * 1024 * 1024
+# What --errors on autoinst-log.txt reads of each serial log it adds, two more downloads.
+SERIAL_FETCH = 4 * 1024 * 1024
 MATCH_WIDTH = 4000
 FALLBACK_TAIL = 20
 MAX_LINES = 60
@@ -1247,8 +1249,9 @@ def runtime_rows(runs, other, last, other_last, cut=(False, False)):
 def serial_errors(client, job_id, args, name, signatures):
     """--errors over a serial log: (lines to print, any hit?); nothing when the job has none."""
     path = file_path(job_id, name)
+    limit = min(args.max_bytes, SERIAL_FETCH)
     try:
-        lines, truncated = fetch_all(client, path, args.max_bytes)
+        lines, truncated = fetch_all(client, path, limit)
     except _oqa.NotFound:
         return [], False
     except _oqa.OqaError as error:
@@ -1258,9 +1261,12 @@ def serial_errors(client, job_id, args, name, signatures):
     found = ",".join(f"{label}:{count}" for label, count in counts.items())
     out = [f"file={name} mode=errors hits={found or '-'} lines={len(lines)}"]
     if truncated:
-        out.append(
-            f"warning: only the first {args.max_bytes} bytes of it were read (--max-bytes)"
+        lift = (
+            "(--max-bytes)"
+            if limit == args.max_bytes
+            else f"(--file {name} --errors reads up to --max-bytes)"
         )
+        out.append(f"warning: only the first {limit} bytes of it were read {lift}")
     if not counts:
         return out, False
     entries, dropped = cap_entries(entries, args.max_lines)

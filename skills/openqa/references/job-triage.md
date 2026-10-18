@@ -128,7 +128,7 @@ The comment `Investigate retry job *<name>*: t#<id>` ends with one verdict (ok =
 Quote verbatim and minimally, without credentials.
 
 1. **Step deep link** (-> openqa-model.md "Step deep link"; module `name` verbatim, a repeated one has a suffix such as `#1`), scenario, `BUILD`, worker host.
-2. **Failing assertion:** the `# Test died:` line and its first stack frame, read at `TEST_GIT_HASH`: `git show <hash>:<file>`, not master.
+2. **Failing assertion:** the `# Test died:` line and its first stack frame, read at `TEST_GIT_HASH`: `git show <hash>:<file>` or `oqa-src.py <job> <file> --line <n>`, not master.
 3. **Product evidence:** failing command, exit code, output; short serial or journal excerpt; for GUI the screenshot URL and what is wrong.
 4. **Regression window:** last good and first bad links with build ids; suspect package versions on both.
 5. **Reproduction rate:** "N of M runs on build X" with links; admit a single data point.

@@ -279,6 +279,23 @@ RULES = (
         ),
         r"\1" + MARK.format("regcode"),
     ),
+    # A template filled in place, as in sed 's/##Registration-Code##/<code>/g': the pattern
+    # is a marker that names a credential, so the value is keyed by that name. A replacement
+    # naming one itself is configuration.
+    (
+        "keyed-assignment",
+        re.compile(
+            r"((?<![^\s'\";{])s([/|#@,:%!])"
+            r"(?=(?:(?!\2)[\\#{}@%$<>]){0,8}[A-Za-z0-9_-]{0,64}?"
+            r"(?:(?i:PASSW|SECRET|TOKEN|REG(?:ISTRATION)?[_-]?CODE)|PASS(?![A-Za-z])))"
+            r"(?:(?!\2)[\\#{}@%$<>]){0,8}[A-Za-z0-9_-]{1,64}(?:(?!\2)[\\#{}@%$<>]){0,8}\2)"
+            + _SLOT
+            + r"(?!nots3cr3t\2)"
+            r"(?!(?:\\.|(?!\2)[^\s'\"\\]){0,256}?(?i:PASSW|SECRET|TOKEN|REG(?:ISTRATION)?[_-]?CODE))"
+            r"(?:\\.|(?!\2)[^\s'\"\\]){6,256}(?=\2)"
+        ),
+        r"\1" + MARK.format("keyed-assignment"),
+    ),
     (
         "registry-auth",
         re.compile(r'("auth"\s*:\s*")[A-Za-z0-9+/=]{16,}(")'),
@@ -376,13 +393,27 @@ RULES = (
 # `sanitize()` sees "hunter2", never "PASSWORD=hunter2", so this is the only rule that
 # can know an SCC_REGCODE value is secret.
 # JSON, Python and Perl forms too, where a string value is quoted and anything else is
-# code. The short names count in upper case only, and PASS before a colon only after
-# "_": "pass=12|skip=0" and "TPASS:" are test results, "ROOT_PASS:" is YAML.
-_KEYED = re.compile(
-    r"(?i)(?<![A-Z0-9_])([A-Z0-9_]{0,40}(?:PASSWORD|PASSWD|SECRET|TOKEN|APIKEY|API_KEY|ACCESS_KEY|PRIVATE_KEY|CREDENTIAL|"
+# code; JSON escaped into a string keeps a backslash before each quote. The short names
+# count in upper case only, and PASS before a colon only after "_": "pass=12|skip=0" and
+# "TPASS:" are test results, "ROOT_PASS:" is YAML.
+_KEYED_NAME = (
+    r"(?<![A-Z0-9_])([A-Z0-9_]{0,40}(?:PASSWORD|PASSWD|SECRET|TOKEN|APIKEY|API_KEY|ACCESS_KEY|PRIVATE_KEY|CREDENTIAL|"
     + _REGCODE_NAME
     + r"|(?-i:PWD|(?<![A-Z])PW(?![A-Z])|(?<=_)PASS(?![A-Z0-9_])|PASS(?![A-Z0-9_]|\s*:)))[A-Z0-9_]{0,40})"
-    r"((?:['\"]\s*(?:=>|[:=])|\s*=>)\s*(?=['\"])|\s+[:=]\s*|:\s*|=)(['\"]?)([^\s'\"]+)"
+)
+_KEYED = re.compile(
+    r"(?i)"
+    + _KEYED_NAME
+    + r"((?:\\?['\"]\s*(?:=>|[:=])|\s*=>)\s*(?=\\?['\"])|\s+[:=]\s*|:\s*|=)((?:\\?['\"])?)"
+    r"((?:[^\s'\"\\]|\\(?!['\"]))+)"
+)
+# An unquoted Perl value is a variable, a call or a constant far more often than a
+# literal: only letters and digits both, ended where a hash value ends, count.
+_KEYED_BARE = re.compile(
+    r"(?i)"
+    + _KEYED_NAME
+    + r"(\\?['\"]?\s*=>\s*)()(?=[A-Z_-]*[0-9])(?=[0-9_-]*[A-Z])([A-Z0-9_-]{8,256})"
+    r"(?=\s*(?:[,;)}\]]|$))"
 )
 
 # A marker in the SOURCE text is an attacker dressing a secret as already-redacted.
@@ -453,7 +484,8 @@ def redact(text):
                 line, hits = pattern.subn(replacement or MARK.format(name), line)
                 if hits:
                     found[name] += hits
-            line = _KEYED.sub(lambda m: _keyed_sub(m, found), line)
+            for keyed in (_KEYED, _KEYED_BARE):
+                line = keyed.sub(lambda m: _keyed_sub(m, found), line)
         for pattern in _SITE:
             line, hits = pattern.subn(MARK.format("site"), line)
             if hits:

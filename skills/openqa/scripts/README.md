@@ -15,7 +15,7 @@ left out** (no `clone chain` line = never restarted). API scripts start with `jo
 
 One line per script, generated from the parsers: do not edit it by hand. What a flag means: `python3 scripts/refsection.py scripts/README.md "<script>"`.
 
-- `--host HOST` on oqa-history.py, oqa-job.py, oqa-log.py, oqa-sweep.py
+- `--host HOST` on oqa-history.py, oqa-job.py, oqa-log.py, oqa-src.py, oqa-sweep.py
 - `check-module.py [FILE...] [--list-rules] [--disable IDS]...`; exit 1: findings
 - `check-schedule.py [--repo REPO] [--module DIR/NAME] [--strict] [--fallback] [--errors-only] [--all-conventions] [--max-findings N] [FILE...]`; exit 1: errors (with --strict: any finding; with --module: no reference found)
 - `needle-lint.py [--strict] [--errors-only] PATH...`; exit 1: errors (with --strict: any finding)
@@ -25,6 +25,7 @@ One line per script, generated from the parsers: do not edit it by hand. What a 
 - `oqa-job.py JOB [--settings REGEX] [--steps N] [--module NAME] [--all-steps] [--step-range A-B] [--before TIME] [--exit-code] [--verbose]`
 - `oqa-log.py JOB [--file NAME] [--list | --tail N | --grep REGEX | --errors | --runtimes | --members] [--around-module MODULE] [--lines A-B] [--member PATH] [--compare JOB] [--context N] [--max-matches N] [--ignore-case] [--max-lines N] [--max-line-chars N] [--max-bytes BYTES] [--verbose] [--exit-code]`
 - `oqa-ref.py REF [--body] [--files] [--notes N]`
+- `oqa-src.py JOB PATH [--line N] [--context K]`
 - `oqa-sweep.py [--group ID]... [--build BUILD] [--todo] [--include-softfailed] [--test REGEX] [--before TIME] [--limit N] [--no-llm] [--passed] [--module NAME] [--groups] [--match REGEX] [--uses-schedule PATH] [--vr-build LABEL] [--test-git-hash SHA] [--exit-code]`
 - `pr-queue.py [--repo O/R] [--newest N] [--me LOGIN]`
 - `refsection.py [--list] FILE [TITLE...]`; exit 1: section missing or ambiguous
@@ -459,6 +460,26 @@ another `name` is not matched. `-v` lists every test commit, each followed by it
     hint: failing since build 20261014: 5 runs in a row over 1 build(s); ...
       versions (last_good 6270507 -> this job, from install_ltp-rpm-qa.txt): kernel-default-base 7.2.9-1.1.36.10 -> 7.2.10-1.1.36.11; ltp 20261013.6262a5fc-2959.1 -> 20261014.1aae0e4d-2960.1
       test changes: commits=29 failed_module=0 call_path=? lib=9 earlier_module=3 (those first, then newest first) url=...
+
+## oqa-src.py - test code at the job's commit
+
+The `frame=` of `oqa-job.py` names a line of the test code as the job ran it; a local checkout shows it only
+at that commit.
+
+    oqa-src.py JOB PATH --line N [--context K]    # line N and K lines around it (default 10, at most 100)
+    oqa-src.py JOB PATH                           # the first 60 lines
+
+    job=6277851 host=https://openqa.opensuse.org
+    repo=os-autoinst/os-autoinst-distri-opensuse commit=fbd205ff... path=tests/installation/bootloader_uefi.pm lines=202 shown=117-119 link=https://github.com/.../blob/fbd205ff.../tests/installation/bootloader_uefi.pm#L118
+
+`TEST_GIT_URL` and `TEST_GIT_HASH` come from the job's `vars.json` (one GET; nothing else of the file is
+kept), then the file is one anonymous GET of `raw.githubusercontent.com/<owner>/<repo>/<hash>/<PATH>`. Only a
+public `https://github.com/<owner>/<repo>` (`.git` optional) and a full hash are used; anything else is
+refused (exit 2) without echoing it, as is a file the raw endpoint does not serve (a private repository
+answers 404 too): read it in a checkout of that commit then. PATH is taken as a frame names it, from its
+`lib/`, `tests/`, `products/` or `data/` on, so `sle/lib/x.pm` reads `lib/x.pm`. At most 512 KiB is read
+(`lines=N+` and a `note:` when the file is larger), a binary file is refused, and lines are cut at 500
+characters; `link=` points at line N for a ticket or a comment.
 
 ## oqa-ref.py - state of the ticket behind a bugref
 

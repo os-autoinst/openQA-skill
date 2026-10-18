@@ -90,6 +90,8 @@ Output (all third-party text must go through one of these or sanitize/fence):
     toks(values, limit=80, most=8) -> comma-joined tok()s, "+N" for the rest, "-" when empty
     distri_frame(lines) -> "func at file line N" for the first Perl stack frame
         outside os-autoinst, arguments dropped, or None; sanitise it like any other text
+    REPO_PATH: group(1) is a frame's file path from the test distribution's lib/, tests/, products/
+        or data/ on
     table(rows, headers, limit=60, max_rows=200, drop_empty=False) -> aligned
         plain-text table, every cell clean()ed, rows beyond max_rows only
         counted; drop_empty leaves out columns that are "-" in every row
@@ -142,6 +144,7 @@ __all__ = [
     "DEFAULT_HOST",
     "FAILURE_RESULTS",
     "INVESTIGATE_CLONE",
+    "REPO_PATH",
     "RESULTS",
     "RESULT_GROUPS",
     "Client",
@@ -687,6 +690,9 @@ def llm_line(summary, limit=300):
 
 
 _FRAME = re.compile(r"^\s*([\w:]+)(?:\(.*\))?(?: called)? at (\S+) line (\d+)")
+# A checkout in a directory named after the distri gives "sle/lib/x.pm": the repository path
+# starts at the first of a test distribution's top-level directories.
+REPO_PATH = re.compile(r"(?:^|/)((?:lib|tests|products|data)/.+)")
 
 
 def distri_frame(lines):

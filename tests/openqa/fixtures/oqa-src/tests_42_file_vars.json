@@ -1,0 +1,7 @@
+{
+   "ARCH": "x86_64",
+   "DISTRI": "example",
+   "TEST_GIT_HASH": "0123456789abcdef0123456789abcdef01234567",
+   "TEST_GIT_URL": "https://github.com/example/os-autoinst-distri-example.git",
+   "WORKER_HOSTNAME": "worker.example.org"
+}

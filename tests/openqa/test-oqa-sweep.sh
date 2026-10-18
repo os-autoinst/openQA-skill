@@ -236,6 +236,45 @@ done
 actual=$(sweep --group 7 --before "$at" 2>&1)
 check "--before without --build is a usage error that says why" "2 1" \
 	"$? $(grep -c "error: --before needs --build B: the group's newest build may not have existed then$" <<<"$actual")"
+# Job 1 failed at 10:00 and a reviewer forced it to softfailed at 12:00; job 3 passed with a failed
+# module (ignore_failure) and was never forced; job 2 failed.
+tmpx=$(mktemp -d)
+python3 - "$tmpx" <<'PY'
+import json, sys
+def save(name, data):
+    json.dump(data, open(f"{sys.argv[1]}/{name}.json", "w"))
+save("api_v1_job_groups_8_build_results_show_tags=1", {"group": {"name": "g"}, "build_results": [{"build": "B", "version": "1"}]})
+settings = {"DISTRI": "d", "VERSION": "1", "FLAVOR": "f", "ARCH": "x86_64", "MACHINE": "64bit"}
+save("api_v1_jobs_groupid=8_build=B_version=1_limit=1000", {"jobs": [
+    {"id": i, "state": "done", "result": r, "t_started": "2030-01-02T09:00:00", "t_finished": "2030-01-02T10:00:00",
+     "settings": {**settings, "TEST": t}, "modules": [{"name": "m", "result": "failed"}]}
+    for i, r, t in ((1, "softfailed", "a"), (2, "failed", "b"), (3, "passed", "c"))]})
+save("api_v1_jobs_1_comments", [{"id": 5, "text": "label:force_result:softfailed", "created": "2030-01-02 12:00:00 +0000"}])
+save("api_v1_jobs_2_comments", [])
+save("api_v1_jobs_3_comments", [{"id": 6, "text": "fine", "created": "2030-01-02 09:30:00 +0000"}])
+PY
+actual=$(python3 "$script" --fixture-dir "$tmpx" --group 8 --build B --before 2030-01-02T11:00Z 2>&1)
+check "--before: an ok job forced later shows its result then, its comments read once; a note says so" \
+	"1 failed 2 failed|note: result(s) of 1 forced later, shown as at --before|requests: 5" \
+	"$(grep -E '^[0-9] [a-z]+ [df]-' <<<"$actual" | cut -d' ' -f1,2 | xargs)|$(grep '^note: result' <<<"$actual")|$(tail -n 1 <<<"$actual")"
+actual=$(python3 "$script" --fixture-dir "$tmpx" --group 8 --build B --before 2030-01-02T13:00Z 2>&1)
+check "--before after the force: the job is ok again, no note" "2 0" \
+	"$(grep -E '^[0-9] [a-z]+ [df]-' <<<"$actual" | cut -d' ' -f1 | xargs) $(grep -c 'forced' <<<"$actual")"
+actual=$(
+	cd "$(dirname "$script")" && python3 - "$tmpx" <<'PY'
+import importlib.util, sys
+spec = importlib.util.spec_from_file_location("sweep", "oqa-sweep.py")
+sweep = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(sweep)
+sweep.MAX_FORCE_CHECKS = 1
+sys.argv = ["oqa-sweep.py", "--fixture-dir", sys.argv[1], "--group", "8", "--build", "B", "--before", "2030-01-02T11:00Z"]
+sweep.main()
+PY
+)
+check "--before: the ok jobs checked for a later force are capped, a warning says how many were not" \
+	"warning: 1 ok job(s) with failed modules not checked for a result forced later (at most 1, or the request cap)" \
+	"$(grep '^warning: 1 ok' <<<"$actual")"
+rm -rf "$tmpx"
 actual=$(
 	cd "$(dirname "$script")" && python3 - "$fixtures" <<'PY'
 import argparse, contextlib, importlib.util, io, json, os, sys, tempfile

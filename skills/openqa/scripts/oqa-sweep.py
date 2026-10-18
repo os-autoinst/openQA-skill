@@ -122,6 +122,10 @@ TEST_WINDOW = 100
 BEFORE_FETCH = 1000
 BEFORE_BYTES = _oqa.MAX_JSON_BYTES
 FINAL_STATES = ("done", "cancelled")
+# Comments.pm "force_result": the label overwrites the job's result when it is made.
+FORCE_RESULT = re.compile(r"force_result:(\w+)")
+# Ok jobs with failed modules whose comments --before reads for a later force_result.
+MAX_FORCE_CHECKS = 20
 MAX_SCHEDULE_GROUPS = 12
 # --match runs the user's regex over a name the server chose: an unbounded
 # subject turns an ordinary ".*a.*b" into minutes of backtracking.
@@ -412,9 +416,27 @@ def jobs_before(client, group, entry, args, results, reserve):
             or finished > args.before
         ):
             newest[scenario].update(result="running", modules=[], refs=[], comments=0)
+    reads = client.requests
+    # A failed module in an ok job may be one a later label:force_result overruled.
+    suspects = [
+        job
+        for job in newest.values()
+        if job["result"] in CLONE_SOURCES and job["modules"]
+    ]
+    forced = []
+    for job in suspects[:MAX_FORCE_CHECKS]:
+        if client.requests >= client.max_requests - reserve:
+            break
+        comments = client.get_json(f"/api/v1/jobs/{job['id']}/comments")
+        comments = comments if isinstance(comments, list) else []
+        job["fetched"] = [c for c in comments if isinstance(c, dict)]
+        then = _result_then(job["fetched"], args.before)
+        if then:
+            job["result"] = then
+            forced.append(job["id"])
+    unchecked = sum("fetched" not in job for job in suspects)
     jobs = [job for job in newest.values() if job["result"] in (*results, "running")]
     jobs.sort(key=_order)
-    reads = client.requests
     done = [job for job in jobs if job["result"] != "running"]
     complete = _read_reviews(client, done, reserve, args.before)
     if args.todo:
@@ -435,14 +457,39 @@ def jobs_before(client, group, entry, args, results, reserve):
         notes.append(
             "warning: request cap reached, '?' marks jobs whose comments were not read"
         )
+    if forced:
+        notes.append(
+            f"note: result(s) of {','.join(map(str, forced))} forced later, shown as at --before"
+        )
+    if unchecked:
+        notes.append(
+            f"warning: {unchecked} ok job(s) with failed modules not checked for a result forced "
+            f"later (at most {MAX_FORCE_CHECKS}, or the request cap)"
+        )
     return jobs, notes
+
+
+def _result_then(comments, before):
+    """The result at `before` of a job whose result a label:force_result comment made later
+    changed, else None. openQA keeps no result from before a force: an earlier force's,
+    else failed, as the caller asks only for jobs with failed modules."""
+    then, changed = None, False
+    for comment in sorted(comments, key=lambda c: _oqa.job_id_of(c.get("id")) or 0):
+        labels = LABEL.findall(str(comment.get("text") or ""))
+        force = next(filter(None, map(FORCE_RESULT.match, labels)), None)
+        created = _oqa.parse_time(comment.get("created"))
+        if created is None or created > before:
+            changed = changed or bool(force)
+        elif force:
+            then = force.group(1)
+    return (then or "failed") if changed else None
 
 
 def _read_reviews(client, jobs, reserve, before=None):
     """Review state of each job in turn while `reserve` requests stay free; False when
     the budget ran out first."""
     for job in jobs:
-        if client.requests >= client.max_requests - reserve:
+        if "fetched" not in job and client.requests >= client.max_requests - reserve:
             return False
         _review_state(client, job, before)
     return True
@@ -453,7 +500,9 @@ def _review_state(client, job, before=None):
     its first label counts, else it is a plain comment. With `before` only the
     comments created by then count."""
     job.update(refs=[], comments=0)
-    comments = client.get_json(f"/api/v1/jobs/{job['id']}/comments")
+    comments = job.pop("fetched", None)
+    if comments is None:
+        comments = client.get_json(f"/api/v1/jobs/{job['id']}/comments")
     if before is not None:
         comments = [
             comment

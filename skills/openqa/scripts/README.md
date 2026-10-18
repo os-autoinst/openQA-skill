@@ -76,7 +76,9 @@ groups still to list need are kept back).
 `--before TIME` (ISO 8601 such as `2030-01-02T10:00Z`, UTC without an offset; needs `--build`): the build as
 it stood then, for the breadth of an older failure (other arches, siblings) without the later restarts,
 reviews and results. Per scenario the newest job that had started by TIME, restarted later or not, with its
-result then: `running` when it finished later (no `modules=`; the count line says how many). Bugrefs,
+result then: `running` when it finished later (no `modules=`; the count line says how many); an ok job with
+failed modules whose `label:force_result` came later, as `oqa-history.py --before` restores it (its comments
+read for at most 20 such jobs, a `warning:` counts the rest). Bugrefs,
 labels and LLM summaries come from the comments created by then. `as_of=` replaces the header counters,
 which are those of now; `note: as of <TIME>: N job(s) that started later left out; cost: 1 /api/v1/jobs
 request (<jobs>, <kB>) and <n> comments requests`. That one request per build carries every job of it with

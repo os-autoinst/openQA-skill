@@ -38,10 +38,11 @@ You are the **triage** stage. Goal: a classification that a reviewer can act on,
 Follow "Triage order" with the bundled scripts, never raw `/details` or whole logs. If the evidence does not decide between two classes, say so and name the one check that would. Flags used here; others -> scripts/README.md "Script flags". Exit 0 = output printed, also for a failed job (`&&` chains work); 2 = error; the lint exits 1 on findings.
 
 ```
-oqa-job.py <job URL> [--steps N] [-v]  |  --module <name> --all-steps
+oqa-job.py <job URL> [--steps N] [-v] [--before T]  |  --module <name> --all-steps
 oqa-log.py <job URL> --errors | --around-module <name> | --grep <regex> | --tail N | --list
-           [--file <name>] [--max-lines N] [-v]      (-v: raw lines, nothing collapsed)
-oqa-history.py <job URL> [--investigation] [--previous N]
+           [--file <name>] [--max-lines N] [--max-line-chars 0] [-v]   (0: uncut; -v: raw lines, nothing collapsed)
+oqa-history.py <job URL> [--investigation] [--previous N] [--before T]
+oqa-sweep.py --group <id> --build <b> [--test <regex>] [--before T]   (as of time T)
 oqa-ref.py <bugref or URL> [--body] [--files]
 oqa-comment-lint.py <file> | - | --text '<draft>'
 ```

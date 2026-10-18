@@ -334,6 +334,31 @@ check "fallback reason is given" 1 "$(grep -c '^note: /tests/overview.json not u
 actual=$(sweep --group 7 --group 8)
 check "several groups: one header each, one host line, one requests line" "2 1 1" \
 	"$(grep -c '^group=' <<<"$actual") $(grep -c '^host=' <<<"$actual") $(grep -c '^requests: ' <<<"$actual")"
+# Group 11 has 70 failures with comments to read; group 12, listed after it, has build B in three versions.
+tmpr=$(mktemp -d)
+python3 - "$tmpr" "$(dirname "$script")" <<'PY'
+import json, sys
+sys.path.insert(0, sys.argv[2])
+import _oqa
+def save(path, params, data):
+    json.dump(data, open(f"{sys.argv[1]}/{_oqa.fixture_name(path, params)}.json", "w"))
+results = _oqa.expand_results(["not_ok"])
+for group, versions in ((11, ["1"]), (12, ["1", "2", "3"])):
+    save(f"/api/v1/job_groups/{group}/build_results", {"show_tags": 1},
+         {"group": {"name": f"g{group}"}, "build_results": [{"build": "B", "version": v} for v in versions]})
+    for v in versions:
+        ids = range(group * 1000, group * 1000 + (70 if group == 11 else 1))
+        tests = {f"t{i}": {"x86_64": {"jobid": i, "overall": "failed", "comments": 1}} for i in ids}
+        save("/tests/overview.json", [("groupid", group), ("build", "B"), ("version", v), ("result", results)],
+             {"results": {"d": {v: {"f": tests}}}, "job_ids": list(ids)})
+for i in range(11000, 11070):
+    save(f"/api/v1/jobs/{i}/comments", None, [{"id": 1, "text": "looking"}])
+PY
+actual=$(python3 "$script" --fixture-dir "$tmpr" --group 11 --group 12 --build B --limit 100 2>&1)
+status=$?
+rm -rf "$tmpr"
+check "several groups: the requests kept back cover every build entry of the groups still to come" \
+	"0 4|requests: 60" "$status $(grep -c '^group=' <<<"$actual")|$(tail -n 1 <<<"$actual")"
 
 actual=$(sweep --group 99 2>&1)
 check "unknown group exits 2 and names --host" "2 1" \

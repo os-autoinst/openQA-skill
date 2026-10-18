@@ -71,7 +71,7 @@ regex searches the newest 100 clone sources (the count line says when that windo
     6228572 failed BCI-x86_64-bci_ruby_podman modules=bci_test_podman bugrefs=gh#SUSE/BCI-tests#1142
 
 `review=?`: comments not read (`mode=api-fallback` or `--before`, request cap; the requests the builds and
-groups still to list need are kept back).
+groups still to list need are kept back, every group's builds read first as a build exists once per version).
 
 `--before TIME` (ISO 8601 such as `2030-01-02T10:00Z`, UTC without an offset; needs `--build`): the build as
 it stood then, for the breadth of an older failure (other arches, siblings) without the later restarts,

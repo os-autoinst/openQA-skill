@@ -4,7 +4,7 @@ Owns: what a failing step, a log line or a console says about the cause, by kind
 
 ## Needle mismatch
 
-1. **Say what the last mismatch screenshot shows** before reading numbers (`oqa-log.py <job> --shot <shot name> --out <dir>` saves it to view; not redacted).
+1. **Say what the last mismatch screenshot shows** before reading numbers (`oqa-log.py <job> --shot <shot name> --out <scratch dir>` saves it to view: a local scratch file, not a gated write; not redacted).
 2. **Compare `similarity`** with the threshold (96 unless the area sets `match`):
    - Near miss, screen looks right: rendering drift (font, theme). TEST, new needle; name the product change.
    - Near 0 everywhere, other screen (error popup, emergency shell): no needle problem. PRODUCT, or a key press lost under load.

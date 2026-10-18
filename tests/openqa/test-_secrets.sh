@@ -307,6 +307,10 @@ keeps "a password read from stdin" '+ podman login --password-stdin quay.io\n'
 keeps "a password read from a file" '+ podman login --password-file /run/secrets/reg quay.io\n'
 redacts "a --password value after =" 'mytool --password=Sup3rS3cretX\n' password-flag
 keeps "a mysql port" 'mysql -h db -P 3306 -e x\n'
+keeps "mysql and mariadb take a password only attached: a word after -p is the database" \
+	'mysql -u root -p mydatabase\nmariadb -u root -p wordpress < dump.sql\n'
+redacts "mariadb with an attached password" 'mariadb -uroot -pS3cretPassX\n' password-flag
+hides "sshpass takes its password after a space" 'sshpass -p S3cretPassX ssh host\n' S3cretPassX
 keeps "an ipmitool port" 'ipmitool -I lanplus -H bmc -p 6230 chassis status\n'
 keeps "an sshpass prompt" 'sshpass -P assword: -f /run/pw ssh root@host.example.org uptime\n'
 keeps "an smbclient port" 'smbclient //srv/share -p 4450 -N -c ls\n'

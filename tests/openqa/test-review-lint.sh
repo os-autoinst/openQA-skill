@@ -271,7 +271,8 @@ check "leading whitespace before the prefix" "0" "$(result)"
 out=$(draft COMMENT "" "Nitrogen is missing" "Blocking the port here hangs the job" | lint --lines 50)
 rc=$?
 check "prose opening with Nitrogen or Blocking is not a prefix" "0" "$(result)"
-out=$(draft COMMENT "" "$(printf '\u200bblocking: broken')" | lint --lines 50 --late)
+# U+200B as UTF-8 bytes: printf's \u depends on the locale, and under LC_ALL=C it stays literal text.
+out=$(draft COMMENT "" "$(printf '\xe2\x80\x8bblocking: broken')" | lint --lines 50 --late)
 rc=$?
 check "a zero-width space before the prefix" "0" "$(result)"
 out=$(draft COMMENT "" "$(printf '> x\n\nblocking: y')" | lint --lines 50 --late)

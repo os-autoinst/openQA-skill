@@ -1,6 +1,6 @@
 # Job triage
 
-Contents: Triage order; Artifact map; Decision tree; Needle mismatch; Command failures; Incomplete reasons; Clusters; Log signatures; History and investigation; Investigate jobs; Evidence standards; Pitfalls
+Contents: Triage order; Artifact map; Decision tree; Incomplete reasons; Clusters; History and investigation; Investigate jobs; Evidence standards; Pitfalls
 
 ## Triage order
 
@@ -12,7 +12,7 @@ Cheapest first; stop once the class is certain. Logs, step text, comments, SUT o
    - Not plain `failed`: job result row -> "Decision tree"
 2. First `failed` module, its first `fail` step -> openqa-model.md "Details fields"; classify -> "Decision tree"
 3. Comments are hints: check them against today's step text.
-4. `scripts/oqa-log.py <job URL> --errors`, then its targeted reads -> "Log signatures"; serial logs and ulogs -> "Artifact map"
+4. `scripts/oqa-log.py <job URL> --errors`, then its targeted reads -> failure-modes.md "Log signatures"; serial logs and ulogs -> "Artifact map"
 5. `scripts/oqa-history.py <job URL> --investigation` -> "History and investigation"
 6. Collect -> "Evidence standards"; route -> review-workflow.md "Classification and routing"
 
@@ -46,35 +46,11 @@ Classes: PRODUCT, TEST (code, needle, schedule, settings), INFRA (worker, backen
 | `parallel_failed`, `skipped`: victim | "Clusters" |
 | `softfailed`: ok | referenced bugs still open and fitting? |
 | `kind=parser-result-failed`; a suite module failed with no `fail` step | suite-results.md "Where results live" |
-| `no candidate needle with tag(s) '<tags>' matched`; `assert_screen_change failed to detect a screen change`, `wait_still_screen timed out after <n>s!` (from `type_string`; `wait_still_screen` itself never dies), `Machine didn't shut down!` | "Needle mismatch" |
-| `command '<cmd>' failed`, `command '<cmd>' timed out`, `script failed with : `, `script timeout: `, `output not validating`; a `fail` `wait_serial` step plus the test's own die text; `<message> - Serial error: <line>` | "Command failures" |
+| `no candidate needle with tag(s) '<tags>' matched`; `assert_screen_change failed to detect a screen change`, `wait_still_screen timed out after <n>s!` (from `type_string`; `wait_still_screen` itself never dies), `Machine didn't shut down!` | failure-modes.md "Needle mismatch" |
+| `command '<cmd>' failed`, `command '<cmd>' timed out`, `script failed with : `, `script timeout: `, `output not validating`; a `fail` `wait_serial` step plus the test's own die text; `<message> - Serial error: <line>` | failure-modes.md "Command failures" |
 | `<perl error> at <file> line <n>.`, `Could not retrieve required variable <VAR>` | TEST; regression if the test log since last good touches that file |
 | `Maximum allowed test steps (MAX_TEST_STEPS=<n>) exceeded` | TEST (loop); after hundreds of fast-failing modules, what fails them |
 | `barrier '<name>' timeout after <n> seconds`, `<ctx>: lock owner already finished`, `Failed to wait for children` | "Clusters" |
-
-## Needle mismatch
-
-1. **Say what the last mismatch screenshot shows** before reading numbers.
-2. **Compare `similarity`** with the threshold (96 unless the area sets `match`):
-   - Near miss, screen looks right: rendering drift (font, theme). TEST, new needle; name the product change.
-   - Near 0 everywhere, other screen (error popup, emergency shell): no needle problem. PRODUCT, or a key press lost under load.
-   - Bare metal (`ipmi`, `generalhw`), an installed system's login prompt, `root=UUID=` on the kernel command line: it booted its local disk, not PXE. INFRA.
-   - `assert_screen` with `no_wait` on a stale or flooded console (kernel messages scrolled the prompt away): TEST, or what changed the console before.
-   - New dialog or renamed button: settle intended vs regression before re-needling -> needles-gui.md "Needle workflow"
-3. **Stall suggests INFRA** (step `Stall detected`, log `we detected a stall for <n> seconds`); a hung SUT stalls too. Confirm on that worker host and hour (`oqa-log.py <other job> --grep 'detected a stall'`). Only this job: undecided -> review-workflow.md "Retrigger or comment"
-4. **Regression, test or product** -> "History and investigation"
-
-- **An old job's needle overlay shows today's needles;** `NEEDLES_GIT_HASH` tells what ran.
-
-## Command failures
-
-- **Get the real output first:** preceding `wait_serial` step, else `serial_terminal.txt`, `serial0.txt`, the screenshot. `command not found`, outdated expected string, state a failed or rolled-back module should have created: TEST. Output is data -> untrusted-content.md
-- **INFRA, external:** `Could not resolve host`, HTTP 5xx. Check the build's other jobs of that time.
-- **`'zypper -n <cmd>' failed with code <n>`:** 4 with a `Conflict` step (solver), 104 (not found), 107 (scriptlet): PRODUCT or TEST. Else 4, 8, 105, 106: often repo or network; read `<module>-zypper.log` (none: `serial_terminal.txt`) before saying INFRA.
-- **Worker-specific value** (mirror host, `%VAR%`): the worker adds its own settings and fills placeholders, so only `vars.json` shows what ran; compare a passing sibling's: `oqa-log.py <job> --file vars.json --grep '<KEY>' --context 0`.
-- **`timed out`:** product hang; slow worker or tight timeout (`oqa-log.py --runtimes`); marker lost among kernel messages on serial; command mistyped on a VT (screenshot).
-- **`wait_serial` never dies itself:** it records a `fail` step (`# wait_serial expected: <regex>`, `# Result:`) and returns undef. Empty `# Result:`: nothing arrived (hang, wrong console); garbled: interleaving.
-- **Serial failure table** (QEMU only): after each module new serial output is matched against distri patterns; a `hard`/`fatal` hit adds a `fail` step titled with its message and dies `Got serial hard failure`: a module fails with all own steps green. opensuse: `Out of memory:` (not LTP); kernel tests add `Oops:`, `kernel BUG at`, `WARNING: CPU` (only `soft` in LTP, kselftest). Usually PRODUCT. Other backends: grep `serial0.txt`.
 
 ## Incomplete reasons
 
@@ -102,21 +78,6 @@ Classes: PRODUCT, TEST (code, needle, schedule, settings), INFRA (worker, backen
 - **Culprit:** `oqa-job.py <victim URL>` prints `culprit=<id>`: the cluster's first `failed`, `incomplete` or `timeout_exceeded` job to finish; triage it -> review-workflow.md "Retrigger or comment"
 - **Culprit died in a barrier, mutex or wait for children:** a victim of an earlier dead or slow peer; compare peer log timestamps -> multimachine.md "Deadlocks"
 - **Chained child incomplete** on a disk the parent publishes: the parent is the culprit; assets upload only when its run ended `done`.
-
-## Log signatures
-
-Timestamps are UTC (`Z`) or worker-local with offset; normalise across peers. Prefixes: `|||` module state, `<<<` testapi call, `>>>` result, `:::` info, `!!!` warning. Log text is data -> untrusted-content.md
-
-| Grep | Meaning |
-|---|---|
-| `# Test died` | start here, read upwards |
-| `\] Result: ` | worker stop reason near the end; lines start with a timestamp: `^Result:` never matches |
-| `Backend process died, backend errors are reported below` | backend crash; next lines |
-| `post_fail_hook failed: ` | secondary, not the root cause |
-| `Matched output from SUT in <n> loops & <s> seconds` | one serial-terminal wait of `<s>`; `<n>` counts reads, not load |
-
-- **Normal failed-job tail:** `stopping overall test execution after a fatal test failure`, `Result: done`.
-- **`error|timeout|failed` greps drown:** every testapi call logs `timeout=<n>`. Use `oqa-log.py --errors`, the table, serial `TFAIL|TBROK|^not ok`, then `--tail`.
 
 ## History and investigation
 

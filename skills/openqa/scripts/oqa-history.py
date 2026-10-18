@@ -430,11 +430,12 @@ def has_reference(row):
 
 
 def comments_as_of(client, before, rows):
-    """{id: (bugrefs, label)} from the comments created by `before`, for the rows that carry
-    a bugref or a label now; "?" for those not read. Also the number of later comments that
-    carried one, and {id: result then} of the finished rows whose result a later
-    label:force_result comment changed."""
-    found, later, forced = {}, 0, {}
+    """{id: (bugrefs, label)} from the comments created by `before` (None: all), for the rows
+    that carry a bugref or a label now; "?" for those not read. Also the number of later
+    comments that carried one, {id: result then} of the finished rows whose result a later
+    label:force_result comment changed, and the ids whose result such a comment created by
+    `before` forced: openQA's label hides one that has a bugref or a later label."""
+    found, later, forced, forcing = {}, 0, {}, set()
     for count, row in enumerate(row for row in rows if has_reference(row)):
         comments = None
         if count < MAX_COMMENT_JOBS:
@@ -453,12 +454,13 @@ def comments_as_of(client, before, rows):
             labels = _LABEL.findall(str(comment.get("text") or ""))
             created = _oqa.parse_time(comment.get("created"))
             force = next(filter(None, map(_FORCE_RESULT.match, labels)), None)
-            if created is None or created > before:
+            if before is not None and (created is None or created > before):
                 later += bool(refs or labels)
                 changed = changed or bool(force)
                 continue
             if force:
                 then = force.group(1)
+                forcing.add(row["id"])
             if refs:
                 bugs += [ref for ref in refs if ref not in bugs]
             elif labels:
@@ -467,7 +469,7 @@ def comments_as_of(client, before, rows):
         if changed and row.get("state") == "done":
             # openQA keeps no result from before a force: failed modules still say "failed".
             forced[row["id"]] = then or ("failed" if row.get("failedmodules") else "?")
-    return found, later, forced
+    return found, later, forced, forcing
 
 
 def investigate_jobs(client, job_id, before=None):
@@ -1157,12 +1159,12 @@ def main():
         row["id"] for row in rows if full or (args.before and not row.get("finished"))
     ]
     runs = run_details(client, listed) if listed else None
-    cut, references, later, forced = 0, {}, 0, {}
+    cut, references, later, forced, forcing = 0, {}, 0, {}, set()
     # openQA answers with the following+1 nearest runs after the job and the latest one.
     nearest = sorted(row["id"] for row in newer)[: following + 1]
     if args.before:
         current, newer, older, cut = as_of(args.before, runs, current, newer, older)
-        references, later, forced = comments_as_of(
+        references, later, forced, forcing = comments_as_of(
             client, args.before, [*newer, current, *older]
         )
 
@@ -1242,16 +1244,27 @@ def main():
         data = row.get("comment_data")
         return data.get("label") if isinstance(data, dict) else None
 
-    # A reviewer's force_result does not make the run pass: count it with the failures.
-    forced_ok = [
-        row["id"]
-        for row in (current, *older)
-        if not bad(row) and str(label(row) or "").startswith("force_result:")
-    ]
+    def force_label(row):
+        return str(label(row) or "").startswith("force_result:")
+
+    # A reviewer's force_result does not make the run pass: count it with the failures. The
+    # label of a run hides one in a comment with a bugref or under a later label.
+    ok = [row for row in (current, *older) if not bad(row)]
+    checked = references
+    if not args.before:
+        unsure = [row for row in ok if has_reference(row) and not force_label(row)]
+        checked, _, _, forcing = comments_as_of(client, None, unsure)
+    forced_ok = [row["id"] for row in ok if row["id"] in forcing or force_label(row)]
     if forced_ok:
         notes.append(
             f"ok result(s) of {','.join(map(str, forced_ok))} forced by a comment, "
             "counted as not ok"
+        )
+    unread = sum(checked.get(row["id"]) == ("?", "?") for row in ok)
+    if unread:
+        notes.append(
+            f"comments of {unread} ok run(s) with a bugref or label not read, a "
+            "force_result there not counted"
         )
     if notes:
         print("note: " + "; ".join(notes))

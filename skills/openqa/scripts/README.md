@@ -401,7 +401,9 @@ in id order.
 run of the streak lacked one of this job's failed modules; one that failed in older runs only (it softfails,
 passes or is not reached now) is no change: `older runs also failed <module>`. On a change, `first_bad` adds
 `(failed modules as now since <id>, N runs)`. A run whose ok result a `label:force_result` comment made counts
-as not ok (`note: ok result(s) of <ids> forced by a comment, counted as not ok`), for `--exit-code` too. Older
+as not ok (`note: ok result(s) of <ids> forced by a comment, counted as not ok`), for `--exit-code` too; as
+openQA's label hides a force beside a bugref or under a later label, the comments of ok runs with either are
+read (30 at most, `note: comments of N ok run(s) ... not read` for the rest). Older
 runs unlike this job are
 left out of `last_good`, `first_bad`, the streak and the hint (`left out, unlike this job: <id> (<why>)`): a
 manual clone without the job group and, from the settings `/api/v1/jobs` gives with `--workers` or

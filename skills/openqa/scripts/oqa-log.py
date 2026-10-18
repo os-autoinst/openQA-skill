@@ -866,31 +866,39 @@ def mode_grep(lines, pattern, context, max_matches, span=None):
 
 
 def softfailed(lines):
-    """One byte per line, 1 inside a module run with a known issue: it recorded a soft
-    failure and neither died nor failed, or forced one over its failure."""
+    """One byte per line, 1 from the start of a module run with a known issue to its own
+    "finished" line: it recorded a soft failure and neither died nor failed, or forced one
+    over its failure. What follows that line, a backend death say, is not the module's."""
     flags = bytearray(len(lines))
-    begin, soft, bad, forced = None, False, False, False
+    begin = end = name = None
+    soft, bad, forced = False, False, False
     for index, text in enumerate([*lines, None]):
         probe = text[:MATCH_WIDTH] if text is not None else ""
-        if text is None or _STARTING.search(probe):
-            if begin is not None and (forced or (soft and not bad)):
-                flags[begin:index] = b"\x01" * (index - begin)
-            begin, soft, bad, forced = index, False, False, False
+        starting = _STARTING.search(probe)
+        if text is None or starting:
+            if end is not None and (forced or (soft and not bad)):
+                flags[begin : end + 1] = b"\x01" * (end + 1 - begin)
+            begin, end, name = index, None, starting and starting.group(1)
+            soft, bad, forced = False, False, False
         elif begin is not None:
             soft = soft or bool(_SOFT.search(probe))
             forced = forced or bool(_FORCED.search(probe))
             bad = bad or bool(_DIED.search(probe) or _TEST_FAILED.search(probe))
+            finished = end is None and _FINISHED.search(probe)
+            if finished and finished.group(1) == name:
+                end = index
     return flags
 
 
 def mode_errors(lines, verbose, signatures=SIGNATURES):
-    """Return (entries, info entries, counts per label, last started module, finished?).
+    """Return (entries, low-rank entries, counts per label, last started module, finished?).
 
     Shown per label: the first PER_LABEL hits, every "# Test died" line and, for how the
     run ended, the last hit. Hits inside a module with a known issue (softfailed) come
     after the others and only fill what those leave of PER_LABEL. An info entry is the
     last record_info call of a module before its "# Test died" or "test <module> failed"
-    line: what the test itself logged about the failure."""
+    line: what the test itself logged about the failure. The softfailed hits, then the info
+    entries, are low rank: they are the first to go under a line cap."""
     counts, hits, infos = {}, [], []
     started = finished = info = None
     for index, text in enumerate(lines):
@@ -942,6 +950,8 @@ def mode_errors(lines, verbose, signatures=SIGNATURES):
                 deferred.append(hit)
     entries, taken = [], set()
     for group, mark in ((chosen, ""), (deferred, " softfailed")):
+        # Where the last group, the softfailed hits, starts.
+        ranked = len(entries)
         for index, label, inside, after, continuation in group:
             if index in taken:
                 continue
@@ -972,7 +982,8 @@ def mode_errors(lines, verbose, signatures=SIGNATURES):
     infos = [(n + 1, label, lines[n]) for n, label in infos if n not in taken]
     if infos:
         counts["info"] = len(infos)
-    return entries, infos[:PER_LABEL], counts, started, finished
+    low = [*entries[ranked:], *infos[:PER_LABEL]]
+    return entries[:ranked], low, counts, started, finished
 
 
 def mode_module(lines, name):
@@ -1233,7 +1244,8 @@ def serial_errors(client, job_id, args, name, signatures):
         return [], False
     except _oqa.OqaError as error:
         return [f"note: {name} not read ({error})"], False
-    entries, _, counts, _, _ = mode_errors(lines, args.verbose, signatures)
+    entries, low, counts, _, _ = mode_errors(lines, args.verbose, signatures)
+    entries += low[: max(args.max_lines - len(entries), 0)]
     found = ",".join(f"{label}:{count}" for label, count in counts.items())
     out = [f"file={name} mode=errors hits={found or '-'} lines={len(lines)}"]
     if truncated:
@@ -1744,14 +1756,20 @@ def show(client, args, job_id, head, pattern):
                 SERIAL_TERMINAL: SERIAL_SIGNATURES,
                 SERIAL0: (*SERIAL0_SIGNATURES, *SIGNATURES),
             }.get(name, SIGNATURES)
-            entries, infos, counts, started, finished = mode_errors(
+            entries, low, counts, started, finished = mode_errors(
                 lines, args.verbose, signatures
             )
             found = ",".join(f"{label}:{count}" for label, count in counts.items())
             mode = f"errors hits={found or '-'}"
             failures = set(counts) - {"info"}
-            # Low rank: info lines only fill what the error lines leave of --max-lines.
-            entries += infos[: max(args.max_lines - len(entries), 0)]
+            # Low rank: softfailed hits and info lines only fill what the other hits leave
+            # of --max-lines.
+            kept = low[: max(args.max_lines - len(entries), 0)]
+            if len(low) > len(kept):
+                notes.append(
+                    f"note: {len(low) - len(kept)} softfailed or info lines left out (--max-lines)"
+                )
+            entries += kept
             serial_hits = False
             if args.file == DEFAULT_FILE and args.member is None:
                 for serial, kinds in (

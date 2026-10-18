@@ -20,7 +20,7 @@ You are the **triage** stage. Goal: a classification that a reviewer can act on,
 |---|---|
 | result incomplete or timeout_exceeded | -> job-triage.md "Incomplete reasons" |
 | needle mismatch | -> failure-modes.md "Needle mismatch" |
-| command failed or timed out, serial mismatch | -> failure-modes.md "Command failures", "Log signatures" |
+| command failed or timed out, typed text or serial mismatch | -> failure-modes.md "Command failures", "Typed input", "Log signatures" |
 | parallel_failed, skipped, or the job has parents or children | -> job-triage.md "Clusters" |
 | failing now and then, or "since when?" | -> job-triage.md "History and investigation", "Investigate jobs" |
 | several modules failed, soft failures before it, or log and digest disagree | -> job-triage.md "Pitfalls" |

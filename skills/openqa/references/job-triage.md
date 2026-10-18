@@ -48,6 +48,7 @@ Classes: PRODUCT, TEST (code, needle, schedule, settings), INFRA (worker, backen
 | `kind=parser-result-failed`; a suite module failed with no `fail` step | suite-results.md "Where results live" |
 | `no candidate needle with tag(s) '<tags>' matched`; `assert_screen_change failed to detect a screen change`, `wait_still_screen timed out after <n>s!` (from `type_string`; `wait_still_screen` itself never dies), `Machine didn't shut down!` | failure-modes.md "Needle mismatch" |
 | `command '<cmd>' failed`, `command '<cmd>' timed out`, `script failed with : `, `script timeout: `, `output not validating`; a `fail` `wait_serial` step plus the test's own die text; `<message> - Serial error: <line>` | failure-modes.md "Command failures" |
+| `typing command '<cmd>' timed out`; a cut or garbled command line; a command that ran without its done-marker | failure-modes.md "Typed input" |
 | `<perl error> at <file> line <n>.`, `Could not retrieve required variable <VAR>` | TEST; regression if the test log since last good touches that file |
 | `Maximum allowed test steps (MAX_TEST_STEPS=<n>) exceeded` | TEST (loop); after hundreds of fast-failing modules, what fails them |
 | `barrier '<name>' timeout after <n> seconds`, `<ctx>: lock owner already finished`, `Failed to wait for children` | "Clusters" |

@@ -268,7 +268,9 @@ read up to 4 MiB (`warning: ... (--file <name> --errors reads up to --max-bytes)
 `[k8s]` a line starting `error: ` (kubectl), `Error from server`, helm's `Error: INSTALLATION FAILED:` or
 `UPGRADE FAILED:`; `[build]` `<file>:<line>:<col>: error:`, `fatal error:`, `make: *** [...] Error N`, `CMake
 Error`; `[sudo]` `[sudo] password for `, `sudo: a password is required`; `[network]` `Could not resolve
-host`, `Temporary failure in name resolution`; `[cli]` a line starting `Error: ` or `│ Error: `, the error
+host`, `Temporary failure in name resolution`; `[mount]` a refused mount: `mount: <target>: <reason>.` of
+mount(8) but its `WARNING:` and an `unknown filesystem type`, which suites probe and skip on, the errors of
+`mount.nfs`, xfstests' `could not mount`, not a status line; `[cli]` a line starting `Error: ` or `│ Error: `, the error
 block of OpenTofu/Terraform and of other tools. `[kernel]` marks `WARNING:`, `BUG:`, `Oops:`, `Call Trace` (with the
 4 lines after it) after a printk time (`[   12.345678] `, maybe with a caller id `[  T812]`) or a journal's
 `kernel: `, a line without either only in the kernel's own wording (`WARNING: CPU: 2 PID: 812`, `WARNING:`

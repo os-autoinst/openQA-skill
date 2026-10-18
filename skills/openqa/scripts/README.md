@@ -151,7 +151,8 @@ list with `... N more steps not shown: --step-range <next>-` (`<next>-B` under `
 numbered A to B. `--before TIME` (ISO 8601, UTC unless it has an offset) reads the comments as they
 stood at TIME, as `oqa-history.py --before` does: a comment created later (`created=`, UTC to the second,
 is what is compared), or with no readable date, is hidden with its bugrefs, labels and flags, the review
-state is that of the rest, and `note: N comment(s) created after --before hidden` counts them. A restart
+state is that of the rest, and `note: N comment(s) created after --before hidden` counts them; one kept but
+edited later adds `edited=<time> (after --before, text as now)`. A restart
 that had not started by TIME is left out of `clone chain` and `SUPERSEDED` (`note: restarts that
 started after --before left out`; one that never started, skipped or cancelled, counts from its finish), one
 still going then shows as `none` and `state=running`. Past the

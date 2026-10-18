@@ -39,7 +39,7 @@ import os
 import posixpath
 import re
 import sys
-from datetime import datetime, timedelta, timezone
+from datetime import timedelta
 
 # python3 -I leaves the script's own directory off sys.path; the sibling modules live there.
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -102,10 +102,6 @@ _PACKAGE_LINE = re.compile(r"[A-Za-z0-9_.+~^-]+")
 _UPLOAD_NAME = r"[A-Za-z0-9_](?:[A-Za-z0-9._+@=~-]|%23)*"
 _DURATION = re.compile(r"(?:(\d{1,5}) days )?(\d{1,5}):(\d\d) (hours|minutes)")
 INVESTIGATE_CLONES = "Automatic investigation jobs for job"
-# As oqa-job.py INVESTIGATE_CLONE: "* *<name>*: t#<id>", older revisions bold with a URL.
-_CLONE = re.compile(
-    r"\s*\*\s+\*{1,2}([^*\s]+)\*{1,2}:\s*(?:t#|https?://[^/\s]+/(?:tests/|t))([0-9]{1,18})(?![0-9])"
-)
 # lib/OpenQA/Utils.pm LABEL_REGEX; Schema/Result/Comments.pm "force_result"
 _LABEL = re.compile(r"\blabel:([\w:#/-]+)\b")
 _FORCE_RESULT = re.compile(r"force_result:(\w+)")
@@ -118,24 +114,8 @@ def positive(value):
     return number
 
 
-def parse_time(value):
-    """An aware UTC datetime from ISO 8601 or openQA's "2030-01-02 10:00:00 +0000", or None;
-    a time without a zone is UTC, as openQA's t_started is."""
-    if not isinstance(value, str):
-        return None
-    text = re.sub(r"[zZ]$", "+00:00", value.strip())
-    text = re.sub(r" ?([+-]\d\d):?(\d\d)$", r"\1:\2", text)
-    try:
-        stamp = datetime.fromisoformat(text)
-    except ValueError:
-        return None
-    if stamp.tzinfo is None:
-        stamp = stamp.replace(tzinfo=timezone.utc)
-    return stamp.astimezone(timezone.utc)
-
-
 def before_time(value):
-    stamp = parse_time(value)
+    stamp = _oqa.parse_time(value)
     if stamp is None:
         raise argparse.ArgumentTypeError(
             "expected an ISO 8601 time such as 2030-01-02T10:00Z"
@@ -383,7 +363,7 @@ def run_details(client, ids):
 def row_times(row, runs):
     """(started, finished) of a history row: finished less duration, else the start
     /api/v1/jobs gives in runs; None for what is unknown."""
-    finished = parse_time(row.get("finished"))
+    finished = _oqa.parse_time(row.get("finished"))
     match = _DURATION.fullmatch(str(row.get("duration") or ""))
     if finished and match:
         days, high, low, unit = match.groups()
@@ -393,7 +373,7 @@ def row_times(row, runs):
             spent = timedelta(minutes=int(high), seconds=int(low))
         return finished - spent, finished
     job = (runs or {}).get(row["id"]) or {}
-    return parse_time(job.get("t_started")), finished or parse_time(
+    return _oqa.parse_time(job.get("t_started")), finished or _oqa.parse_time(
         job.get("t_finished")
     )
 
@@ -472,7 +452,7 @@ def comments_as_of(client, before, rows):
             refs = comment.get("bugrefs")
             refs = [str(ref) for ref in refs] if isinstance(refs, list) else []
             labels = _LABEL.findall(str(comment.get("text") or ""))
-            created = parse_time(comment.get("created"))
+            created = _oqa.parse_time(comment.get("created"))
             force = next(filter(None, map(_FORCE_RESULT.match, labels)), None)
             if created is None or created > before:
                 later += bool(refs or labels)
@@ -502,13 +482,13 @@ def investigate_jobs(client, job_id, before=None):
     for comment in comments if isinstance(comments, list) else ():
         if not isinstance(comment, dict):
             continue
-        created = parse_time(comment.get("created"))
+        created = _oqa.parse_time(comment.get("created"))
         if before and (created is None or created > before):
             continue
         lines = str(comment.get("text") or "").split("\n")
         if not any(line.lstrip().startswith(INVESTIGATE_CLONES) for line in lines):
             continue
-        for match in filter(None, map(_CLONE.match, lines)):
+        for match in filter(None, map(_oqa.INVESTIGATE_CLONE.match, lines)):
             name = match.group(1).partition(":investigate:")[2] or match.group(1)
             clone = f"{_oqa.tok(name, 60)} t#{match.group(2)}"
             if clone not in clones:

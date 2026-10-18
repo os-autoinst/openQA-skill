@@ -46,7 +46,7 @@ One line per script, generated from the parsers: do not edit it by hand. What a 
 
 `--build` needs `--group`; `--groups --match REGEX` finds the id. Group ids belong to one instance and the
 host is `--host` alone (default o3), never taken from a job URL seen elsewhere: a group the instance
-answers with an HTTP 4xx (a group of another instance) ends in exit 2 with an error naming `--host`,
+answers with an HTTP 4xx but 408 and 429 (a group of another instance) ends in exit 2 with an error naming `--host`,
 not in an empty listing.
 
 Failed, incomplete and timeout_exceeded jobs also get an indented `llm-investigation-summary (automatic, unverified):`

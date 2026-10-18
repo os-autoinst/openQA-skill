@@ -192,8 +192,11 @@ def pick_builds(client, group, build):
             f"unexpected build_results answer for group {group}"
         ) from None
     except _oqa.OqaError as error:
-        # _oqa words an error status "HTTP <code>: <path>"; a 4xx means no such group here.
-        if isinstance(error, _oqa.NotFound) or re.match(r"HTTP 4\d\d:", str(error)):
+        # _oqa words an error status "HTTP <code>: <path>"; a 4xx means no such group here,
+        # but a request timeout (408) or too many requests (429) says nothing about the group.
+        if isinstance(error, _oqa.NotFound) or re.match(
+            r"HTTP 4(?!08|29)\d\d:", str(error)
+        ):
             raise _oqa.OqaError(
                 f"group {group} is not readable on {client.host} ({error}); a group of "
                 "another openQA instance needs --host"

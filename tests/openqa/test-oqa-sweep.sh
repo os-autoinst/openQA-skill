@@ -361,7 +361,7 @@ spec = importlib.util.spec_from_file_location("sweep", "oqa-sweep.py")
 sweep = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(sweep)
 client = sweep._oqa.Client("https://openqa.example.org", fixture_dir="/nonexistent")
-for status in (400, 403, 503):
+for status in (400, 403, 408, 429, 503):
     def refuse(path, params=None, status=status):
         raise sweep._oqa.OqaError(f"HTTP {status}: {path}")
     client.get_json = refuse
@@ -371,10 +371,12 @@ for status in (400, 403, 503):
         print(status, error)
 PY
 )
-check "any 4xx for the group is an error naming --host; a 5xx with --build still falls back" "$(
+check "a 4xx for the group is an error naming --host; a 5xx, a timeout or too many requests with --build still falls back" "$(
 	cat <<'EOF'
 400 group 5 is not readable on https://openqa.example.org (HTTP 400: /api/v1/job_groups/5/build_results); a group of another openQA instance needs --host
 403 group 5 is not readable on https://openqa.example.org (HTTP 403: /api/v1/job_groups/5/build_results); a group of another openQA instance needs --host
+408 (None, [{'build': 'B'}])
+429 (None, [{'build': 'B'}])
 503 (None, [{'build': 'B'}])
 EOF
 )" "$actual"

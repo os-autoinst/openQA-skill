@@ -1081,6 +1081,21 @@ actual=$(python3 "$src" --fixture-dir "$tmp" 81 --runtimes 2>&1)
 contains "--runtimes: a log without module markers says so" "note: no module markers" "$actual"
 timeout 10 python3 "$src" --fixture-dir "$tmp" 83 --runtimes >/dev/null 2>&1
 check "--runtimes: 2000 lines of unclosed arguments stay linear (10 s budget)" 0 $?
+# A line of 160 record_info calls without a result: each call read to the line end was
+# quadratic, about 15 ms a line.
+actual=$(cd "$scripts" && python3 -c '
+import importlib.util, time
+spec = importlib.util.spec_from_file_location("oqa_log", "oqa-log.py")
+mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+fail = next(pattern for label, pattern, *_ in mod.SIGNATURES if label == "fail")
+line = ("<<< testapi::record_info(" * 160)[:3990]
+start = time.perf_counter()
+for _ in range(200):
+    mod._SOFT.search(line), fail.search(line)
+inner = "<<< testapi::record_info(title=\"a\", output=\"<<< testapi::record_info(\", result=\"{}\")"
+print(time.perf_counter() - start < 1, bool(fail.search(inner.format("fail"))), bool(mod._SOFT.search(inner.format("softfail"))))
+' 2>&1)
+check "--errors: record_info results over 200 such lines take under 1 s; a call quoted in another still counts" "True True True" "$actual"
 
 # --- --shot: one step screenshot saved where the caller says --------------------------
 png="$fixtures/tests_4242_images_boot-2.png"

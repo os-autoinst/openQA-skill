@@ -115,10 +115,13 @@ _DIED = re.compile(r"# Test died")
 _TEST_FAILED = re.compile(r"(?:^|\] )test \S+ failed\b")
 # testapi.pm record_info: bmwqemu::log_call "<<< testapi::record_info(title=..., output=...)"
 _INFO = re.compile(r"<<< testapi::record_info\(")
-# A module that records a soft failure, or forces one over its failure, has a known issue.
-_SOFT = re.compile(
-    r'<<< testapi::(?:record_soft_failure\(|record_info\([^\n]*\bresult="softfail")'
+# A record_info call with that result. Each call is read on only up to the next one, so a
+# line of many calls is one pass, not one per call.
+_RESULT = (
+    r'<<< testapi::record_info\((?:(?!<<< testapi::record_info\()[^\n])*\bresult="{}"'
 )
+# A module that records a soft failure, or forces one over its failure, has a known issue.
+_SOFT = re.compile(r"<<< testapi::record_soft_failure\(|" + _RESULT.format("softfail"))
 _FORCED = re.compile(r"<<< testapi::force_soft_failure\(")
 # What os-autoinst logs about its own console plumbing for every testapi call.
 _PLUMBING = re.compile(
@@ -185,7 +188,7 @@ RUNNER_SIGNATURES = (
 )
 
 SIGNATURES = (
-    _signature("fail", [r'<<< testapi::record_info\([^\n]*\bresult="fail"']),
+    _signature("fail", [_RESULT.format("fail")]),
     _signature("hook", [r"post_fail_hook failed: "]),
     _signature(
         "needle", [r"no candidate needle with tag\(s\) '[^']*' matched"], 3, True

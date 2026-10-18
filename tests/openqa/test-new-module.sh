@@ -104,7 +104,8 @@ usage "unknown kind" --stdout --kind nope --path tests/console/a.pm --summary S 
 usage "--repo without tests/" --repo "$work/empty" --kind console --path tests/console/a.pm --summary S --maintainer 'a@b.c'
 check "failed runs wrote nothing" "" "$(find "$work/empty" -type f)"
 
-usage "bidi override in the maintainer" --stdout --kind console --path tests/console/a.pm --summary S --maintainer $'a@b.c \u202e'
+# U+202E as UTF-8 bytes: bash's \u escape depends on the locale, and under LC_ALL=C it stays literal text.
+usage "bidi override in the maintainer" --stdout --kind console --path tests/console/a.pm --summary S --maintainer $'a@b.c \xe2\x80\xae'
 usage "escape sequence in the summary" --stdout --kind console --path tests/console/a.pm --summary $'S\e[31m' --maintainer 'a@b.c'
 
 # --- writes stay inside the checkout ------------------------------------------------

@@ -57,6 +57,13 @@ By kind of change, not by block: `tests/virt_autotest` and virtualization featur
 - **Asks**: one remote operation per ssh call, no `&&` chains; no unbounded loops - they cost money; every reboot justified (all #25535); provider-specific module guarded `if is_ec2()` (#26642); test logic in `tests/publiccloud/`, not `publiccloud::instance` methods (#26176); lib code works on transactional and classic systems (#26710).
 - **Shared with SAP**: grep `schedule/sles4sap/` for lib users; add one SAP run (#25182).
 - **Unit tests required**: `t/NN_publiccloud*.t`.
+- **Triage**: a step often says only `fail`; the cause is in the uploads -> job-triage.md "Artifact map".
+  - **img-proof**: its log ulog holds pytest's output, each failed test and why.
+  - **Registration** (`registercloudguest`, `guestregister.service`; ulogs `*-cloudregister.log.txt`, `*-guestregister-journal.log.txt`): an error of the client or the image is PRODUCT; the cloud's update servers failing for other images and products at the same time is an outage, INFRA.
+  - **Provisioning**: OpenTofu `Error:` in the `TFM apply output` step and the `tf_apply_output` ulog. A capacity shortage (`STOCKOUT`, `InsufficientInstanceCapacity`, `SkuNotAvailable`, `AllocationFailed`) is INFRA once the other zones (GCE, `ZONE UNAVAILABLE`) and `PUBLIC_CLOUD_ALTERNATE_REGIONS` (`REGION UNAVAILABLE`) failed too; any other error stops at once.
+  - **SSH**: `nc` `timed out`, no answer: not booted or no route, see `destroy-console.txt`; `refused`: up, sshd not listening.
+  - **SLE Micro** up to 5.4 has no cloud-init and no provider agent (`check_services`): a cloud-init expectation there is TEST.
+  - **The image** under test is `PUBLIC_CLOUD_BUILD` (with `_KIWI`) or `PUBLIC_CLOUD_IMAGE_ID`/`_URI`, not `BUILD`: a change there is the product change, in the settings diff.
 
 ## Kernel
 - **Prefix commit and title with the component, never Conventional Commits** (`docs/KERNEL_README.md`, #26595): lib package `Kernel::hba:`, `LTP:`, `Kselftests: BPF:`; test module base name `blktests:`; test family `kernel/nvme:`; only truly area-wide `kernel:`.

@@ -495,8 +495,10 @@ at that commit.
 kept), then the file is one anonymous GET of `raw.githubusercontent.com/<owner>/<repo>/<hash>/<PATH>`. Only a
 public `https://github.com/<owner>/<repo>` (`.git` optional) and a full hash are used; anything else is
 refused (exit 2) without echoing it, as is a file the raw endpoint does not serve (a private repository
-answers 404 too): read it in a checkout of that commit then. PATH is taken as a frame names it, from its
-`lib/`, `tests/`, `products/` or `data/` on, so `sle/lib/x.pm` reads `lib/x.pm`. At most 512 KiB is read
+answers 404 too): read it in a checkout of that commit then. PATH is read as given first; when the
+repository has no such file, from its `lib/`, `tests/`, `products/` or `data/` on, as a frame from a checkout
+named after the distri names it, so `sle/lib/x.pm` reads `lib/x.pm` (one more GET) and `t/data/x.yaml` stays
+itself. At most 512 KiB is read
 (`lines=N+` and a `note:` when the file is larger), a binary file is refused, and lines are cut at 500
 characters; `link=` points at line N for a ticket or a comment.
 

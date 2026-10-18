@@ -120,6 +120,16 @@ check "the window stops at the last line, 10 lines of context by default" \
 actual=$(src "$fixtures" 42 sle/tests/console/hostile.pm --line 37 --context 0)
 check "a frame from a checkout named after the distri is read from its tests/ on" "0 path=tests/console/hostile.pm 1" \
 	"$? $(grep -o 'path=[^ ]*' <<<"$actual") $(grep -c "^37:     assert_script_run('false');$" <<<"$actual")"
+# t/data/ is a directory of the repository itself, beside a data/ holding a file of the same name.
+mkdir "$work/top"
+cp "$fixtures"/* "$work/top/"
+printf 'name: t-data\n' >"$work/top/example_os-autoinst-distri-example_${sha}_t_data_test_data_1.yaml"
+printf 'name: data\n' >"$work/top/example_os-autoinst-distri-example_${sha}_data_test_data_1.yaml"
+actual=$(src "$work/top" 42 t/data/test_data_1.yaml)
+check "a path of the repository is read as given, not from a data/ further in" "path=t/data/test_data_1.yaml|1: name: t-data|requests: 2" \
+	"$(grep -o 'path=[^ ]*' <<<"$actual")|$(grep '^1: ' <<<"$actual")|$(tail -n 1 <<<"$actual")"
+check "a checkout prefix costs one more request, the path as given first" "path=data/test_data_1.yaml requests: 3" \
+	"$(src "$work/top" 42 sle/data/test_data_1.yaml | grep -Eo '^requests: [0-9]+|path=[^ ]*' | xargs)"
 actual=$(src "$fixtures" 42 ./tests/console/hostile.pm)
 check "no --line: the first 60 lines and how many follow" "shown=1-60 60 1" \
 	"$(grep -o 'shown=[0-9-]*' <<<"$actual") $(grep -Ec '^ ?[0-9]+: ' <<<"$actual") $(grep -c '^note: 13 more lines; --line N \[--context K\] shows another part$' <<<"$actual")"

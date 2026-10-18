@@ -170,11 +170,6 @@ BOT_TEMPLATES = (
     "Ignored issue",
     "Ignored failure",
 )
-# One clone of the list openqa-investigate posts, "* *<name>*: t#<id>"; older revisions
-# wrote the name in bold and a URL, ".../t<id>" or ".../tests/<id>".
-INVESTIGATE_CLONE = re.compile(
-    r"\s*\*\s+\*{1,2}([^*\s]+)\*{1,2}:\s*(?:t#|https?://[^/\s]+/(?:tests/|t))([0-9]{1,18})(?![0-9])"
-)
 # openqa-investigate names its clones TEST:investigate:<kind> and sets
 # OPENQA_INVESTIGATE_ORIGIN=<host>/t<origin id>.
 INVESTIGATE_TEST = re.compile(r":investigate:(.+)\Z")
@@ -469,10 +464,10 @@ def start_minute(job):
 def as_of(link, before):
     """A restart as it stood at `before`: None when it had not started, running when it
     had not finished."""
-    started = parse_time(link.get("t_started"))
+    started = _oqa.parse_time(link.get("t_started"))
     if started is None or started > before:
         return None
-    finished = parse_time(link.get("t_finished"))
+    finished = _oqa.parse_time(link.get("t_finished"))
     if link.get("state") == "done" and (finished is None or finished > before):
         return {**link, "state": "running", "result": "none"}
     return link
@@ -1055,7 +1050,7 @@ def comment_body(item, verbose):
         clones = [
             f"{match.group(1).partition(':investigate:')[2] or match.group(1)} t#{match.group(2)}"
             for line in lines
-            if (match := INVESTIGATE_CLONE.match(line))
+            if (match := _oqa.INVESTIGATE_CLONE.match(line))
         ]
         return " ".join([first, ", ".join(clones)]) if clones else first
     return first
@@ -1068,33 +1063,17 @@ def llm_fields(summary):
     )
 
 
-def parse_time(value):
-    """An aware UTC datetime from ISO 8601 or openQA's "2030-01-02 10:00:00 +0000", or None;
-    a time without a zone is UTC."""
-    if not isinstance(value, str):
-        return None
-    text = re.sub(r"[zZ]$", "+00:00", value.strip())
-    text = re.sub(r" ?([+-]\d\d):?(\d\d)$", r"\1:\2", text)
-    try:
-        stamp = datetime.fromisoformat(text)
-        if stamp.tzinfo is None:
-            stamp = stamp.replace(tzinfo=timezone.utc)
-        return stamp.astimezone(timezone.utc)
-    except (ValueError, OverflowError):
-        return None
-
-
 def created_value(value):
     """When a comment was made, in UTC to the second as --before compares it; a value that
     is no time is shown cut."""
-    stamp = parse_time(value)
+    stamp = _oqa.parse_time(value)
     if stamp:
         return stamp.strftime("%Y-%m-%dT%H:%M:%SZ")
     return tok(_oqa.clean(str(value), 20)[:16].replace(" ", "T"), 20)
 
 
 def before_time(value):
-    stamp = parse_time(value)
+    stamp = _oqa.parse_time(value)
     if stamp is None:
         raise argparse.ArgumentTypeError(
             "expected an ISO 8601 time such as 2030-01-02T10:00Z"
@@ -1103,7 +1082,7 @@ def before_time(value):
 
 
 def created_by(comment, before):
-    created = parse_time(comment.get("created"))
+    created = _oqa.parse_time(comment.get("created"))
     return created is not None and created <= before
 
 

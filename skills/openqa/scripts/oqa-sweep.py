@@ -89,7 +89,6 @@ import json
 import os
 import re
 import sys
-from datetime import datetime, timezone
 
 # python3 -I leaves the script's own directory off sys.path; the sibling modules live there.
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -141,22 +140,6 @@ class ShapeError(Exception):
 
 
 tok, toks = _oqa.tok, _oqa.toks
-
-
-def parse_time(value):
-    """An aware UTC datetime from ISO 8601 or openQA's "2030-01-02 10:00:00 +0000", or None;
-    a time without a zone is UTC, as openQA's t_started is."""
-    if not isinstance(value, str):
-        return None
-    text = re.sub(r"[zZ]$", "+00:00", value.strip())
-    text = re.sub(r" ?([+-]\d\d):?(\d\d)$", r"\1:\2", text)
-    try:
-        stamp = datetime.fromisoformat(text)
-    except ValueError:
-        return None
-    if stamp.tzinfo is None:
-        stamp = stamp.replace(tzinfo=timezone.utc)
-    return stamp.astimezone(timezone.utc)
 
 
 def _iso(stamp):
@@ -412,9 +395,9 @@ def jobs_before(client, group, entry, args, results, reserve):
     for job in sorted(
         _of_test(fetched, args.test, _api_test), key=lambda job: -job["id"]
     ):
-        finished = parse_time(job.get("t_finished"))
+        finished = _oqa.parse_time(job.get("t_finished"))
         # A job cancelled before it ran has no start, only its end.
-        started = parse_time(job.get("t_started")) or finished
+        started = _oqa.parse_time(job.get("t_started")) or finished
         if started is None or started > args.before:
             later += 1
             continue
@@ -475,7 +458,8 @@ def _review_state(client, job, before=None):
         comments = [
             comment
             for comment in comments
-            if (created := parse_time(comment.get("created"))) and created <= before
+            if (created := _oqa.parse_time(comment.get("created")))
+            and created <= before
         ]
     job["llm"] = _oqa.llm_review(comments)
     for comment in comments:
@@ -974,7 +958,7 @@ def test_regex(value):
 
 
 def before_time(value):
-    stamp = parse_time(value)
+    stamp = _oqa.parse_time(value)
     if stamp is None:
         raise argparse.ArgumentTypeError(
             "expected an ISO 8601 time such as 2030-01-02T10:00Z"

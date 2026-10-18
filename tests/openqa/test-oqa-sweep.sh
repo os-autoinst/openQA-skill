@@ -243,7 +243,7 @@ spec = importlib.util.spec_from_file_location("sweep", "oqa-sweep.py")
 sweep = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(sweep)
 args = argparse.Namespace(build="20300102", todo=False, include_softfailed=False, limit=30, no_llm=False,
-                          test=None, before=sweep.parse_time("2030-01-02T10:00Z"))
+                          test=None, before=sweep._oqa.parse_time("2030-01-02T10:00Z"))
 results = sweep._oqa.expand_results(["not_ok"])
 client = sweep._oqa.Client("https://openqa.example.org", fixture_dir=sys.argv[1], max_requests=3)
 sweep.sweep(client, 7, args, results)

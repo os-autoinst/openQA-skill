@@ -102,6 +102,10 @@ Output (all third-party text must go through one of these or sanitize/fence):
         Anyone can post a look-alike, so it adds "by": [userName, ...] of the summaries and
         "class_by": {class: [userName, ...]}; raw text (None when missing) like the rest
     CARRYOVER: the marker openQA appends to a comment it copied from an older job, group(1) that job's id
+    INVESTIGATE_CLONE: matches one line of the clone list openqa-investigate posts, group(1) the clone's
+        TEST, group(2) its id; raw text
+    parse_time(value) -> aware UTC datetime from ISO 8601 or "2030-01-02 10:00:00 +0000", else None;
+        a time without a zone is UTC
     llm_line(summary, limit=300) -> up to 3 bullets plus the first prose line, one line cut at a sentence end
 
 Offline tests: --fixture-dir DIR (or Client(fixture_dir=DIR)) disables the
@@ -125,6 +129,7 @@ import time
 import traceback
 import urllib.error
 import urllib.request
+from datetime import datetime, timezone
 from urllib.parse import quote, urlencode, urlsplit
 
 # python3 -I leaves the script's own directory off sys.path; the sibling modules live there.
@@ -136,6 +141,7 @@ __all__ = [
     "CARRYOVER",
     "DEFAULT_HOST",
     "FAILURE_RESULTS",
+    "INVESTIGATE_CLONE",
     "RESULTS",
     "RESULT_GROUPS",
     "Client",
@@ -157,6 +163,7 @@ __all__ = [
     "llm_summary",
     "normalize_host",
     "parse_job_url",
+    "parse_time",
     "quoted",
     "run",
     "sanitize",
@@ -458,6 +465,22 @@ def job_id_of(value):
     return value if type(value) is int and 0 < value < 10**18 else None
 
 
+def parse_time(value):
+    """An aware UTC datetime from ISO 8601 or openQA's "2030-01-02 10:00:00 +0000", or None;
+    a time without a zone is UTC, as openQA's t_started is."""
+    if not isinstance(value, str):
+        return None
+    text = re.sub(r"[zZ]$", "+00:00", value.strip())
+    text = re.sub(r" ?([+-]\d\d):?(\d\d)$", r"\1:\2", text)
+    try:
+        stamp = datetime.fromisoformat(text)
+        if stamp.tzinfo is None:
+            stamp = stamp.replace(tzinfo=timezone.utc)
+        return stamp.astimezone(timezone.utc)
+    except (ValueError, OverflowError):
+        return None
+
+
 def _job(data, job_id=None):
     job = data.get("job") if isinstance(data, dict) else None
     if not isinstance(job, dict):
@@ -553,6 +576,11 @@ def toks(values, limit=80, most=8):
 
 
 CARRYOVER = re.compile(r"\(Automatic (?:carryover|takeover) from t#([0-9]{1,18})\)")
+# One clone of the list openqa-investigate posts, "* *<name>*: t#<id>"; older revisions
+# wrote the name in bold and a URL, ".../t<id>" or ".../tests/<id>".
+INVESTIGATE_CLONE = re.compile(
+    r"\s*\*\s+\*{1,2}([^*\s]+)\*{1,2}:\s*(?:t#|https?://[^/\s]+/(?:tests/|t))([0-9]{1,18})(?![0-9])"
+)
 LLM_MARKERS = ("**LLM Investigation summary:**", "**TL;DR:**")
 _LLM_FOOTER = re.compile(r"This comment has been \**AI generated", re.IGNORECASE)
 _LLM_CLASS = re.compile(

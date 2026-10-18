@@ -1264,7 +1264,7 @@ def main():
     if not ok:
         # The settings line is a fixed subset; what changed is in the investigation data.
         print(
-            f"hint: settings changed since the last good run: oqa-history.py {url} --investigation"
+            f"hint: what changed since the last good run: oqa-history.py {url} --investigation"
         )
     print_chain(client, job, args.verbose, args.before)
     print_dependencies(client, job, args.verbose)

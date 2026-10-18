@@ -1,7 +1,7 @@
 job=880 host=https://openqa.example.org result=failed started=2030-01-02T03:04:05 duration=20m00s
 scenario=exampleos-15.6-Updates-x86_64-qam-update@64bit build=20300102 group=11
 settings: BACKEND=qemu
-hint: settings changed since the last good run: oqa-history.py https://openqa.example.org/tests/880 --investigation
+hint: what changed since the last good run: oqa-history.py https://openqa.example.org/tests/880 --investigation
 modules=1 failed=1
 module=zypper_in result=failed category=console
   step=2 kind=step-failed title="Conflict" link=https://openqa.example.org/tests/880#step/zypper_in/2 last_shot=https://openqa.example.org/tests/880/images/zypper_in-1.png

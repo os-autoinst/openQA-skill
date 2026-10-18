@@ -2,7 +2,7 @@ job=900 host=https://openqa.example.org result=failed worker=#404 started=2030-0
 scenario=exampleos-Rolling-DVD-x86_64-kde@64bit build=20300102 group=7
 note: details unusable or too large: module results only, no steps
 settings: BACKEND=qemu QEMUCPU=host QEMURAM=2048
-hint: settings changed since the last good run: oqa-history.py https://openqa.example.org/tests/900 --investigation
+hint: what changed since the last good run: oqa-history.py https://openqa.example.org/tests/900 --investigation
 modules=2 failed=1 passed=1
 module=plasma result=failed
   steps not available link=https://openqa.example.org/tests/900#step/plasma/1

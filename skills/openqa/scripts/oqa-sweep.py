@@ -1009,15 +1009,6 @@ def test_regex(value):
         raise argparse.ArgumentTypeError(f"not a valid regex: {error}") from None
 
 
-def before_time(value):
-    stamp = _oqa.parse_time(value)
-    if stamp is None:
-        raise argparse.ArgumentTypeError(
-            "expected an ISO 8601 time such as 2030-01-02T10:00Z"
-        )
-    return stamp
-
-
 def git_hash(value):
     if not GIT_HASH.fullmatch(value.lower()):
         raise argparse.ArgumentTypeError("must be 7 to 40 hex digits")
@@ -1061,7 +1052,7 @@ def main():
     )
     parser.add_argument(
         "--before",
-        type=before_time,
+        type=_oqa.before_time,
         metavar="TIME",
         help="the build as it stood at TIME (ISO 8601 such as 2030-01-02T10:00Z, UTC "
         "unless it has an offset): per scenario the newest job that had started by then, "

@@ -109,6 +109,7 @@ Output (all third-party text must go through one of these or sanitize/fence):
         TEST, group(2) its id; raw text
     parse_time(value) -> aware UTC datetime from ISO 8601 or "2030-01-02 10:00:00 +0000", else None;
         a time without a zone is UTC
+    before_time(value) -> parse_time() as an argparse type, for --before TIME
     llm_line(summary, limit=300) -> up to 3 bullets plus the first prose line, one line cut at a sentence end
 
 Offline tests: --fixture-dir DIR (or Client(fixture_dir=DIR)) disables the
@@ -153,6 +154,7 @@ __all__ = [
     "NotFound",
     "OqaError",
     "add_common_args",
+    "before_time",
     "clean",
     "client_from_args",
     "clone_chain",
@@ -484,6 +486,15 @@ def parse_time(value):
         return stamp.astimezone(timezone.utc)
     except (ValueError, OverflowError):
         return None
+
+
+def before_time(value):
+    stamp = parse_time(value)
+    if stamp is None:
+        raise argparse.ArgumentTypeError(
+            "expected an ISO 8601 time such as 2030-01-02T10:00Z"
+        )
+    return stamp
 
 
 def _job(data, job_id=None):

@@ -203,6 +203,18 @@ tests_overview.json_groupid=1_result=failed_result=incomplete
 133 True
 EOF
 )" "$actual"
+actual=$(py '
+import argparse, _oqa
+print(_oqa.before_time("2030-01-02T12:00+02:00").isoformat())
+try:
+    _oqa.before_time("yesterday")
+except argparse.ArgumentTypeError as error:
+    print(error)
+')
+check "before_time: --before TIME in UTC, a usage error for anything else" \
+	"2030-01-02T10:00:00+00:00|expected an ISO 8601 time such as 2030-01-02T10:00Z" "$(paste -sd'|' <<<"$actual")"
+check "before_time has one owner: no script keeps its own copy" "_oqa.py" \
+	"$(grep -l '^def before_time' "$scripts"/*.py | xargs -n 1 basename)"
 
 # --- current failures ---------------------------------------------------------
 actual=$(oqa --fixture-dir "$fixtures" failures 7 20300101)

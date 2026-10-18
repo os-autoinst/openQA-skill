@@ -48,6 +48,7 @@ By kind of change, not by block: `tests/virt_autotest` and virtualization featur
 - **Scheduling is Perl, not `schedule/*.yaml`** (only image creation and a few SL Micro flows use YAML): `lib/main_containers.pm` (driven by `CONTAINER_RUNTIMES`) or `lib/main_micro_alp.pm`; unschedule there rather than skip in the module (#26708). Opt-in flags: `CONTAINER[S]_*`, e.g. `loadtest 'containers/<x>' if get_var('CONTAINERS_<FLAG>');`
 - **Asks**: the platform's own mechanism (readiness probe, `kubectl wait`) over outside scripting (#25409); no re-implemented distribution upgrade, a pre/post pair via `$run_args->{phase}` like `containers/upgrade` (#25058); soft-failure scoped to product, version, bug (#26342); no leading underscore on test-module subs (#25375); truthiness, not definedness, of optional settings (#25435).
 - **Title**: plain, or `containers:` / `<module>:`. **Runs**: shared modules (`container_engine`, `host_configuration`) need runs across host products and runtimes.
+- **Triage**: `bci_version_check` failing with `Stale build`, or its pull timing out: the moving totest tag already points to a newer build. A timing race, not PRODUCT: the job is obsolete, the newer build's run counts.
 
 ## Public cloud
 - **Shape**: `publiccloud::basetest`; `my ($self, $args) = @_;`; `$args->{my_instance}`, `$args->{my_provider}` (set by `publiccloud/prepare_instance`); early-return guards before any console switch (#26179).

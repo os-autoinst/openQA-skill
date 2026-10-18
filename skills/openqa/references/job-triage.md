@@ -56,6 +56,7 @@ Classes: PRODUCT, TEST (code, needle, schedule, settings), INFRA (worker, backen
 | `Machine didn't shut down!` | refused or hung shutdown, no needle problem: the last screenshot, `serial0.txt` and the journal ulog for the unit or mount that held it |
 | `command '<cmd>' failed`, `command '<cmd>' timed out`, `script failed with : `, `script timeout: `, `output not validating`; a `fail` `wait_serial` step plus the test's own die text; `<message> - Serial error: <line>`; a helper's own die after its retries | failure-modes.md "Command failures" |
 | `Unknown issue`, `<service> failed` (`journal_check`) | failure-modes.md "Journal check" |
+| `Stale build` (`bci_version_check`) | area-conventions.md "Containers" |
 | `typing command '<cmd>' timed out`; a cut or garbled command line; a command that ran without its done-marker | failure-modes.md "Typed input" |
 | `<perl error> at <file> line <n>.`, `Could not retrieve required variable <VAR>` | TEST; regression if the test log since last good touches that file |
 | `Maximum allowed test steps (MAX_TEST_STEPS=<n>) exceeded` | TEST (loop); after hundreds of fast-failing modules, what fails them |
@@ -143,4 +144,4 @@ Templates -> bugs-and-tickets.md "Bug body", "Ticket body"
 - **Suite cloned or installed at run time:** not at `TEST_GIT_HASH` -> suite-results.md "Suite revision"
 - **Digest and log disagree** (log `last_module=` not in the digest, other worker or date, modules after a fatal one): the artifact is from another run; no evidence, say so.
 
-Sources: openQA lib/OpenQA Constants.pm, JobSettings.pm, Worker/Job.pm, Worker/Engines/isotovideo.pm, Schema/Result/Jobs.pm, Scheduler/Model/Jobs.pm; os-autoinst testapi.pm, basetest.pm, consoles/serial_screen.pm, autotest.pm, distribution.pm, lockapi.pm, OpenQA/Qemu/Proc.pm, script/isotovideo, consoles/localXvnc.pm; os-autoinst-distri-opensuse lib/utils.pm, lib/known_bugs.pm, lib/Utils/Logging.pm, lib/publiccloud/instance.pm, tests/publiccloud/{img_proof,destroy}.pm; os-autoinst-scripts openqa-investigate, openqa-llm-investigate
+Sources: openQA lib/OpenQA Constants.pm, JobSettings.pm, Worker/Job.pm, Worker/Engines/isotovideo.pm, Schema/Result/Jobs.pm, Scheduler/Model/Jobs.pm; os-autoinst testapi.pm, basetest.pm, consoles/serial_screen.pm, autotest.pm, distribution.pm, lockapi.pm, OpenQA/Qemu/Proc.pm, script/isotovideo, consoles/localXvnc.pm; os-autoinst-distri-opensuse lib/utils.pm, lib/known_bugs.pm, lib/Utils/Logging.pm, lib/publiccloud/instance.pm, tests/publiccloud/{img_proof,destroy}.pm, tests/containers/bci_version_check.pm; os-autoinst-scripts openqa-investigate, openqa-llm-investigate

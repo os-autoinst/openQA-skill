@@ -81,8 +81,19 @@ golden crossed-worst 1 --fixture-dir "$vars" --job https://openqa.opensuse.org/t
 
 for name in fork-worst pr-worst crossed-worst; do
 	lines=$(wc -l <"$fixtures/$name.out")
-	if [ "$lines" -le 9 ]; then ok "$name: command plus at most 8 lines"; else not_ok "$name: $lines lines"; fi
+	if [ "$lines" -le 10 ]; then ok "$name: command plus at most 9 lines"; else not_ok "$name: $lines lines"; fi
 done
+# Every note and hazard one form can print at once: the bound the docstring and --help state.
+run --fixture-dir "$vars" --job https://openqa.opensuse.org/tests/4243 --test-hash 0123456 --skip-chained-deps \
+	--label 'poo 1(2)' --schedule console/foo,bar --needles-fork '<user>' --needles-branch '<branch>'
+check "crossed: the most lines one form prints, the command plus 9" "1 10 2 4" \
+	"$rc $(wc -l <<<"$out") $(grep -c '^note: ' <<<"$out") $(grep -c '^hazard: ' <<<"$out")"
+run --job https://openqa.opensuse.org/tests/77 --pr "$pr" --needles-fork '<user>' --needles-branch '<branch>' \
+	--schedule console/foo,bar --set WORKER_CLASS:client=w2
+check "pr: the most lines one form prints, the command plus 9" "1 10 3 3" \
+	"$rc $(wc -l <<<"$out") $(grep -c '^note: ' <<<"$out") $(grep -c '^hazard: ' <<<"$out")"
+check "the docstring and --help state that bound" "1 1" \
+	"$(sed -n 4p "$script" | grep -c 'at most 9 short lines') $(python3 "$script" --help | tr -s ' \n' ' ' | grep -c 'lines (9 at most)')"
 
 # --- --job forms ---
 run --job "$lab" "${fork[@]}"

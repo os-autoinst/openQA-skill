@@ -47,7 +47,7 @@ Timestamps are UTC (`Z`) or worker-local with offset; normalise across peers. Pr
 | `# Test died` | start here, read upwards |
 | `\] Result: ` | worker stop reason near the end; lines start with a timestamp: `^Result:` never matches |
 | `Backend process died, backend errors are reported below` | backend crash; next lines |
-| `post_fail_hook failed: ` | secondary, not the root cause |
+| `post_fail_hook failed: ` | secondary, not the root cause; except `COREDUMPS found`: a process crashed, its `core.<binary>....txt` ulog names it -> area-conventions.md "Virtualization" |
 | `Matched output from SUT in <n> loops & <s> seconds` | one serial-terminal wait of `<s>`; `<n>` counts reads, not load |
 
 - **Normal failed-job tail:** `stopping overall test execution after a fatal test failure`, `Result: done`.

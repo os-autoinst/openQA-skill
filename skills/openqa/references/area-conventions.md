@@ -100,6 +100,7 @@ By kind of change, not by block: `tests/virt_autotest` and virtualization featur
 - **Scheduling**: `schedule/virt_autotest/*.yaml`; maintenance-update feature tests also go into `get_virt_features_definition` and the loaders of `lib/main_common.pm`, version guards in each (#25205).
 - **Asks**: a generic crash detector is `record_info(.., result => 'fail')`, soft-failure is for one known bug; show the captured output, never made-up text (both #26316).
 - **Runs**: simulated-failure path (#25205); maintenance-update and development product (#26316).
+- **Triage**: host logs are uploads (`collect_virt_system_logs`, mostly from `post_fail_hook`): `*-libvirt_daemons.tar.gz`, `*-qemu.tar.gz` (per-guest qemu logs), `*-xen.tar.gz`, `*-journalctl-b.txt`; a core dump comes with `core.<binary>....txt` (`coredumpctl info`). `COREDUMPS found` from the hook can be the primary evidence: qemu crashed on the host.
 
 ## Transactional and MinimalVM
 - **Schedules**: `schedule/jeos/sle/{jeos,minimalvm}-main.yaml`, `schedule/elemental3/`; SL Micro / MicroOS flows in `lib/main_micro_alp.pm`. -> references/module-templates.md "Transactional test"

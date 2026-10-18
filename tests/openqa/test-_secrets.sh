@@ -476,6 +476,7 @@ for line in "my %args = (regcode => $regcode, email => 'a@example.org');" "    '
 	check "an unquoted Perl value: ${line%%"$regcode"*}" "${line/"$regcode"/[REDACTED:keyed-assignment]}" "$actual"
 done
 keeps "unquoted Perl values that are code" "password => DEFAULT_PASSWORD,\ntoken_timeout => 300,\ntoken => generate_token2(),\npassword => undef,\npassword_hash => sha512,\nregcode => get_required_var('SCC_REGCODE'),\ntoken => \$t1234567,\n"
+keeps "an unquoted Perl constant with an underscore" "token => CHECKSUM_SHA256,\nPASSWORD => SLE_15_SP6 }\n"
 SECONDS=0
 python3 -c "
 import sys; sys.path.insert(0, '$scripts')

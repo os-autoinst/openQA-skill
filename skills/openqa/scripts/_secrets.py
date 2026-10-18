@@ -409,11 +409,11 @@ _KEYED = re.compile(
     r"((?:[^\s'\"\\]|\\(?!['\"]))+)"
 )
 # An unquoted Perl value is a variable, a call or a constant far more often than a
-# literal: only letters and digits both, ended where a hash value ends, count.
+# literal: only letters and digits both, ended where a hash value ends, count, and not an
+# upper-case name with an underscore such as CHECKSUM_SHA256.
 _KEYED_BARE = re.compile(
-    r"(?i)"
-    + _KEYED_NAME
-    + r"(\\?['\"]?\s*=>\s*)()(?=[A-Z_-]*[0-9])(?=[0-9_-]*[A-Z])([A-Z0-9_-]{8,256})"
+    r"(?i)" + _KEYED_NAME + r"(\\?['\"]?\s*=>\s*)()(?=[A-Z_-]*[0-9])(?=[0-9_-]*[A-Z])"
+    r"(?!(?-i:[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)+)(?![A-Za-z0-9_-]))([A-Z0-9_-]{8,256})"
     r"(?=\s*(?:[,;)}\]]|$))"
 )
 # The text of an element named for a credential, as in the AutoYaST profile a test filled

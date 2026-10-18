@@ -54,6 +54,7 @@ PERSISTENT_STREAK = 3
 NEXT_BEFORE = 20
 # A job's module list is part of each row of /api/v1/jobs: LTP jobs take ~130 kB each.
 IDS_PER_REQUEST = 25
+MAX_LISTED = 2 * IDS_PER_REQUEST
 MAX_WORKERS = 20
 MAX_COMMENT_JOBS = 30
 MAX_REQUESTS = 80
@@ -1158,7 +1159,13 @@ def main():
     listed = [
         row["id"] for row in rows if full or (args.before and not row.get("finished"))
     ]
-    runs = run_details(client, listed) if listed else None
+    # At most MAX_LISTED of them: the runs still going (--before needs their start), this job
+    # and the nearest older runs first, which last good, the streak and the module marks use.
+    rank = {}
+    for row in [*(r for r in rows if not r.get("finished")), current, *older, *newer]:
+        rank.setdefault(row["id"], len(rank))
+    fetched = sorted(listed, key=rank.get)[:MAX_LISTED]
+    runs = run_details(client, fetched) if listed else None
     cut, references, later, forced, forcing = 0, {}, 0, {}, set()
     # openQA answers with the following+1 nearest runs after the job and the latest one.
     nearest = sorted(row["id"] for row in newer)[: following + 1]
@@ -1216,6 +1223,11 @@ def main():
         print("note: no worker column; --workers reads it")
     elif runs is None:
         print("note: workers not read (/api/v1/jobs not readable)")
+    if runs is not None and len(listed) > MAX_LISTED:
+        print(
+            f"note: /api/v1/jobs read for {MAX_LISTED} of {len(listed)} runs, this job and "
+            "the nearest older ones first; the rest show '?'"
+        )
     notes = (
         [f"{len(newer)} newer run(s) not counted, latest={newer[0]['id']}"]
         if newer

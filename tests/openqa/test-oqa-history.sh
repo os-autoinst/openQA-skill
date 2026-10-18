@@ -148,6 +148,24 @@ status=$?
 rm -rf "$tmp"
 check "--before: a run without finished whose list chunk failed is refused, not cut" \
 	"2 error: --before needs the start times of the runs still going; /api/v1/jobs could not be read" "$status $actual"
+# 62 runs: the module lists are read for 50 of them, this job and the nearest older ones.
+tmp=$(mktemp -d)
+python3 - "$tmp" <<'PY'
+import json, sys
+rows = [{"id": 6000 - i, "build": "1", "result": "passed", "state": "done", "iscurrent": 1 if i == 0 else None}
+        for i in range(62)]
+json.dump({"data": rows}, open(f"{sys.argv[1]}/tests_6000_ajax_previous_limit=61_next_limit=0.json", "w"))
+for part in (rows[:25], rows[25:50]):
+    name = "api_v1_jobs_ids=" + "_".join(str(row["id"]) for row in part)
+    jobs = [{"id": row["id"], "t_started": "2030-01-01T10:00:00", "assigned_worker_id": 100} for row in part]
+    json.dump({"jobs": jobs}, open(f"{sys.argv[1]}/{name}.json", "w"))
+json.dump({"worker": {"host": "w100", "instance": 1}}, open(f"{sys.argv[1]}/api_v1_workers_100.json", "w"))
+PY
+actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 6000 --previous 61 --workers 2>&1)
+rm -rf "$tmp"
+check "a long history: two list requests for the 50 nearest runs, the rest '?', a note says so" \
+	"50 12|note: /api/v1/jobs read for 50 of 62 runs, this job and the nearest older ones first; the rest show '?'|requests: 4" \
+	"$(grep -c '2030-01-01T10:00Z' <<<"$actual") $(grep -Ec '^59[0-9]{2}  1      \?  ' <<<"$actual")|$(grep '^note: /api' <<<"$actual")|$(tail -n 1 <<<"$actual")"
 
 # --- classification hints ------------------------------------------------------------
 actual=$(history 5100)

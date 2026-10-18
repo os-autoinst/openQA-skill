@@ -251,11 +251,12 @@ RULES = (
         r"\1" + MARK.format("curl-user"),
     ),
     # mysql and mariadb take a password only attached, -pSECRET: a word after "-p " is the
-    # database, the password prompted for.
+    # database, the password prompted for. Only the first "login" after a container tool is
+    # tried, or a line of "docker login" repeated costs a second.
     (
         "password-flag",
         re.compile(
-            r"(?i)((?:ipmitool\b[^\n]{0,200}?\s(?-i:-P)|sshpass\b[^\n]{0,200}?\s(?-i:-p)|(?:mysql|mariadb)\b[^\n]{0,200}?\s(?-i:-p)(?=\S)|smbclient\b[^\n]{0,200}?\s(?:-U\s*|--user[= ])[^\s%]{1,64}%|(?:helm|podman|docker|kubectl|skopeo)\b[^\n]{0,80}?\blogin\b[^\n]{0,200}?\s-p|\s--password(?=[ =]))[ =]?)\S{4,}"
+            r"(?i)((?:ipmitool\b[^\n]{0,200}?\s(?-i:-P)|sshpass\b[^\n]{0,200}?\s(?-i:-p)|(?:mysql|mariadb)\b[^\n]{0,200}?\s(?-i:-p)(?=\S)|smbclient\b[^\n]{0,200}?\s(?:-U\s*|--user[= ])[^\s%]{1,64}%|(?:helm|podman|docker|kubectl|skopeo)\b(?:(?!\blogin\b)[^\n]){0,80}\blogin\b[^\n]{0,200}?\s-p|\s--password(?=[ =]))[ =]?)\S{4,}"
         ),
         r"\1" + MARK.format("password-flag"),
     ),

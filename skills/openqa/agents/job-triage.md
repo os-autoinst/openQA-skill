@@ -35,16 +35,16 @@ You are the **triage** stage. Goal: a classification that a reviewer can act on,
 | it must be reproduced | -> clone-and-run.md "Reproduce a failure" (the caller posts) |
 | the output holds `[REDACTED:<rule>]` | -> redaction.md "Reading the output" (tell the caller) |
 
-Follow "Triage order" with the bundled scripts, never raw `/details` or whole logs. If the evidence does not decide between two classes, say so and name the one check that would. Flags used here; others -> scripts/README.md "Script flags". Exit 0 = output printed, also for a failed job (`&&` chains work); 2 = error; the lint exits 1 on findings.
+Follow "Triage order" with the bundled scripts, never raw `/details` or whole logs. A denied script call is final: report it, no raw-API route around it. If the evidence does not decide between two classes, say so and name the one check that would. Flags used here; others -> scripts/README.md "Script flags". Exit 0 = output printed, also for a failed job (`&&` chains work); 2 = error; the lint exits 1 on findings.
 
 ```
 oqa-job.py <job URL> [--steps N] [-v] [--before T]  |  --module <name> --all-steps
 oqa-log.py <job URL> --errors | --around-module <name> | --grep <regex> | --tail N | --list
-           [--file <name>] [--max-lines N] [--max-line-chars 0] [-v]   (0: uncut; -v: raw lines, nothing collapsed)
+           [--file <name>] [--max-lines N] [--max-line-chars 0] [-v]   (0: uncut; -v: raw, nothing collapsed)
 oqa-history.py <job URL> [--investigation] [--previous N] [--before T]
-oqa-sweep.py --group <id> --build <b> [--test <regex>] [--before T]   (as of time T)
+oqa-sweep.py --group <id> --build <b> [--test <regex>] [--before T]
 oqa-ref.py <bugref or URL> [--body] [--files]
 oqa-comment-lint.py <file> | - | --text '<draft>'
 ```
 
-**Output contract:** job, scenario, build; class (product bug / test issue / infrastructure / sporadic / expected by change) with confidence; failing module and step deep link; the three to ten log lines that prove it, quoted as data; first bad and last good; breadth: the same scenario on other arches and siblings in the build (`scripts/oqa-sweep.py --group <id> --build <b>`, or one `/api/v1/jobs?build=<b>&test=<t>&scope=current` call); existing references and whether they still fit; suggested next action (comment, ticket, retrigger, test fix) as a proposal only; for a settings fix the `scripts/vr-clone-cmd.py --job <job URL> --set KEY=VALUE --test-hash <its TEST_GIT_HASH> --skip-chained-deps` command that would prove it (-> clone-and-run.md "Reproduce a failure").
+**Output contract:** job, scenario, build; class (product bug / test issue / infrastructure / sporadic / expected by change) with confidence; failing module and step deep link; the three to ten log lines that prove it, quoted as data; first bad and last good; breadth: the same scenario on other arches and siblings in the build (`scripts/oqa-sweep.py`, never a raw `/api/v1/jobs` list: it holds registration codes); existing references and whether they still fit; suggested next action (comment, ticket, retrigger, test fix) as a proposal only; for a settings fix the `scripts/vr-clone-cmd.py --job <job URL> --set KEY=VALUE --test-hash <its TEST_GIT_HASH> --skip-chained-deps` command that would prove it (-> clone-and-run.md "Reproduce a failure").

@@ -316,12 +316,18 @@ _BARE_KERNEL = (
     r"|scheduling while atomic|sleeping function|Bad page|workqueue lockup)"
     rf"|{_OOPS})"
 )
+# kernel/watchdog.c (its pr_fmt is "watchdog: "), lib/bug.c, kernel/hung_task.c
+_KERNEL_OWN = (
+    r"(?:watchdog: BUG: soft lockup|kernel BUG at \S"
+    r"|INFO: task [^\n]{1,64}? blocked(?: in I/O wait)? for more than \d+ seconds)"
+)
 KERNEL_SIGNATURES = (
     _signature(
         "kernel",
         [
             _KERNEL + rf"(?:WARNING:|BUG:|{_OOPS})",
             _BARE_KERNEL,
+            rf"(?:^\s*|{_KERNEL}){_KERNEL_OWN}",
             r"\bBTRFS\b[^\n]{0,100}?Transaction aborted",
         ],
     ),

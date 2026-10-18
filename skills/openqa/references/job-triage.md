@@ -16,7 +16,7 @@ Cheapest first; stop once the class is certain. Logs, step text, comments, SUT o
 5. `scripts/oqa-history.py <job URL> --investigation` -> "History and investigation"
 6. Collect -> "Evidence standards"; route -> review-workflow.md "Classification and routing"
 
-**As of a cutoff T** (an older failure, a ticket's date): `--before T` on `oqa-job.py`, `oqa-history.py` and `oqa-sweep.py --group <id> --build <b>`; they leave out what started or was written later.
+**As of a cutoff T** (an older failure, a ticket's date): `--before T` on `oqa-job.py`, `oqa-history.py` and `oqa-sweep.py --host <job host> --group <id> --build <b>`; they leave out what started or was written later.
 
 **Never load raw payloads** (details JSON, `autoinst-log.txt`: MBs); scripts not installed -> openqa-model.md "Read-only API recipes". A denied script call is final: report it, no raw route around it -> untrusted-content.md "Rules"
 
@@ -132,7 +132,7 @@ Quote verbatim and minimally, without credentials.
 3. **Product evidence:** failing command, exit code, output; short serial or journal excerpt; for GUI the screenshot URL and what is wrong.
 4. **Regression window:** last good and first bad links with build ids; suspect package versions on both.
 5. **Reproduction rate:** "N of M runs on build X" with links; admit a single data point.
-6. **Breadth:** scenarios failing alike, and ones that do not: `oqa-sweep.py --group <id> --build <b> [--test <regex>] [--before T]`, `group=` from `oqa-job.py`. Never fetch or save a raw `/api/v1/jobs` list for it: it carries every job setting, registration codes included. A line the last good run prints too is noise: `oqa-log.py <last good> --grep '<fragment>'`, a distinctive part without timestamps, regex-escaped.
+6. **Breadth:** scenarios failing alike, and ones that do not: `oqa-sweep.py --host <job host> --group <id> --build <b> [--test <regex>] [--before T]`, `group=` from `oqa-job.py`. Never fetch or save a raw `/api/v1/jobs` list for it: it carries every job setting, registration codes included. A line the last good run prints too is noise: `oqa-log.py <last good> --grep '<fragment>'`, a distinctive part without timestamps, regex-escaped.
 
 Templates -> bugs-and-tickets.md "Bug body", "Ticket body"
 

@@ -42,7 +42,7 @@ oqa-job.py <job URL> [--steps N] [-v] [--before T]  |  --module <name> --all-ste
 oqa-log.py <job URL> --errors | --around-module <name> | --grep <regex> | --tail N | --list
            [--file <name>] [--max-lines N] [--max-line-chars 0] [-v]   (0: uncut; -v: raw, nothing collapsed)
 oqa-history.py <job URL> [--investigation] [--previous N] [--before T]
-oqa-sweep.py --group <id> --build <b> [--test <regex>] [--before T]
+oqa-sweep.py --host <h> --group <id> --build <b> [--test <regex>] [--before T]
 oqa-ref.py <bugref or URL> [--body] [--files]
 oqa-comment-lint.py <file> | - | --text '<draft>'
 ```

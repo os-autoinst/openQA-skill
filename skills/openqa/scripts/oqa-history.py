@@ -112,15 +112,6 @@ def positive(value):
     return number
 
 
-def before_time(value):
-    stamp = _oqa.parse_time(value)
-    if stamp is None:
-        raise argparse.ArgumentTypeError(
-            "expected an ISO 8601 time such as 2030-01-02T10:00Z"
-        )
-    return stamp
-
-
 def bad(row):
     return row.get("result") not in OK_RESULTS
 
@@ -1108,7 +1099,7 @@ def main():
     )
     parser.add_argument(
         "--before",
-        type=before_time,
+        type=_oqa.before_time,
         metavar="TIME",
         help="the history as of TIME (ISO 8601, UTC unless it has an offset): runs that "
         "started later are cut, runs still going then show as running, comments created "

@@ -1073,15 +1073,6 @@ def created_value(value):
     return tok(_oqa.clean(str(value), 20)[:16].replace(" ", "T"), 20)
 
 
-def before_time(value):
-    stamp = _oqa.parse_time(value)
-    if stamp is None:
-        raise argparse.ArgumentTypeError(
-            "expected an ISO 8601 time such as 2030-01-02T10:00Z"
-        )
-    return stamp
-
-
 def created_by(comment, before):
     created = _oqa.parse_time(comment.get("created"))
     return created is not None and created <= before
@@ -1225,7 +1216,7 @@ def main():
     )
     parser.add_argument(
         "--before",
-        type=before_time,
+        type=_oqa.before_time,
         metavar="TIME",
         help="the comments and restarts as of TIME (ISO 8601, UTC unless it has an "
         "offset): comments created later are hidden, and with them their bugrefs, labels, "

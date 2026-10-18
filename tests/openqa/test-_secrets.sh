@@ -433,6 +433,47 @@ actual=$(printf '{\n  "product": {\n    "id": "SLES",\n    "registrationCode": "
 	python3 "$scripts/_secrets.py" 2>&1 >/dev/null)
 check "registrationCode in a profile dump and in Jsonnet with a bare key" "redacted 3: keyed-assignment=3" "$actual"
 
+# --- JSON escaped into a string, a template filled by sed, an unquoted Perl value ---------
+# shellcheck disable=SC2016 # literal $..., as the log prints it
+for line in "echo '{\\\"product\\\": {\\\"registrationCode\\\": \\\"$regcode\\\"}}' > /tmp/profile.json" \
+	"[debug] <<< testapi::script_run(cmd=\"agama config load <<< '{\\\"registrationCode\\\":\\\"$regcode\\\"}'\")" \
+	"\"settings\": \"{\\\"SCC_REGCODE\\\" : \\\"$regcode\\\"}\"" "ROOT_PASSWORD=\\\"$regcode\\\" ./setup.sh"; do
+	actual=$(printf '%s\n' "$line" | python3 "$scripts/_secrets.py" 2>/dev/null)
+	check "a JSON-escaped key: ${line%%"$regcode"*}" "${line/"$regcode"/[REDACTED:keyed-assignment]}" "$actual"
+done
+keeps "a JSON-escaped template slot" '{\\"registrationCode\\": \\"{{SCC_REGCODE}}\\"}\n'
+# shellcheck disable=SC2016 # literal $..., as the log prints it
+for line in "sed -i 's/##Registration-Code##/$regcode/g' /root/combustion/script" \
+	"sed -ri 's/##Registration-Password##/$regcode/g;' /tmp/autoyast.xml" \
+	"sed -i -e 's|{{SCC_REGCODE}}|$regcode|g' \\" "sed -e 's/@REGCODE@/$regcode/;s/a/b/' f" \
+	"[debug] <<< testapi::assert_script_run(cmd=\"sed -i 's/ROOT_PASSWORD/$regcode/g' /root/x.exp\")" \
+	"sed -i \"s/\\\$AD_DOMAIN_PASSWORD/$regcode/\" /etc/samba/x.conf"; do
+	actual=$(printf '%s\n' "$line" | python3 "$scripts/_secrets.py" 2>/dev/null)
+	check "a code filled into a template by sed: ${line%%"$regcode"*}" "${line/"$regcode"/[REDACTED:keyed-assignment]}" "$actual"
+done
+keeps "sed filling in openQA's public default password" "sed -i 's/ROOT_PASSWORD/nots3cr3t/g' /root/x.exp\n"
+keeps "sed changing a setting that names a password" "sed -i 's/#PasswordAuthentication/PasswordAuthentication/' /etc/ssh/sshd_config\n"
+keeps "sed with a space in the substitution" "sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/' /etc/ssh/sshd_config\n"
+# shellcheck disable=SC2016 # literal slots, as the source writes them
+keeps "sed filling in a variable" 'sed -i "s/{{SCC_REGCODE}}/$SCC_REGCODE/" profile.xml\n'
+# shellcheck disable=SC2016 # Perl source, quoted in a ticket
+keeps "a Perl substitution of a variable" '$profile =~ s/\\{\\{PASSWORD\\}\\}/$testapi::password/g;\n'
+keeps "sed on a word that only starts like PASS" "sed 's/PASSED/OK12345/' result.txt\n"
+for line in "my %args = (regcode => $regcode, email => 'a@example.org');" "    'SCC_REGCODE' => $regcode," \
+	"{ api_token => $regcode }"; do
+	actual=$(printf '%s\n' "$line" | python3 "$scripts/_secrets.py" 2>/dev/null)
+	check "an unquoted Perl value: ${line%%"$regcode"*}" "${line/"$regcode"/[REDACTED:keyed-assignment]}" "$actual"
+done
+keeps "unquoted Perl values that are code" "password => DEFAULT_PASSWORD,\ntoken_timeout => 300,\ntoken => generate_token2(),\npassword => undef,\npassword_hash => sha512,\nregcode => get_required_var('SCC_REGCODE'),\ntoken => \$t1234567,\n"
+SECONDS=0
+python3 -c "
+import sys; sys.path.insert(0, '$scripts')
+import _secrets
+for line in (' s/' + 'PASSWORD' * 8 + 'x') * 3400, ' s/PASS/' * 30000, 'password => ' + 'a1' * 120000, '\\\\\"password\\\\\": ' * 16000:
+    _secrets.redact(line)
+"
+check "sed templates, bare Perl values and escaped keys on 240k-character lines stay linear" 1 "$((SECONDS < 10))"
+
 # --- the live system's root password on the installer's boot command line --------------
 for value in "Zq9x""Wv" "Xk""9q" "hun""ter2"; do
 	for line in "[    0.000000] Kernel command line: BOOT_IMAGE=/boot/x86_64/loader/linux live.password=$value console=ttyS0" \

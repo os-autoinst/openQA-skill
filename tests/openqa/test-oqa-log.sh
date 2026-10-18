@@ -1056,4 +1056,129 @@ contains "--runtimes: a log without module markers says so" "note: no module mar
 timeout 10 python3 "$src" --fixture-dir "$tmp" 83 --runtimes >/dev/null 2>&1
 check "--runtimes: 2000 lines of unclosed arguments stay linear (10 s budget)" 0 $?
 
+# --- --shot: one step screenshot saved where the caller says --------------------------
+png="$fixtures/tests_4242_images_boot-2.png"
+mkdir "$tmp/shots" "$tmp/cwd"
+actual=$(log 4242 --shot boot-2.png --out "$tmp/shots")
+status=$?
+check "--shot saves the PNG as <job>-NAME in --out and prints its path" "0 $(
+	cat <<EOF
+job=4242 host=https://openqa.opensuse.org mode=shot
+saved=$tmp/shots/4242-boot-2.png bytes=71
+note: not redacted; a screenshot can show a secret -> references/redaction.md "What it is not"
+requests: 1
+EOF
+)" "$status $actual"
+cmp -s "$png" "$tmp/shots/4242-boot-2.png"
+check "the saved file is the screenshot, byte for byte" 0 $?
+check "the saved file is readable by its owner only" 600 "$(stat -c %a "$tmp/shots/4242-boot-2.png")"
+printf 'kept' >"$tmp/shots/4242-boot-3.png"
+cp "$png" "$tmp/tests_4242_images_boot-3.png"
+actual=$(python3 "$src" --fixture-dir "$tmp" 4242 --shot boot-3.png --out "$tmp/shots" 2>&1)
+check "--shot never overwrites a file" "2 error: $tmp/shots/4242-boot-3.png exists; nothing saved kept" \
+	"$? $actual $(cat "$tmp/shots/4242-boot-3.png")"
+ln -s "$tmp/planted" "$tmp/shots/4242-boot-4.png"
+cp "$png" "$tmp/tests_4242_images_boot-4.png"
+actual=$(python3 "$src" --fixture-dir "$tmp" 4242 --shot boot-4.png --out "$tmp/shots" 2>&1)
+check "--shot never writes through a symlink planted at its target" "2 error: $tmp/shots/4242-boot-4.png exists; nothing saved no" \
+	"$? $actual $([ -e "$tmp/planted" ] && echo yes || echo no)"
+cp "$png" "$tmp/tests_4242_images_generate_report_1-3.png"
+actual=$(python3 "$src" --fixture-dir "$tmp" 4242 --shot 'generate_report%231-3.png' --out "$tmp/shots" 2>/dev/null)
+check "--shot takes the %23 of a shot= link as the # of a module loaded twice" "0 1" \
+	"$? $(grep -c "^saved=$tmp/shots/4242-generate_report#1-3.png bytes=71$" <<<"$actual")"
+cp "$png" "$tmp/tests_4242_images_a_b-2.png"
+actual=$(python3 "$src" --fixture-dir "$tmp" 4242 --shot 'a%2Bb-2.png' --out "$tmp/shots" 2>/dev/null)
+check "--shot takes the %2B of a shot= link as a +" "0 1" "$? $(grep -c "^saved=$tmp/shots/4242-a+b-2.png bytes=71$" <<<"$actual")"
+mkdir "$tmp/full"
+actual=$(
+	ulimit -f 0
+	python3 "$src" --fixture-dir "$fixtures" 4242 --shot boot-2.png --out "$tmp/full" 2>&1
+)
+check "a failed write leaves no partial file behind, so a retry can succeed" \
+	"2 error: cannot write $tmp/full/4242-boot-2.png: File too large; nothing saved " "$? $actual $(ls -A "$tmp/full")"
+# usage ARGS... : the exit code and the last line of stderr, run where nothing may be written
+usage() {
+	local out rc
+	out=$(cd "$tmp/cwd" && python3 "$src" --fixture-dir "$fixtures" 4242 "$@" 2>&1 >/dev/null)
+	rc=$?
+	printf '%s\n' "${out##*$'\n'}"
+	return "$rc"
+}
+together="oqa-log.py: error: --shot and --out go together: --out DIR is where the screenshot goes"
+actual=$(usage --shot boot-2.png)
+check "--shot without --out is a usage error" "2 $together" "$? $actual"
+actual=$(usage --tail 3 --out .)
+check "--out without --shot is a usage error" "2 $together" "$? $actual"
+actual=$(usage --shot boot-2.png --out . --grep x)
+check "--shot is a mode of its own (with --grep: exit 2)" \
+	"2 oqa-log.py: error: argument --grep: not allowed with argument --shot" "$? $actual"
+actual=$(usage --shot boot-2.png --out . --file serial0.txt)
+check "--shot with --file is a usage error" "2 oqa-log.py: error: --shot reads the job's screenshots; drop --file" "$? $actual"
+actual=$(usage --shot boot-2.png --out . --around-module m)
+check "--shot with --around-module is a usage error" \
+	"2 oqa-log.py: error: --around-module and --lines go alone, together or with --grep" "$? $actual"
+check "nothing was written when --out was missing or the call refused" "" "$(ls -A "$tmp/cwd")"
+for bad in ../boot-2.png x/boot-2.png boot-2.jpg boot-2 .png 'boot 2.png' 'boot-2.png?x=1'; do
+	actual=$(python3 "$src" --fixture-dir "$fixtures" 4242 --shot "$bad" --out "$tmp/cwd" 2>&1)
+	check "--shot refuses a name that is no screenshot file name: $bad" "2 1" \
+		"$? $(grep -c 'error: not a screenshot name: .*; give the file name at the end of a shot= or last_shot= link of oqa-job.py, e.g. boot-2.png$' <<<"$actual")"
+done
+printf '<!DOCTYPE html><html>gone</html>' >"$tmp/tests_4242_images_page.png"
+actual=$(python3 "$src" --fixture-dir "$tmp" 4242 --shot page.png --out "$tmp/cwd" 2>&1)
+check "--shot refuses an answer that is no PNG" "2 error: the answer is not a PNG image; nothing saved" "$? $actual"
+actual=$(python3 "$src" --fixture-dir "$fixtures" 4242 --shot boot-2.png --out "$tmp/cwd" --max-bytes 70 2>&1)
+check "--shot refuses a screenshot over the size cap" "2 error: the screenshot is larger than 70 bytes; nothing saved" "$? $actual"
+actual=$(python3 "$src" --fixture-dir "$fixtures" 4242 --shot boot-9.png --out "$tmp/cwd" 2>&1)
+check "--shot names a missing screenshot" \
+	"2 error: job 4242 has no screenshot boot-9.png; its names are on the shot= and last_shot= links of oqa-job.py" "$? $actual"
+actual=$(python3 "$src" --fixture-dir "$fixtures" 4242 --shot boot-2.png --out "$tmp/none" 2>&1)
+check "--shot needs an existing --out directory" "2 error: --out: not an existing directory: $tmp/none" "$? $actual"
+check "no refused call left a file behind" "" "$(ls -A "$tmp/cwd")"
+actual=$(
+	cd "$scripts" && python3 - "$png" "$tmp/wire" <<'EOF' 2>&1 | sed -E 's/127\.0\.0\.1:[0-9]+/127.0.0.1:PORT/g'
+import os, runpy, sys, threading
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+
+with open(sys.argv[1], "rb") as file:
+    body = file.read()
+os.mkdir(sys.argv[2])
+seen = []
+
+class Handler(BaseHTTPRequestHandler):
+    def log_message(self, *args):
+        pass
+
+    def do_GET(self):
+        seen.append((self.command, self.path, dict(self.headers)))
+        self.send_response(200)
+        self.send_header("Content-Type", "image/png")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+threading.Thread(target=server.serve_forever, daemon=True).start()
+sys.argv = ["oqa-log.py", f"http://127.0.0.1:{server.server_address[1]}/tests/77", "--shot", "boot-2.png", "--out", sys.argv[2]]
+try:
+    runpy.run_path("oqa-log.py", run_name="__main__")
+except SystemExit as status:
+    print("exit", status.code)
+print("requests", [(method, path, headers.get("Accept")) for method, path, headers in seen])
+print("unexpected headers", sorted({key.lower() for item in seen for key in item[2]}
+                                   - {"accept", "accept-encoding", "connection", "host", "user-agent"}))
+server.shutdown()
+EOF
+)
+check "--shot: one GET of the image route, Accept image/png, no Referer or other header" "$(
+	cat <<EOF
+job=77 host=http://127.0.0.1:PORT mode=shot
+saved=$tmp/wire/77-boot-2.png bytes=71
+note: not redacted; a screenshot can show a secret -> references/redaction.md "What it is not"
+requests: 1
+exit 0
+requests [('GET', '/tests/77/images/boot-2.png', 'image/png')]
+unexpected headers []
+EOF
+)" "$actual"
+
 exit $fail

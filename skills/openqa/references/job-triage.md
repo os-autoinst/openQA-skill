@@ -107,7 +107,7 @@ Classes: PRODUCT, TEST (code, needle, schedule, settings), INFRA (worker, backen
 
 1. **Read** an investigate clone (-> "Investigate jobs") or a newer run (`note:`) on the old build or tests, its `TEST_GIT_HASH` and failing step checked: a restart takes the newest tests.
 2. **Else propose** one: a write -> clone-and-run.md "Reproduce a failure"
-3. **Old tests pass on the new build or new tests fail on the old:** TEST, the window's commits; else PRODUCT. A fail in another step decides nothing. Until then "did commit X cause it?" is "unknown, this run decides".
+3. **Old tests pass on the new build or new tests fail on the old:** TEST, the window's commits; else PRODUCT. A fail in another step decides nothing. Clones run on today's workers: with `os-autoinst` or QEMU changed too, a failing `:last_good_tests_and_build` rerun is INFRA (tools). Until then "did commit X cause it?" is "unknown, this run decides".
 
 ## Investigate jobs
 

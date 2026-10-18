@@ -530,6 +530,8 @@ check "oqa-history.py --investigation masks them in the settings diff" \
 	"$(grep -c "${codes%%,*}" <<<"$actual") $(grep -o 'UNIFIED_GUEST_REG_CODES: .*' <<<"$actual")"
 keeps "-r of other commands after a registration command" 'SUSEConnect --status; rm -r /tmp/registration-cache\nSUSEConnect -s && cp -r /etc/zypp /tmp/zypp-backup\nSUSEConnect -d | grep -r Deregistered /var/log/messages\n'
 keeps "-r of other commands" 'zypper -r repo-oss-update in vim\ngrep -r SUSEConnect /etc/zypp/credentials.d\ntransactional-update pkg install vim -r repo-oss-update\n'
+# connect-ng's flags are case-sensitive and define -r alone (cmd/suseconnect/suseconnect.go).
+keeps "an upper-case -R is no registration code flag" 'SUSEConnect -R ABCD1234EFGH5678\nregistercloudguest -R ABCD1234EFGH5678\n'
 # shellcheck disable=SC2016 # literal slots, as documentation writes them
 keeps "a registration code slot in documentation" 'SUSEConnect -r <regcode>\nSUSEConnect -r $SCC_REGCODE\nregistercloudguest -r ${REGCODE}\n'
 

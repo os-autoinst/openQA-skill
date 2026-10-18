@@ -71,8 +71,10 @@ Rules for humans and agents changing this repository.
   the flag does in that script's own section of the same file. An argument a block's command cannot run
   without is also shown in that block of `SKILL.md`. A test-only flag gets `help=argparse.SUPPRESS`.
 - Network scripts go through `scripts/_oqa.py`: GET only, no `Referer`, no credentials, host from `--host`.
-  `scripts/pr-queue.py` alone reads GitHub through `gh`: read-only calls, `gh` authenticates itself, no token in argv.
-  Do not add a code path that can write.
+  `scripts/pr-queue.py` alone reads GitHub through `gh`: read-only calls, `gh` authenticates itself, no token in argv;
+  `scripts/oqa-src.py` reads one public file from raw.githubusercontent.com through `_oqa.Client`, anonymously.
+  Do not add a code path that writes to a remote service. A local file is written only into a directory the caller
+  names (`oqa-log.py --shot ... --out DIR`), never overwriting.
 - Every piece of third-party text printed goes through `scripts/_sanitize.py`, stdout and stderr alike: an
   error message that quotes a path, a file name or an errno is third-party text too. A substring cut out of
   such text by a `\w`-based regex is **not** sanitised by having matched — the sanitiser strips code points

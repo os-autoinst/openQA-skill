@@ -1134,6 +1134,9 @@ def print_comments(client, job_id, result, verbose, before=None):
             f"comment={tok(comment.get('id'), 20)} by={tok(comment.get('userName'), 40)} "
             f"class={item['author']} created={created_value(comment.get('created'))}"
         )
+        updated = _oqa.parse_time(comment.get("updated"))
+        if before and updated and updated > before:
+            line += f" edited={created_value(comment.get('updated'))} (after --before, text as now)"
         if item["refs"]:
             line += f" bugrefs={toks(item['refs'], 60)}"
         if item["labels"]:

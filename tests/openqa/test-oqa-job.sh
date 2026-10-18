@@ -729,8 +729,10 @@ as_of() {
 	python3 - "$tmp" <<'PY'
 import json, sys
 comments = [
-    {"id": 1, "userName": "reviewer_a", "text": "solver conflict, the update looks wrong", "created": "2030-01-02 04:00:00 +0000"},
-    {"id": 2, "userName": "reviewer_b", "text": "label:force_result:softfailed:bsc#1300100 flag:carryover", "created": "2030-01-03 09:05:00 +0200"},
+    {"id": 1, "userName": "reviewer_a", "text": "solver conflict, the update looks wrong", "created": "2030-01-02 04:00:00 +0000",
+     "updated": "2030-01-03 07:40:00 +0000"},
+    {"id": 2, "userName": "reviewer_b", "text": "label:force_result:softfailed:bsc#1300100 flag:carryover", "created": "2030-01-03 09:05:00 +0200",
+     "updated": "2030-01-03 09:05:00 +0200"},
     {"id": 3, "userName": "reviewer_b", "text": "bsc#1300100", "bugrefs": ["bsc#1300100"], "created": "2030-01-03 09:00:00 +0000"},
     {"id": 4, "userName": "reviewer_c", "text": "poo#1", "bugrefs": ["poo#1"], "created": "not a time"},
 ]
@@ -740,14 +742,16 @@ PY
 	rm -rf "$tmp"
 }
 actual=$(as_of --before 2030-01-03T07:30Z)
-check "--before: a later or undated comment is hidden with its bugrefs, the review state is the earlier one" "$(
+check "--before: a later or undated comment is hidden with its bugrefs, the review state is the earlier one; one edited later is marked" "$(
 	cat <<'EOF'
 review: reviewed=yes label=force_result:softfailed:bsc#1300100 comments=2 plain=1 force_result_not_applied=softfailed
 note: 2 comment(s) created after --before hidden
-comment=1 by=reviewer_a class=human created=2030-01-02T04:00:00Z
+comment=1 by=reviewer_a class=human created=2030-01-02T04:00:00Z edited=2030-01-03T07:40:00Z (after --before, text as now)
 comment=2 by=reviewer_b class=human created=2030-01-03T07:05:00Z labels=force_result:softfailed:bsc#1300100 flags=carryover
 EOF
 )" "$(grep -E '^(review|note|comment)' <<<"$actual")"
+check "an edit before --before, or no --before at all, is not marked" "0 0" \
+	"$(as_of --before 2030-01-03T07:45Z | grep -c 'edited=') $(as_of | grep -c 'edited=')"
 actual=$(as_of --before 2030-01-03T08:00+02:00)
 check "--before with an offset: the label of 07:05 UTC is hidden too, the job is not reviewed" \
 	"review: reviewed=no comments=1 plain=1|note: 3 comment(s) created after --before hidden|0" \

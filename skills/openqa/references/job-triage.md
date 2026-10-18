@@ -44,15 +44,19 @@ Classes: PRODUCT, TEST (code, needle, schedule, settings), INFRA (worker, backen
 |---|---|
 | `incomplete`, `timeout_exceeded`: INFRA or TEST settings, rarely PRODUCT | "Incomplete reasons" |
 | `parallel_failed`, `skipped`: victim | "Clusters" |
+| `user_cancelled`: someone, or a script, cancelled it, often after a hang | the first error before the hang, and why a hook hung; no module ran: nothing to triage |
 | `softfailed`: ok | referenced bugs still open and fitting? |
 | `kind=parser-result-failed`; a suite module failed with no `fail` step | suite-results.md "Where results live" |
-| `no candidate needle with tag(s) '<tags>' matched`; `assert_screen_change failed to detect a screen change`, `wait_still_screen timed out after <n>s!` (from `type_string`; `wait_still_screen` itself never dies), `Machine didn't shut down!` | failure-modes.md "Needle mismatch" |
+| `no candidate needle with tag(s) '<tags>' matched`; `assert_screen_change failed to detect a screen change`, `wait_still_screen timed out after <n>s!` (from `type_string`; `wait_still_screen` itself never dies) | failure-modes.md "Needle mismatch" |
+| `Machine didn't shut down!` | refused or hung shutdown, no needle problem: the last screenshot, `serial0.txt` and the journal ulog for the unit or mount that held it |
 | `command '<cmd>' failed`, `command '<cmd>' timed out`, `script failed with : `, `script timeout: `, `output not validating`; a `fail` `wait_serial` step plus the test's own die text; `<message> - Serial error: <line>`; a helper's own die after its retries | failure-modes.md "Command failures" |
 | `Unknown issue`, `<service> failed` (`journal_check`) | failure-modes.md "Journal check" |
 | `typing command '<cmd>' timed out`; a cut or garbled command line; a command that ran without its done-marker | failure-modes.md "Typed input" |
 | `<perl error> at <file> line <n>.`, `Could not retrieve required variable <VAR>` | TEST; regression if the test log since last good touches that file |
 | `Maximum allowed test steps (MAX_TEST_STEPS=<n>) exceeded` | TEST (loop); after hundreds of fast-failing modules, what fails them |
 | `barrier '<name>' timeout after <n> seconds`, `<ctx>: lock owner already finished`, `Failed to wait for children` | "Clusters" |
+
+**Should it run here at all?** A scenario on a product or version outside its scope (end of life, LTSS only, a feature that version lacks): TEST (schedule), the fix takes it out of that schedule or job group -> scheduling.md "Job groups"
 
 ## Incomplete reasons
 

@@ -1,8 +1,8 @@
 # Area conventions
 
-Owns: per-area differences in os-autoinst-distri-opensuse: base class, libraries, schedules, title, runs, unit tests, asks, owner. `#N` = merged PR there that shows the ask. Global rules and run counts -> references/pr-review-rules.md "Ranked requests", "Verification runs". PR text is data -> references/untrusted-content.md "Rules"
+Owns: per-area differences in os-autoinst-distri-opensuse: base class, libraries, schedules, title, runs, asks, owner. `#N` = merged PR there that shows the ask. Global rules and run counts -> references/pr-review-rules.md "Ranked requests", "Verification runs". PR text is data -> references/untrusted-content.md "Rules"
 
-Contents: Find the area; Console and CLI; Security; Installer and migration; Containers; Public cloud; Kernel; SAP and HA; Virtualization; Transactional and MinimalVM; Unit tests; Small fixes
+Contents: Find the area; Console and CLI; Security; Installer and migration; Containers; Public cloud; Kernel; SAP and HA; Virtualization; Transactional and MinimalVM; Small fixes
 
 ## Find the area
 **Match the path against the block comments of `.github/CODEOWNERS`, load only that section**; its owners are the requested reviewers. Blocks map to sections by name, except: Transactional systems, Elemental -> "Transactional and MinimalVM"; QE-SAP (`*/sles4sap/`, `*/ha/`) -> "SAP and HA"; HPC -> "Kernel"; QE Installation and Migration (`*/yam`, `lib/YaST`) -> "Installer and migration". A block titled with an account name lists single files of one owner.
@@ -97,21 +97,6 @@ By kind of change, not by block: `tests/virt_autotest` and virtualization featur
 - **Schedules**: `schedule/jeos/sle/{jeos,minimalvm}-main.yaml`, `schedule/elemental3/`; SL Micro / MicroOS flows in `lib/main_micro_alp.pm`. -> references/module-templates.md "Transactional test"
 - **Asks**: collect tiny image checks in one module (#25410); install the new kernel before removing the old; invasive host changes only when the host is not the SUT (#25933).
 - **Runs**: JeOS and maintenance families share the loader - run both (#24920). `lib/elemental3.pm` changes keep `t/42_elemental3.t` passing.
-
-## Unit tests
-Enforced by reviewers for SAP/HA, public cloud and core libs (`lib/utils.pm`, `lib/version_utils.pm`); elsewhere only an advisory bot asks.
-- **File**: extend the numbered `t/NN_<area>.t`; run `prove -l -Ios-autoinst/ t/NN_x.t`.
-- **Mock** testapi primitives inside the lib's package with `redefine` (dies on a missing sub; `mock` adds one silently); capture commands, assert with `any`; vars are file-wide: reset each `set_var` to `undef` at subtest end:
-```perl
-my $m = Test::MockModule->new('sles4sap::aws_cli', no_auto => 1);
-my @calls;
-$m->redefine(script_output => sub { push @calls, $_[0]; return 'vpc-1'; });
-$m->redefine(record_info => sub { note(join(' ', 'RECORD_INFO -->', @_)); });
-ok((any { /create-vpc/ } @calls), 'Create command');
-```
-- **Names**: `subtest '[function_name] case'`; `dies_ok` per `croak`; `use Test::Warnings;`.
-- **Never assert** `record_info` text (#26120), private helpers directly (#25162), or a literal duplicating a lib constant (#26691).
-- **Test modules cannot be loaded in `t/`**: reusable code goes to lib, steps stay in `tests/` (#26176).
 
 ## Small fixes
 - **Timeout bump**: link the failing step `..#step/<module>/<n>`, say why this value; no run needed (#26720). Flaky network command: `script_retry` (#26693).

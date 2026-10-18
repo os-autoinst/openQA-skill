@@ -266,6 +266,20 @@ actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 8000)
 check "runs are ordered by start, so a run that started late counts where it ran" \
 	"8000 7975 7990 7980 7960|first_bad=8000 build=1 streak=1|hint: intermittent: only 1 not-ok in a row now; look for a sporadic issue before blaming build 1" \
 	"$(awk '/^[0-9]+ / {print $1}' <<<"$actual" | paste -sd ' ')|$(grep -E '^(first_bad|hint)' <<<"$actual" | paste -sd '|')"
+# 8070 never started (setup failure): duration 0, no start, only its finish days ago.
+python3 - "$tmp" <<'PY'
+import json, sys
+runs = ((8100, "failed", "05", "30:00 minutes"), (8090, "passed", "04", "30:00 minutes"),
+        (8080, "passed", "03", "30:00 minutes"), (8070, "incomplete", "02", 0), (8060, "passed", "01", "30:00 minutes"))
+rows = [{"id": i, "build": "1", "state": "done", "result": r, "failedmodules": ["x"] if r == "failed" else [],
+         "iscurrent": 1 if i == 8100 else None, "finished": f"2030-01-{d}T10:30:00Z", "duration": t}
+        for i, r, d, t in runs]
+json.dump({"data": rows}, open(f"{sys.argv[1]}/tests_8100_ajax_previous_limit=10_next_limit=0.json", "w"))
+PY
+actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 8100)
+check "a run that never started is ordered by its finish, not on top" \
+	"8100 8090 8080 8070 8060|first_bad=8100 build=1 streak=1" \
+	"$(awk '/^[0-9]+ / {print $1}' <<<"$actual" | paste -sd ' ')|$(grep '^first_bad' <<<"$actual")"
 # Runs on two workers: every one on worker 41 fails, every one on worker 42 passes.
 python3 - "$tmp" <<'PY'
 import json, sys

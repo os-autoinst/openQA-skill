@@ -915,6 +915,21 @@ check "--before: a walk that runs out of hops says the job it names may not be t
 	"$(walk_hops 1)"
 check "--before: hops that run out on the last job of the chain need no note" \
 	"SUPERSEDED: restarted, newest=977 result=passed started=2030-01-02T08:00Z" "$(walk_hops 2)"
+# 980 -> 981 -> 982: 981 never started (skipped, cancelled at 02:00), its restart 982 ran at 03:00.
+python3 - "$chain_dir" <<'PY'
+import json, sys
+for n, state, result, started, finished in ((980, "done", "failed", "01:00", "01:30"), (981, "cancelled", "skipped", None, "02:00"),
+                                            (982, "done", "passed", "03:00", "03:30")):
+    job = {"id": n, "state": state, "result": result, "test": "chain", "settings": {"DISTRI": "exampleos", "TEST": "chain"},
+           "t_started": started and f"2030-01-02T{started}:00", "t_finished": f"2030-01-02T{finished}:00",
+           "origin_id": n - 1 if n > 980 else None, "clone_id": n + 1 if n < 982 else None}
+    json.dump({"job": job}, open(f"{sys.argv[1]}/api_v1_jobs_{n}.json", "w"))
+    json.dump({"job": {**job, "logs": [], "ulogs": [], "testresults": []}}, open(f"{sys.argv[1]}/api_v1_jobs_{n}_details.json", "w"))
+    json.dump([], open(f"{sys.argv[1]}/api_v1_jobs_{n}_comments.json", "w"))
+PY
+check "--before: a restart that never started counts from its finish and does not cut the chain" \
+	"clone chain: [980:failed@2030-01-02T01:00Z] -> 981:skipped -> 982:passed@2030-01-02T03:00Z|SUPERSEDED: restarted, newest=982 result=passed started=2030-01-02T03:00Z|clone chain: [980:failed@2030-01-02T01:00Z] -> 981:skipped" \
+	"$(chain_97x 980 --before 2030-01-02T04:00Z | grep -E '^(clone|SUPER)' | paste -sd'|')|$(chain_97x 980 --before 2030-01-02T02:30Z | grep '^clone')"
 rm -rf "$chain_dir"
 
 exit $fail

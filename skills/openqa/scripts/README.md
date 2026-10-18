@@ -153,7 +153,8 @@ stood at TIME, as `oqa-history.py --before` does: a comment created later (`crea
 is what is compared), or with no readable date, is hidden with its bugrefs, labels and flags, the review
 state is that of the rest, and `note: N comment(s) created after --before hidden` counts them. A restart
 that had not started by TIME is left out of `clone chain` and `SUPERSEDED` (`note: restarts that
-started after --before left out`), one still going then shows as `none` and `state=running`. Past the
+started after --before left out`; one that never started, skipped or cancelled, counts from its finish), one
+still going then shows as `none` and `state=running`. Past the
 chain line the restarts are then walked one request each, at most 20, with a note when they run out first.
 
     job=6228436 host=https://openqa.opensuse.org result=failed worker=worker21:13 started=... duration=6m13s

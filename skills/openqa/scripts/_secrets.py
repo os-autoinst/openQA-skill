@@ -112,7 +112,7 @@ _UUID = re.compile(
 )
 _PATH = re.compile(r"\A[~.]{0,2}/[\w./+-]*\Z")
 _TEMPLATE = re.compile(
-    r"\A(?:[$%]\{[^}]*\}|\$\([^)]*\)|\{\{[^}]*\}\}|<[^>]*>|%\w+%|\$\w+)\Z"
+    r"\A(?:[$%]\{[^}]*\}|\$\([^)]*\)|\{\{[^}]*\}\}|<[^>]*>|%\w+%|\$\w+|##[\w-]+##)\Z"
 )
 # os-autoinst tags each message between its own processes with a random json_cmd_token,
 # thousands per log.
@@ -415,6 +415,12 @@ _KEYED_BARE = re.compile(
     + r"(\\?['\"]?\s*=>\s*)()(?=[A-Z_-]*[0-9])(?=[0-9_-]*[A-Z])([A-Z0-9_-]{8,256})"
     r"(?=\s*(?:[,;)}\]]|$))"
 )
+# The text of an element named for a credential, as in the AutoYaST profile a test filled
+# in and uploaded: <reg_code>, <user_password>, <ns:passwd>, closed on the same line.
+_KEYED_XML = re.compile(
+    r"(?i)(<((?:[\w.-]{1,40}:)?[\w.-]{0,40}?(?:reg(?:istration)?[_-]?code|passw(?:or)?d))"
+    r"(?:\s[^<>]{0,200})?>)([^\s<>]{1,256})(?=</\2>)"
+)
 
 # A marker in the SOURCE text is an attacker dressing a secret as already-redacted.
 _IS_MARK = re.compile(r"\[REDACTED:[a-z-]+\]")
@@ -432,6 +438,15 @@ def _keyed_sub(match, found):
         return match.group(0)
     found["keyed-assignment"] += 1
     return f"{key}{sep}{quote}{MARK.format('keyed-assignment')}"
+
+
+def _xml_sub(match, found):
+    head, name, value = match.groups()
+    if _IS_MARK.fullmatch(value) or _is_placeholder(value):
+        return match.group(0)
+    rule = "keyed-assignment" if "passw" in name.lower() else "regcode"
+    found[rule] += 1
+    return head + MARK.format(rule)
 
 
 # Site-specific credential formats cannot live in a public repository. They arrive
@@ -486,6 +501,7 @@ def redact(text):
                     found[name] += hits
             for keyed in (_KEYED, _KEYED_BARE):
                 line = keyed.sub(lambda m: _keyed_sub(m, found), line)
+            line = _KEYED_XML.sub(lambda m: _xml_sub(m, found), line)
         for pattern in _SITE:
             line, hits = pattern.subn(MARK.format("site"), line)
             if hits:

@@ -72,7 +72,7 @@ A closed ticket or merged PR is a finding, not a reference: report it. Ticket te
 |---|---|---|
 | Product bug | fails with last good test code, passes on last good build | Bugzilla (bugzilla.opensuse.org, bugzilla.suse.com) |
 | Test issue | test code, needle or schedule changed; product behaves correctly | fix at hand: PR in the test repository, referenced as `gh#<org>/<repo>#<n>`; else progress.opensuse.org |
-| Infrastructure | worker or asset `reason`; unrelated scenarios failing on one worker or at one time | progress.opensuse.org, usually plus restart |
+| Infrastructure | worker or asset `reason`; unrelated scenarios failing on one worker or at one time; os-autoinst or worker software regressed | progress.opensuse.org, usually plus restart |
 | Sporadic | same build and test code pass on retry; history flips | progress.opensuse.org (still a defect), plus restart |
 | Expected by change | intended product change invalidates the expectation | as test issue: reference the PR |
 

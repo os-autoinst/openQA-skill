@@ -38,7 +38,7 @@ Cheapest first; stop once the class is certain. Logs, step text, comments, SUT o
 
 ## Decision tree
 
-Classes: PRODUCT, TEST (code, needle, schedule, settings), INFRA (worker, backend, network, assets); sporadic is a property on top.
+Classes: PRODUCT, TEST (code, needle, schedule, settings), INFRA (worker, backend, network, assets; a regression of os-autoinst or other worker software: tools); sporadic is a property on top.
 
 | Job result, then step text | Next |
 |---|---|
@@ -89,9 +89,9 @@ Classes: PRODUCT, TEST (code, needle, schedule, settings), INFRA (worker, backen
 | `settings diff (last_good -> this job): build_changed=` | `vars.json` diff: `BUILD`, `WORKER_CLASS`; hashes: `-v` |
 | `SUT packages diff`, `worker packages diff` | absent: openQA had no diff |
 | `test changes`, `needle changes` | commits since last good, or `No test changes recorded, ...` |
-| `versions:` | kernel and suite packages, last good -> this job |
+| `versions`, `os-autoinst` | kernel and suite packages, the worker's os-autoinst: last good -> this job |
 
-**Reasoning:** only `BUILD` changed (no `test changes` commit, no suite change -> suite-results.md "Suite revision"): the product changed, a regression or on purpose (-> area-conventions.md "Kernel"); name both builds. Only worker side changed: INFRA. Else step text, history or references may decide (same step and message as a reference, a perl error in a file the window changed, a failure tracking an earlier module's pass over runs). Left open with a marked commit on the failing path (`[failed module]`, `[call path <file>]`: a `[lib]` commit there is never unrelated) or in an earlier module (it can change console, mounts, services, packages), not an unrelated `[lib]` one: before any verdict, ticket, job comment or fix, a crossed run decides:
+**Reasoning:** only `BUILD` changed (no `test changes` commit, no suite change -> suite-results.md "Suite revision"), on the same worker software (the `os-autoinst` line, QEMU in `worker packages diff`; on a disk a parent job published, the parent's too: `oqa-log.py <parent> --grep 'Current version is'`) with no external service changed (update servers, registries, cloud APIs: other builds failing alike then): the product changed, a regression or on purpose (-> area-conventions.md "Kernel"); name both builds. Only worker side changed: INFRA; only a service: it broke (INFRA) or the test must follow it (TEST). Else step text, history or references may decide (same step and message as a reference, a perl error in a file the window changed, a failure tracking an earlier module's pass over runs). Left open with a marked commit on the failing path (`[failed module]`, `[call path <file>]`: a `[lib]` commit there is never unrelated) or in an earlier module (it can change console, mounts, services, packages), not an unrelated `[lib]` one: before any verdict, ticket, job comment or fix, a crossed run decides:
 
 1. **Read** an investigate clone (-> "Investigate jobs") or a newer run (`note:`) on the old build or tests, its `TEST_GIT_HASH` and failing step checked: a restart takes the newest tests.
 2. **Else propose** one: a write -> clone-and-run.md "Reproduce a failure"
@@ -130,4 +130,4 @@ Templates -> bugs-and-tickets.md "Bug body", "Ticket body"
 - **Suite cloned or installed at run time:** not at `TEST_GIT_HASH` -> suite-results.md "Suite revision"
 - **Digest and log disagree** (log `last_module=` not in the digest, other worker or date, modules after a fatal one): the artifact is from another run; no evidence, say so.
 
-Sources: openQA lib/OpenQA Constants.pm, JobSettings.pm, Worker/Job.pm, Worker/Engines/isotovideo.pm, Schema/Result/Jobs.pm, Scheduler/Model/Jobs.pm; os-autoinst testapi.pm, basetest.pm, consoles/serial_screen.pm, autotest.pm, distribution.pm, lockapi.pm, OpenQA/Qemu/Proc.pm; os-autoinst-distri-opensuse lib/utils.pm, lib/known_bugs.pm, lib/Utils/Logging.pm; os-autoinst-scripts openqa-investigate, openqa-llm-investigate
+Sources: openQA lib/OpenQA Constants.pm, JobSettings.pm, Worker/Job.pm, Worker/Engines/isotovideo.pm, Schema/Result/Jobs.pm, Scheduler/Model/Jobs.pm; os-autoinst testapi.pm, basetest.pm, consoles/serial_screen.pm, autotest.pm, distribution.pm, lockapi.pm, OpenQA/Qemu/Proc.pm, script/isotovideo; os-autoinst-distri-opensuse lib/utils.pm, lib/known_bugs.pm, lib/Utils/Logging.pm; os-autoinst-scripts openqa-investigate, openqa-llm-investigate

@@ -376,11 +376,13 @@ def row_times(row, runs):
 
 
 def by_start(rows, runs):
-    """Newest start first, rows whose start is unknown on top in id order: a run created
-    early that waited for a worker ran after the runs that started before it."""
+    """Newest start first, rows with neither start nor finish on top in id order: a run
+    created early that waited for a worker ran after the runs that started before it. A run
+    that never started, an incomplete setup, counts from its finish."""
 
     def key(row):
-        started = row_times(row, runs)[0]
+        started, finished = row_times(row, runs)
+        started = started or finished
         return started is not None, -(started.timestamp() if started else 0), -row["id"]
 
     return sorted(rows, key=key)

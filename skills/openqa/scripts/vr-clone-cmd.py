@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: GPL-2.0-or-later
 # Build (never run) the clone command for an openQA verification run, with the known hazards handled.
-"""Prints one command line, then at most 8 short lines about what it does.
+"""Prints one command line, then at most 9 short lines about what it does.
 
 Nothing is executed. Only --test-hash uses the network: one GET of the job's vars.json
 through _oqa.py, from the host of the job URL. The printed command is for review.
@@ -480,7 +480,7 @@ def main(argv=None):
         "of another commit (a crossed run). _GROUP=0 is always included.",
         epilog="A fork that is not known yet: pass the literal '<user>' to --fork/--needles-fork and "
         "'<branch>' to --branch/--needles-branch; they are emitted verbatim with a note to replace them. "
-        "Output: the command, then creates/overrides/note/hazard/approval lines (8 at most). "
+        "Output: the command, then creates/overrides/note/hazard/approval lines (9 at most). "
         f"Exit codes: 0 no hazard, 1 command printed with hazard lines, 2 usage error, also an "
         f"argument over {MAX_ARG} characters.",
     )

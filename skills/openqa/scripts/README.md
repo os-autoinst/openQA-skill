@@ -267,7 +267,8 @@ host`, `Temporary failure in name resolution`; `[cli]` a line starting `Error: `
 block of OpenTofu/Terraform and of other tools. `[kernel]` marks `WARNING:`, `BUG:`, `Oops:`, `Call Trace` (with the
 4 lines after it) after a printk time (`[   12.345678] `, maybe with a caller id `[  T812]`) or a journal's
 `kernel: `, a line without either only in the kernel's own wording (`WARNING: CPU: 2 PID: 812`, `WARNING:`
-with a source file, `BUG: soft lockup` and the like, `Oops:`), as programs print `WARNING:` too, and a
+with a source file, `BUG: soft lockup` and the like, `Oops:`, `watchdog: BUG: soft lockup`, `kernel BUG at`,
+a hung task's `INFO: task ... blocked for more than N seconds`), as programs print `WARNING:` too, and a
 `BTRFS` line's `Transaction aborted`; the signatures of `autoinst-log.txt` apply there too, and
 `--file serial_terminal.txt --errors` uses the same set. Then `serial0.txt`, the kernel console, the same
 way but for `[kernel]` lines only, `Kernel panic - not syncing` among them, as the SUT's programs print there

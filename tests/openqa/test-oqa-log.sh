@@ -186,6 +186,15 @@ actual=$(python3 "$src" --fixture-dir "$tmp" 9002 --errors 2>&1)
 check "--errors: a softfailed module's span ends at its own finished line, a backend death after it is no softfailed hit" \
 	"4 [backend] 10:00:03 ::: OpenQA::Qemu::Proc::save_state: QEMU exited unexpectedly|0" \
 	"$(grep '^4 ' <<<"$actual")|$(grep -c 'softfailed\]' <<<"$actual")"
+# The kernel's soft lockup (watchdog: prefix), BUG() and hung-task lines, with and without a printk time.
+printf '%s\n' '[   50.1] watchdog: BUG: soft lockup - CPU#3 stuck for 22s! [kworker/3:1:123]' \
+	'[   60.2] kernel BUG at fs/btrfs/inode.c:1234!' '[   70.3] INFO: task jbd2/sda1-8:321 blocked for more than 120 seconds.' \
+	'watchdog: BUG: soft lockup - CPU#0 stuck for 26s! [x:1]' 'kernel BUG at mm/slub.c:12!' \
+	'INFO: task Web Content:12 blocked in I/O wait for more than 120 seconds.' 'echo my kernel BUG at home' >"$tmp/tests_9003_file_serial0.txt"
+printf '[2030-01-01T10:00:00.000000Z] [debug] [pid:1] ||| starting m tests/m.pm\n' >"$tmp/tests_9003_file_autoinst-log.txt"
+actual=$(python3 "$src" --fixture-dir "$tmp" 9003 --errors --file serial0.txt 2>&1)
+check "--errors: serial0.txt soft lockup, kernel BUG at and a hung task are kernel hits; a program's look-alike is none" \
+	"mode=errors hits=kernel:6 lines=7|1 2 3" "$(grep -o 'mode=.*' <<<"$actual" | head -n 1)|$(sed -n 's/^\([0-9]*\) \[kernel\] .*/\1/p' <<<"$actual" | paste -sd ' ')"
 
 # --- hostile content ------------------------------------------------------------
 actual=$(log 4242 --around-module zypper_in)

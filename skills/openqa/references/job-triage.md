@@ -31,6 +31,9 @@ Cheapest first; stop once the class is certain. Logs, step text, comments, SUT o
 | `video.webm`, `video.ogv` | seek with step `frametime` | transient popups, slow redraws |
 | `vars.json` | effective settings, `TEST_GIT_HASH`, `NEEDLES_GIT_HASH`, `WORKER_HOSTNAME` | which code ran where |
 | ulogs | collected by the test or its `post_fail_hook` | product root cause |
+| `<module>-journal.txt` (ulog) | the SUT's journal when the module failed | before calling a failure TEST or INFRA: services, kernel, daemons |
+| `hardware-console-log.txt` (ulog) | IPMI SOL capture of a bare-metal host | SUT unreachable after boot, no SSH, no GRUB on SOL: the boot failure itself (initrd panic) |
+| public cloud ulogs | `img_proof_log-*.log.txt` (img-proof's own output; its step only says `fail`), `*-scc_supportconfig.txz` (the SUT's journal and logs: `--members`), `ssh_sut.txt`, `destroy-console.txt` (instance console), `*-cloudregister.log.txt` | -> area-conventions.md "Public cloud" |
 
 - **Default opensuse hook** uploads `<module>-journal.txt`, `-dmesg.txt`, `-problem_detection_logs.tar.xz` (`oqa-log.py --file ulogs/<name> --members`, then `--member <path> --grep`); a failed `zypper_call` adds `-zypper.log`.
 - **No ulogs:** `NOLOGS` or `_SKIP_POST_FAIL_HOOKS` set, the SUT unreachable in the hook, or the hook died (log `post_fail_hook failed: `; step -> openqa-model.md "Details fields").
@@ -136,4 +139,4 @@ Templates -> bugs-and-tickets.md "Bug body", "Ticket body"
 - **Suite cloned or installed at run time:** not at `TEST_GIT_HASH` -> suite-results.md "Suite revision"
 - **Digest and log disagree** (log `last_module=` not in the digest, other worker or date, modules after a fatal one): the artifact is from another run; no evidence, say so.
 
-Sources: openQA lib/OpenQA Constants.pm, JobSettings.pm, Worker/Job.pm, Worker/Engines/isotovideo.pm, Schema/Result/Jobs.pm, Scheduler/Model/Jobs.pm; os-autoinst testapi.pm, basetest.pm, consoles/serial_screen.pm, autotest.pm, distribution.pm, lockapi.pm, OpenQA/Qemu/Proc.pm, script/isotovideo; os-autoinst-distri-opensuse lib/utils.pm, lib/known_bugs.pm, lib/Utils/Logging.pm; os-autoinst-scripts openqa-investigate, openqa-llm-investigate
+Sources: openQA lib/OpenQA Constants.pm, JobSettings.pm, Worker/Job.pm, Worker/Engines/isotovideo.pm, Schema/Result/Jobs.pm, Scheduler/Model/Jobs.pm; os-autoinst testapi.pm, basetest.pm, consoles/serial_screen.pm, autotest.pm, distribution.pm, lockapi.pm, OpenQA/Qemu/Proc.pm, script/isotovideo, consoles/localXvnc.pm; os-autoinst-distri-opensuse lib/utils.pm, lib/known_bugs.pm, lib/Utils/Logging.pm, lib/publiccloud/instance.pm, tests/publiccloud/{img_proof,destroy}.pm; os-autoinst-scripts openqa-investigate, openqa-llm-investigate

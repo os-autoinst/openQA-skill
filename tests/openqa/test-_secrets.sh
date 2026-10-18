@@ -489,6 +489,18 @@ for line in (' s/' + 'PASSWORD' * 8 + 'x') * 3400, ' s/PASS/' * 30000, 'password
     _secrets.redact(line)
 "
 check "sed templates, bare Perl values and escaped keys on 240k-character lines stay linear" 1 "$((SECONDS < 10))"
+# Every "login" within reach of each "docker" was tried with its own window: 1.2 s a line.
+actual=$(python3 -c "
+import sys, time; sys.path.insert(0, '$scripts')
+import _secrets
+rule = next(pattern for name, pattern, _ in _secrets.RULES if name == 'password-flag')
+line = ('docker login ' * 21846)[:262144]
+start = time.perf_counter()
+for _ in range(2):
+    rule.search(line)
+print(time.perf_counter() - start < 1.4, rule.search('docker --config /x login -u bob -p Sup3rS3cretX reg') is not None)
+")
+check "password-flag: two 256k-character lines of 'docker login ' take under 1.4 s, a real login still matches" "True True" "$actual"
 
 # --- the live system's root password on the installer's boot command line --------------
 for value in "Zq9x""Wv" "Xk""9q" "hun""ter2"; do

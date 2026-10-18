@@ -185,6 +185,28 @@ RUNNER_SIGNATURES = (
     _signature(
         "network", [r"Could not resolve host", r"Temporary failure in name resolution"]
     ),
+    # mount(8) "mount: <target>: <reason>." (util-linux sys-utils/mount.c, reasons from libmount
+    # context_mount.c) but its warnings and an unknown filesystem type, which suites probe and
+    # skip on; mount.nfs (nfs-utils utils/mount/error.c); xfstests common/rc
+    _signature(
+        "mount",
+        [
+            r"^mount: \S+: (?!WARNING: |unknown filesystem type)[^\n]*\.$",
+            (
+                r"^mount\.\w+: (?:access denied by server while mounting "
+                r"|an incorrect mount option was specified for "
+                r"|requested NFS version or transport protocol is not supported for "
+                r"|mount (?:spec \S+ or )?point \S+ (?:is not a directory|does not exist)"
+                r"|\S+ is busy or already mounted"
+                r"|mounting \S+ failed, reason given by server: "
+                r"|mount system call failed for "
+                r"|encountered unexpected error condition for "
+                r"|mount to NFS server '"
+                r"|[A-Z][^\n]{0,100}? for \S+ on \S+$)"
+            ),
+            r"^(?:common/rc: could not|!!! failed to) mount \S+ on ",
+        ],
+    ),
     # the error block of OpenTofu/Terraform (boxed or -no-color) and of other CLI tools
     _signature("cli", [r"^(?:\u2502 )?Error: "]),
 )

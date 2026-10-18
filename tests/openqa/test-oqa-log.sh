@@ -432,6 +432,19 @@ file=serial_terminal.txt mode=errors hits=suite:1,sudo:1,network:1,cli:1 lines=1
 11 [cli] │ Error: creating EC2 Instance: UnauthorizedOperation
 EOF
 )" "$(sed -n '/^file=serial_terminal/,/^<<<END/p' <<<"$actual" | grep -v '^<<<' | sed 's/ *$//')"
+actual=$(log 4281 --errors --file serial_terminal.txt)
+check "--errors: refused mounts of mount(8), mount.nfs and xfstests, 3 of 10 shown; status and warning lines of mount are none" "0 $(
+	cat <<'EOF'
+job=4281 host=https://openqa.opensuse.org mode=errors hits=mount:10 lines=23
+<<<UNTRUSTED NONCE source=openqa.opensuse.org/tests/4281/file/serial_terminal.txt>>>
+12 [mount] mount.nfs: an incorrect mount option was specified for /opt/nfs/test
+14 [mount] mount.nfs: an incorrect mount option was specified for /opt/nfs/test
+15 [mount] common/rc: could not mount localhost:/opt/export/test on /opt/nfs/test
+<<<END NONCE>>>
+note: first 3 hits per label shown, --grep for more
+requests: 1
+EOF
+)" "$? $actual"
 log 4257 --errors --file serial_terminal.txt --exit-code >/dev/null
 check "--errors --exit-code: program output alone in serial_terminal.txt is no hit (exit 0)" 0 $?
 actual=$(log 4258 --errors --file serial_terminal.txt)

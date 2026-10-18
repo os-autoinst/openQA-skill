@@ -1,0 +1,23 @@
+# mount -v /dev/vdb /mnt/scratch
+mount: /dev/vdb mounted on /mnt/scratch.
+mount: /mnt/iso: WARNING: source write-protected, mounted read-only.
+mount: /mnt/x: unknown filesystem type 'minix' (hint: possibly blacklisted, see mount(8)).
+mount.nfs: timeout set for Tue Jan  1 10:00:00 2030
+mount.nfs: trying text-based options 'vers=4.0,addr=127.0.0.1,clientaddr=127.0.0.1'
+umount: /mnt/scratch: not mounted.
+export NFS_MOUNT_OPTIONS="-o rw,relatime,vers=4.0"
+MOUNT_OPTIONS -- -o rw,relatime,vers=4.0 localhost:/opt/export/scratch /opt/nfs/scratch
+common/rc: retrying test device mount with external set
+# timeout 1995 /opt/wrapper.sh 'generic/001' -nfs | tee /opt/log/generic/001
+mount.nfs: an incorrect mount option was specified for /opt/nfs/test
+common/rc: retrying test device mount with external set
+mount.nfs: an incorrect mount option was specified for /opt/nfs/test
+common/rc: could not mount localhost:/opt/export/test on /opt/nfs/test
+mount.nfs: an incorrect mount option was specified for /opt/nfs/test
+common/rc: could not mount localhost:/opt/export/test on /opt/nfs/test
+mount.nfs: Protocol not supported for localhost:/opt/export/test on /opt/nfs/test
+mount.nfs4: access denied by server while mounting srv.example.org:/export
+mount.nfs4: mount to NFS server 'srv.example.org' failed: timed out, giving up
+mount: /mnt/scratch: wrong fs type, bad option, bad superblock on /dev/vdb, missing codepage or helper program, or other error.
+       dmesg(1) may have more information after failed mount system call.
+!!! failed to mount /dev/vdb on /mnt/test

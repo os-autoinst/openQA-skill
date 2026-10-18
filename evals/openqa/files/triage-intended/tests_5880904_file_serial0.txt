@@ -1,0 +1,2003 @@
+[    0.000000][    T0] Linux version 6.19.12-1-default (geeko@buildhost) (gcc (SUSE Linux) 15.2.1 20260202, GNU ld (GNU Binutils; openSUSE Tumbleweed) 2.45.0.20251103-2) #1 SMP PREEMPT_DYNAMIC Sun Apr 12 17:36:53 UTC 2026 (c7234f7)
+[    0.000000][    T0] Command line: BOOT_IMAGE=/boot/vmlinuz-6.19.12-1-default root=UUID=5a89ef6e-af09-4990-9274-23a3cb54ea0f splash=silent video=1024x768 plymouth.ignore-serial-consoles console=ttyS0 console=tty inst.install_url=https://openqa.opensuse.org/assets/repo/openSUSE-Tumbleweed-oss-x86_64-Snapshot20260426 kernel.softlockup_panic=1 resume=/dev/disk/by-uuid/ed80c39e-04b1-4956-a779-792896ff63e4 security=selinux selinux=1 mitigations=auto
+[    0.000000][    T0] x86 CPU feature dependency check failure: CPU0 has '18*32+31' enabled but '18*32+26' disabled. Kernel might be fine, but no guarantees.
+[    0.000000][    T0] BIOS-provided physical RAM map:
+[    0.000000][    T0] BIOS-e820: [mem 0x0000000000000000-0x000000000009fbff] usable
+[    0.000000][    T0] BIOS-e820: [mem 0x000000000009fc00-0x000000000009ffff] reserved
+[    0.000000][    T0] BIOS-e820: [mem 0x00000000000f0000-0x00000000000fffff] reserved
+[    0.000000][    T0] BIOS-e820: [mem 0x0000000000100000-0x00000000bffd8fff] usable
+[    0.000000][    T0] BIOS-e820: [mem 0x00000000bffd9000-0x00000000bfffffff] reserved
+[    0.000000][    T0] BIOS-e820: [mem 0x00000000feffc000-0x00000000feffffff] reserved
+[    0.000000][    T0] BIOS-e820: [mem 0x00000000fffc0000-0x00000000ffffffff] reserved
+[    0.000000][    T0] BIOS-e820: [mem 0x0000000100000000-0x000000013fffffff] usable
+[    0.000000][    T0] BIOS-e820: [mem 0x000000fd00000000-0x000000ffffffffff] reserved
+[    0.000000][    T0] NX (Execute Disable) protection: active
+[    0.000000][    T0] APIC: Static calls initialized
+[    0.000000][    T0] SMBIOS 2.8 present.
+[    0.000000][    T0] DMI: QEMU Standard PC (i440FX + PIIX, 1996), BIOS rel-1.16.3-2-gc13ff2cd-prebuilt.qemu.org 04/01/2014
+[    0.000000][    T0] DMI: Memory slots populated: 1/1
+[    0.000000][    T0] Hypervisor detected: KVM
+[    0.000000][    T0] last_pfn = 0xbffd9 max_arch_pfn = 0x400000000
+[    0.000000][    T0] kvm-clock: Using msrs 4b564d01 and 4b564d00
+[    0.000000][    T0] kvm-clock: using sched offset of 3826487257 cycles
+[    0.000002][    T0] clocksource: kvm-clock: mask: 0xffffffffffffffff max_cycles: 0x1cd42e4dffb, max_idle_ns: 881590591483 ns
+[    0.000004][    T0] tsc: Detected 2199.998 MHz processor
+[    0.000917][    T0] last_pfn = 0x140000 max_arch_pfn = 0x400000000
+[    0.000949][    T0] MTRR map: 4 entries (3 fixed + 1 variable; max 19), built from 8 variable MTRRs
+[    0.000951][    T0] x86/PAT: Configuration [0-7]: WB  WC  UC- UC  WB  WP  UC- WT  
+[    0.000993][    T0] last_pfn = 0xbffd9 max_arch_pfn = 0x400000000
+[    0.003080][    T0] found SMP MP-table at [mem 0x000f5450-0x000f545f]
+[    0.003091][    T0] Using GB pages for direct mapping
+[    0.003329][    T0] RAMDISK: [mem 0x3418b000-0x360bcfff]
+[    0.003331][    T0] ACPI: Early table checksum verification disabled
+[    0.003333][    T0] ACPI: RSDP 0x00000000000F5250 000014 (v00 BOCHS )
+[    0.003336][    T0] ACPI: RSDT 0x00000000BFFE2326 000034 (v01 BOCHS  BXPC     00000001 BXPC 00000001)
+[    0.003340][    T0] ACPI: FACP 0x00000000BFFE21DA 000074 (v01 BOCHS  BXPC     00000001 BXPC 00000001)
+[    0.003343][    T0] ACPI: DSDT 0x00000000BFFE0040 00219A (v01 BOCHS  BXPC     00000001 BXPC 00000001)
+[    0.003345][    T0] ACPI: FACS 0x00000000BFFE0000 000040
+[    0.003347][    T0] ACPI: APIC 0x00000000BFFE224E 000078 (v03 BOCHS  BXPC     00000001 BXPC 00000001)
+[    0.003349][    T0] ACPI: HPET 0x00000000BFFE22C6 000038 (v01 BOCHS  BXPC     00000001 BXPC 00000001)
+[    0.003351][    T0] ACPI: WAET 0x00000000BFFE22FE 000028 (v01 BOCHS  BXPC     00000001 BXPC 00000001)
+[    0.003352][    T0] ACPI: Reserving FACP table memory at [mem 0xbffe21da-0xbffe224d]
+[    0.003354][    T0] ACPI: Reserving DSDT table memory at [mem 0xbffe0040-0xbffe21d9]
+[    0.003354][    T0] ACPI: Reserving FACS table memory at [mem 0xbffe0000-0xbffe003f]
+[    0.003355][    T0] ACPI: Reserving APIC table memory at [mem 0xbffe224e-0xbffe22c5]
+[    0.003355][    T0] ACPI: Reserving HPET table memory at [mem 0xbffe22c6-0xbffe22fd]
+[    0.003356][    T0] ACPI: Reserving WAET table memory at [mem 0xbffe22fe-0xbffe2325]
+[    0.003812][    T0] No NUMA configuration found
+[    0.003813][    T0] Faking a node at [mem 0x0000000000000000-0x000000013fffffff]
+[    0.003821][    T0] NODE_DATA(0) allocated [mem 0x13ffd3280-0x13fffdfff]
+[    0.004028][    T0] Zone ranges:
+[    0.004029][    T0]   DMA      [mem 0x0000000000001000-0x0000000000ffffff]
+[    0.004030][    T0]   DMA32    [mem 0x0000000001000000-0x00000000ffffffff]
+[    0.004031][    T0]   Normal   [mem 0x0000000100000000-0x000000013fffffff]
+[    0.004032][    T0]   Device   empty
+[    0.004033][    T0] Movable zone start for each node
+[    0.004035][    T0] Early memory node ranges
+[    0.004035][    T0]   node   0: [mem 0x0000000000001000-0x000000000009efff]
+[    0.004036][    T0]   node   0: [mem 0x0000000000100000-0x00000000bffd8fff]
+[    0.004038][    T0]   node   0: [mem 0x0000000100000000-0x000000013fffffff]
+[    0.004039][    T0] Initmem setup node 0 [mem 0x0000000000001000-0x000000013fffffff]
+[    0.004202][    T0] On node 0, zone DMA: 1 pages in unavailable ranges
+[    0.004221][    T0] On node 0, zone DMA: 97 pages in unavailable ranges
+[    0.011663][    T0] On node 0, zone Normal: 39 pages in unavailable ranges
+[    0.012513][    T0] ACPI: PM-Timer IO Port: 0x608
+[    0.012524][    T0] ACPI: LAPIC_NMI (acpi_id[0xff] dfl dfl lint[0x1])
+[    0.012548][    T0] IOAPIC[0]: apic_id 0, version 17, address 0xfec00000, GSI 0-23
+[    0.012550][    T0] ACPI: INT_SRC_OVR (bus 0 bus_irq 0 global_irq 2 dfl dfl)
+[    0.012552][    T0] ACPI: INT_SRC_OVR (bus 0 bus_irq 5 global_irq 5 high level)
+[    0.012553][    T0] ACPI: INT_SRC_OVR (bus 0 bus_irq 9 global_irq 9 high level)
+[    0.012553][    T0] ACPI: INT_SRC_OVR (bus 0 bus_irq 10 global_irq 10 high level)
+[    0.012554][    T0] ACPI: INT_SRC_OVR (bus 0 bus_irq 11 global_irq 11 high level)
+[    0.012557][    T0] ACPI: Using ACPI (MADT) for SMP configuration information
+[    0.012557][    T0] ACPI: HPET id: 0x8086a201 base: 0xfed00000
+[    0.012560][    T0] TSC deadline timer available
+[    0.012562][    T0] CPU topo: Max. logical packages:   1
+[    0.012563][    T0] CPU topo: Max. logical nodes:      1
+[    0.012564][    T0] CPU topo: Num. nodes per package:  1
+[    0.012566][    T0] CPU topo: Max. logical dies:       1
+[    0.012566][    T0] CPU topo: Max. dies per package:   1
+[    0.012570][    T0] CPU topo: Max. threads per core:   1
+[    0.012571][    T0] CPU topo: Num. cores per package:     1
+[    0.012571][    T0] CPU topo: Num. threads per package:   1
+[    0.012572][    T0] CPU topo: Allowing 1 present CPUs plus 0 hotplug CPUs
+[    0.012584][    T0] kvm-guest: APIC: eoi() replaced with kvm_guest_apic_eoi_write()
+[    0.012603][    T0] PM: hibernation: Registered nosave memory: [mem 0x00000000-0x00000fff]
+[    0.012604][    T0] PM: hibernation: Registered nosave memory: [mem 0x0009f000-0x000fffff]
+[    0.012606][    T0] PM: hibernation: Registered nosave memory: [mem 0xbffd9000-0xffffffff]
+[    0.012607][    T0] [mem 0xc0000000-0xfeffbfff] available for PCI devices
+[    0.012608][    T0] Booting paravirtualized kernel on KVM
+[    0.012609][    T0] clocksource: refined-jiffies: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 1910969940391419 ns
+[    0.017771][    T0] setup_percpu: NR_CPUS:8192 nr_cpumask_bits:1 nr_cpu_ids:1 nr_node_ids:1
+[    0.018016][    T0] percpu: Embedded 87 pages/cpu s233472 r8192 d114688 u2097152
+[    0.018048][    T0] kvm-guest: PV spinlocks disabled, single CPU
+[    0.018050][    T0] Kernel command line: BOOT_IMAGE=/boot/vmlinuz-6.19.12-1-default root=UUID=5a89ef6e-af09-4990-9274-23a3cb54ea0f splash=silent video=1024x768 plymouth.ignore-serial-consoles console=ttyS0 console=tty inst.install_url=https://openqa.opensuse.org/assets/repo/openSUSE-Tumbleweed-oss-x86_64-Snapshot20260426 kernel.softlockup_panic=1 resume=/dev/disk/by-uuid/ed80c39e-04b1-4956-a779-792896ff63e4 security=selinux selinux=1 mitigations=auto
+[    0.018168][    T0] Unknown kernel command line parameters "splash=silent", will be passed to user space.
+[    0.018186][    T0] random: crng init done
+[    0.018186][    T0] printk: log buffer data + meta data: 262144 + 917504 = 1179648 bytes
+[    0.018638][    T0] Dentry cache hash table entries: 524288 (order: 10, 4194304 bytes, linear)
+[    0.018870][    T0] Inode-cache hash table entries: 262144 (order: 9, 2097152 bytes, linear)
+[    0.018891][    T0] software IO TLB: area num 1.
+[    0.026567][    T0] Fallback order for Node 0: 0 
+[    0.026571][    T0] Built 1 zonelists, mobility grouping on.  Total pages: 1048439
+[    0.026572][    T0] Policy zone: Normal
+[    0.026573][    T0] mem auto-init: stack:off, heap alloc:off, heap free:off
+[    0.031082][    T0] SLUB: HWalign=64, Order=0-3, MinObjects=0, CPUs=1, Nodes=1
+[    0.041827][    T0] ftrace: allocating 51055 entries in 200 pages
+[    0.041829][    T0] ftrace: allocated 200 pages with 3 groups
+[    0.042670][    T0] Dynamic Preempt: voluntary
+[    0.042859][    T0] rcu: Preemptible hierarchical RCU implementation.
+[    0.042860][    T0] rcu: 	RCU event tracing is enabled.
+[    0.042860][    T0] rcu: 	RCU restricting CPUs from NR_CPUS=8192 to nr_cpu_ids=1.
+[    0.042862][    T0] 	Trampoline variant of Tasks RCU enabled.
+[    0.042862][    T0] 	Rude variant of Tasks RCU enabled.
+[    0.042863][    T0] 	Tracing variant of Tasks RCU enabled.
+[    0.042863][    T0] rcu: RCU calculated value of scheduler-enlistment delay is 100 jiffies.
+[    0.042864][    T0] rcu: Adjusting geometry for rcu_fanout_leaf=16, nr_cpu_ids=1
+[    0.042869][    T0] RCU Tasks: Setting shift to 0 and lim to 1 rcu_task_cb_adjust=1 rcu_task_cpu_ids=1.
+[    0.042870][    T0] RCU Tasks Rude: Setting shift to 0 and lim to 1 rcu_task_cb_adjust=1 rcu_task_cpu_ids=1.
+[    0.042871][    T0] RCU Tasks Trace: Setting shift to 0 and lim to 1 rcu_task_cb_adjust=1 rcu_task_cpu_ids=1.
+[    0.048620][    T0] NR_IRQS: 524544, nr_irqs: 256, preallocated irqs: 16
+[    0.048816][    T0] rcu: srcu_init: Setting srcu_struct sizes based on contention.
+[    0.048889][    T0] Console: colour dummy device 80x25
+[    0.048892][    T0] printk: legacy console [tty0] enabled
+[    0.049206][    T0] printk: legacy console [ttyS0] enabled
+[    0.263149][    T0] ACPI: Core revision 20250807
+[    0.264406][    T0] clocksource: hpet: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 19112604467 ns
+[    0.266652][    T0] APIC: Switch to symmetric I/O mode setup
+[    0.268076][    T0] x2apic enabled
+[    0.269116][    T0] APIC: Switched APIC routing to: physical x2apic
+[    0.271598][    T0] ..TIMER: vector=0x30 apic1=0 pin1=2 apic2=-1 pin2=-1
+[    0.273093][    T0] clocksource: tsc-early: mask: 0xffffffffffffffff max_cycles: 0x1fb63109b96, max_idle_ns: 440795265316 ns
+[    0.275546][    T0] Calibrating delay loop (skipped) preset value.. 4399.99 BogoMIPS (lpj=2199998)
+[    0.276648][    T0] x86/cpu: User Mode Instruction Prevention (UMIP) activated
+[    0.277614][    T0] Last level iTLB entries: 4KB 512, 2MB 255, 4MB 127
+[    0.278545][    T0] Last level dTLB entries: 4KB 512, 2MB 255, 4MB 127, 1GB 0
+[    0.279557][    T0] mitigations: Enabled attack vectors: user_kernel, user_user, guest_host, guest_guest, SMT mitigations: auto
+[    0.280546][    T0] Speculative Store Bypass: Mitigation: Speculative Store Bypass disabled via prctl
+[    0.281546][    T0] Transient Scheduler Attacks: Vulnerable: No microcode
+[    0.282545][    T0] Spectre V2 : Mitigation: Retpolines
+[    0.283546][    T0] Speculative Return Stack Overflow: Mitigation: Safe RET
+[    0.284545][    T0] Spectre V1 : Mitigation: usercopy/swapgs barriers and __user pointer sanitization
+[    0.285546][    T0] Spectre V2 : Spectre v2 / SpectreRSB: Filling RSB on context switch and VMEXIT
+[    0.286545][    T0] Spectre V2 : Enabling Restricted Speculation for firmware calls
+[    0.287547][    T0] Spectre V2 : mitigation: Enabling conditional Indirect Branch Prediction Barrier
+[    0.288546][    T0] active return thunk: srso_alias_return_thunk
+[    0.289572][    T0] x86/fpu: Supporting XSAVE feature 0x001: 'x87 floating point registers'
+[    0.290545][    T0] x86/fpu: Supporting XSAVE feature 0x002: 'SSE registers'
+[    0.291545][    T0] x86/fpu: Supporting XSAVE feature 0x004: 'AVX registers'
+[    0.292545][    T0] x86/fpu: Supporting XSAVE feature 0x200: 'Protection Keys User registers'
+[    0.293546][    T0] x86/fpu: xstate_offset[2]:  576, xstate_sizes[2]:  256
+[    0.294545][    T0] x86/fpu: xstate_offset[9]:  832, xstate_sizes[9]:    8
+[    0.295545][    T0] x86/fpu: Enabled xstate features 0x207, context size is 840 bytes, using 'compacted' format.
+[    0.332443][    T0] Freeing SMP alternatives memory: 44K
+[    0.332547][    T0] pid_max: default: 32768 minimum: 301
+[    0.333678][    T0] landlock: Up and running.
+[    0.334545][    T0] Yama: becoming mindful.
+[    0.335555][    T0] SELinux:  Initializing.
+[    0.337085][    T0] LSM support for eBPF active
+[    0.338627][    T0] Mount-cache hash table entries: 8192 (order: 4, 65536 bytes, linear)
+[    0.339550][    T0] Mountpoint-cache hash table entries: 8192 (order: 4, 65536 bytes, linear)
+[    0.341701][    T1] smpboot: CPU0: AMD EPYC 7773X 64-Core Processor (family: 0x19, model: 0x1, stepping: 0x2)
+[    0.342746][    T1] Performance Events: Fam17h+ core perfctr, AMD PMU driver.
+[    0.343550][    T1] ... version:                   0
+[    0.344548][    T1] ... bit width:                 48
+[    0.345548][    T1] ... generic counters:          6
+[    0.346548][    T1] ... generic bitmap:            000000000000003f
+[    0.347548][    T1] ... fixed-purpose counters:    0
+[    0.348548][    T1] ... fixed-purpose bitmap:      0000000000000000
+[    0.349548][    T1] ... value mask:                0000ffffffffffff
+[    0.350548][    T1] ... max period:                00007fffffffffff
+[    0.351548][    T1] ... global_ctrl mask:          000000000000003f
+[    0.352652][    T1] signal: max sigframe size: 3376
+[    0.353588][    T1] rcu: Hierarchical SRCU implementation.
+[    0.354548][    T1] rcu: 	Max phase no-delay instances is 400.
+[    0.362929][    T1] smp: Bringing up secondary CPUs ...
+[    0.363561][    T1] smp: Brought up 1 node, 1 CPU
+[    0.364551][    T1] smpboot: Total of 1 processors activated (4399.99 BogoMIPS)
+[    0.368231][   T21] node 0 deferred pages initialised in 2ms
+[    0.368567][    T1] Memory: 3964828K/4193756K available (17443K kernel code, 3125K rwdata, 14988K rodata, 4660K init, 5464K bss, 224432K reserved, 0K cma-reserved)
+[    0.369996][    T1] devtmpfs: initialized
+[    0.370648][    T1] x86/mm: Memory block size: 128MB
+[    0.372877][    T1] clocksource: jiffies: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 1911260446275000 ns
+[    0.373564][    T1] posixtimers hash table entries: 512 (order: 1, 8192 bytes, linear)
+[    0.374558][    T1] futex hash table entries: 256 (16384 bytes on 1 NUMA nodes, total 16 KiB, linear).
+[    0.375828][    T1] PM: RTC time: 01:10:22, date: 2026-04-28
+[    0.377076][    T1] NET: Registered PF_NETLINK/PF_ROUTE protocol family
+[    0.377932][    T1] DMA: preallocated 512 KiB GFP_KERNEL pool for atomic allocations
+[    0.378554][    T1] DMA: preallocated 512 KiB GFP_KERNEL|GFP_DMA pool for atomic allocations
+[    0.379553][    T1] DMA: preallocated 512 KiB GFP_KERNEL|GFP_DMA32 pool for atomic allocations
+[    0.380558][    T1] audit: initializing netlink subsys (disabled)
+[    0.381591][   T27] audit: type=2000 audit(1777338622.508:1): state=initialized audit_enabled=0 res=1
+[    0.382785][    T1] thermal_sys: Registered thermal governor 'fair_share'
+[    0.382788][    T1] thermal_sys: Registered thermal governor 'bang_bang'
+[    0.383552][    T1] thermal_sys: Registered thermal governor 'step_wise'
+[    0.384549][    T1] thermal_sys: Registered thermal governor 'user_space'
+[    0.385569][    T1] cpuidle: using governor ladder
+[    0.387555][    T1] cpuidle: using governor menu
+[    0.389811][    T1] acpiphp: ACPI Hot Plug PCI Controller Driver version: 0.5
+[    0.390889][    T1] PCI: Using configuration type 1 for base access
+[    0.391548][    T1] PCI: Using configuration type 1 for extended access
+[    0.392796][    T1] kprobes: kprobe jump-optimization is enabled. All kprobes are optimized if possible.
+[    0.422564][    T1] HugeTLB: registered 1.00 GiB page size, pre-allocated 0 pages
+[    0.423549][    T1] HugeTLB: 16380 KiB vmemmap can be freed for a 1.00 GiB page
+[    0.424549][    T1] HugeTLB: registered 2.00 MiB page size, pre-allocated 0 pages
+[    0.425549][    T1] HugeTLB: 28 KiB vmemmap can be freed for a 2.00 MiB page
+[    0.431462][    T1] fbcon: Taking over console
+[    0.433571][    T1] ACPI: Added _OSI(Module Device)
+[    0.433573][    T1] ACPI: Added _OSI(Processor Device)
+[    0.433575][    T1] ACPI: Added _OSI(Processor Aggregator Device)
+[    0.439567][    T1] ACPI: 1 ACPI AML tables successfully acquired and loaded
+[    0.443104][    T1] ACPI: Interpreter enabled
+[    0.444612][    T1] ACPI: PM: (supports S0 S3 S4 S5)
+[    0.446550][    T1] ACPI: Using IOAPIC for interrupt routing
+[    0.447863][    T1] PCI: Using host bridge windows from ACPI; if necessary, use "pci=nocrs" and report a bug
+[    0.448548][    T1] PCI: Using E820 reservations for host bridge windows
+[    0.449714][    T1] ACPI: Enabled 2 GPEs in block 00 to 0F
+[    0.455147][    T1] ACPI: PCI Root Bridge [PCI0] (domain 0000 [bus 00-ff])
+[    0.455554][    T1] acpi PNP0A03:00: _OSC: OS supports [ExtendedConfig ASPM ClockPM Segments MSI EDR HPX-Type3]
+[    0.457154][    T1] acpiphp: Slot [3] registered
+[    0.457581][    T1] acpiphp: Slot [4] registered
+[    0.458581][    T1] acpiphp: Slot [5] registered
+[    0.459590][    T1] acpiphp: Slot [6] registered
+[    0.460581][    T1] acpiphp: Slot [7] registered
+[    0.461583][    T1] acpiphp: Slot [8] registered
+[    0.462581][    T1] acpiphp: Slot [9] registered
+[    0.463581][    T1] acpiphp: Slot [10] registered
+[    0.464580][    T1] acpiphp: Slot [11] registered
+[    0.465580][    T1] acpiphp: Slot [12] registered
+[    0.466580][    T1] acpiphp: Slot [13] registered
+[    0.467580][    T1] acpiphp: Slot [14] registered
+[    0.468588][    T1] acpiphp: Slot [15] registered
+[    0.469581][    T1] acpiphp: Slot [16] registered
+[    0.470580][    T1] acpiphp: Slot [17] registered
+[    0.471580][    T1] acpiphp: Slot [18] registered
+[    0.472580][    T1] acpiphp: Slot [19] registered
+[    0.473580][    T1] acpiphp: Slot [20] registered
+[    0.474580][    T1] acpiphp: Slot [21] registered
+[    0.475581][    T1] acpiphp: Slot [22] registered
+[    0.476582][    T1] acpiphp: Slot [23] registered
+[    0.477581][    T1] acpiphp: Slot [24] registered
+[    0.478581][    T1] acpiphp: Slot [25] registered
+[    0.479581][    T1] acpiphp: Slot [26] registered
+[    0.480581][    T1] acpiphp: Slot [27] registered
+[    0.481581][    T1] acpiphp: Slot [28] registered
+[    0.482585][    T1] acpiphp: Slot [29] registered
+[    0.483609][    T1] acpiphp: Slot [30] registered
+[    0.484580][    T1] acpiphp: Slot [31] registered
+[    0.485569][    T1] PCI host bridge to bus 0000:00
+[    0.486555][    T1] pci_bus 0000:00: root bus resource [io  0x0000-0x0cf7 window]
+[    0.487550][    T1] pci_bus 0000:00: root bus resource [io  0x0d00-0xffff window]
+[    0.488553][    T1] pci_bus 0000:00: root bus resource [mem 0x000a0000-0x000bffff window]
+[    0.489551][    T1] pci_bus 0000:00: root bus resource [mem 0xc0000000-0xfebfffff window]
+[    0.490551][    T1] pci_bus 0000:00: root bus resource [mem 0x380000000000-0x38007fffffff window]
+[    0.491550][    T1] pci_bus 0000:00: root bus resource [bus 00-ff]
+[    0.492856][    T1] pci 0000:00:00.0: [8086:1237] type 00 class 0x060000 conventional PCI endpoint
+[    0.494447][    T1] pci 0000:00:01.0: [8086:7000] type 00 class 0x060100 conventional PCI endpoint
+[    0.495483][    T1] pci 0000:00:01.1: [8086:7010] type 00 class 0x010180 conventional PCI endpoint
+[    0.496562][    T1] pci 0000:00:01.1: BAR 4 [io  0xc140-0xc14f]
+[    0.497616][    T1] pci 0000:00:01.1: BAR 0 [io  0x01f0-0x01f7]: legacy IDE quirk
+[    0.498549][    T1] pci 0000:00:01.1: BAR 1 [io  0x03f6]: legacy IDE quirk
+[    0.499553][    T1] pci 0000:00:01.1: BAR 2 [io  0x0170-0x0177]: legacy IDE quirk
+[    0.500556][    T1] pci 0000:00:01.1: BAR 3 [io  0x0376]: legacy IDE quirk
+[    0.501873][    T1] pci 0000:00:01.3: [8086:7113] type 00 class 0x068000 conventional PCI endpoint
+[    0.503203][    T1] pci 0000:00:01.3: quirk: [io  0x0600-0x063f] claimed by PIIX4 ACPI
+[    0.503567][    T1] pci 0000:00:01.3: quirk: [io  0x0700-0x070f] claimed by PIIX4 SMB
+[    0.504988][    T1] pci 0000:00:02.0: [1234:1111] type 00 class 0x030000 conventional PCI endpoint
+[    0.507527][    T1] pci 0000:00:02.0: BAR 0 [mem 0xfd000000-0xfdffffff pref]
+[    0.507580][    T1] pci 0000:00:02.0: BAR 2 [mem 0xfebd8000-0xfebd8fff]
+[    0.508604][    T1] pci 0000:00:02.0: ROM [mem 0xfebc0000-0xfebcffff pref]
+[    0.509635][    T1] pci 0000:00:02.0: Video device with shadowed ROM at [mem 0x000c0000-0x000dffff]
+[    0.510909][    T1] pci 0000:00:03.0: [8086:2668] type 00 class 0x040300 conventional PCI endpoint
+[    0.512462][    T1] pci 0000:00:03.0: BAR 0 [mem 0xfebd0000-0xfebd3fff]
+[    0.514563][    T1] pci 0000:00:04.0: [1af4:1000] type 00 class 0x020000 conventional PCI endpoint
+[    0.517172][    T1] pci 0000:00:04.0: BAR 0 [io  0xc100-0xc11f]
+[    0.517564][    T1] pci 0000:00:04.0: BAR 1 [mem 0xfebd9000-0xfebd9fff]
+[    0.518604][    T1] pci 0000:00:04.0: BAR 4 [mem 0x380000000000-0x380000003fff 64bit pref]
+[    0.519564][    T1] pci 0000:00:04.0: ROM [mem 0xfeb80000-0xfebbffff pref]
+[    0.523308][    T1] pci 0000:00:05.0: [1af4:1005] type 00 class 0x00ff00 conventional PCI endpoint
+[    0.525180][    T1] pci 0000:00:05.0: BAR 0 [io  0xc120-0xc13f]
+[    0.525564][    T1] pci 0000:00:05.0: BAR 1 [mem 0xfebda000-0xfebdafff]
+[    0.526603][    T1] pci 0000:00:05.0: BAR 4 [mem 0x380000004000-0x380000007fff 64bit pref]
+[    0.530168][    T1] pci 0000:00:06.0: [1b36:000d] type 00 class 0x0c0330 conventional PCI endpoint
+[    0.531446][    T1] pci 0000:00:06.0: BAR 0 [mem 0xfebd4000-0xfebd7fff 64bit]
+[    0.533492][    T1] pci 0000:00:07.0: [1af4:1003] type 00 class 0x078000 conventional PCI endpoint
+[    0.535219][    T1] pci 0000:00:07.0: BAR 0 [io  0xc080-0xc0bf]
+[    0.535564][    T1] pci 0000:00:07.0: BAR 1 [mem 0xfebdb000-0xfebdbfff]
+[    0.536603][    T1] pci 0000:00:07.0: BAR 4 [mem 0x380000008000-0x38000000bfff 64bit pref]
+[    0.539915][    T1] pci 0000:00:08.0: [1af4:1004] type 00 class 0x010000 conventional PCI endpoint
+[    0.543548][    T1] pci 0000:00:08.0: BAR 0 [io  0xc0c0-0xc0ff]
+[    0.544565][    T1] pci 0000:00:08.0: BAR 1 [mem 0xfebdc000-0xfebdcfff]
+[    0.545604][    T1] pci 0000:00:08.0: BAR 4 [mem 0x38000000c000-0x38000000ffff 64bit pref]
+[    0.548964][    T1] pci 0000:00:09.0: [1af4:1001] type 00 class 0x010000 conventional PCI endpoint
+[    0.551563][    T1] pci 0000:00:09.0: BAR 0 [io  0xc000-0xc07f]
+[    0.552564][    T1] pci 0000:00:09.0: BAR 1 [mem 0xfebdd000-0xfebddfff]
+[    0.553603][    T1] pci 0000:00:09.0: BAR 4 [mem 0x380000010000-0x380000013fff 64bit pref]
+[    0.565868][    T1] ACPI: PCI: Interrupt link LNKA configured for IRQ 10
+[    0.566750][    T1] ACPI: PCI: Interrupt link LNKB configured for IRQ 10
+[    0.567735][    T1] ACPI: PCI: Interrupt link LNKC configured for IRQ 11
+[    0.568736][    T1] ACPI: PCI: Interrupt link LNKD configured for IRQ 11
+[    0.569653][    T1] ACPI: PCI: Interrupt link LNKS configured for IRQ 9
+[    0.571009][    T1] iommu: Default domain type: Passthrough
+[    0.571651][    T1] pps_core: LinuxPPS API ver. 1 registered
+[    0.572548][    T1] pps_core: Software ver. 5.3.6 - Copyright 2005-2007 Rodolfo Giometti <giometti@linux.it>
+[    0.573554][    T1] PTP clock support registered
+[    0.574563][    T1] EDAC MC: Ver: 3.0.0
+[    0.576156][    T1] NetLabel: Initializing
+[    0.576548][    T1] NetLabel:  domain hash size = 128
+[    0.577548][    T1] NetLabel:  protocols = UNLABELED CIPSOv4 CALIPSO
+[    0.578574][    T1] NetLabel:  unlabeled traffic allowed by default
+[    0.579556][    T1] mctp: management component transport protocol core
+[    0.580549][    T1] NET: Registered PF_MCTP protocol family
+[    0.581562][    T1] PCI: Using ACPI for IRQ routing
+[    0.582970][    T1] pci 0000:00:02.0: vgaarb: setting as boot VGA device
+[    0.583542][    T1] pci 0000:00:02.0: vgaarb: bridge control possible
+[    0.583542][    T1] pci 0000:00:02.0: vgaarb: VGA device added: decodes=io+mem,owns=io+mem,locks=none
+[    0.583550][    T1] vgaarb: loaded
+[    0.584485][    T1] hpet0: at MMIO 0xfed00000, IRQs 2, 8, 0
+[    0.584548][    T1] hpet0: 3 comparators, 64-bit 100.000000 MHz counter
+[    0.590575][    T1] clocksource: Switched to clocksource kvm-clock
+[    0.593387][    T1] VFS: Disk quotas dquot_6.6.0
+[    0.594451][    T1] VFS: Dquot-cache hash table entries: 512 (order 0, 4096 bytes)
+[    0.596250][    T1] pnp: PnP ACPI init
+[    0.597660][    T1] pnp: PnP ACPI: found 6 devices
+[    0.605326][    T1] clocksource: acpi_pm: mask: 0xffffff max_cycles: 0xffffff, max_idle_ns: 2085701024 ns
+[    0.607580][    T1] NET: Registered PF_INET protocol family
+[    0.608897][    T1] IP idents hash table entries: 65536 (order: 7, 524288 bytes, linear)
+[    0.624774][    T1] tcp_listen_portaddr_hash hash table entries: 2048 (order: 3, 32768 bytes, linear)
+[    0.626838][    T1] Table-perturb hash table entries: 65536 (order: 6, 262144 bytes, linear)
+[    0.628735][    T1] TCP established hash table entries: 32768 (order: 6, 262144 bytes, linear)
+[    0.630677][    T1] TCP bind hash table entries: 32768 (order: 8, 1048576 bytes, linear)
+[    0.632545][    T1] TCP: Hash tables configured (established 32768 bind 32768)
+[    0.634204][    T1] MPTCP token hash table entries: 4096 (order: 5, 98304 bytes, linear)
+[    0.636147][    T1] UDP hash table entries: 2048 (order: 5, 131072 bytes, linear)
+[    0.637958][    T1] UDP-Lite hash table entries: 2048 (order: 5, 131072 bytes, linear)
+[    0.639775][    T1] NET: Registered PF_UNIX/PF_LOCAL protocol family
+[    0.641212][    T1] NET: Registered PF_XDP protocol family
+[    0.642459][    T1] pci_bus 0000:00: resource 4 [io  0x0000-0x0cf7 window]
+[    0.643996][    T1] pci_bus 0000:00: resource 5 [io  0x0d00-0xffff window]
+[    0.645540][    T1] pci_bus 0000:00: resource 6 [mem 0x000a0000-0x000bffff window]
+[    0.647212][    T1] pci_bus 0000:00: resource 7 [mem 0xc0000000-0xfebfffff window]
+[    0.648895][    T1] pci_bus 0000:00: resource 8 [mem 0x380000000000-0x38007fffffff window]
+[    0.650785][    T1] pci 0000:00:01.0: PIIX3: Enabling Passive Release
+[    0.652251][    T1] pci 0000:00:00.0: Limiting direct PCI/PCI transfers
+[    0.655234][    T1] ACPI: \_SB_.LNKB: Enabled at IRQ 10
+[    0.658034][    T1] PCI: CLS 0 bytes, default 64
+[    0.659164][    T1] PCI-DMA: Using software bounce buffering for IO (SWIOTLB)
+[    0.660756][    T1] software IO TLB: mapped [mem 0x00000000bbfd9000-0x00000000bffd9000] (64MB)
+[    0.662812][   T29] Trying to unpack rootfs image as initramfs...
+[    0.666749][    T1] clocksource: tsc: mask: 0xffffffffffffffff max_cycles: 0x1fb63109b96, max_idle_ns: 440795265316 ns
+[    0.718243][    T1] Initialise system trusted keyrings
+[    0.721082][    T1] Key type blacklist registered
+[    0.723876][    T1] workingset: timestamp_bits=36 max_order=20 bucket_order=0
+[    0.727319][    T1] integrity: Platform Keyring initialized
+[    0.729921][    T1] integrity: Machine keyring initialized
+[    0.731194][    T1] Allocating IMA blacklist keyring.
+[    0.759779][    T1] Key type asymmetric registered
+[    0.761868][    T1] Asymmetric key parser 'x509' registered
+[    0.765174][    T1] Block layer SCSI generic (bsg) driver version 0.4 loaded (major 245)
+[    0.768872][    T1] io scheduler mq-deadline registered
+[    0.770083][    T1] io scheduler kyber registered
+[    0.773748][    T1] io scheduler bfq registered
+[    0.776083][    T1] ledtrig-cpu: registered to indicate activity on CPUs
+[    0.782457][    T1] ACPI: \_SB_.LNKD: Enabled at IRQ 11
+[    0.790645][    T1] ACPI: \_SB_.LNKA: Enabled at IRQ 10
+[    0.798551][    T1] ACPI: \_SB_.LNKC: Enabled at IRQ 11
+[    0.832893][    T1] Serial: 8250/16550 driver, 32 ports, IRQ sharing enabled
+[    0.836368][    T1] 00:04: ttyS0 at I/O 0x3f8 (irq = 4, base_baud = 115200) is a 16550A
+[    1.012080][   T29] Freeing initrd memory: 31944K
+[    1.015118][    T1] Non-volatile memory driver v1.3
+[    1.016484][    T1] Linux agpgart interface v0.103
+[    1.018039][    T1] ACPI: bus type drm_connector registered
+[    1.020190][    T1] i8042: PNP: PS/2 Controller [PNP0303:KBD,PNP0f13:MOU] at 0x60,0x64 irq 1,12
+[    1.023388][    T1] serio: i8042 KBD port at 0x60,0x64 irq 1
+[    1.024688][    T1] serio: i8042 AUX port at 0x60,0x64 irq 12
+[    1.026138][    T1] mousedev: PS/2 mouse device common for all mice
+[    1.028006][   T10] input: AT Translated Set 2 keyboard as /devices/platform/i8042/serio0/input/input0
+[    1.030170][    T1] rtc_cmos 00:05: RTC can wake from S4
+[    1.032328][   T10] input: VirtualPS/2 VMware VMMouse as /devices/platform/i8042/serio1/input/input3
+[    1.035192][    T1] rtc_cmos 00:05: registered as rtc0
+[    1.036834][   T10] input: VirtualPS/2 VMware VMMouse as /devices/platform/i8042/serio1/input/input2
+[    1.039007][    T1] rtc_cmos 00:05: setting system clock to 2026-04-28T01:10:22 UTC (1777338622)
+[    1.041082][    T1] rtc_cmos 00:05: alarms up to one day, y3k, 242 bytes nvram, hpet irqs
+[    1.043072][    T1] amd_pstate: the _CPC object is not present in SBIOS or ACPI disabled
+[    1.045122][    T1] efi-framebuffer efi-framebuffer.0: [drm] Registered 1 planes with drm panic
+[    1.047080][    T1] [drm] Initialized efidrm 1.0.0 for efi-framebuffer.0 on minor 0
+[    1.048848][    T1] efi-framebuffer efi-framebuffer.0: [drm] User-defined mode not supported: "1024x768": 60 64127 1024 1080 1184 1344 768 769 772 795 0x20 0x6
+[    1.053326][    T1] Console: switching to colour frame buffer device 100x37
+[    1.055963][    T1] efi-framebuffer efi-framebuffer.0: [drm] fb0: efidrmdrmfb frame buffer device
+[    1.058071][    T1] hid: raw HID events driver (C) Jiri Kosina
+[    1.059506][    T1] drop_monitor: Initializing network drop monitor service
+[    1.061245][    T1] NET: Registered PF_INET6 protocol family
+[    1.062835][    T1] Segment Routing with IPv6
+[    1.063859][    T1] RPL Segment Routing with IPv6
+[    1.064987][    T1] In-situ OAM (IOAM) with IPv6
+[    1.066400][    T1] IPI shorthand broadcast: enabled
+[    1.070260][    T1] sched_clock: Marking stable (848002671, 221719416)->(1236992665, -167270578)
+[    1.072544][    T1] registered taskstats version 1
+[    1.074016][    T1] Loading compiled-in X.509 certificates
+[    1.075512][    T1] Loaded X.509 cert 'openSUSE Secure Boot Signkey: da89dc82efa50f451409029d285397e520ec4a61'
+[    1.086901][    T1] Demotion targets for Node 0: null
+[    1.088757][    T1] page_owner is disabled
+[    1.090453][    T1] Key type .fscrypt registered
+[    1.092291][    T1] Key type fscrypt-provisioning registered
+[    1.094419][    T1] Key type big_key registered
+[    1.125864][    T1] Key type encrypted registered
+[    1.128198][    T1] ima: No TPM chip found, activating TPM-bypass!
+[    1.130913][    T1] Loading compiled-in module X.509 certificates
+[    1.133651][    T1] Loaded X.509 cert 'openSUSE Secure Boot Signkey: da89dc82efa50f451409029d285397e520ec4a61'
+[    1.138205][    T1] ima: Allocated hash algorithm: sha256
+[    1.140898][    T1] ima: No architecture policies found
+[    1.143360][    T1] evm: Initialising EVM extended attributes:
+[    1.145796][    T1] evm: security.selinux
+[    1.147715][    T1] evm: security.SMACK64 (disabled)
+[    1.149863][    T1] evm: security.SMACK64EXEC (disabled)
+[    1.152089][    T1] evm: security.SMACK64TRANSMUTE (disabled)
+[    1.154424][    T1] evm: security.SMACK64MMAP (disabled)
+[    1.156560][    T1] evm: security.apparmor
+[    1.157984][    T1] evm: security.ima
+[    1.159246][    T1] evm: security.capability
+[    1.160629][    T1] evm: HMAC attrs: 0x1
+[    1.205550][    T1] PM:   Magic number: 6:810:155
+[    1.231842][    T1] RAS: Correctable Errors collector initialized.
+[    1.266769][    T1] clk: Disabling unused clocks
+[    1.270750][    T1] PM: genpd: Disabling unused power domains
+[    1.277221][    T1] Freeing unused decrypted memory: 2028K
+[    1.282358][    T1] Freeing unused kernel image (initmem) memory: 4660K
+[    1.286747][    T1] Write protecting the kernel read-only data: 34816k
+[    1.291129][    T1] Freeing unused kernel image (text/rodata gap) memory: 988K
+[    1.295963][    T1] Freeing unused kernel image (rodata/data gap) memory: 1396K
+[    1.356047][    T1] x86/mm: Checked W+X mappings: passed, no W+X pages found.
+[    1.402283][    T1] Run /init as init process
+[    1.427769][    T1] fuse: init (API version 7.45)
+[    1.436454][    T1] systemd[1]: Successfully made /usr/ read-only.
+[    1.772228][    T1] systemd[1]: systemd 260.1 running in system mode (+PAM +AUDIT +SELINUX +APPARMOR +IMA +IPE -SMACK +SECCOMP +GCRYPT +GNUTLS +OPENSSL +ACL +BLKID +CURL +ELFUTILS +FIDO2 +IDN2 +KMOD +LIBCRYPTSETUP +LIBCRYPTSETUP_PLUGINS +LIBFDISK +PCRE2 +PWQUALITY +P11KIT +QRENCODE +TPM2 +BZIP2 +LZ4 +XZ +ZLIB +ZSTD +BPF_FRAMEWORK -BTF -XKBCOMMON -UTMP +LIBARCHIVE)
+[    1.781941][    T1] systemd[1]: Detected virtualization kvm.
+[    1.783796][    T1] systemd[1]: Detected architecture x86-64.
+[    1.785674][    T1] systemd[1]: Running in initrd.
+[    1.789625][    T1] systemd[1]: Hostname set to <susetest>.
+[    1.995667][    T1] systemd[1]: bpf-restrict-fs: LSM BPF program attached
+[    2.057404][    T1] systemd[1]: /usr/lib/systemd/system/plymouth-start.service:15: Unit uses KillMode=none. This is unsafe, as it disables systemd's process lifecycle management for the service. Please update the service to use a safer KillMode=, such as 'mixed' or 'control-group'. Support for KillMode=none is deprecated and will eventually be removed.
+[    2.066955][    T1] systemd[1]: /usr/lib/systemd/system/systemd-ask-password-plymouth.service:10: ConditionPathExists= path is not absolute, ignoring: ${localstatedir}/run/plymouth/pid
+[    2.074895][    T1] systemd[1]: Queued start job for default target Initrd Default Target.
+[    2.146919][    T1] systemd[1]: Expecting device /dev/disk/by-uuid/5a89ef6e-af09-4990-9274-23a3cb54ea0f...
+[    2.152457][    T1] systemd[1]: Expecting device /dev/disk/by-uuid/ed80c39e-04b1-4956-a779-792896ff63e4...
+[    2.158290][    T1] systemd[1]: Reached target Initrd /usr File System.
+[    2.162799][    T1] systemd[1]: Reached target Slice Units.
+[    2.167084][    T1] systemd[1]: Reached target Swaps.
+[    2.171378][    T1] systemd[1]: Reached target Timer Units.
+[    2.178192][    T1] systemd[1]: Listening on Journal Socket (/dev/log).
+[    2.183186][    T1] systemd[1]: Listening on Journal Sockets.
+[    2.187753][    T1] systemd[1]: Listening on udev Control Socket.
+[    2.192398][    T1] systemd[1]: Listening on udev Kernel Socket.
+[    2.195517][    T1] systemd[1]: Reached target Socket Units.
+[    2.205785][    T1] systemd[1]: Starting Create List of Static Device Nodes...
+[    2.218777][    T1] systemd[1]: Started Hardware RNG Entropy Gatherer Daemon.
+[    2.232780][    T1] systemd[1]: Starting Journal Service...
+[    2.243779][    T1] systemd[1]: Starting Load Kernel Modules...
+[    2.267780][    T1] systemd[1]: Starting Virtual Console Setup...
+[    2.278236][  T213] i2c_dev: i2c /dev entries driver
+[    2.310376][    T1] systemd[1]: Finished Create List of Static Device Nodes.
+[    2.334279][    T1] systemd[1]: Finished Load Kernel Modules.
+[    2.354787][    T1] systemd[1]: Starting Apply Kernel Variables...
+[    2.371651][  T211] systemd-journald[211]: Collecting audit messages is disabled.
+[    2.380789][    T1] systemd[1]: Starting Create Static Device Nodes in /dev gracefully...
+[    2.423634][    T1] systemd[1]: Finished Apply Kernel Variables.
+[    2.444811][    T1] systemd[1]: Finished Create Static Device Nodes in /dev gracefully.
+[    2.469799][    T1] systemd[1]: Starting Create Static Device Nodes in /dev...
+[    2.495307][    T1] systemd[1]: Finished Virtual Console Setup.
+[    2.507100][    T1] systemd[1]: Started Journal Service.
+[    2.782725][  T337] raid6: avx2x4   gen() 33336 MB/s
+[    2.800723][  T337] raid6: avx2x2   gen() 33991 MB/s
+[    2.818724][  T337] raid6: avx2x1   gen() 24468 MB/s
+[    2.820385][  T337] raid6: using algorithm avx2x2 gen() 33991 MB/s
+[    2.838724][  T337] raid6: .... xor() 28297 MB/s, rmw enabled
+[    2.840561][  T337] raid6: using avx2x2 recovery algorithm
+[    2.920903][  T337] xor: automatically using best checksumming function   avx       
+[    3.155160][  T337] Btrfs loaded, assert=on, zoned=yes, fsverity=yes
+[    4.056844][  T361] Console: switching to colour dummy device 80x25
+[    4.071196][  T361] bochs-drm 0000:00:02.0: vgaarb: deactivate vga console
+[    4.089370][  T361] [drm] Found bochs VGA, ID 0xb0c5.
+[    4.090536][  T361] [drm] Framebuffer size 16384 kB @ 0xfd000000, mmio @ 0xfebd8000.
+[    4.111149][  T357] SCSI subsystem initialized
+[    4.122605][  T361] bochs-drm 0000:00:02.0: [drm] Registered 1 planes with drm panic
+[    4.129508][  T364] FDC 0 is a S82078B
+[    4.144745][  T361] [drm] Initialized bochs-drm 1.0.0 for 0000:00:02.0 on minor 0
+[    4.187601][  T354] virtio_blk virtio4: 1/0/0 default/read/poll queues
+[    4.197204][  T379] ACPI: bus type USB registered
+[    4.210079][  T357] alua: device handler registered
+[    4.222799][  T361] fbcon: bochs-drmdrmfb (fb0) is primary device
+[    4.236259][  T379] usbcore: registered new interface driver usbfs
+[    4.236279][  T379] usbcore: registered new interface driver hub
+[    4.236296][  T379] usbcore: registered new device driver usb
+[    4.246680][  T357] rdac: device handler registered
+[    4.253387][  T354] virtio_blk virtio4: [vda] 209715200 512-byte logical blocks (107 GB/100 GiB)
+[    4.261781][  T357] emc: device handler registered
+[    4.292858][  T354]  vda: vda1 vda2 vda3
+[    4.297795][  T385] virtio_scsi virtio3: 1/0/0 default/read/poll queues
+[    4.303004][  T385] scsi host0: Virtio SCSI HBA
+[    4.316796][  T361] Console: switching to colour frame buffer device 128x48
+[    4.330765][  T379] xhci_hcd 0000:00:06.0: xHCI Host Controller
+[    4.330775][  T379] xhci_hcd 0000:00:06.0: new USB bus registered, assigned bus number 1
+[    4.331212][  T379] xhci_hcd 0000:00:06.0: hcc params 0x00087001 hci version 0x100 quirks 0x0000000000000010
+[    4.337693][  T379] xhci_hcd 0000:00:06.0: xHCI Host Controller
+[    4.337698][  T379] xhci_hcd 0000:00:06.0: new USB bus registered, assigned bus number 2
+[    4.337702][  T379] xhci_hcd 0000:00:06.0: Host supports USB 3.0 SuperSpeed
+[    4.342778][  T379] usb usb1: New USB device found, idVendor=1d6b, idProduct=0002, bcdDevice= 6.19
+[    4.342789][  T379] usb usb1: New USB device strings: Mfr=3, Product=2, SerialNumber=1
+[    4.342791][  T379] usb usb1: Product: xHCI Host Controller
+[    4.342793][  T379] usb usb1: Manufacturer: Linux 6.19.12-1-default xhci-hcd
+[    4.342794][  T379] usb usb1: SerialNumber: 0000:00:06.0
+[    4.344164][  T379] hub 1-0:1.0: USB hub found
+[    4.344367][  T379] hub 1-0:1.0: 4 ports detected
+[    4.345341][  T379] usb usb2: We don't know the algorithms for LPM for this host, disabling LPM.
+[    4.345391][  T379] usb usb2: New USB device found, idVendor=1d6b, idProduct=0003, bcdDevice= 6.19
+[    4.345394][  T379] usb usb2: New USB device strings: Mfr=3, Product=2, SerialNumber=1
+[    4.345396][  T379] usb usb2: Product: xHCI Host Controller
+[    4.345397][  T379] usb usb2: Manufacturer: Linux 6.19.12-1-default xhci-hcd
+[    4.345398][  T379] usb usb2: SerialNumber: 0000:00:06.0
+[    4.349008][  T379] hub 2-0:1.0: USB hub found
+[    4.349151][  T379] hub 2-0:1.0: 4 ports detected
+[    4.361773][   T88] scsi 0:0:0:0: CD-ROM            QEMU     QEMU CD-ROM      2.5+ PQ: 0 ANSI: 5
+[    4.421890][   T88] scsi 0:0:0:0: Attached scsi generic sg0 type 5
+[    4.445383][  T357] scsi host1: ata_piix
+[    4.452302][  T357] scsi host2: ata_piix
+[    4.453315][    C0] sr 0:0:0:0: Power-on or device reset occurred
+[    4.453986][  T357] ata1: PATA max MWDMA2 cmd 0x1f0 ctl 0x3f6 bmdma 0xc140 irq 14 lpm-pol 0
+[    4.453988][  T357] ata2: PATA max MWDMA2 cmd 0x170 ctl 0x376 bmdma 0xc148 irq 15 lpm-pol 0
+[    4.456122][  T387] sr 0:0:0:0: [sr0] scsi3-mmc drive: 16x/50x cd/rw xa/form2 cdda tray
+[    4.456124][  T387] cdrom: Uniform CD-ROM driver Revision: 3.20
+[    4.569797][  T361] bochs-drm 0000:00:02.0: [drm] fb0: bochs-drmdrmfb frame buffer device
+[    4.582736][    T9] usb 1-1: new high-speed USB device number 2 using xhci_hcd
+[    4.711539][    T9] usb 1-1: New USB device found, idVendor=0627, idProduct=0001, bcdDevice= 0.00
+[    4.713556][    T9] usb 1-1: New USB device strings: Mfr=1, Product=3, SerialNumber=10
+[    4.715360][    T9] usb 1-1: Product: QEMU USB Tablet
+[    4.716518][    T9] usb 1-1: Manufacturer: QEMU
+[    4.717556][    T9] usb 1-1: SerialNumber: 28754-0000:00:06.0-1
+[    4.792380][  T387] usbcore: registered new interface driver usbhid
+[    4.793943][  T387] usbhid: USB HID core driver
+[    4.838812][  T387] input: QEMU QEMU USB Tablet as /devices/pci0000:00/0000:00:06.0/usb1/1-1/1-1:1.0/0003:0627:0001.0001/input/input4
+[    4.851809][  T387] hid-generic 0003:0627:0001.0001: input,hidraw0: USB HID v0.01 Mouse [QEMU QEMU USB Tablet] on usb-0000:00:06.0-1/input0
+[    5.837662][  T506] BTRFS: device fsid 5a89ef6e-af09-4990-9274-23a3cb54ea0f devid 1 transid 188 /dev/vda2 (254:2) scanned by mount (506)
+[    5.845056][  T506] BTRFS info (device vda2): first mount of filesystem 5a89ef6e-af09-4990-9274-23a3cb54ea0f
+[    5.850159][  T506] BTRFS info (device vda2): using crc32c (crc32c-lib) checksum algorithm
+[    5.860321][  T506] BTRFS info (device vda2): turning on async discard
+[    5.861995][  T506] BTRFS info (device vda2): enabling free space tree
+[    6.682830][  T211] systemd-journald[211]: Received SIGTERM from PID 1 (systemd).
+[    6.757479][   T27] audit: type=1404 audit(1777338628.217:2): enforcing=1 old_enforcing=0 auid=4294967295 ses=4294967295 enabled=1 old-enabled=1 lsm=selinux res=1
+[    6.798587][    T1] SELinux:  Permission firmware_load in class system not defined in policy.
+[    6.800736][    T1] SELinux:  Permission kexec_image_load in class system not defined in policy.
+[    6.802942][    T1] SELinux:  Permission kexec_initramfs_load in class system not defined in policy.
+[    6.805209][    T1] SELinux:  Permission policy_load in class system not defined in policy.
+[    6.807329][    T1] SELinux:  Permission x509_certificate_load in class system not defined in policy.
+[    6.809728][    T1] SELinux:  Permission allowed in class io_uring not defined in policy.
+[    6.811769][    T1] SELinux:  Class memfd_file not defined in policy.
+[    6.813387][    T1] SELinux: the above unknown classes and permissions will be allowed
+[    6.818346][    T1] SELinux:  policy capability network_peer_controls=1
+[    6.820009][    T1] SELinux:  policy capability open_perms=1
+[    6.821435][    T1] SELinux:  policy capability extended_socket_class=1
+[    6.823199][    T1] SELinux:  policy capability always_check_network=0
+[    6.824956][    T1] SELinux:  policy capability cgroup_seclabel=1
+[    6.826484][    T1] SELinux:  policy capability nnp_nosuid_transition=1
+[    6.828144][    T1] SELinux:  policy capability genfs_seclabel_symlinks=1
+[    6.829866][    T1] SELinux:  policy capability ioctl_skip_cloexec=0
+[    6.831465][    T1] SELinux:  policy capability userspace_initial_context=0
+[    6.833206][    T1] SELinux:  policy capability netlink_xperm=0
+[    6.834697][    T1] SELinux:  policy capability netif_wildcard=0
+[    6.836241][    T1] SELinux:  policy capability genfs_seclabel_wildcard=0
+[    6.837951][    T1] SELinux:  policy capability functionfs_seclabel=0
+[    6.839588][    T1] SELinux:  policy capability memfd_class=0
+[    6.874969][   T27] audit: type=1403 audit(1777338628.334:3): auid=4294967295 ses=4294967295 lsm=selinux res=1
+[    6.878447][    T1] systemd[1]: Successfully loaded SELinux policy in 121.100ms.
+[    6.927286][    T1] NET: Registered PF_VSOCK protocol family
+[    6.948941][    T1] systemd[1]: Relabeled /dev/, /dev/shm/, /run/ in 14.170ms.
+[    7.621125][    T1] systemd[1]: systemd 260.1 running in system mode (+PAM +AUDIT +SELINUX +APPARMOR +IMA +IPE -SMACK +SECCOMP +GCRYPT +GNUTLS +OPENSSL +ACL +BLKID +CURL +ELFUTILS +FIDO2 +IDN2 +KMOD +LIBCRYPTSETUP +LIBCRYPTSETUP_PLUGINS +LIBFDISK +PCRE2 +PWQUALITY +P11KIT +QRENCODE +TPM2 +BZIP2 +LZ4 +XZ +ZLIB +ZSTD +BPF_FRAMEWORK -BTF -XKBCOMMON -UTMP +LIBARCHIVE)
+[    7.628944][    T1] systemd[1]: Detected virtualization kvm.
+[    7.630279][    T1] systemd[1]: Detected architecture x86-64.
+[    7.852846][    T1] systemd[1]: bpf-restrict-fs: LSM BPF program attached
+[    7.988763][    T1] systemd[1]: /usr/lib/systemd/system/plymouth-start.service:15: Unit uses KillMode=none. This is unsafe, as it disables systemd's process lifecycle management for the service. Please update the service to use a safer KillMode=, such as 'mixed' or 'control-group'. Support for KillMode=none is deprecated and will eventually be removed.
+[    7.993855][    T1] systemd[1]: /usr/lib/systemd/system/systemd-ask-password-plymouth.service:10: ConditionPathExists= path is not absolute, ignoring: ${localstatedir}/run/plymouth/pid
+[    8.100026][    T1] systemd[1]: initrd-switch-root.service: Deactivated successfully.
+[    8.101961][    T1] systemd[1]: Stopped Switch Root.
+[    8.105463][    T1] systemd[1]: systemd-journald.service: Scheduled restart job, restart counter is at 1.
+[    8.108808][    T1] systemd[1]: Created slice Slice /system/getty.
+[    8.111331][    T1] systemd[1]: Created slice Slice /system/serial-getty.
+[    8.113426][    T1] systemd[1]: Created slice User and Session Slice.
+[    8.115386][    T1] systemd[1]: Set up automount Arbitrary Executable File Formats File System Automount Point.
+[    8.117406][    T1] systemd[1]: Expecting device /dev/disk/by-uuid/5a89ef6e-af09-4990-9274-23a3cb54ea0f...
+[    8.119284][    T1] systemd[1]: Expecting device /dev/disk/by-uuid/ed80c39e-04b1-4956-a779-792896ff63e4...
+[    8.121165][    T1] systemd[1]: Expecting device /dev/hvc0...
+[    8.122357][    T1] systemd[1]: Expecting device /dev/hvc1...
+[    8.123594][    T1] systemd[1]: Expecting device /dev/ttyS0...
+[    8.124837][    T1] systemd[1]: Reached target Image Downloads.
+[    8.126097][    T1] systemd[1]: Stopped target Switch Root.
+[    8.127288][    T1] systemd[1]: Stopped target Initrd File Systems.
+[    8.128583][    T1] systemd[1]: Stopped target Initrd Root File System.
+[    8.129938][    T1] systemd[1]: Reached target Local Integrity Protected Volumes.
+[    8.131503][    T1] systemd[1]: Reached target Remote File Systems.
+[    8.132844][    T1] systemd[1]: Reached target Slice Units.
+[    8.134052][    T1] systemd[1]: Reached target System Time Set.
+[    8.135316][    T1] systemd[1]: Reached target Timer Units.
+[    8.136514][    T1] systemd[1]: Reached target Local Verity Protected Volumes.
+[    8.138555][    T1] systemd[1]: Listening on Device-mapper event daemon FIFOs.
+[    8.141650][    T1] systemd[1]: Listening on LVM2 poll daemon socket.
+[    8.144961][    T1] systemd[1]: Listening on Query the User Interactively for a Password.
+[    8.147493][    T1] systemd[1]: Listening on Process Core Dump Socket.
+[    8.149201][    T1] systemd[1]: Listening on Credential Encryption/Decryption.
+[    8.150492][    T1] systemd[1]: Make TPM PCR Policy skipped, unmet condition check ConditionSecurity=measured-uki
+[    8.152705][    T1] systemd[1]: Listening on Disk Repartitioning Service Socket.
+[    8.155288][    T1] systemd[1]: Listening on udev Control Socket.
+[    8.156581][    T1] systemd[1]: Listening on udev Varlink Socket.
+[    8.159193][    T1] systemd[1]: Mounting Huge Pages File System...
+[    8.164780][    T1] systemd[1]: Mounting POSIX Message Queue File System...
+[    8.171139][    T1] systemd[1]: Mounting Kernel Debug File System...
+[    8.177802][    T1] systemd[1]: Mounting Kernel Trace File System...
+[    8.184782][    T1] systemd[1]: Starting Availability of block devices...
+[    8.195708][    T1] systemd[1]: Starting Create List of Static Device Nodes...
+[    8.203846][    T1] systemd[1]: Load Kernel Module configfs skipped, unmet condition check ConditionKernelModuleLoaded=!configfs
+[    8.216198][    T1] systemd[1]: Load Kernel Module drm skipped, unmet condition check ConditionKernelModuleLoaded=!drm
+[    8.222795][    T1] systemd[1]: Starting Load Kernel Module efi_pstore...
+[    8.227805][    T1] systemd[1]: Load Kernel Module fuse skipped, unmet condition check ConditionKernelModuleLoaded=!fuse
+[    8.234773][    T1] systemd[1]: Mounting FUSE Control File System...
+[    8.238796][    T1] systemd[1]: plymouth-start.service: Deactivated successfully.
+[    8.242682][    T1] systemd[1]: plymouth-start.service: Unit process 373 (plymouthd) remains running after unit stopped.
+[    8.245949][    T1] systemd[1]: Stopped Show Plymouth Boot Screen.
+[    8.251210][    T1] systemd[1]: Dispatch Password Requests to Console Directory Watch skipped, unmet condition check ConditionPathExists=!/run/plymouth/pid
+[    8.255617][    T1] systemd[1]: Reached target Local Encrypted Volumes.
+[    8.256854][    T1] systemd[1]: plymouth-switch-root.service: Deactivated successfully.
+[    8.258187][    T1] systemd[1]: Stopped Plymouth switch root service.
+[    8.259367][    T1] systemd[1]: systemd-fsck-root.service: Deactivated successfully.
+[    8.260602][    T1] systemd[1]: Stopped File System Check on Root Device.
+[    8.261799][    T1] systemd[1]: Clear Stale Hibernate Storage Info skipped, unmet condition check ConditionPathExists=/sys/firmware/efi/efivars/HibernateLocation-8cf2644b-4b0b-428f-9387-6d876050dc67
+[    8.267810][    T1] systemd[1]: Starting Journal Service...
+[    8.272780][    T1] systemd[1]: Starting Load Kernel Modules...
+[    8.279782][    T1] systemd[1]: Starting Remount Root and Kernel File Systems...
+[    8.288799][    T1] systemd[1]: Starting Load udev Rules from Credentials...
+[    8.301414][    T1] systemd[1]: Starting Coldplug All udev Devices...
+[    8.320956][    T1] systemd[1]: Mounted Huge Pages File System.
+[    8.328237][    T1] systemd[1]: Mounted POSIX Message Queue File System.
+[    8.337323][    T1] systemd[1]: Mounted Kernel Debug File System.
+[    8.344635][    T1] systemd[1]: Mounted Kernel Trace File System.
+[    8.352124][    T1] systemd[1]: Finished Availability of block devices.
+[    8.358255][    T1] systemd[1]: Finished Create List of Static Device Nodes.
+[    8.365161][    T1] systemd[1]: modprobe@efi_pstore.service: Deactivated successfully.
+[    8.373946][    T1] systemd[1]: Finished Load Kernel Module efi_pstore.
+[    8.379008][    T1] systemd[1]: Mounted FUSE Control File System.
+[    8.385076][    T1] systemd[1]: Finished Load Kernel Modules.
+[    8.391061][    T1] systemd[1]: Finished Remount Root and Kernel File Systems.
+[    8.397834][    T1] systemd[1]: Apply Kernel Variables for 6.19.12-1-default from /boot skipped, unmet condition check ConditionPathExists=!/usr/lib/modules/6.19.12-1-default/sysctl.conf
+[    8.411793][    T1] systemd[1]: Starting Apply Kernel Variables for 6.19.12-1-default...
+[    8.418934][    T1] systemd[1]: Rebuild Hardware Database skipped, unmet condition check ConditionNeedsUpdate=/etc
+[    8.432202][    T1] systemd[1]: Starting Create Static Device Nodes in /dev gracefully...
+[    8.440520][    T1] systemd[1]: Finished Load udev Rules from Credentials.
+[    8.453340][  T759] systemd-journald[759]: Collecting audit messages is disabled.
+[    8.460108][    T1] systemd[1]: Finished Apply Kernel Variables for 6.19.12-1-default.
+[    8.472806][    T1] systemd[1]: Starting Apply Kernel Variables...
+[    8.477883][    T1] systemd[1]: Started Journal Service.
+[    9.229839][  T799] input: Power Button as /devices/LNXSYSTM:00/LNXPWRBN:00/input/input5
+[    9.244634][  T791] piix4_smbus 0000:00:01.3: SMBus Host Controller at 0x700, revision 0
+[    9.269822][  T799] ACPI: button: Power Button [PWRF]
+[    9.280627][  T791] i2c i2c-0: Memory type 0x07 not supported yet, not instantiating SPD
+[    9.310658][  T802] parport_pc 00:03: reported by Plug and Play ACPI
+[    9.345118][  T802] parport0: PC-style at 0x378, irq 7 [PCSPP,TRISTATE]
+[    9.414872][  T796] input: PC Speaker as /devices/platform/pcspkr/input/input6
+[    9.463385][  T816] Adding 2098152k swap on /dev/vda3.  Priority:-1 extents:1 across:2098152k 
+[    9.561505][  T798] ppdev: user-space parallel port driver
+[    9.570157][  T787] virtio_net virtio0 ens4: renamed from eth0
+[    9.779583][  T828] snd_hda_codec_generic hdaudioC0D0: autoconfig for Generic: line_outs=1 (0x3/0x0/0x0/0x0/0x0) type:line
+[    9.781326][  T828] snd_hda_codec_generic hdaudioC0D0:    speaker_outs=0 (0x0/0x0/0x0/0x0/0x0)
+[    9.782665][  T828] snd_hda_codec_generic hdaudioC0D0:    hp_outs=0 (0x0/0x0/0x0/0x0/0x0)
+[    9.783954][  T828] snd_hda_codec_generic hdaudioC0D0:    mono: mono_out=0x0
+[    9.785056][  T828] snd_hda_codec_generic hdaudioC0D0:    inputs:
+[    9.848563][  T799] kvm_amd: TSC scaling supported
+[    9.849373][  T799] kvm_amd: Nested Virtualization enabled
+[    9.850221][  T799] kvm_amd: Nested Paging enabled
+[    9.850994][  T799] kvm_amd: LBR virtualization supported
+[    9.861821][  T759] systemd-journald[759]: Received client request to flush runtime journal.
+[    9.868136][  T799] kvm_amd: Virtual VMLOAD VMSAVE supported
+[    9.869121][  T799] kvm_amd: Virtual GIF supported
+[   10.626809][  T946] device-mapper: uevent: version 1.0.3
+[   10.633550][  T946] device-mapper: ioctl: 4.50.0-ioctl (2025-04-28) initialised: dm-devel@lists.linux.dev
+[   13.024824][ T1089] NET: Registered PF_PACKET protocol family
+[!p]104\[0m[?7h[1G[0J[6n[32766;32766H[6n[!p]104\[0m[?7h[1G[0J[6n[32766;32766H[6n]3008;start=65d1803580294e51a2d2bd41a09a892a;user=root;hostname=susetest;machineid=c7c0c40d364447af89e46102e48ec7e0;bootid=c3b9d6b960694835a9f47230b0e69789;pid=1067;pidfdid=1068;comm=(agetty);servicename=serial-getty@ttyS0.service;invocationid=476b69e2532d4ac7a12104a62813af9c;type=service\P+q6E616D65\[   15.367073][    C0] clocksource: Long readout interval, skipping watchdog check: cs_nsec: 2932446716 wd_nsec: 584376480
+
+Welcome to openSUSE Tumbleweed 20260426 - Kernel 6.19.12-1-default (ttyS0).
+
+ens4: 10.0.2.15
+
+
+
+susetest login: [   20.189011][ T1326] NOTICE: Automounting of tracing to debugfs is deprecated and will be removed in 2030
+[   23.856148][ T1851] RPC: Registered named UNIX socket transport module.
+[   23.857718][ T1851] RPC: Registered udp transport module.
+[   23.859045][ T1851] RPC: Registered tcp transport module.
+[   23.860326][ T1851] RPC: Registered tcp-with-tls transport module.
+[   23.861770][ T1851] RPC: Registered tcp NFSv4.1 backchannel transport module.
+[   24.029365][ T1883] NFSD: Using nfsdcld client tracking operations.
+[   24.030812][ T1883] NFSD: no clients to reclaim, skipping NFSv4 grace period (net effffff9)
+generic/001
+[   61.388184][ T2159] netfs: FS-Cache loaded
+[   61.442730][ T2163] Key type dns_resolver registered
+[   61.563158][ T2163] NFS: Registering the id_resolver key type
+[   61.564478][ T2163] Key type id_resolver registered
+[   61.565707][ T2163] Key type id_legacy registered
+[   61.867268][ T2006] run fstests generic/001 at 2026-04-27 21:11:26
+generic/002
+[   67.162542][ T4860] run fstests generic/002 at 2026-04-27 21:11:32
+generic/003
+[   68.075408][ T5535] run fstests generic/003 at 2026-04-27 21:11:33
+generic/004
+[   68.768051][ T6032] run fstests generic/004 at 2026-04-27 21:11:33
+generic/005
+[   69.477830][ T6529] run fstests generic/005 at 2026-04-27 21:11:34
+generic/006
+[   70.273608][ T7101] run fstests generic/006 at 2026-04-27 21:11:35
+generic/007
+[   73.288110][ T7632] run fstests generic/007 at 2026-04-27 21:11:38
+generic/008
+[   55.711770][ T2128] netfs: FS-Cache loaded
+[   55.772564][ T2132] Key type dns_resolver registered
+[   55.908011][ T2132] NFS: Registering the id_resolver key type
+[   55.909293][ T2132] Key type id_resolver registered
+[   55.910412][ T2132] Key type id_legacy registered
+[   56.207081][ T1975] run fstests generic/008 at 2026-04-27 21:11:21
+generic/009
+[   56.956383][ T2484] run fstests generic/009 at 2026-04-27 21:11:21
+generic/011
+[   57.658871][ T2981] run fstests generic/011 at 2026-04-27 21:11:22
+generic/012
+[   61.245272][ T3509] run fstests generic/012 at 2026-04-27 21:11:26
+generic/013
+[   61.987583][ T4010] run fstests generic/013 at 2026-04-27 21:11:27
+generic/014
+[   73.735529][ T4622] run fstests generic/014 at 2026-04-27 21:11:38
+generic/015
+[   87.159809][ T5149] run fstests generic/015 at 2026-04-27 21:12:23
+generic/016
+[   87.853878][ T5640] run fstests generic/016 at 2026-04-27 21:12:24
+generic/018
+[   88.561247][ T6141] run fstests generic/018 at 2026-04-27 21:12:24
+generic/020
+[   89.345237][ T6641] run fstests generic/020 at 2026-04-27 21:12:25
+generic/021
+[   90.085932][ T7138] run fstests generic/021 at 2026-04-27 21:12:26
+generic/022
+[   90.836694][ T7639] run fstests generic/022 at 2026-04-27 21:12:27
+generic/023
+[   91.576300][ T8140] run fstests generic/023 at 2026-04-27 21:12:27
+generic/024
+[   92.676789][ T8957] run fstests generic/024 at 2026-04-27 21:12:28
+generic/025
+[   93.430248][ T9451] run fstests generic/025 at 2026-04-27 21:12:29
+generic/026
+[   94.143574][ T9946] run fstests generic/026 at 2026-04-27 21:12:30
+generic/028
+[   94.878394][T10459] run fstests generic/028 at 2026-04-27 21:12:31
+generic/029
+[  100.625036][T10975] run fstests generic/029 at 2026-04-27 21:12:36
+generic/030
+[  101.529729][T11571] run fstests generic/030 at 2026-04-27 21:12:37
+generic/031
+[  102.561855][T12183] run fstests generic/031 at 2026-04-27 21:12:38
+generic/032
+[  103.255983][T12679] run fstests generic/032 at 2026-04-27 21:12:39
+generic/033
+[  103.936238][T13172] run fstests generic/033 at 2026-04-27 21:12:40
+generic/034
+[  104.638891][T13667] run fstests generic/034 at 2026-04-27 21:12:40
+generic/035
+[  105.334221][T14158] run fstests generic/035 at 2026-04-27 21:12:41
+generic/037
+[  106.124013][T14686] run fstests generic/037 at 2026-04-27 21:12:42
+generic/039
+[  106.869101][T15181] run fstests generic/039 at 2026-04-27 21:12:43
+generic/040
+[  107.576894][T15676] run fstests generic/040 at 2026-04-27 21:12:43
+generic/041
+[  108.275156][T16171] run fstests generic/041 at 2026-04-27 21:12:44
+generic/042
+[  108.954294][T16666] run fstests generic/042 at 2026-04-27 21:12:45
+generic/050
+[  109.693338][T17167] run fstests generic/050 at 2026-04-27 21:12:45
+generic/052
+[  110.470738][T17667] run fstests generic/052 at 2026-04-27 21:12:46
+generic/053
+[  111.212295][T18171] run fstests generic/053 at 2026-04-27 21:12:47
+generic/056
+[  111.896838][T18663] run fstests generic/056 at 2026-04-27 21:12:48
+generic/057
+[  112.606690][T19159] run fstests generic/057 at 2026-04-27 21:12:48
+generic/058
+[  113.328782][T19655] run fstests generic/058 at 2026-04-27 21:12:49
+generic/059
+[  114.056867][T20146] run fstests generic/059 at 2026-04-27 21:12:50
+generic/060
+[  114.775927][T20638] run fstests generic/060 at 2026-04-27 21:12:50
+generic/061
+[  115.483766][T21129] run fstests generic/061 at 2026-04-27 21:12:51
+generic/062
+[  116.228691][T21620] run fstests generic/062 at 2026-04-27 21:12:52
+generic/063
+[  116.951425][T22120] run fstests generic/063 at 2026-04-27 21:12:53
+generic/064
+[  117.670550][T22611] run fstests generic/064 at 2026-04-27 21:12:53
+generic/065
+[  118.400477][T23107] run fstests generic/065 at 2026-04-27 21:12:54
+generic/066
+[  119.102635][T23603] run fstests generic/066 at 2026-04-27 21:12:55
+generic/067
+[  119.778826][T24096] run fstests generic/067 at 2026-04-27 21:12:55
+[  119.995247][T24525] loop: module loaded
+generic/069
+[  120.597733][T24619] run fstests generic/069 at 2026-04-27 21:12:56
+generic/070
+[  126.852590][T25168] run fstests generic/070 at 2026-04-27 21:13:03
+generic/071
+[  127.566447][T25665] run fstests generic/071 at 2026-04-27 21:13:03
+generic/073
+[  128.268509][T26159] run fstests generic/073 at 2026-04-27 21:13:04
+generic/075
+[  128.999686][T26651] run fstests generic/075 at 2026-04-27 21:13:05
+generic/076
+[  132.847014][T27190] run fstests generic/076 at 2026-04-27 21:13:09
+generic/078
+[  133.553395][T27678] run fstests generic/078 at 2026-04-27 21:13:09
+generic/079
+[  134.253416][T28173] run fstests generic/079 at 2026-04-27 21:13:10
+generic/080
+[  134.960551][T28658] run fstests generic/080 at 2026-04-27 21:13:11
+generic/081
+[  137.722091][T29182] run fstests generic/081 at 2026-04-27 21:13:13
+generic/082
+[  138.499361][T29679] run fstests generic/082 at 2026-04-27 21:13:14
+generic/084
+[  139.230732][T30176] run fstests generic/084 at 2026-04-27 21:13:15
+generic/086
+[  145.046113][T35496] run fstests generic/086 at 2026-04-27 21:13:21
+generic/087
+[  145.778993][T35995] run fstests generic/087 at 2026-04-27 21:13:21
+generic/088
+[  146.564150][T36531] run fstests generic/088 at 2026-04-27 21:13:22
+generic/090
+[  147.282478][T37052] run fstests generic/090 at 2026-04-27 21:13:23
+generic/091
+[  148.039374][T37548] run fstests generic/091 at 2026-04-27 21:13:24
+generic/092
+[  160.522888][T38110] run fstests generic/092 at 2026-04-27 21:13:36
+generic/094
+[  161.223210][T38609] run fstests generic/094 at 2026-04-27 21:13:37
+generic/095
+[  161.941139][T39114] run fstests generic/095 at 2026-04-27 21:13:38
+generic/096
+[  181.551628][T39756] run fstests generic/096 at 2026-04-27 21:13:57
+generic/097
+[  182.284691][T40252] run fstests generic/097 at 2026-04-27 21:13:58
+generic/098
+[  183.012008][T40749] run fstests generic/098 at 2026-04-27 21:13:59
+generic/099
+[  183.895594][T41320] run fstests generic/099 at 2026-04-27 21:14:00
+generic/101
+[  184.627609][T41833] run fstests generic/101 at 2026-04-27 21:14:00
+generic/103
+[  185.327895][T42325] run fstests generic/103 at 2026-04-27 21:14:01
+generic/104
+[  186.029105][T42816] run fstests generic/104 at 2026-04-27 21:14:02
+generic/105
+[  186.755124][T43315] run fstests generic/105 at 2026-04-27 21:14:02
+generic/106
+[  187.446526][T43806] run fstests generic/106 at 2026-04-27 21:14:03
+generic/107
+[  188.146555][T44302] run fstests generic/107 at 2026-04-27 21:14:04
+generic/108
+[  188.839739][T44798] run fstests generic/108 at 2026-04-27 21:14:05
+generic/110
+[  189.606634][T45299] run fstests generic/110 at 2026-04-27 21:14:05
+generic/111
+[  190.336221][T45812] run fstests generic/111 at 2026-04-27 21:14:06
+generic/112
+[  191.065685][T46325] run fstests generic/112 at 2026-04-27 21:14:07
+generic/113
+[  194.584457][T46865] run fstests generic/113 at 2026-04-27 21:14:10
+generic/114
+[  205.781207][T47478] run fstests generic/114 at 2026-04-27 21:14:21
+generic/115
+[  206.488251][T47981] run fstests generic/115 at 2026-04-27 21:14:22
+generic/116
+[  207.180625][T48497] run fstests generic/116 at 2026-04-27 21:14:23
+generic/117
+[  207.902089][T49010] run fstests generic/117 at 2026-04-27 21:14:24
+generic/118
+[  208.608925][T49502] run fstests generic/118 at 2026-04-27 21:14:24
+generic/119
+[  209.315952][T50015] run fstests generic/119 at 2026-04-27 21:14:25
+generic/120
+[  210.005297][T50528] run fstests generic/120 at 2026-04-27 21:14:26
+generic/121
+[  210.685306][T51022] run fstests generic/121 at 2026-04-27 21:14:26
+generic/122
+[  211.382397][T51539] run fstests generic/122 at 2026-04-27 21:14:27
+generic/123
+[  212.082169][T52056] run fstests generic/123 at 2026-04-27 21:14:28
+generic/124
+[  212.856724][T52608] run fstests generic/124 at 2026-04-27 21:14:29
+generic/126
+[  215.317062][T53944] run fstests generic/126 at 2026-04-27 21:14:31
+generic/128
+[  216.180639][T54531] run fstests generic/128 at 2026-04-27 21:14:32
+generic/129
+[  217.913140][T55274] run fstests generic/129 at 2026-04-27 21:14:34
+generic/130
+[  231.919138][T55963] run fstests generic/130 at 2026-04-27 21:14:48
+generic/131
+[  235.892764][T56668] run fstests generic/131 at 2026-04-27 21:14:52
+generic/134
+[  237.673764][T57195] run fstests generic/134 at 2026-04-27 21:14:53
+generic/135
+[  238.385795][T57708] run fstests generic/135 at 2026-04-27 21:14:54
+generic/136
+[  239.223043][T58261] run fstests generic/136 at 2026-04-27 21:14:55
+generic/138
+[  239.991010][T58778] run fstests generic/138 at 2026-04-27 21:14:56
+generic/139
+[  240.746965][T59291] run fstests generic/139 at 2026-04-27 21:14:56
+generic/140
+[  241.473058][T59804] run fstests generic/140 at 2026-04-27 21:14:57
+generic/141
+[  242.201914][T60318] run fstests generic/141 at 2026-04-27 21:14:58
+generic/142
+[  242.984868][T60846] run fstests generic/142 at 2026-04-27 21:14:59
+generic/143
+[  243.728550][T61359] run fstests generic/143 at 2026-04-27 21:14:59
+generic/144
+[  244.443206][T61872] run fstests generic/144 at 2026-04-27 21:15:00
+generic/145
+[  245.158554][T62385] run fstests generic/145 at 2026-04-27 21:15:01
+generic/146
+[  245.903870][T62898] run fstests generic/146 at 2026-04-27 21:15:02
+generic/147
+[  246.678659][T63413] run fstests generic/147 at 2026-04-27 21:15:02
+generic/148
+[  247.442055][T63926] run fstests generic/148 at 2026-04-27 21:15:03
+generic/149
+[  248.225011][T64439] run fstests generic/149 at 2026-04-27 21:15:04
+generic/150
+[  249.021042][T64952] run fstests generic/150 at 2026-04-27 21:15:05
+generic/151
+[  249.808229][T65465] run fstests generic/151 at 2026-04-27 21:15:06
+generic/152
+[  250.648445][T65978] run fstests generic/152 at 2026-04-27 21:15:06
+generic/153
+[  251.443773][T66491] run fstests generic/153 at 2026-04-27 21:15:07
+generic/154
+[  252.261548][T67005] run fstests generic/154 at 2026-04-27 21:15:08
+generic/155
+[  253.076869][T67518] run fstests generic/155 at 2026-04-27 21:15:09
+generic/156
+[  253.980653][T68031] run fstests generic/156 at 2026-04-27 21:15:10
+generic/157
+[  254.741499][T68545] run fstests generic/157 at 2026-04-27 21:15:10
+generic/158
+[  255.473329][T69059] run fstests generic/158 at 2026-04-27 21:15:11
+generic/159
+[  256.236112][T69577] run fstests generic/159 at 2026-04-27 21:15:12
+generic/160
+[  257.088433][T70064] run fstests generic/160 at 2026-04-27 21:15:13
+generic/161
+[  257.953663][T70549] run fstests generic/161 at 2026-04-27 21:15:14
+generic/162
+[  258.821477][T71074] run fstests generic/162 at 2026-04-27 21:15:15
+generic/163
+[  259.693288][T71599] run fstests generic/163 at 2026-04-27 21:15:15
+generic/169
+[  260.587262][T72124] run fstests generic/169 at 2026-04-27 21:15:16
+generic/171
+[  261.746809][T72684] run fstests generic/171 at 2026-04-27 21:15:17
+generic/172
+[  262.675064][T73212] run fstests generic/172 at 2026-04-27 21:15:18
+generic/173
+[  263.655398][T73739] run fstests generic/173 at 2026-04-27 21:15:19
+generic/174
+[  264.684405][T74266] run fstests generic/174 at 2026-04-27 21:15:20
+generic/177
+[  265.631942][T74793] run fstests generic/177 at 2026-04-27 21:15:21
+generic/178
+[  266.499360][T75294] run fstests generic/178 at 2026-04-27 21:15:22
+generic/179
+[  267.443114][T75809] run fstests generic/179 at 2026-04-27 21:15:23
+generic/180
+[  268.325088][T76322] run fstests generic/180 at 2026-04-27 21:15:24
+generic/181
+[  269.190617][T76835] run fstests generic/181 at 2026-04-27 21:15:25
+generic/182
+[  270.072109][T77348] run fstests generic/182 at 2026-04-27 21:15:26
+generic/183
+[  270.965295][T77865] run fstests generic/183 at 2026-04-27 21:15:27
+generic/184
+[  271.949198][T78390] run fstests generic/184 at 2026-04-27 21:15:28
+generic/185
+[  272.863198][T78907] run fstests generic/185 at 2026-04-27 21:15:29
+generic/188
+[  273.813970][T79432] run fstests generic/188 at 2026-04-27 21:15:30
+generic/189
+[  274.857865][T79957] run fstests generic/189 at 2026-04-27 21:15:31
+generic/190
+[  275.836368][T80482] run fstests generic/190 at 2026-04-27 21:15:32
+generic/191
+[  276.803788][T81009] run fstests generic/191 at 2026-04-27 21:15:33
+generic/193
+[  277.770804][T81534] run fstests generic/193 at 2026-04-27 21:15:33
+generic/194
+[  278.964306][T82190] run fstests generic/194 at 2026-04-27 21:15:35
+generic/195
+[  279.853889][T82715] run fstests generic/195 at 2026-04-27 21:15:36
+generic/196
+[  280.759007][T83240] run fstests generic/196 at 2026-04-27 21:15:36
+generic/197
+[  281.675722][T83765] run fstests generic/197 at 2026-04-27 21:15:37
+generic/198
+[  282.601889][T84291] run fstests generic/198 at 2026-04-27 21:15:38
+generic/199
+[  283.866765][T84808] run fstests generic/199 at 2026-04-27 21:15:40
+generic/200
+[  284.824793][T85333] run fstests generic/200 at 2026-04-27 21:15:41
+generic/201
+[  285.745615][T85858] run fstests generic/201 at 2026-04-27 21:15:41
+generic/202
+[  286.693358][T86383] run fstests generic/202 at 2026-04-27 21:15:42
+generic/203
+[  287.622152][T86910] run fstests generic/203 at 2026-04-27 21:15:43
+generic/205
+[  288.526570][T87435] run fstests generic/205 at 2026-04-27 21:15:44
+generic/206
+[  289.440600][T87960] run fstests generic/206 at 2026-04-27 21:15:45
+generic/207
+[  290.350280][T88485] run fstests generic/207 at 2026-04-27 21:15:46
+generic/210
+[  292.606423][T89006] run fstests generic/210 at 2026-04-27 21:15:48
+generic/211
+[  293.422703][T89524] run fstests generic/211 at 2026-04-27 21:15:49
+generic/212
+[  294.178586][T90012] run fstests generic/212 at 2026-04-27 21:15:50
+generic/213
+[  294.971436][T90530] run fstests generic/213 at 2026-04-27 21:15:51
+generic/214
+[  295.811601][T91029] run fstests generic/214 at 2026-04-27 21:15:52
+generic/215
+[  296.640448][T91530] run fstests generic/215 at 2026-04-27 21:15:52
+generic/216
+[  299.559853][T92058] run fstests generic/216 at 2026-04-27 21:15:55
+generic/217
+[  300.453776][T92583] run fstests generic/217 at 2026-04-27 21:15:56
+generic/218
+[  301.263167][T93108] run fstests generic/218 at 2026-04-27 21:15:57
+generic/219
+[  302.093058][T93634] run fstests generic/219 at 2026-04-27 21:15:58
+generic/220
+[  302.857012][T94121] run fstests generic/220 at 2026-04-27 21:15:59
+generic/221
+[  303.688343][T94646] run fstests generic/221 at 2026-04-27 21:15:59
+generic/222
+[  305.483093][T95157] run fstests generic/222 at 2026-04-27 21:16:01
+generic/223
+[  306.320300][T95682] run fstests generic/223 at 2026-04-27 21:16:02
+generic/225
+[  307.091561][T96178] run fstests generic/225 at 2026-04-27 21:16:03
+generic/227
+[  307.827580][T96677] run fstests generic/227 at 2026-04-27 21:16:04
+generic/228
+[  308.679786][T97202] run fstests generic/228 at 2026-04-27 21:16:04
+generic/229
+[  309.426355][T97700] run fstests generic/229 at 2026-04-27 21:16:05
+generic/230
+[  310.293998][T98227] run fstests generic/230 at 2026-04-27 21:16:06
+generic/235
+[  311.045982][T98714] run fstests generic/235 at 2026-04-27 21:16:07
+generic/236
+[  311.764934][T99201] run fstests generic/236 at 2026-04-27 21:16:07
+generic/237
+[  313.553944][T99722] run fstests generic/237 at 2026-04-27 21:16:09
+generic/238
+[  314.324278][T100236] run fstests generic/238 at 2026-04-27 21:16:10
+generic/240
+[  315.147627][T100761] run fstests generic/240 at 2026-04-27 21:16:11
+generic/244
+[  315.949031][T101287] run fstests generic/244 at 2026-04-27 21:16:12
+generic/245
+[  316.693811][T101772] run fstests generic/245 at 2026-04-27 21:16:12
+generic/246
+[  317.455963][T102296] run fstests generic/246 at 2026-04-27 21:16:13
+generic/247
+[  318.228077][T102810] run fstests generic/247 at 2026-04-27 21:16:14
+generic/248
+[  325.627127][T104842] run fstests generic/248 at 2026-04-27 21:16:21
+generic/249
+[  326.443475][T105354] run fstests generic/249 at 2026-04-27 21:16:22
+generic/250
+[  327.461433][T105873] run fstests generic/250 at 2026-04-27 21:16:23
+generic/252
+[  328.271565][T106368] run fstests generic/252 at 2026-04-27 21:16:24
+generic/253
+[  329.034372][T106863] run fstests generic/253 at 2026-04-27 21:16:25
+generic/254
+[  329.884423][T107388] run fstests generic/254 at 2026-04-27 21:16:26
+generic/255
+[  330.700998][T107913] run fstests generic/255 at 2026-04-27 21:16:26
+generic/256
+[  331.470890][T108414] run fstests generic/256 at 2026-04-27 21:16:27
+generic/257
+[  332.241984][T108907] run fstests generic/257 at 2026-04-27 21:16:28
+generic/258
+[  333.269110][T109588] run fstests generic/258 at 2026-04-27 21:16:29
+generic/259
+[  334.101595][T110116] run fstests generic/259 at 2026-04-27 21:16:30
+generic/260
+[  334.905820][T110641] run fstests generic/260 at 2026-04-27 21:16:31
+generic/261
+[  335.709554][T111143] run fstests generic/261 at 2026-04-27 21:16:31
+generic/262
+[  336.543672][T111668] run fstests generic/262 at 2026-04-27 21:16:32
+generic/263
+[  337.434331][T112195] run fstests generic/263 at 2026-04-27 21:16:33
+generic/264
+[  343.038557][T112727] run fstests generic/264 at 2026-04-27 21:16:39
+generic/265
+[  343.825833][T113252] run fstests generic/265 at 2026-04-27 21:16:40
+generic/266
+[  344.669258][T113785] run fstests generic/266 at 2026-04-27 21:16:40
+generic/267
+[  345.474110][T114318] run fstests generic/267 at 2026-04-27 21:16:41
+generic/268
+[  346.294729][T114851] run fstests generic/268 at 2026-04-27 21:16:42
+generic/271
+[  347.151273][T115386] run fstests generic/271 at 2026-04-27 21:16:43
+generic/272
+[  347.977663][T115919] run fstests generic/272 at 2026-04-27 21:16:44
+generic/276
+[  348.825274][T116452] run fstests generic/276 at 2026-04-27 21:16:45
+generic/277
+[  349.682438][T116985] run fstests generic/277 at 2026-04-27 21:16:45
+generic/278
+[  350.403545][T117476] run fstests generic/278 at 2026-04-27 21:16:46
+generic/279
+[  351.223545][T118009] run fstests generic/279 at 2026-04-27 21:16:47
+generic/281
+[  352.056502][T118543] run fstests generic/281 at 2026-04-27 21:16:48
+generic/282
+[  352.919584][T119076] run fstests generic/282 at 2026-04-27 21:16:49
+generic/283
+[  353.743563][T119609] run fstests generic/283 at 2026-04-27 21:16:49
+generic/284
+[  354.578539][T120142] run fstests generic/284 at 2026-04-27 21:16:50
+generic/286
+[  355.387786][T120667] run fstests generic/286 at 2026-04-27 21:16:51
+generic/287
+[  356.134282][T121166] run fstests generic/287 at 2026-04-27 21:16:52
+generic/288
+[  356.989286][T121693] run fstests generic/288 at 2026-04-27 21:16:53
+generic/289
+[  357.798886][T122195] run fstests generic/289 at 2026-04-27 21:16:54
+generic/290
+[  358.632151][T122720] run fstests generic/290 at 2026-04-27 21:16:54
+generic/291
+[  359.487580][T123245] run fstests generic/291 at 2026-04-27 21:16:55
+generic/292
+[  360.316456][T123770] run fstests generic/292 at 2026-04-27 21:16:56
+generic/293
+[  361.142251][T124295] run fstests generic/293 at 2026-04-27 21:16:57
+generic/294
+[  361.983060][T124820] run fstests generic/294 at 2026-04-27 21:16:58
+generic/295
+[  362.751280][T125302] run fstests generic/295 at 2026-04-27 21:16:58
+generic/296
+[  363.580709][T125827] run fstests generic/296 at 2026-04-27 21:16:59
+generic/301
+[  364.386365][T126352] run fstests generic/301 at 2026-04-27 21:17:00
+generic/302
+[  365.203326][T126877] run fstests generic/302 at 2026-04-27 21:17:01
+generic/303
+[  366.039956][T127402] run fstests generic/303 at 2026-04-27 21:17:02
+generic/304
+[  366.804949][T127918] run fstests generic/304 at 2026-04-27 21:17:03
+generic/305
+[  367.581545][T128436] run fstests generic/305 at 2026-04-27 21:17:03
+generic/306
+[  368.427884][T128962] run fstests generic/306 at 2026-04-27 21:17:04
+generic/307
+[  369.372593][T129556] run fstests generic/307 at 2026-04-27 21:17:05
+generic/308
+[  370.129283][T130048] run fstests generic/308 at 2026-04-27 21:17:06
+generic/309
+[  370.927303][T130564] run fstests generic/309 at 2026-04-27 21:17:07
+generic/312
+[  372.732690][T131086] run fstests generic/312 at 2026-04-27 21:17:08
+generic/313
+[  373.450461][T131575] run fstests generic/313 at 2026-04-27 21:17:09
+generic/314
+[  378.248995][T132089] run fstests generic/314 at 2026-04-27 21:17:14
+generic/315
+[  379.033711][T132630] run fstests generic/315 at 2026-04-27 21:17:15
+generic/316
+[  379.767256][T133129] run fstests generic/316 at 2026-04-27 21:17:15
+generic/317
+[  380.494687][T133630] run fstests generic/317 at 2026-04-27 21:17:16
+generic/318
+[  381.388935][T134221] run fstests generic/318 at 2026-04-27 21:17:17
+generic/319
+[  382.128025][T134733] run fstests generic/319 at 2026-04-27 21:17:18
+generic/321
+[  382.858315][T135220] run fstests generic/321 at 2026-04-27 21:17:19
+generic/322
+[  383.565798][T135711] run fstests generic/322 at 2026-04-27 21:17:19
+generic/324
+[  384.273207][T136201] run fstests generic/324 at 2026-04-27 21:17:20
+generic/325
+[  384.989046][T136687] run fstests generic/325 at 2026-04-27 21:17:21
+generic/326
+[  385.693806][T137178] run fstests generic/326 at 2026-04-27 21:17:21
+generic/327
+[  386.485432][T137704] run fstests generic/327 at 2026-04-27 21:17:22
+generic/328
+[  387.271521][T138232] run fstests generic/328 at 2026-04-27 21:17:23
+generic/329
+[  388.073299][T138758] run fstests generic/329 at 2026-04-27 21:17:24
+generic/330
+[  388.869315][T139291] run fstests generic/330 at 2026-04-27 21:17:25
+generic/331
+[  389.670741][T139816] run fstests generic/331 at 2026-04-27 21:17:25
+generic/332
+[  390.497245][T140349] run fstests generic/332 at 2026-04-27 21:17:26
+generic/335
+[  391.322818][T140874] run fstests generic/335 at 2026-04-27 21:17:27
+generic/336
+[  392.040156][T141366] run fstests generic/336 at 2026-04-27 21:17:28
+generic/337
+[  392.769983][T141863] run fstests generic/337 at 2026-04-27 21:17:28
+generic/338
+[  393.477762][T142355] run fstests generic/338 at 2026-04-27 21:17:29
+generic/341
+[  394.195913][T142849] run fstests generic/341 at 2026-04-27 21:17:30
+generic/342
+[  394.908954][T143341] run fstests generic/342 at 2026-04-27 21:17:31
+generic/343
+[  395.621723][T143833] run fstests generic/343 at 2026-04-27 21:17:31
+generic/346
+[  396.365482][T144329] run fstests generic/346 at 2026-04-27 21:17:32
+generic/347
+[  400.289814][T144876] run fstests generic/347 at 2026-04-27 21:17:36
+generic/348
+[  401.066552][T145374] run fstests generic/348 at 2026-04-27 21:17:37
+generic/353
+[  401.794722][T145871] run fstests generic/353 at 2026-04-27 21:17:38
+generic/355
+[  402.587748][T146397] run fstests generic/355 at 2026-04-27 21:17:38
+generic/356
+[  403.430324][T146958] run fstests generic/356 at 2026-04-27 21:17:39
+[  403.664594][T147403] Adding 36k swap on /opt/nfs/scratch/swap.  Priority:-1 extents:1 across:36k 
+generic/357
+[  404.332912][T147526] run fstests generic/357 at 2026-04-27 21:17:40
+generic/358
+[  405.027934][T148007] run fstests generic/358 at 2026-04-27 21:17:41
+generic/359
+[  405.853341][T148532] run fstests generic/359 at 2026-04-27 21:17:42
+generic/360
+[  406.640251][T149057] run fstests generic/360 at 2026-04-27 21:17:42
+generic/361
+[  407.424090][T149580] run fstests generic/361 at 2026-04-27 21:17:43
+generic/362
+[  408.186731][T150072] run fstests generic/362 at 2026-04-27 21:17:44
+generic/364
+[  408.920675][T150552] run fstests generic/364 at 2026-04-27 21:17:45
+generic/366
+[  419.780304][T151074] run fstests generic/366 at 2026-04-27 21:17:55
+generic/367
+[  434.837332][T152443] run fstests generic/367 at 2026-04-27 21:18:11
+generic/368
+[  435.660679][T152969] run fstests generic/368 at 2026-04-27 21:18:11
+[  435.890213][T153460] nfs: Unknown parameter 'inlinecrypt'
+generic/369
+[  436.461119][T153533] run fstests generic/369 at 2026-04-27 21:18:12
+[  436.689463][T154026] nfs: Unknown parameter 'inlinecrypt'
+generic/370
+[  437.245256][T154099] run fstests generic/370 at 2026-04-27 21:18:13
+[  437.485758][T154543] Adding 36k swap on /opt/nfs/scratch/swap.  Priority:-1 extents:1 across:36k 
+generic/371
+[  438.182602][T154666] run fstests generic/371 at 2026-04-27 21:18:14
+generic/372
+[  438.923043][T155160] run fstests generic/372 at 2026-04-27 21:18:15
+generic/373
+[  439.734470][T155685] run fstests generic/373 at 2026-04-27 21:18:15
+generic/374
+[  440.567570][T156210] run fstests generic/374 at 2026-04-27 21:18:16
+generic/375
+[  441.386710][T156735] run fstests generic/375 at 2026-04-27 21:18:17
+generic/376
+[  442.145260][T157232] run fstests generic/376 at 2026-04-27 21:18:18
+generic/377
+[  442.897675][T157725] run fstests generic/377 at 2026-04-27 21:18:19
+generic/378
+[  443.649114][T158217] run fstests generic/378 at 2026-04-27 21:18:19
+generic/379
+[  444.481522][T158762] run fstests generic/379 at 2026-04-27 21:18:20
+generic/380
+[  445.219848][T159256] run fstests generic/380 at 2026-04-27 21:18:21
+generic/381
+[  445.932777][T159743] run fstests generic/381 at 2026-04-27 21:18:22
+generic/382
+[  446.687314][T160230] run fstests generic/382 at 2026-04-27 21:18:22
+generic/383
+[  447.449385][T160719] run fstests generic/383 at 2026-04-27 21:18:23
+generic/384
+[  448.205902][T161206] run fstests generic/384 at 2026-04-27 21:18:24
+generic/385
+[  448.964467][T161703] run fstests generic/385 at 2026-04-27 21:18:25
+generic/386
+[  449.733657][T162195] run fstests generic/386 at 2026-04-27 21:18:25
+generic/389
+[  450.462966][T162677] run fstests generic/389 at 2026-04-27 21:18:26
+generic/391
+[  451.203128][T163175] run fstests generic/391 at 2026-04-27 21:18:27
+generic/392
+[  451.948742][T163675] run fstests generic/392 at 2026-04-27 21:18:28
+generic/393
+[  452.793497][T164177] run fstests generic/393 at 2026-04-27 21:18:29
+generic/394
+[  453.803021][T164778] run fstests generic/394 at 2026-04-27 21:18:30
+generic/395
+[  454.745724][T165303] run fstests generic/395 at 2026-04-27 21:18:30
+generic/396
+[  455.587244][T165877] run fstests generic/396 at 2026-04-27 21:18:31
+generic/397
+[  456.443413][T166451] run fstests generic/397 at 2026-04-27 21:18:32
+generic/398
+[  457.258467][T167032] run fstests generic/398 at 2026-04-27 21:18:33
+generic/400
+[  458.038062][T167606] run fstests generic/400 at 2026-04-27 21:18:34
+generic/401
+[  458.791131][T168088] run fstests generic/401 at 2026-04-27 21:18:35
+generic/402
+[  459.693160][T168639] run fstests generic/402 at 2026-04-27 21:18:35
+generic/403
+[  460.562173][T169157] run fstests generic/403 at 2026-04-27 21:18:36
+generic/404
+[  461.410537][T169648] run fstests generic/404 at 2026-04-27 21:18:37
+generic/406
+[  462.219907][T170149] run fstests generic/406 at 2026-04-27 21:18:38
+generic/407
+[  463.833200][T170688] run fstests generic/407 at 2026-04-27 21:18:40
+generic/408
+[  464.674109][T171212] run fstests generic/408 at 2026-04-27 21:18:40
+generic/409
+[  465.485403][T171740] run fstests generic/409 at 2026-04-27 21:18:41
+generic/410
+[  466.279250][T172239] run fstests generic/410 at 2026-04-27 21:18:42
+generic/411
+[  467.038299][T172740] run fstests generic/411 at 2026-04-27 21:18:43
+generic/412
+[  467.829316][T173239] run fstests generic/412 at 2026-04-27 21:18:44
+generic/413
+[  468.788000][T173792] run fstests generic/413 at 2026-04-27 21:18:45
+[  469.016555][T174231] nfs: Unknown parameter 'dax'
+generic/414
+[  469.645196][T174304] run fstests generic/414 at 2026-04-27 21:18:45
+generic/417
+[  470.513462][T174829] run fstests generic/417 at 2026-04-27 21:18:46
+generic/419
+[  471.339196][T175330] run fstests generic/419 at 2026-04-27 21:18:47
+generic/420
+[  472.179452][T175904] run fstests generic/420 at 2026-04-27 21:18:48
+generic/422
+[  473.056231][T176406] run fstests generic/422 at 2026-04-27 21:18:49
+generic/423
+[  473.882436][T176910] run fstests generic/423 at 2026-04-27 21:18:50
+generic/424
+[  474.763137][T177448] run fstests generic/424 at 2026-04-27 21:18:50
+generic/425
+[  475.604422][T177950] run fstests generic/425 at 2026-04-27 21:18:51
+generic/426
+[  476.396744][T178442] run fstests generic/426 at 2026-04-27 21:18:52
+generic/427
+[  477.192460][T178937] run fstests generic/427 at 2026-04-27 21:18:53
+generic/428
+[  477.974278][T179428] run fstests generic/428 at 2026-04-27 21:18:54
+generic/430
+[  478.784641][T179940] run fstests generic/430 at 2026-04-27 21:18:55
+generic/431
+[  479.690975][T180518] run fstests generic/431 at 2026-04-27 21:18:55
+generic/432
+[  480.557637][T181088] run fstests generic/432 at 2026-04-27 21:18:56
+generic/433
+[  481.470337][T181667] run fstests generic/433 at 2026-04-27 21:18:57
+generic/434
+[  482.378498][T182231] run fstests generic/434 at 2026-04-27 21:18:58
+generic/436
+[  483.305526][T182790] run fstests generic/436 at 2026-04-27 21:18:59
+generic/437
+[  484.129277][T183294] run fstests generic/437 at 2026-04-27 21:19:00
+generic/439
+[  485.561072][T184806] run fstests generic/439 at 2026-04-27 21:19:01
+generic/440
+[  486.366243][T185312] run fstests generic/440 at 2026-04-27 21:19:02
+generic/441
+[  487.193602][T185888] run fstests generic/441 at 2026-04-27 21:19:03
+generic/443
+[  487.990735][T186383] run fstests generic/443 at 2026-04-27 21:19:04
+generic/444
+[  488.777799][T186895] run fstests generic/444 at 2026-04-27 21:19:04
+generic/445
+[  489.543051][T187392] run fstests generic/445 at 2026-04-27 21:19:05
+generic/446
+[  490.338197][T187896] run fstests generic/446 at 2026-04-27 21:19:06
+generic/448
+[  491.126771][T188408] run fstests generic/448 at 2026-04-27 21:19:07
+generic/449
+[  491.981866][T188931] run fstests generic/449 at 2026-04-27 21:19:08
+generic/450
+[  492.811203][T189434] run fstests generic/450 at 2026-04-27 21:19:09
+generic/451
+[  493.708686][T189993] run fstests generic/451 at 2026-04-27 21:19:09
+generic/452
+[  524.517571][T204283] run fstests generic/452 at 2026-04-27 21:19:40
+generic/453
+[  525.380213][T204828] run fstests generic/453 at 2026-04-27 21:19:41
+generic/454
+[  526.109276][T205313] run fstests generic/454 at 2026-04-27 21:19:42
+generic/456
+[  526.842285][T205804] run fstests generic/456 at 2026-04-27 21:19:43
+generic/458
+[  527.583697][T206305] run fstests generic/458 at 2026-04-27 21:19:43
+generic/460
+[  528.390825][T206830] run fstests generic/460 at 2026-04-27 21:19:44
+generic/462
+[  531.755627][T207363] run fstests generic/462 at 2026-04-27 21:19:47
+[  531.979449][T207801] nfs: Unknown parameter 'dax'
+generic/463
+[  532.534741][T207874] run fstests generic/463 at 2026-04-27 21:19:48
+generic/465
+[  533.294952][T208398] run fstests generic/465 at 2026-04-27 21:19:49
+generic/466
+[  534.009423][T208879] run fstests generic/466 at 2026-04-27 21:19:50
+generic/467
+[  534.737359][T209365] run fstests generic/467 at 2026-04-27 21:19:50
+generic/468
+[  535.461868][T209858] run fstests generic/468 at 2026-04-27 21:19:51
+generic/469
+[  536.255721][T210359] run fstests generic/469 at 2026-04-27 21:19:52
+generic/470
+[  536.966503][T210858] run fstests generic/470 at 2026-04-27 21:19:53
+generic/471
+[  537.688726][T211351] run fstests generic/471 at 2026-04-27 21:19:54
+generic/472
+[  541.217739][T211865] run fstests generic/472 at 2026-04-27 21:19:57
+[  541.464051][T212310] Adding 36k swap on /opt/nfs/scratch/swap.  Priority:-1 extents:1 across:36k 
+[  541.561985][T212339] Adding 2044k swap on /opt/nfs/scratch/swap.  Priority:-1 extents:1 across:2044k 
+[  541.595812][T212352] Adding 2044k swap on /opt/nfs/scratch/swap.  Priority:-1 extents:1 across:2044k 
+[  541.623592][T212367] Adding 8k swap on /opt/nfs/scratch/swap.  Priority:-1 extents:1 across:8k 
+generic/474
+[  542.269404][T212471] run fstests generic/474 at 2026-04-27 21:19:58
+generic/477
+[  543.046931][T212972] run fstests generic/477 at 2026-04-27 21:19:59
+generic/478
+[  543.800117][T213465] run fstests generic/478 at 2026-04-27 21:20:00
+generic/479
+[  555.373570][T215124] run fstests generic/479 at 2026-04-27 21:20:11
+generic/480
+[  556.125580][T215623] run fstests generic/480 at 2026-04-27 21:20:12
+generic/481
+[  556.867506][T216121] run fstests generic/481 at 2026-04-27 21:20:13
+generic/483
+[  557.584155][T216613] run fstests generic/483 at 2026-04-27 21:20:13
+generic/484
+[  558.312868][T217105] run fstests generic/484 at 2026-04-27 21:20:14
+generic/485
+[  559.077081][T217599] run fstests generic/485 at 2026-04-27 21:20:15
+generic/486
+[  559.811251][T218098] run fstests generic/486 at 2026-04-27 21:20:16
+generic/487
+[  560.529595][T218585] run fstests generic/487 at 2026-04-27 21:20:16
+generic/488
+[  561.258818][T219078] run fstests generic/488 at 2026-04-27 21:20:17
+generic/489
+[  562.047501][T219565] run fstests generic/489 at 2026-04-27 21:20:18
+generic/490
+[  562.795281][T220059] run fstests generic/490 at 2026-04-27 21:20:19
+generic/491
+[  563.600823][T220583] run fstests generic/491 at 2026-04-27 21:20:19
+generic/492
+[  564.364223][T221081] run fstests generic/492 at 2026-04-27 21:20:20
+generic/493
+[  565.135517][T221575] run fstests generic/493 at 2026-04-27 21:20:21
+[  565.383318][T222020] Adding 36k swap on /opt/nfs/scratch/swap.  Priority:-1 extents:1 across:36k 
+generic/494
+[  566.062152][T222143] run fstests generic/494 at 2026-04-27 21:20:22
+[  566.303022][T222588] Adding 36k swap on /opt/nfs/scratch/swap.  Priority:-1 extents:1 across:36k 
+generic/495
+[  566.935167][T222679] run fstests generic/495 at 2026-04-27 21:20:23
+[  567.194050][T223124] Adding 36k swap on /opt/nfs/scratch/swap.  Priority:-1 extents:1 across:36k 
+generic/496
+[  567.864920][T223227] run fstests generic/496 at 2026-04-27 21:20:24
+[  568.106767][T223672] Adding 36k swap on /opt/nfs/scratch/swap.  Priority:-1 extents:1 across:36k 
+generic/497
+[  568.692650][T223760] run fstests generic/497 at 2026-04-27 21:20:25
+[  568.940871][T224205] Adding 36k swap on /opt/nfs/scratch/swap.  Priority:-1 extents:1 across:36k 
+generic/498
+[  569.545513][T224295] run fstests generic/498 at 2026-04-27 21:20:25
+generic/499
+[  570.268486][T224791] run fstests generic/499 at 2026-04-27 21:20:26
+generic/501
+[  571.003857][T225284] run fstests generic/501 at 2026-04-27 21:20:27
+generic/502
+[  571.836654][T225814] run fstests generic/502 at 2026-04-27 21:20:28
+generic/503
+[  572.578013][T226311] run fstests generic/503 at 2026-04-27 21:20:28
+generic/504
+[  573.319107][T226815] run fstests generic/504 at 2026-04-27 21:20:29
+generic/505
+[  574.110480][T227334] run fstests generic/505 at 2026-04-27 21:20:30
+generic/506
+[  574.924997][T227835] run fstests generic/506 at 2026-04-27 21:20:31
+generic/507
+[  575.724737][T228322] run fstests generic/507 at 2026-04-27 21:20:32
+generic/508
+[  576.487714][T228813] run fstests generic/508 at 2026-04-27 21:20:32
+generic/509
+[  577.212320][T229300] run fstests generic/509 at 2026-04-27 21:20:33
+generic/510
+[  577.969050][T229797] run fstests generic/510 at 2026-04-27 21:20:34
+generic/511
+[  578.702838][T230289] run fstests generic/511 at 2026-04-27 21:20:35
+generic/512
+[  579.499994][T230782] run fstests generic/512 at 2026-04-27 21:20:35
+generic/513
+[  580.267876][T231281] run fstests generic/513 at 2026-04-27 21:20:36
+generic/514
+[  581.117120][T231807] run fstests generic/514 at 2026-04-27 21:20:37
+generic/515
+[  581.955268][T232332] run fstests generic/515 at 2026-04-27 21:20:38
+generic/516
+[  582.810717][T232858] run fstests generic/516 at 2026-04-27 21:20:39
+generic/517
+[  583.571393][T233375] run fstests generic/517 at 2026-04-27 21:20:39
+generic/518
+[  584.431059][T233900] run fstests generic/518 at 2026-04-27 21:20:40
+generic/519
+[  585.343958][T234425] run fstests generic/519 at 2026-04-27 21:20:41
+generic/520
+[  586.147043][T234919] run fstests generic/520 at 2026-04-27 21:20:42
+generic/523
+[  587.041383][T235412] run fstests generic/523 at 2026-04-27 21:20:43
+generic/524
+[  587.854446][T235904] run fstests generic/524 at 2026-04-27 21:20:44
+generic/525
+[  591.763349][T236750] run fstests generic/525 at 2026-04-27 21:20:48
+generic/526
+[  592.686427][T237297] run fstests generic/526 at 2026-04-27 21:20:49
+generic/527
+[  593.583122][T237793] run fstests generic/527 at 2026-04-27 21:20:49
+generic/528
+[  594.449286][T238289] run fstests generic/528 at 2026-04-27 21:20:50
+generic/529
+[  595.456717][T238859] run fstests generic/529 at 2026-04-27 21:20:51
+generic/530
+[  596.285256][T239345] run fstests generic/530 at 2026-04-27 21:20:52
+generic/531
+[  597.133430][T239847] run fstests generic/531 at 2026-04-27 21:20:53
+generic/532
+[  597.954622][T240338] run fstests generic/532 at 2026-04-27 21:20:54
+generic/533
+[  598.789780][T240861] run fstests generic/533 at 2026-04-27 21:20:55
+generic/534
+[  599.598332][T241358] run fstests generic/534 at 2026-04-27 21:20:55
+generic/535
+[  600.409662][T241850] run fstests generic/535 at 2026-04-27 21:20:56
+generic/536
+[  601.209565][T242342] run fstests generic/536 at 2026-04-27 21:20:57
+generic/537
+[  602.090412][T242842] run fstests generic/537 at 2026-04-27 21:20:58
+generic/538
+[  602.933594][T243346] run fstests generic/538 at 2026-04-27 21:20:59
+generic/539
+[  610.747155][T244637] run fstests generic/539 at 2026-04-27 21:21:07
+generic/540
+[  611.542399][T245142] run fstests generic/540 at 2026-04-27 21:21:07
+generic/541
+[  612.375274][T245668] run fstests generic/541 at 2026-04-27 21:21:08
+generic/542
+[  613.224320][T246193] run fstests generic/542 at 2026-04-27 21:21:09
+generic/543
+[  614.042596][T246719] run fstests generic/543 at 2026-04-27 21:21:10
+generic/544
+[  614.928329][T247244] run fstests generic/544 at 2026-04-27 21:21:11
+generic/545
+[  615.804661][T247769] run fstests generic/545 at 2026-04-27 21:21:12
+generic/546
+[  616.565402][T248266] run fstests generic/546 at 2026-04-27 21:21:12
+generic/547
+[  617.345339][T248762] run fstests generic/547 at 2026-04-27 21:21:13
+generic/548
+[  618.114502][T249264] run fstests generic/548 at 2026-04-27 21:21:14
+generic/549
+[  618.925553][T249840] run fstests generic/549 at 2026-04-27 21:21:15
+generic/550
+[  619.738011][T250416] run fstests generic/550 at 2026-04-27 21:21:16
+generic/552
+[  620.551335][T250992] run fstests generic/552 at 2026-04-27 21:21:16
+generic/553
+[  621.301490][T251487] run fstests generic/553 at 2026-04-27 21:21:17
+generic/554
+[  622.105291][T252016] run fstests generic/554 at 2026-04-27 21:21:18
+[  622.391278][T252486] Adding 36k swap on /opt/nfs/scratch/swap.  Priority:-1 extents:1 across:36k 
+[  622.560674][T252522] Adding 16380k swap on /opt/nfs/scratch/swapfile.  Priority:-1 extents:1 across:16380k 
+generic/555
+[  623.223129][T252624] run fstests generic/555 at 2026-04-27 21:21:19
+generic/556
+[  624.007129][T253138] run fstests generic/556 at 2026-04-27 21:21:20
+generic/557
+[  624.774313][T253624] run fstests generic/557 at 2026-04-27 21:21:21
+generic/563
+[  625.547404][T254116] run fstests generic/563 at 2026-04-27 21:21:21
+generic/564
+[  626.314894][T254613] run fstests generic/564 at 2026-04-27 21:21:22
+[  626.560082][T255094] loop0: detected capacity change from 0 to 256
+generic/565
+[  627.392367][T255231] run fstests generic/565 at 2026-04-27 21:21:23
+generic/566
+[  628.308957][T255799] run fstests generic/566 at 2026-04-27 21:21:24
+generic/567
+[  629.065139][T256285] run fstests generic/567 at 2026-04-27 21:21:25
+generic/568
+[  629.844107][T256781] run fstests generic/568 at 2026-04-27 21:21:26
+generic/569
+[  630.616907][T257271] run fstests generic/569 at 2026-04-27 21:21:27
+generic/570
+[  631.389505][T257761] run fstests generic/570 at 2026-04-27 21:21:27
+generic/571
+[  632.168367][T258248] run fstests generic/571 at 2026-04-27 21:21:28
+generic/572
+[  632.931189][T258743] run fstests generic/572 at 2026-04-27 21:21:29
+generic/573
+[  633.699447][T259232] run fstests generic/573 at 2026-04-27 21:21:30
+generic/574
+[  634.458377][T259721] run fstests generic/574 at 2026-04-27 21:21:30
+generic/575
+[  635.242380][T260210] run fstests generic/575 at 2026-04-27 21:21:31
+generic/576
+[  636.020625][T260699] run fstests generic/576 at 2026-04-27 21:21:32
+generic/577
+[  636.851130][T261252] run fstests generic/577 at 2026-04-27 21:21:33
+generic/578
+[  637.667286][T261743] run fstests generic/578 at 2026-04-27 21:21:34
+generic/580
+[  638.459035][T262237] run fstests generic/580 at 2026-04-27 21:21:34
+generic/581
+[  639.326795][T262811] run fstests generic/581 at 2026-04-27 21:21:35
+generic/582
+[  640.189097][T263398] run fstests generic/582 at 2026-04-27 21:21:36
+generic/583
+[  641.045632][T263974] run fstests generic/583 at 2026-04-27 21:21:37
+generic/584
+[  641.898887][T264550] run fstests generic/584 at 2026-04-27 21:21:38
+generic/586
+[  642.741712][T265127] run fstests generic/586 at 2026-04-27 21:21:39
+generic/587
+[  643.530500][T265629] run fstests generic/587 at 2026-04-27 21:21:39
+generic/588
+[  644.399496][T266124] run fstests generic/588 at 2026-04-27 21:21:40
+generic/591
+[  645.308103][T266654] run fstests generic/591 at 2026-04-27 21:21:41
+generic/592
+[  646.159838][T267174] run fstests generic/592 at 2026-04-27 21:21:42
+generic/593
+[  646.981612][T267750] run fstests generic/593 at 2026-04-27 21:21:43
+generic/594
+[  647.803304][T268326] run fstests generic/594 at 2026-04-27 21:21:44
+generic/595
+[  648.691143][T268815] run fstests generic/595 at 2026-04-27 21:21:45
+generic/596
+[  649.587908][T269390] run fstests generic/596 at 2026-04-27 21:21:45
+generic/597
+[  650.367968][T269875] run fstests generic/597 at 2026-04-27 21:21:46
+generic/598
+[  651.357458][T270501] run fstests generic/598 at 2026-04-27 21:21:47
+generic/599
+[  652.427388][T271194] run fstests generic/599 at 2026-04-27 21:21:48
+generic/600
+[  653.252761][T271695] run fstests generic/600 at 2026-04-27 21:21:49
+generic/601
+[  653.991728][T272182] run fstests generic/601 at 2026-04-27 21:21:50
+generic/602
+[  654.744858][T272669] run fstests generic/602 at 2026-04-27 21:21:51
+generic/603
+[  655.565693][T273245] run fstests generic/603 at 2026-04-27 21:21:51
+generic/604
+[  656.350660][T273736] run fstests generic/604 at 2026-04-27 21:21:52
+generic/605
+[  658.732335][T275277] run fstests generic/605 at 2026-04-27 21:21:55
+[  658.935724][T275706] nfs: Unknown parameter 'dax'
+generic/606
+[  659.567741][T275779] run fstests generic/606 at 2026-04-27 21:21:55
+[  659.780315][T276206] nfs: Unknown parameter 'dax'
+generic/607
+[  660.386025][T276279] run fstests generic/607 at 2026-04-27 21:21:56
+generic/608
+[  661.163886][T276783] run fstests generic/608 at 2026-04-27 21:21:57
+[  661.385906][T277210] nfs: Unknown parameter 'dax'
+generic/609
+[  661.982950][T277283] run fstests generic/609 at 2026-04-27 21:21:58
+generic/610
+[  662.843499][T277820] run fstests generic/610 at 2026-04-27 21:21:59
+generic/611
+[  663.655183][T278316] run fstests generic/611 at 2026-04-27 21:22:00
+generic/612
+[  664.456388][T278808] run fstests generic/612 at 2026-04-27 21:22:00
+generic/613
+[  665.337798][T279331] run fstests generic/613 at 2026-04-27 21:22:01
+generic/614
+[  666.219080][T279905] run fstests generic/614 at 2026-04-27 21:22:02
+generic/615
+[  667.076599][T280414] run fstests generic/615 at 2026-04-27 21:22:03
+generic/618
+[  688.998061][T295307] run fstests generic/618 at 2026-04-27 21:22:25
+generic/620
+[  689.814518][T295799] run fstests generic/620 at 2026-04-27 21:22:26
+generic/621
+[  690.679049][T296296] run fstests generic/621 at 2026-04-27 21:22:27
+generic/623
+[  691.536857][T296871] run fstests generic/623 at 2026-04-27 21:22:27
+generic/624
+[  692.377374][T297374] run fstests generic/624 at 2026-04-27 21:22:28
+generic/625
+[  693.187715][T297864] run fstests generic/625 at 2026-04-27 21:22:29
+generic/626
+[  693.955985][T298353] run fstests generic/626 at 2026-04-27 21:22:30
+generic/628
+[  694.761914][T298845] run fstests generic/628 at 2026-04-27 21:22:31
+generic/629
+[  695.723838][T299383] run fstests generic/629 at 2026-04-27 21:22:32
+generic/630
+[  696.540519][T299883] run fstests generic/630 at 2026-04-27 21:22:32
+generic/632
+[  697.393085][T300409] run fstests generic/632 at 2026-04-27 21:22:33
+generic/633
+[  699.935013][T300922] run fstests generic/633 at 2026-04-27 21:22:36
+[  700.120825][T301354] process 'vfstest' launched '/dev/fd/4/file1' with NULL argv: empty string added
+generic/634
+[  700.757970][T301450] run fstests generic/634 at 2026-04-27 21:22:37
+generic/635
+[  701.830841][T302082] run fstests generic/635 at 2026-04-27 21:22:38
+generic/636
+[  702.686576][T302583] run fstests generic/636 at 2026-04-27 21:22:39
+[  702.942579][T303028] Adding 36k swap on /opt/nfs/scratch/swap.  Priority:-1 extents:1 across:36k 
+[  703.037764][T303058] Empty swap-file
+generic/637
+[  703.677975][T303156] run fstests generic/637 at 2026-04-27 21:22:40
+generic/638
+[  704.732909][T303780] run fstests generic/638 at 2026-04-27 21:22:41
+generic/639
+[  705.556344][T304295] run fstests generic/639 at 2026-04-27 21:22:41
+generic/640
+[  706.381829][T304820] run fstests generic/640 at 2026-04-27 21:22:42
+generic/641
+[  707.149411][T305314] run fstests generic/641 at 2026-04-27 21:22:43
+[  707.427002][T305764] Adding 36k swap on /opt/nfs/scratch/swap.  Priority:-1 extents:1 across:36k 
+generic/644
+[  708.068535][T305853] run fstests generic/644 at 2026-04-27 21:22:44
+generic/645
+[  708.838203][T306337] run fstests generic/645 at 2026-04-27 21:22:45
+generic/646
+[  709.604848][T306821] run fstests generic/646 at 2026-04-27 21:22:46
+generic/647
+[  710.434968][T307321] run fstests generic/647 at 2026-04-27 21:22:46
+generic/651
+[  711.244485][T307837] run fstests generic/651 at 2026-04-27 21:22:47
+generic/652
+[  712.127969][T308362] run fstests generic/652 at 2026-04-27 21:22:48
+generic/653
+[  713.017341][T308888] run fstests generic/653 at 2026-04-27 21:22:49
+generic/654
+[  713.854733][T309413] run fstests generic/654 at 2026-04-27 21:22:50
+generic/655
+[  714.704942][T309938] run fstests generic/655 at 2026-04-27 21:22:51
+generic/657
+[  715.569976][T310463] run fstests generic/657 at 2026-04-27 21:22:51
+generic/658
+[  716.442154][T310988] run fstests generic/658 at 2026-04-27 21:22:52
+generic/659
+[  717.285186][T311515] run fstests generic/659 at 2026-04-27 21:22:53
+generic/660
+[  718.169632][T312040] run fstests generic/660 at 2026-04-27 21:22:54
+generic/661
+[  719.047204][T312565] run fstests generic/661 at 2026-04-27 21:22:55
+generic/662
+[  719.933752][T313090] run fstests generic/662 at 2026-04-27 21:22:56
+generic/663
+[  720.825243][T313615] run fstests generic/663 at 2026-04-27 21:22:57
+generic/664
+[  721.708499][T314140] run fstests generic/664 at 2026-04-27 21:22:58
+generic/665
+[  722.545938][T314666] run fstests generic/665 at 2026-04-27 21:22:58
+generic/666
+[  723.390324][T315191] run fstests generic/666 at 2026-04-27 21:22:59
+generic/667
+[  724.226714][T315716] run fstests generic/667 at 2026-04-27 21:23:00
+generic/668
+[  725.088949][T316241] run fstests generic/668 at 2026-04-27 21:23:01
+generic/669
+[  725.917770][T316766] run fstests generic/669 at 2026-04-27 21:23:02
+generic/673
+[  726.763894][T317291] run fstests generic/673 at 2026-04-27 21:23:03
+generic/674
+[  727.673101][T317831] run fstests generic/674 at 2026-04-27 21:23:04
+generic/675
+[  728.571855][T318369] run fstests generic/675 at 2026-04-27 21:23:04
+generic/676
+[  729.454631][T318914] run fstests generic/676 at 2026-04-27 21:23:05
+generic/677
+[  735.384016][T319427] run fstests generic/677 at 2026-04-27 21:23:11
+generic/678
+[  736.135152][T319919] run fstests generic/678 at 2026-04-27 21:23:12
+generic/679
+[  736.917204][T320415] run fstests generic/679 at 2026-04-27 21:23:13
+generic/680
+[  737.683531][T320911] run fstests generic/680 at 2026-04-27 21:23:14
+generic/681
+[  738.502308][T321454] run fstests generic/681 at 2026-04-27 21:23:14
+generic/682
+[  739.233299][T321936] run fstests generic/682 at 2026-04-27 21:23:15
+generic/683
+[  739.963581][T322418] run fstests generic/683 at 2026-04-27 21:23:16
+generic/684
+[  740.719114][T322930] run fstests generic/684 at 2026-04-27 21:23:17
+generic/685
+[  741.517263][T323444] run fstests generic/685 at 2026-04-27 21:23:17
+generic/686
+[  742.323715][T323958] run fstests generic/686 at 2026-04-27 21:23:18
+generic/687
+[  743.142620][T324473] run fstests generic/687 at 2026-04-27 21:23:19
+generic/688
+[  743.936895][T324987] run fstests generic/688 at 2026-04-27 21:23:20
+generic/689
+[  744.735712][T325496] run fstests generic/689 at 2026-04-27 21:23:21
+generic/690
+[  745.532274][T325991] run fstests generic/690 at 2026-04-27 21:23:21
+generic/692
+[  746.304484][T326488] run fstests generic/692 at 2026-04-27 21:23:22
+generic/693
+[  747.118374][T326987] run fstests generic/693 at 2026-04-27 21:23:23
+generic/695
+[  747.973508][T327565] run fstests generic/695 at 2026-04-27 21:23:24
+generic/696
+[  748.740063][T328057] run fstests generic/696 at 2026-04-27 21:23:25
+generic/697
+[  749.664786][T328604] run fstests generic/697 at 2026-04-27 21:23:26
+generic/698
+[  750.429130][T329101] run fstests generic/698 at 2026-04-27 21:23:26
+generic/699
+[  751.260098][T329602] run fstests generic/699 at 2026-04-27 21:23:27
+generic/700
+[  752.119862][T330110] run fstests generic/700 at 2026-04-27 21:23:28
+generic/702
+[  752.905635][T330602] run fstests generic/702 at 2026-04-27 21:23:29
+generic/703
+[  753.789420][T331127] run fstests generic/703 at 2026-04-27 21:23:30
+generic/704
+[  754.628317][T331623] run fstests generic/704 at 2026-04-27 21:23:31
+generic/706
+[  755.456730][T332121] run fstests generic/706 at 2026-04-27 21:23:31
+generic/708
+[  756.307124][T332644] run fstests generic/708 at 2026-04-27 21:23:32
+generic/709
+[  757.194590][T333162] run fstests generic/709 at 2026-04-27 21:23:33
+generic/710
+[  758.004648][T333669] run fstests generic/710 at 2026-04-27 21:23:34
+generic/711
+[  758.778223][T334174] run fstests generic/711 at 2026-04-27 21:23:35
+generic/712
+[  759.563512][T334678] run fstests generic/712 at 2026-04-27 21:23:35
+generic/713
+[  760.384751][T335182] run fstests generic/713 at 2026-04-27 21:23:36
+generic/714
+[  761.196803][T335686] run fstests generic/714 at 2026-04-27 21:23:37
+generic/715
+[  762.000357][T336190] run fstests generic/715 at 2026-04-27 21:23:38
+generic/716
+[  762.755403][T336695] run fstests generic/716 at 2026-04-27 21:23:39
+generic/717
+[  763.549458][T337199] run fstests generic/717 at 2026-04-27 21:23:39
+generic/718
+[  764.313303][T337703] run fstests generic/718 at 2026-04-27 21:23:40
+generic/719
+[  765.088631][T338207] run fstests generic/719 at 2026-04-27 21:23:41
+generic/720
+[  765.852242][T338711] run fstests generic/720 at 2026-04-27 21:23:42
+generic/721
+[  766.672719][T339215] run fstests generic/721 at 2026-04-27 21:23:43
+generic/722
+[  767.479810][T339716] run fstests generic/722 at 2026-04-27 21:23:43
+generic/723
+[  768.247325][T340220] run fstests generic/723 at 2026-04-27 21:23:44
+generic/724
+[  769.024332][T340724] run fstests generic/724 at 2026-04-27 21:23:45
+generic/725
+[  769.772957][T341228] run fstests generic/725 at 2026-04-27 21:23:46
+generic/726
+[  770.566005][T341732] run fstests generic/726 at 2026-04-27 21:23:46
+generic/727
+[  771.370805][T342249] run fstests generic/727 at 2026-04-27 21:23:47
+generic/728
+[  772.155882][T342773] run fstests generic/728 at 2026-04-27 21:23:48
+generic/729
+[  772.914179][T343270] run fstests generic/729 at 2026-04-27 21:23:49
+generic/730
+[  773.695098][T343786] run fstests generic/730 at 2026-04-27 21:23:50
+generic/731
+[  774.467248][T344285] run fstests generic/731 at 2026-04-27 21:23:50
+generic/732
+[  775.229469][T344784] run fstests generic/732 at 2026-04-27 21:23:51
+generic/734
+[  776.015847][T345274] run fstests generic/734 at 2026-04-27 21:23:52
+generic/735
+[  776.831710][T345787] run fstests generic/735 at 2026-04-27 21:23:53
+generic/736
+[  777.623813][T346281] run fstests generic/736 at 2026-04-27 21:23:54
+generic/737
+[  780.855220][T346795] run fstests generic/737 at 2026-04-27 21:23:57
+generic/738
+[  781.696317][T347295] run fstests generic/738 at 2026-04-27 21:23:58
+generic/739
+[  782.483932][T347792] run fstests generic/739 at 2026-04-27 21:23:58
+generic/740
+[  783.330048][T348391] run fstests generic/740 at 2026-04-27 21:23:59
+generic/741
+[  784.080962][T348877] run fstests generic/741 at 2026-04-27 21:24:00
+generic/742
+[  784.857839][T349395] run fstests generic/742 at 2026-04-27 21:24:01
+generic/745
+[  785.629034][T349896] run fstests generic/745 at 2026-04-27 21:24:02
+generic/749
+[  786.425480][T350389] run fstests generic/749 at 2026-04-27 21:24:02
+generic/752
+[  787.230549][T350908] run fstests generic/752 at 2026-04-27 21:24:03
+generic/755
+[  788.031523][T351414] run fstests generic/755 at 2026-04-27 21:24:04
+generic/756
+[  790.860043][T351936] run fstests generic/756 at 2026-04-27 21:24:07
+generic/757
+[  791.617355][T352429] run fstests generic/757 at 2026-04-27 21:24:08
+generic/758
+[  792.446804][T352935] run fstests generic/758 at 2026-04-27 21:24:08
+generic/759
+[  793.228815][T353432] run fstests generic/759 at 2026-04-27 21:24:09
+generic/760
+[  800.424249][T353975] run fstests generic/760 at 2026-04-27 21:24:16
+generic/761
+[  807.753447][T354524] run fstests generic/761 at 2026-04-27 21:24:24
+generic/763
+[  808.934643][T355311] run fstests generic/763 at 2026-04-27 21:24:25
+generic/764
+[  809.731890][T355826] run fstests generic/764 at 2026-04-27 21:24:26
+generic/765
+[  810.477526][T356317] run fstests generic/765 at 2026-04-27 21:24:26
+generic/766
+[  811.233514][T356810] run fstests generic/766 at 2026-04-27 21:24:27
+generic/767
+[  812.187925][T357311] run fstests generic/767 at 2026-04-27 21:24:28
+generic/768
+[  812.955227][T357810] run fstests generic/768 at 2026-04-27 21:24:29
+generic/769
+[  813.702123][T358296] run fstests generic/769 at 2026-04-27 21:24:30
+generic/770
+[  814.434877][T358783] run fstests generic/770 at 2026-04-27 21:24:30
+generic/771
+[  815.166210][T359270] run fstests generic/771 at 2026-04-27 21:24:31
+generic/775
+[  815.916432][T359762] run fstests generic/775 at 2026-04-27 21:24:32
+generic/776
+[  816.763552][T360274] run fstests generic/776 at 2026-04-27 21:24:33
+generic/777
+[  817.546164][T360772] run fstests generic/777 at 2026-04-27 21:24:33
+generic/779
+[  818.344377][T361265] run fstests generic/779 at 2026-04-27 21:24:34
+generic/780
+[  819.138621][T361761] run fstests generic/780 at 2026-04-27 21:24:35
+generic/781
+[  819.945104][T362257] run fstests generic/781 at 2026-04-27 21:24:36
+generic/782
+[  820.745066][T362745] run fstests generic/782 at 2026-04-27 21:24:37
+generic/783
+[  821.537481][T363237] run fstests generic/783 at 2026-04-27 21:24:37
+generic/784
+[  822.302964][T363735] run fstests generic/784 at 2026-04-27 21:24:38
+generic/785
+[  823.024355][T364228] run fstests generic/785 at 2026-04-27 21:24:39
+generic/786
+[  823.750239][T364720] run fstests generic/786 at 2026-04-27 21:24:40
+generic/787
+[  824.514116][T365214] run fstests generic/787 at 2026-04-27 21:24:40
+generic/788
+[  825.251179][T365708] run fstests generic/788 at 2026-04-27 21:24:41
+generic/789
+[  825.979010][T366197] run fstests generic/789 at 2026-04-27 21:24:42
+generic/790
+[  826.719311][T366689] run fstests generic/790 at 2026-04-27 21:24:43
+generic/791
+[  827.466794][T367183] run fstests generic/791 at 2026-04-27 21:24:43

@@ -1,7 +1,7 @@
 job=500 host=https://openqa.example.org result=failed worker=worker-a:4 started=2030-01-02T03:04:05 duration=1h06m
 scenario=exampleos-Rolling-DVD-x86_64-textmode@64bit build=20300102 group=7
 settings: BACKEND=qemu CASEDIR=https://git.example.org/tests.git#branch YAML_SCHEDULE=schedule/textmode.yaml QEMUCPU=host QEMURAM=2048
-hint: settings changed since the last good run: oqa-history.py https://openqa.example.org/tests/500 --investigation
+hint: what changed since the last good run: oqa-history.py https://openqa.example.org/tests/500 --investigation
 clone chain: 470:incomplete@2030-01-01T21:10Z -> 490:failed@2030-01-02T01:30Z -> [500:failed@2030-01-02T03:04Z]
 dependencies:
   parent/chained job=480 result=passed test=create_hdd

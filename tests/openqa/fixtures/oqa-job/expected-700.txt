@@ -1,7 +1,7 @@
 job=700 host=https://openqa.example.org result=parallel_failed worker=worker-a:4 started=2030-01-02T03:04:05 duration=1h06m
 scenario=exampleos-Rolling-DVD-x86_64-mm-client@64bit build=20300102 group=7
 settings: BACKEND=qemu QEMUCPU=host QEMURAM=2048
-hint: settings changed since the last good run: oqa-history.py https://openqa.example.org/tests/700 --investigation
+hint: what changed since the last good run: oqa-history.py https://openqa.example.org/tests/700 --investigation
 dependencies:
   parent/chained job=480 result=passed test=create_hdd
   parent/parallel job=701 result=failed test=mm-server failed_modules=barrier_wait

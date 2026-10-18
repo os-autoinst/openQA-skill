@@ -1,7 +1,7 @@
 job=890 host=https://openqa.example.org result=failed started=2030-01-02T03:04:05 duration=30m00s
 scenario=exampleos-15.6-Cloud-x86_64-cloud-xfstests@64bit build=20300102 group=12
 settings: BACKEND=qemu
-hint: settings changed since the last good run: oqa-history.py https://openqa.example.org/tests/890 --investigation
+hint: what changed since the last good run: oqa-history.py https://openqa.example.org/tests/890 --investigation
 modules=2 failed=2
 module=register_instance result=failed category=publiccloud
   step=4 kind=test-died:command-failure link=https://openqa.example.org/tests/890#step/register_instance/4

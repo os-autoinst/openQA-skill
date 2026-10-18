@@ -427,6 +427,15 @@ for line in "  \"product\": { \"id\": \"SLES\", \"registrationCode\": \"$regcode
 	hides "Agama's registrationCode: ${line%%"$regcode"*}" "$line\n" "$regcode"
 done
 keeps "an Agama profile template" "    registrationCode: '{{SCC_REGCODE}}',\n"
+# An AutoYaST profile as the test filled it in and uploaded it.
+for case in "    <reg_code>$regcode</reg_code>|regcode" "<REGCODE>$regcode</REGCODE>|regcode" \
+	"<ay:registration_code a=\"b\">$regcode</ay:registration_code>|regcode" \
+	"      <user_password>$regcode</user_password>|keyed-assignment" "<passwd>$regcode</passwd>|keyed-assignment"; do
+	line=${case%|*}
+	actual=$(printf '%s\n' "$line" | python3 "$scripts/_secrets.py" 2>/dev/null)
+	check "an XML element named for a credential: ${line%%"$regcode"*}" "${line/"$regcode"/[REDACTED:${case#*|}]}" "$actual"
+done
+keeps "XML elements that hold no credential" "<reg_code></reg_code>\n<reg_code/>\n<reg_code>{{SCC_REGCODE}}</reg_code>\n<reg_code>##Registration-Code##</reg_code>\n<user_password>!</user_password>\n<group_password>x</group_password>\n<password>linux</password>\n<user_password>nots3cr3t</user_password>\n<passwd_encryption>sha512</passwd_encryption>\n<password>ENTER PASSWORD HERE</password>\n"
 # An Agama profile as agama config show prints it, and a Jsonnet guest profile once filled.
 actual=$(printf '{\n  "product": {\n    "id": "SLES",\n    "registrationCode": "%s",\n    "registrationEmail": ""\n  }\n}\n%s\n%s\n' \
 	"$regcode" "  product: { id: 'SLES', registrationCode: '$regcode' }," "    registrationCode: \"$regcode\"," |

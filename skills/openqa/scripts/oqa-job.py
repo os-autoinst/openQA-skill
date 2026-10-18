@@ -462,11 +462,12 @@ def start_minute(job):
 
 def as_of(link, before):
     """A restart as it stood at `before`: None when it had not started, running when it
-    had not finished."""
-    started = _oqa.parse_time(link.get("t_started"))
+    had not finished. One that never started, skipped or cancelled, counts from its finish;
+    one with neither time is still pending now."""
+    finished = _oqa.parse_time(link.get("t_finished"))
+    started = _oqa.parse_time(link.get("t_started")) or finished
     if started is None or started > before:
         return None
-    finished = _oqa.parse_time(link.get("t_finished"))
     if link.get("state") == "done" and (finished is None or finished > before):
         return {**link, "state": "running", "result": "none"}
     return link

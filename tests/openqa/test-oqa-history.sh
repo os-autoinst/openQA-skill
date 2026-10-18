@@ -642,6 +642,45 @@ actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 5000 --investiga
 check "versions: the upload of a module loaded twice, '%23' in its link, is read by its name" \
 	"  versions (last_good 4960 -> this job, from install_ltp-kernel-pkg.txt -> install_ltp#1-rpm-qa.txt): kernel-default 6.4.0-150600.23.1 -> 6.4.0-150600.23.2; suites ?" \
 	"$(grep '^  versions' <<<"$actual")"
+# No list uploaded: the head of serial_terminal.txt, where xfstests prints its version.log.
+version_log() {
+	printf '> cat /opt/version.log\nxfsprogs-6.19.0-1.2.x86_64\nkernel-default-%s-1.1.x86_64\nxfstests-20300317.57d71a88-1.1.x86_64\n%s-1-default\nName        : kernel-default\nVersion     : %s\nRelease     : 1.1\n' "$1" "$1" "$1"
+}
+printf '<a href="/tests/5000/file/serial_terminal.txt">s</a>\n' >"$tmp"/tests_5000_downloads_ajax
+printf '<a href="/tests/4960/file/serial_terminal.txt">s</a>\n' >"$tmp"/tests_4960_downloads_ajax
+version_log 6.19.12 >"$tmp"/tests_4960_file_serial_terminal.txt
+version_log 7.0.1 >"$tmp"/tests_5000_file_serial_terminal.txt
+actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 5000 --investigation)
+check "versions: without an uploaded list, the package lines at the head of serial_terminal.txt" \
+	"  versions (last_good 4960 -> this job, from serial_terminal.txt): kernel-default 6.19.12-1.1 -> 7.0.1-1.1; xfstests 20300317.57d71a88-1.1 (unchanged)" \
+	"$(grep '^  versions' <<<"$actual")"
+python3 - "$tmp"/tests_5000_file_serial_terminal.txt <<'PY'
+import sys
+head, cut = "kernel-default-7.0.1-1.1.x86_64\n", 256 << 10
+pad = cut - 22 - len(head)
+text = head + "x" * (pad - 1) + "\nkernel-default-7.0.2-1.1.x86_64\nxfstests-20300317.57d71a88-1.1.x86_64\n"
+open(sys.argv[1], "w").write(text)
+PY
+actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 5000 --investigation)
+check "versions: serial_terminal.txt is read to 256 KiB, a line cut there is not; a suite not found there reads '?'" \
+	"  versions (last_good 4960 -> this job, from serial_terminal.txt): kernel-default 6.19.12-1.1 -> 7.0.1-1.1; xfstests 20300317.57d71a88-1.1 -> ?" \
+	"$(grep '^  versions' <<<"$actual")"
+printf 'kernel-default-7.0.1-1.1.x86_64\nltp-20300105-1.1.x86_64\n' >"$tmp"/tests_5000_file_install_ltp-rpm-qa.txt
+printf '<a href="/tests/5000/file/install_ltp-rpm-qa.txt">r</a>\n' >"$tmp"/tests_5000_downloads_ajax
+requests=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 5000 --investigation | grep '^requests:')
+printf '<a href="/tests/5000/file/install_ltp-rpm-qa.txt">r</a> <a href="/tests/5000/file/serial_terminal.txt">s</a>\n' >"$tmp"/tests_5000_downloads_ajax
+actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 5000 --investigation)
+check "versions: an uploaded list wins and no serial terminal is read for it; last good without one falls back" \
+	"  versions (last_good 4960 -> this job, from serial_terminal.txt -> install_ltp-rpm-qa.txt): kernel-default 6.19.12-1.1 -> 7.0.1-1.1; ltp ? -> 20300105-1.1; xfstests 20300317.57d71a88-1.1 -> -|$requests" \
+	"$(grep '^  versions' <<<"$actual")|$(grep '^requests:' <<<"$actual")"
+printf '<a href="/tests/5000/file/serial_terminal.txt">s</a>\n' >"$tmp"/tests_5000_downloads_ajax
+printf '<a href="/tests/4960/file/install_ltp-rpm-qa.txt">r</a> <a href="/tests/4960/file/serial_terminal.txt">s</a>\n' >"$tmp"/tests_4960_downloads_ajax
+printf 'kernel-default-6.19.12-1.1.x86_64\n' >"$tmp"/tests_4960_file_install_ltp-rpm-qa.txt
+version_log 7.0.1 >"$tmp"/tests_5000_file_serial_terminal.txt
+actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 5000 --investigation)
+check "versions: last good's own list beats the job's serial terminal" \
+	"  versions (last_good 4960 -> this job, from install_ltp-rpm-qa.txt -> serial_terminal.txt): kernel-default 6.19.12-1.1 -> 7.0.1-1.1; xfstests - -> 20300317.57d71a88-1.1" \
+	"$(grep '^  versions' <<<"$actual")"
 rm -rf "$tmp"
 
 actual=$(history 5000 --investigation --max-items 200)

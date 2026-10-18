@@ -1,8 +1,8 @@
 # Contributing gates
 
-Owns: os-autoinst-distri-opensuse contribution rules, the check enforcing each, local gates, commit/PR mechanics, merge process.
+Owns: os-autoinst-distri-opensuse contribution rules, the check enforcing each, local gates, unit tests, commit/PR mechanics, merge process.
 
-Contents: Setup; Rule to check; Local gate order; Forbidden strings; Soft-failure reference; Duplication and unused modules; Checks that do not fire; Commit messages; LLM-assistance trailer; PR template; Merge process
+Contents: Setup; Rule to check; Local gate order; Unit tests; Forbidden strings; Soft-failure reference; Duplication and unused modules; Checks that do not fire; Commit messages; LLM-assistance trailer; PR template; Merge process
 
 ## Setup
 
@@ -66,6 +66,22 @@ CI-equivalent, minutes: `make test TESTS=static` (or `unit`, `compile`, `compile
 **Side effects**: `TESTS=check-strict` rewrites files under `tests/` (`--write`) — clean tree first, then read `git diff`. `tools/update_spec --check` replaces the spec with an identical copy even on success (mode becomes 0600).
 
 What CI does not check, and tools never to run -> "Checks that do not fire".
+
+## Unit tests
+
+Enforced by reviewers for SAP/HA, public cloud and core libs (`lib/utils.pm`, `lib/version_utils.pm`); elsewhere only an advisory bot asks.
+- **File**: extend the numbered `t/NN_<area>.t`; run `prove -l -Ios-autoinst/ t/NN_x.t`.
+- **Mock** testapi primitives inside the lib's package with `redefine` (dies on a missing sub; `mock` adds one silently); capture commands, assert with `any`; vars are file-wide: reset each `set_var` to `undef` at subtest end:
+```perl
+my $m = Test::MockModule->new('sles4sap::aws_cli', no_auto => 1);
+my @calls;
+$m->redefine(script_output => sub { push @calls, $_[0]; return 'vpc-1'; });
+$m->redefine(record_info => sub { note(join(' ', 'RECORD_INFO -->', @_)); });
+ok((any { /create-vpc/ } @calls), 'Create command');
+```
+- **Names**: `subtest '[function_name] case'`; `dies_ok` per `croak`; `use Test::Warnings;`.
+- **Never assert** `record_info` text (#26120), private helpers directly (#25162), or a literal duplicating a lib constant (#26691).
+- **Test modules cannot be loaded in `t/`**: reusable code goes to lib, steps stay in `tests/` (#26176).
 
 ## Forbidden strings
 

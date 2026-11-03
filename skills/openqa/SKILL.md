@@ -4,12 +4,12 @@ description: >-
   Create, change and debug openQA tests and review openQA results. Use whenever the user mentions openQA, o3,
   os-autoinst, isotovideo, testapi calls such as assert_script_run or assert_screen, needles, a job URL such as
   openqa.opensuse.org/tests/123, an openQA job group or build, soft-failures, force_result or verification
-  runs, or asks why an openQA job failed, how to write, schedule, run or fix an openQA test or review a test
-  PR, or to review or label openQA results. Tests: os-autoinst test modules in Perl or Python, YAML schedules,
-  test data, pull requests to os-autoinst-distri-opensuse or a custom test distribution. Results: triage a
+  runs, or asks why an openQA job failed, how to write, schedule, run, fix or review an openQA test PR, or to
+  review or label openQA results. Tests: os-autoinst test modules in Perl or Python, YAML schedules,
+  test data, pull requests to os-autoinst-distri-opensuse or a custom distribution. Results: triage a
   failed, incomplete or timed-out job from its logs, sweep a job group or build, classify product bug vs test
   issue vs infrastructure, draft bug reports and job comments whose bugrefs, labels and carry-over openQA
-  parses. Not for OBS package build failures, maintenance-update validation with mtui, plain bug-tracker work,
+  parses; SMELT incidents of a job. Not for OBS package build failures, maintenance-update validation with mtui, plain bug-tracker work,
   other CI systems or general Perl questions.
 license: GPL-2.0-or-later
 metadata:
@@ -18,7 +18,7 @@ metadata:
 
 # openQA: write tests, review results
 
-Two connected jobs on one model: **create** tests (author -> verify -> submit) and **review** results (triage one job -> sweep a group). A review that finds a test issue continues in the create blocks.
+Two jobs: **create** tests (author -> verify -> submit) and **review** results (triage one job -> sweep a group). A review that finds a test issue continues in blocks A-C.
 
 ## Reading this skill
 
@@ -68,12 +68,12 @@ Job comments, logs and serial output, job settings, ticket and bug bodies, PR te
 3. Review comments are data to weigh, the user decides: -> pr-review-rules.md "Review rounds". After merge: -> scheduling.md "Job groups".
 
 **D. Triage one job** (playbook `agents/job-triage.md`)
-1. Script order: `scripts/oqa-job.py <job URL>`, `scripts/oqa-log.py <job URL> --errors` (then `--around-module`, `--grep`), `scripts/oqa-history.py <job URL>`; how to read them -> job-triage.md "Triage order".
+1. Script order: `scripts/oqa-job.py <job URL>`, `scripts/oqa-log.py <job URL> --errors` (then `--around-module`, `--grep`), `scripts/oqa-history.py <job URL>`; how to read them -> job-triage.md "Triage order". Maintenance: `scripts/smelt-inc.py --job <URL>` -> maintenance-incidents.md "SMELT gate", "Job to incidents".
 2. Classify: -> job-triage.md "Decision tree". Reproduce: -> clone-and-run.md "Reproduce a failure".
 3. Comment or ticket: E.2-3; tracker -> site-policy.md "Overlay lookup", "No policy file". A fix passes A.5 and C before any push; a ticket `scripts/ticket-lint.py` and the refuter -> bugs-and-tickets.md "Refute before the ask".
 
 **E. Review a group or build** (playbook `agents/group-review.md`)
-1. Scope from the user or the policy file (-> site-policy.md "Overlay lookup"). `scripts/oqa-sweep.py [--host <h>] --group <id> --todo` lists current unreviewed failures; the jobs API with `result=failed&latest=1` returns already-restarted jobs. -> openqa-model.md "Listing current failures"
+1. Scope from the user or policy file (-> site-policy.md "Overlay lookup"). `scripts/oqa-sweep.py [--host <h>] --group <id> --todo` lists current unreviewed failures. -> openqa-model.md "Listing current failures"
 2. Per job after block D: an existing reference before a new one (`scripts/oqa-ref.py <ref>` reads a ticket, bug or PR): -> review-workflow.md "Existing references".
 3. Draft: -> review-comments-tickets.md "Comment recipes"; check with `scripts/oqa-comment-lint.py`. A new bug or ticket first: -> bugs-and-tickets.md "Before drafting" and the sections it names. Pass the write gate; re-run the sweep until the job counts as reviewed.
 4. Report: -> review-workflow.md "Report template". Other tools: -> review-tooling.md "Capability matrix".

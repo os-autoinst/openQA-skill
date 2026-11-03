@@ -46,9 +46,13 @@ print(sorted(name for name, item in inspect.getmembers(_oqa, inspect.isfunction)
 print(sorted(name for name in dir(_oqa.Client) if name.startswith(("post", "put", "delete", "patch", "send", "write"))))
 ')
 check "the client takes no method, body or header parameter and has no write verb" "$(printf '[]\n[]\n[]')" "$actual"
-check "only _oqa.py talks to the network; nothing but check-schedule.py, vr-reach.py and pr-queue.py spawns a process or reads the environment" "" \
+check "only _oqa.py talks to the network; nothing but check-schedule.py, vr-reach.py and pr-queue.py spawns a process, and only those and the SMELT_URL gate read the environment" "" \
 	"$(grep -ElI 'urllib\.request|http\.client|import socket|urlopen|subprocess|os\.system|os\.popen|os\.environ|getenv|expanduser|netrc|pickle|\beval\(|\bexec\(' \
-		"$scripts"/*.py | grep -v '/_oqa\.py$' | grep -v '/check-schedule\.py$' | grep -v '/vr-reach\.py$' | grep -v '/pr-queue\.py$')"
+		"$scripts"/*.py | grep -v '/_oqa\.py$' | grep -v '/check-schedule\.py$' | grep -v '/vr-reach\.py$' | grep -v '/pr-queue\.py$' |
+		grep -v '/oqa-job\.py$' | grep -v '/smelt-inc\.py$')"
+# oqa-job.py and smelt-inc.py read one variable, the SMELT_URL gate, and nothing else of that kind.
+check "oqa-job.py and smelt-inc.py: no process, no network of their own, the environment only for the SMELT_URL gate" "0 0" \
+	"$(grep -ElI 'urllib\.request|http\.client|import socket|urlopen|subprocess|os\.system|os\.popen|getenv|expanduser|netrc|pickle|\beval\(|\bexec\(' "$scripts/oqa-job.py" "$scripts/smelt-inc.py" | wc -l) $(grep -h 'os\.environ' "$scripts/oqa-job.py" "$scripts/smelt-inc.py" | grep -vc 'os\.environ\.get(_oqa\.SMELT_ENV')"
 # check-schedule.py asks the local git which schedule files are new; that is its only process.
 check "check-schedule.py: one subprocess call, git with an argument list, no shell, no network" "1 1 0" \
 	"$(grep -c 'subprocess\.run(' "$scripts/check-schedule.py") $(grep -A2 'subprocess\.run(' "$scripts/check-schedule.py" | grep -c '\["git", "-C", repo, "-c", "core.fsmonitor=false", ') $(grep -Ec 'shell=|os\.system|os\.popen|urllib|http\.client|import socket|urlopen|getenv|expanduser|netrc|pickle|\beval\(|\bexec\(' "$scripts/check-schedule.py")"

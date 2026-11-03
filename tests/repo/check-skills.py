@@ -125,7 +125,7 @@ UNROUTED = {
 # Content that must not reach a public repository.
 PUBLIC_PATTERNS = [
     (
-        r"gitlab\.suse\.de|confluence|jira\.suse|\.slack\.com|smelt|dashboard\.qam|monitor\.qa\.suse",
+        r"gitlab\.suse\.de|confluence|jira\.suse|\.slack\.com|dashboard\.qam|monitor\.qa\.suse",
         "internal service",
     ),
     (

@@ -938,4 +938,25 @@ check "--before: a restart that never started counts from its finish and does no
 	"$(chain_97x 980 --before 2030-01-02T04:00Z | grep -E '^(clone|SUPER)' | paste -sd'|')|$(chain_97x 980 --before 2030-01-02T02:30Z | grep '^clone')"
 rm -rf "$chain_dir"
 
+# --- incidents line: opt in with SMELT_URL, a settings parse only ---------------------------
+inc_dir=$(mktemp -d)
+cp "$fixtures"/* "$inc_dir"
+python3 - "$inc_dir" <<'PY'
+import json, sys
+path = f"{sys.argv[1]}/api_v1_jobs_500_details.json"
+data = json.load(open(path))
+data["job"]["settings"].update({"INCIDENT_ID": "47567", "BASE_TEST_ISSUES": "47570,47567,x", "SDK_TEST_ISSUES": "47567"})
+json.dump(data, open(path, "w"))
+PY
+incidents_line() {
+	env "$@" python3 "$script" --host https://openqa.example.org --fixture-dir "$inc_dir" 500 | grep '^incidents='
+}
+check "incidents line: silent while SMELT_URL is unset" "" "$(incidents_line -u SMELT_URL)"
+check "incidents line: with SMELT_URL, the count and the ids highest first, no network call" \
+	"incidents=2 ids=47570,47567 (priority and packages: smelt-inc.py --job https://openqa.example.org/tests/500)" \
+	"$(incidents_line SMELT_URL=smelt.example.org)"
+check "incidents line: a job that tests no incident stays silent" "" \
+	"$(env SMELT_URL=smelt.example.org python3 "$script" --host https://openqa.example.org --fixture-dir "$fixtures" 500 | grep '^incidents=')"
+rm -rf "$inc_dir"
+
 exit $fail

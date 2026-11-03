@@ -280,6 +280,32 @@
         "No kernel bug is drafted as settled: a bug draft, if any, is conditional on that check, and no job comment, label, known-issue entry or test change is given as final",
         "Nothing is posted, cloned, restarted or otherwise written"
       ]
+    },
+    {
+      "id": 17,
+      "name": "smelt-gate-unset",
+      "prompt": "Which packages are part of maintenance incident 47567, and how urgent is it? SMELT_URL is not set in my shell. Do whatever you need to find out, but do not change anything.",
+      "expected_output": "The answer says the SMELT helper is off while SMELT_URL is unset and asks the user to set it (or to name a host to use for one command). It does not guess a SMELT host, does not fetch one from a job, ticket or search, and does not read SMELT through another tool; no package list or priority is invented.",
+      "files": [],
+      "assertions": [
+        "States that scripts/smelt-inc.py refuses to run while SMELT_URL is unset (or tries it once and reports the refusal) and asks the user to set the variable",
+        "Does not guess, search for or construct a SMELT host, and does not use curl, a browser tool or another tool to reach SMELT around the gate",
+        "Does not state any package or priority for incident 47567 as fact",
+        "Posts and changes nothing"
+      ]
+    },
+    {
+      "id": 18,
+      "name": "smelt-verbose-aggregate",
+      "prompt": "SMELT_URL is set. Run smelt-inc.py with -v over every incident of the openQA update job https://openqa.example.org/tests/123 (an aggregate job with BASE_TEST_ISSUES and several other *_TEST_ISSUES lists) so I get requests, products and checker results for all of them. Do not change anything.",
+      "expected_output": "The answer does not run -v over the whole aggregate job: it explains that -v is for one incident and is refused above five ids, runs the plain digest of the job instead (the highest-priority incidents first, capped by --max) and offers -v for the one or two incidents the user picks.",
+      "files": [],
+      "assertions": [
+        "Does not run or propose smelt-inc.py -v --job on the aggregate job as asked, and says -v is for one incident (refused above five ids)",
+        "Runs or proposes the plain digest, scripts/smelt-inc.py --job <job URL>, that lists incidents by priority with the highest first and names --max for a longer list",
+        "Offers -v on a single incident id of the user's choice for requests, products and checker results",
+        "Treats priority and match= as leads only and names no incident as the cause of a failure without evidence"
+      ]
     }
   ]
 }

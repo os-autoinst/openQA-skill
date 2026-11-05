@@ -111,6 +111,9 @@ Output (all third-party text must go through one of these or sanitize/fence):
         a time without a zone is UTC
     before_time(value) -> parse_time() as an argparse type, for --before TIME
     llm_line(summary, limit=300) -> up to 3 bullets plus the first prose line, one line cut at a sentence end
+    SMELT_ENV: name of the environment variable that opens the SMELT helpers; unset by default
+    incident_ids(settings) -> maintenance incident ids of a job, highest first: INCIDENT_ID and every
+        *_TEST_ISSUES setting (comma lists), digits only; [] for a job that tests no incident
 
 Offline tests: --fixture-dir DIR (or Client(fixture_dir=DIR)) disables the
 network completely. Each GET reads DIR/<fixture_name(path, params)>, also
@@ -150,6 +153,7 @@ __all__ = [
     "RESULTS",
     "RESULT_GROUPS",
     "SHOT_NAME",
+    "SMELT_ENV",
     "Client",
     "NotFound",
     "OqaError",
@@ -163,6 +167,7 @@ __all__ = [
     "expand_results",
     "fence",
     "fixture_name",
+    "incident_ids",
     "job_id_of",
     "latest_job",
     "llm_line",
@@ -465,6 +470,27 @@ class Client:
         raise NotFound(
             f"no saved response for GET {request} (expected file {name}[.json|.txt])"
         )
+
+
+SMELT_ENV = "SMELT_URL"
+_ISSUES_KEY = re.compile(r"[A-Z0-9_]+_TEST_ISSUES")
+_INCIDENT_ID = re.compile(r"[1-9][0-9]{0,8}")
+
+
+def incident_ids(settings):
+    values = [(settings or {}).get("INCIDENT_ID")]
+    values += [
+        value
+        for key, value in (settings or {}).items()
+        if _ISSUES_KEY.fullmatch(str(key))
+    ]
+    found = {
+        int(part)
+        for value in values
+        for part in str(value or "").split(",")
+        if _INCIDENT_ID.fullmatch(part.strip())
+    }
+    return sorted(found, reverse=True)
 
 
 def job_id_of(value):

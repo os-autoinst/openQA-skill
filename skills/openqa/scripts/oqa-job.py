@@ -416,6 +416,18 @@ def print_investigation(job):
     )
 
 
+def print_incidents(job, url):
+    # Only a settings parse: SMELT itself is asked by smelt-inc.py, and only when the variable is set.
+    ids = (
+        _oqa.incident_ids(job.get("settings")) if os.environ.get(_oqa.SMELT_ENV) else []
+    )
+    if ids:
+        print(
+            f"incidents={len(ids)} ids={_oqa.toks([str(n) for n in ids])} "
+            f"(priority and packages: smelt-inc.py --job {url})"
+        )
+
+
 def print_settings(job, pattern, verbose, url):
     settings = job.get("settings") or {}
     names = VERBOSE_SETTINGS if verbose else DEFAULT_SETTINGS
@@ -1257,6 +1269,7 @@ def main():
     print_investigation(job)
     url = f"{client.host}/tests/{job_id}"
     print_settings(job, args.settings, args.verbose, url)
+    print_incidents(job, url)
     if not ok:
         # The settings line is a fixed subset; what changed is in the investigation data.
         print(

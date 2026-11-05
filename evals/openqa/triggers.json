@@ -78,5 +78,13 @@
   {
     "query": "set up a QEMU VM with UEFI firmware and a serial console on my laptop so I can debug why my own kernel build hangs during boot",
     "should_trigger": false
+  },
+  {
+    "query": "openQA job 25326243 is an update aggregate job; which maintenance incidents does it test, what priority do they have and which packages are in them?",
+    "should_trigger": true
+  },
+  {
+    "query": "list the packages and bugzilla references of a SUSE maintenance incident from its osc patchinfo and tell me which one to submit first",
+    "should_trigger": false
   }
 ]

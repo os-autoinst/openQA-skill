@@ -32,7 +32,7 @@ Contents: Default toolchain; Capability matrix; openqa-cli; Optional MCP servers
 | W restart (one or many) | - | `openqa-cli api -X POST jobs/restart` | `restart_jobs` (1-500 ids) |
 | W clone with changed settings | - | `openqa-clone-job` | - (`duplicate_job`: no settings) |
 | W file a bug | - | - | Bugzilla MCP (bugwarden): `create_bug`, `add_attachment`, `bug_info` |
-| W file a ticket | - | - | Redmine MCP (mcp-redmine): `redmine_request` `POST /issues.json` |
+| W file a ticket | - | - | Redmine MCP (ruprogress-mcp): `create_redmine_issue`, `get_redmine_issue` |
 
 ## openqa-cli
 

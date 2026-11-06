@@ -97,7 +97,8 @@ openqa-cli api --host https://openqa.opensuse.org -X POST jobs/<id>/restart
 | openQA restarted it already | read the clone. -> references/openqa-model.md "Automatic restarts" |
 
 - The clone replaces the restarted job in the build counters: a passing clone clears the failure; a failing one with the same failed modules inherits the bugref by carry-over.
-- Dependencies restart too: children always; parallel parents and siblings always; a directly chained parent always; a chained parent only when it was not ok. Limit with `skip_parents=1`, `skip_children=1`, `skip_ok_result_children=1`.
+- Dependencies restart too: children always; parallel parents and siblings always; a directly chained parent always; a chained parent only when it was not ok. Limit with `skip_parents=1` (restart a child alone), `skip_children=1`, `skip_ok_result_children=1` (restart a parent without its ok children).
+- Restart a Public Cloud upload parent, not its child, when the image must be uploaded again because it was auto-cleaned.
 - Two failures at the same step are deterministic: never restart again for a pass.
 - Changed settings are a clone, not a restart. -> references/clone-and-run.md "Reproduce a failure"
 

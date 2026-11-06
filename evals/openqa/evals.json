@@ -280,6 +280,34 @@
         "No kernel bug is drafted as settled: a bug draft, if any, is conditional on that check, and no job comment, label, known-issue entry or test change is given as final",
         "Nothing is posted, cloned, restarted or otherwise written"
       ]
+    },
+    {
+      "id": 17,
+      "name": "restart-vs-clone-dependencies",
+      "prompt": "A Public Cloud child job failed because its parent's published image was auto-cleaned. I want a new run that replaces the failed one in the build, and I also want to re-run a different child job alone without touching its parent. Tell me exactly which calls to use and what each does to the old jobs. Do not run anything.",
+      "expected_output": "Restart the upload parent (not the child) so the image is uploaded again; a restart sets clone_id on the old job, so the clone replaces it in the build. Children restart with the parent; skip_ok_result_children=1 keeps passed children. To restart a child alone, pass skip_parents=1, otherwise parallel and directly chained parents restart too. openqa-clone-job with changed settings does not set clone_id. Nothing is run; restart is a write needing approval.",
+      "files": [],
+      "assertions": [
+        "Says to restart the upload parent, not the child, because the image was auto-cleaned and must be uploaded again",
+        "States that a restart creates a clone and sets clone_id on the old job, so the old job is superseded in the build",
+        "Names skip_parents=1 for restarting a child alone and skip_ok_result_children=1 for restarting a parent without its ok children",
+        "States that openqa-clone-job with changed settings does not set clone_id on the old job",
+        "Nothing is run, restarted or posted without the user's approval"
+      ]
+    },
+    {
+      "id": 18,
+      "name": "wrong-carryover-and-merged-fix",
+      "prompt": "Job 12345 in my group shows 'Automatic carryover from t#999' with bsc#111, but its failing step message differs from the bug. The fix PR was merged an hour ago and I have a local checkout of the tests; I think a restart needs CASEDIR pointing at it. What should I do? Do not change anything.",
+      "expected_output": "Compare the failing step and message with the ticket: carry-over matches only the failed-module set, so the label may be wrong. A wrong automatic comment can be deleted with DELETE jobs/<id>/comments/<cid> (a write needing approval); force_result comments cannot be deleted. Workers use the instance's own tests checkout, pulled automatically every few minutes, so a local tree is irrelevant and CASEDIR is not needed: after the merge a plain restart picks it up. No claim that the fix works before the restarted job is read.",
+      "files": [],
+      "assertions": [
+        "Compares the failing step and message with the ticket instead of trusting the carried-over label",
+        "Mentions DELETE jobs/<id>/comments/<cid> for a wrong automatic carry-over comment and that force_result comments cannot be deleted",
+        "Says workers use the instance's own tests checkout, so a local checkout is irrelevant and CASEDIR is not needed; a plain restart picks up the merged code",
+        "Does not claim the fix works or is the cause without reading the restarted job; inference is marked as such",
+        "Nothing is deleted, restarted or posted"
+      ]
     }
   ]
 }

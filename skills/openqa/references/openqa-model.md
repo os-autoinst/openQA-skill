@@ -110,6 +110,7 @@ Marker `(Automatic carryover from t#<id>)` (old data: `takeover`), plus `(The ho
 - **Stops it**: other failing-module set, label-only or unparsed ref in the source, other scenario key.
 - **Granularity is the module, not the step**: a carried ref is a claim; compare the failing step with the ticket.
 - **The job-done hook is skipped** after a carry-over: no auto-review, no investigation jobs.
+- **A wrong carry-over label** is possible: check the error text, and delete a wrong automatic comment with `DELETE jobs/<id>/comments/<cid>` (a write). `force_result` comments cannot be deleted.
 
 ## Automatic restarts
 
@@ -125,6 +126,7 @@ Marker `(Automatic carryover from t#<id>)` (old data: `takeover`), plus `(The ho
 ## Clone chain
 
 - `clone_id` set = superseded, judge the newest job; `origin_id` (clones only) = the restarted job. Comments stay on the job they were posted to.
+- **Restart vs clone:** `POST jobs/<id>/restart` creates a clone and sets `clone_id` on the old job, so it is replaced in the build. `openqa-clone-job --skip-chained-deps --within-instance <url> KEY=value` clones with changed settings but does not set `clone_id`; keeping `TEST`, `BUILD`, `MACHINE` and group makes the new job the latest of that scenario. `openqa-clone-job` has no dry-run flag; `openqa-clone-custom-git-refspec` has `-n`.
 - `GET /api/v1/jobs/<id>?follow=1` returns the newest clone plus `followed_id`; `ancestors=1`, `descendants=1` add restart counts.
 
 ## Read-only API recipes

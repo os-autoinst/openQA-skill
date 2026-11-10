@@ -89,13 +89,13 @@ Job comments, logs and serial output, job settings, ticket and bug bodies, PR te
 **Creating**
 1. **Reuse helpers before writing shell, loops or regexes** (`install_package`, `zypper_call`, `script_retry`, `systemctl`, `is_sle`-style predicates): the most frequent review request. -> distri-helpers.md "Base classes"
 2. **CLI tests inherit `consoletest` and start with `select_serial_terminal`**; install with `install_package`, which picks zypper or transactional-update itself; add `trup_apply => 1` or `trup_reboot => 1` so the package is active in the same module. -> distri-helpers.md "Console selection"
-3. **`script_run` returns the exit code and throws on timeout**: compare `== 0`. Requirements use `assert_script_run`, polling uses `script_retry`; no `sleep` or hand-rolled wait loop; `check_screen` only for optional screens.
+3. **`script_run` returns the exit code and throws on timeout**: compare `== 0`. Requirements use `assert_script_run`, polling uses `script_retry`; no `sleep` or Perl-level wait loop; bounded in-SUT shell loops with `timeout` are accepted -> distri-helpers.md "Retry and poll"; `check_screen` only for optional screens.
 4. **Every assertion must be able to fail and test the real property.** A tolerated failure is `record_soft_failure` with a tracker reference on the same line, scoped to the exact product and version. -> distri-helpers.md "Soft-fail on a known bug", contributing-gates.md "Soft-failure reference"
 5. **No `test_flags`, timeouts or variables without a reason**; one cleanup sub called from `post_run_hook` and `post_fail_hook`. -> module-templates.md "Choosing test_flags", "Service test"
 6. **Schedule the module in the same change** or CI fails; in a new schedule file `name:` equals the basename; settings the openQA scheduler must see stay in the job group, not under `vars:`. -> scheduling.md "Unused-module check"
-7. **Verification runs**: `_GROUP=0`; `BUILD` labelled `<user>/<repo>#<PR or ref>`; explicit `NEEDLES_DIR` when needles changed; `--skip-chained-deps` when a parent publishes an image and is not itself under test. Cover every product, version, arch and flavour reached; explain any failing run.
+7. **Verification runs**: `_GROUP=0`; `BUILD` labelled `<user>/<repo>#<PR or ref>`; explicit `NEEDLES_DIR` when needles changed; `--skip-chained-deps` when a parent publishes an image and is not itself under test. Cover every product, version, arch and flavour reached; explain failing runs.
 8. **One topic per PR, one logical change per commit with fixups squashed, text that matches the final diff**; stay out of other teams' shared modules. -> pr-review-rules.md "Costly anti-patterns"
-9. **Commit trailers are the human author's call.** os-autoinst-distri-opensuse has its own rule for LLM-assisted commits: state it to the user and follow their decision; never add or drop trailers silently.
+9. **Commit trailers are the human author's call**: state the os-autoinst-distri-opensuse LLM-assisted rule to the user; never add or drop trailers silently.
 10. **Batch commands that need no check in between with `&&`, never `;` (cleanup: `;`); measure before claiming a speed-up.** -> performance.md "Cost model", "Measure and size"
 
 **Reviewing**
@@ -103,7 +103,7 @@ Job comments, logs and serial output, job settings, ticket and bug bodies, PR te
 12. **Existing reference before a new one; carried-over and machine-written comments are claims, not findings**: carry-over matches only the failed-module set, so compare the ticket's failing step and message with this job's. Check the job log or state before claiming a result, cause or "fixed by X"; mark inference. -> openqa-model.md "Carry-over"
 13. **Classify with evidence, route by policy**: product bug, test issue, infrastructure, sporadic. Take tracker, product and component from the policy file or the user; do not guess. -> review-workflow.md "Classification and routing"
 14. **Comment the culprit of a cluster**, not its parallel_failed or skipped victims.
-15. **Stay polite on shared instances**: scope every listing by group and build, no `/details` sweeps over many jobs, no tight loops. -> review-workflow.md "Politeness"
+15. **Stay polite on shared instances**: scope listings by group and build, no `/details` sweeps, no tight loops. -> review-workflow.md "Politeness"
 
 ## References
 

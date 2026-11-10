@@ -85,6 +85,7 @@ if (zypper_call("se -x python311-Django", exitcode => [0, 104]) == 104) {   # te
 | `validate_script_output_retry($cmd, $check, ...)` | `retry => 10, delay => 30, timeout => 90` | `$check` is a regex or coderef (`sub { m/PONG/ }`); always dies after the last retry |
 
 - Worst case is about `retry * (timeout + retry_grace + delay)`. A leading `!` in `$cmd` is moved in front of `timeout`, so negation works. In a pipeline only the first command is wrapped by `timeout`.
+- `script_retry` is host-to-SUT polling, one round-trip per attempt; in-SUT bounded shell loops batch high-frequency polling -> performance.md "Batch and upload".
 - Interactive programs: `script_start_io($cmd)`, then `script_finish_io(timeout => N, exitcodes => [..])`; the POD's `exitcode` key is silently ignored.
 
 ## Services
@@ -94,13 +95,13 @@ systemctl($command, ignore_failure => 0, expect_false => 0, timeout => N);   # u
 my $is_running = (systemctl("status apparmor", ignore_failure => 1) == 0);   # tests/console/apparmor.pm
 ```
 
-- Runs `systemctl --no-pager $command` under `assert_script_run`; `ignore_failure => 1` switches to `script_run` so the exit code comes back; `expect_false => 1` prefixes `! `.
+- Runs `systemctl --no-pager $command` under `assert_script_run`; `ignore_failure => 1` switches to `script_run` so the exit code comes back.
 - **Why not raw `assert_script_run "systemctl ..."`**: `start|restart|enable <unit>` registers the unit, and the base `post_fail_hook` uploads `journalctl -b -u <unit>` for each.
 - The unit is the word right after the verb: `systemctl('enable --now foo')` registers `--now`. Write `enable foo --now`.
 
 ## Reboot
 
-**Classic system**: `power_action` triggers, `wait_boot` (a method) supervises; afterwards no console is logged in, so select one again.
+**Classic system**: `power_action` triggers, `wait_boot` supervises; afterwards no console is logged in, so select one again.
 
 ```perl
 power_action('reboot', textmode => 1);        # use power_action_utils 'power_action';
@@ -108,9 +109,9 @@ $self->wait_boot(bootloader_time => 300);     # tests/console/journalctl.pm
 select_serial_terminal;
 ```
 
-- `power_action($action, observe => 0, keepconsole => 0, textmode => check_var('DESKTOP', 'textmode'))`; `$action` is `reboot` or `poweroff`. Without `keepconsole` it first selects `root-console` (textmode) or `x11`, so a console module on a desktop job passes `textmode => 1`. `observe => 1` only supervises a reboot started elsewhere. It does not wait for the boot.
+- `power_action($action, observe => 0, keepconsole => 0, textmode => check_var('DESKTOP', 'textmode'))`; `$action` is `reboot` or `poweroff`. Without `keepconsole` it first selects `root-console` (textmode) or `x11`, so a console module on a desktop job passes `textmode => 1`. `observe => 1` only supervises a reboot started elsewhere.
 - `wait_boot(bootloader_time => 100, ready_time => 300)` (300 on pvm/ipmi, 500 on ipmi/hyperv) handles bootloader, disk unlock, s390x/pvm reconnect.
-- **Transactional system**: not the pair above. `install_package(..., trup_reboot => 1)`, `check_reboot_changes` or `process_reboot(trigger => 1)` reboot, log in and **re-select the previous console themselves** -> references/distri-helpers.md "Transactional systems".
+- **Transactional system**: not the pair above. `install_package(..., trup_reboot => 1)`, `check_reboot_changes` or `process_reboot(trigger => 1)` reboot, log in and **re-select the previous console themselves** -> "Transactional systems".
 - **Replaces**: `assert_script_run 'reboot'` (exit marker never arrives); `enter_cmd 'reboot'; sleep ...`.
 
 ## Transactional systems
@@ -124,7 +125,7 @@ select_serial_terminal;
 | `reboot_on_changes()` | same comparison without the assertion |
 | `process_reboot(trigger => 0, expected_grub => 1, expected_passphrase => 0)` | `trigger => 1` issues the reboot, else only observes; uses `root-console` needles (grub, login) even in a serial-only module, then switches back. `expected_grub` defaults to 0 on VMware |
 
-- Packages -> references/distri-helpers.md "Install or remove packages"; anything else `trup_call`, not raw `transactional-update` strings.
+- Packages -> "Install or remove packages"; anything else `trup_call`, not raw `transactional-update` strings.
 - Already transactional-aware: `install_package`, `uninstall_package`, `fully_patch_system`, `add_suseconnect_product`.
 - Module shape -> references/module-templates.md "Transactional test".
 
@@ -172,7 +173,7 @@ add_suseconnect_product("PackageHub", undef, undef, undef, 300, 1) if is_sle;   
 
 ## Log upload
 
-**`opensusebasetest::post_fail_hook` already uploads** (do not duplicate): health check, process list, `journalctl -b`, `dmesg`, `/etc/sysconfig`, one journal per unit started via `systemctl()`, `problem_detection_logs.tar.xz`, network and unit listings, the solver test case after a `zypper_call` failure, core dumps with `COLLECT_COREDUMPS`. `NOLOGS=1` disables everything.
+**`opensusebasetest::post_fail_hook` already uploads** (do not duplicate): health check, process list, `journalctl -b`, `dmesg`, `/etc/sysconfig`, one journal per unit started via `systemctl()`, `problem_detection_logs.tar.xz`, the solver test case after a `zypper_call` failure, core dumps with `COLLECT_COREDUMPS`. `NOLOGS=1` disables everything.
 
 - Add a module `post_fail_hook` only for component-specific files and **call `$self->SUPER::post_fail_hook` first**; a hook without it drops every log above.
 - `save_and_upload_log($cmd, $file, {timeout => N, screenshot => 1, noupload => 1, logname => 'x'})` runs `$cmd | tee $file`, ignores the exit code, uploads with `failok`. **Options are a hashref**; the flat list the POD shows is silently lost.

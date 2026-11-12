@@ -299,7 +299,7 @@
       "id": 18,
       "name": "wrong-carryover-and-merged-fix",
       "prompt": "Job 12345 in my group shows 'Automatic carryover from t#999' with bsc#111, but its failing step message differs from the bug. The fix PR was merged an hour ago and I have a local checkout of the tests; I think a restart needs CASEDIR pointing at it. What should I do? Do not change anything.",
-      "expected_output": "Compare the failing step and message with the ticket: carry-over matches only the failed-module set, so the label may be wrong. A wrong automatic comment can be deleted with DELETE jobs/<id>/comments/<cid> (a write needing approval); force_result comments cannot be deleted. Workers use the instance's own tests checkout, pulled automatically every few minutes, so a local tree is irrelevant and CASEDIR is not needed: after the merge a plain restart picks it up. No claim that the fix works before the restarted job is read.",
+      "expected_output": "Compare the failing step and message with the ticket: carry-over matches only the failed-module set, so the label may be wrong. A wrong automatic comment can be deleted with DELETE jobs/<id>/comments/<cid> (a write needing approval); force_result comments cannot be deleted. Workers use the instance's own tests checkout, which openQA updates before a scheduled or restarted job starts (git_auto_update), so a local tree is irrelevant and CASEDIR is not needed: after the merge a plain restart picks it up. No claim that the fix works before the restarted job is read.",
       "files": [],
       "assertions": [
         "Compares the failing step and message with the ticket instead of trusting the carried-over label",

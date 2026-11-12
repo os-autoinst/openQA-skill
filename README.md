@@ -107,12 +107,14 @@ real vulnerability in this repository would look like.
 ## Development
 
 ```
-(rc=0; for t in tests/*/test-*.sh; do bash "$t" || rc=1; done; exit $rc)
-python3 tests/repo/check-skills.py
-python3 tests/repo/check-flags.py
-ruff check . && ruff format --check .
-shellcheck tests/*/test-*.sh && shfmt -d tests/*/test-*.sh
+make help      # list all targets
+make test      # script suites and repository gates (CI "tests" job)
+make lint      # ruff, shellcheck and shfmt (CI "lint" job)
+make check-all # test, lint and the advisory Agent Skills spec check
 ```
+
+The Makefile runs the same commands CI runs, with ruff pinned to CI's version through `uvx` when `uv` is
+available. `make tidy` applies ruff's formatting and fixes.
 
 The references were checked against these upstream revisions in October 2026: openQA `61bb066`,
 os-autoinst `2b02af1`, os-autoinst-distri-opensuse `786e32d`, os-autoinst-distri-example `274346e`,

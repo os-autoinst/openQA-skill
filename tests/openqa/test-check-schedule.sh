@@ -134,7 +134,7 @@ if command -v git >/dev/null; then
 INJECTED=1.yaml"
 	(
 		cd "$gitrepo" && git init -q . && git add tests schedule/tracked.yaml schedule/edited.yaml &&
-			git -c user.name=t -c user.email=t@example.com commit -q -m fixtures &&
+			git -c user.name=t -c user.email=t@example.com -c commit.gpgsign=false commit -q -m fixtures &&
 			git add schedule/staged.yaml && echo '  - console/sshd' >>schedule/edited.yaml
 	) >/dev/null 2>&1
 	actual=$(lint --repo "$gitrepo" --fallback | grep ': convention: name ')

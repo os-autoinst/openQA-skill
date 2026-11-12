@@ -44,7 +44,7 @@ jobs:
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v7.0.1
       # The Makefile runs ruff through uvx at the version pinned there, so uv is needed.
-      - run: pipx install uv
+      - run: pipx install uv==0.13.6
       - name: shfmt
         run: |
           curl -fsSL -o /tmp/shfmt \

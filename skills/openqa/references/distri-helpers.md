@@ -76,7 +76,7 @@ if (zypper_call("se -x python311-Django", exitcode => [0, 104]) == 104) {   # te
 
 ## Retry and poll
 
-**Never `sleep` then assert, never hand-roll a `for`/`while` loop**; poll the condition (`use utils;`).
+**Never `sleep` then assert, never hand-roll a Perl `for`/`while` loop**; poll the condition (`use utils;`). In-SUT loop -> performance.md "Batch and upload".
 
 | Helper | Defaults | Behaviour |
 |---|---|---|

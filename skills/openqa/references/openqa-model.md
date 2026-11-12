@@ -126,7 +126,7 @@ Marker `(Automatic carryover from t#<id>)` (old data: `takeover`), plus `(The ho
 ## Clone chain
 
 - `clone_id` set = superseded, judge the newest job; `origin_id` (clones only) = the restarted job. Comments stay on the job they were posted to.
-- **Restart vs clone:** `POST jobs/<id>/restart` creates a clone and sets `clone_id` on the old job, so it is replaced in the build. `openqa-clone-job --skip-chained-deps --within-instance <url> KEY=value` clones with changed settings but does not set `clone_id`; keeping `TEST`, `BUILD`, `MACHINE` and group makes the new job the latest of that scenario. `openqa-clone-job` has no dry-run flag; `openqa-clone-custom-git-refspec` has `-n`.
+- **Restart vs clone:** `POST jobs/<id>/restart` creates a clone and sets `clone_id` on the old job, so it is replaced in the build. `openqa-clone-job --skip-chained-deps --within-instance <url> KEY=value` clones with changed settings but does not set `clone_id`; keeping `TEST`, `BUILD`, `MACHINE` and group makes the new job the latest of that scenario. Preview without posting: `openqa-clone-job --export-command`, `openqa-clone-custom-git-refspec -c '--export-command'` (its `-n` posts nothing and prints nothing) -> clone-and-run.md "Manual clone".
 - `GET /api/v1/jobs/<id>?follow=1` returns the newest clone plus `followed_id`; `ancestors=1`, `descendants=1` add restart counts.
 
 ## Read-only API recipes

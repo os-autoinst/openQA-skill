@@ -1,5 +1,4 @@
 # Mirrors .github/workflows/ci.yml and the README "Development" block; change all three together.
-SOURCE_FILES ?= $(shell git ls-files "**.py")
 SHELL_TESTS := $(wildcard tests/*/test-*.sh)
 
 # CI pins these; a different version on PATH can flag or reformat differently.

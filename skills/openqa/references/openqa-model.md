@@ -110,7 +110,7 @@ Marker `(Automatic carryover from t#<id>)` (old data: `takeover`), plus `(The ho
 - **Stops it**: other failing-module set, label-only or unparsed ref in the source, other scenario key.
 - **Granularity is the module, not the step**: a carried ref is a claim; compare the failing step with the ticket.
 - **The job-done hook is skipped** after a carry-over: no auto-review, no investigation jobs.
-- **A wrong carry-over label** is possible: check the error text, and delete a wrong automatic comment with `DELETE jobs/<id>/comments/<cid>` (a write). `force_result` comments cannot be deleted.
+- **A wrong carry-over label** is possible: check the error text, and delete a wrong automatic comment with `DELETE jobs/<id>/comments/<cid>` (a write, allowed to the carried comment's author or an admin -> "Auth and roles"). `force_result` comments cannot be deleted.
 
 ## Automatic restarts
 

@@ -166,7 +166,7 @@ sub cleanup {
 1;
 ```
 
-- **The runtime arrives as run_args**: container modules are scheduled in `lib/main_containers.pm`, not YAML, as `loadtest('containers/seccomp', run_args => $run_args, name => $run_args->{runtime} . '_seccomp')` -> references/area-conventions.md "Containers".
+- **The runtime arrives as run_args**: container modules are scheduled in `lib/main_containers.pm`, not YAML, as `loadtest('containers/seccomp', run_args => $run_args, name => $run_args->{runtime} . '_seccomp')` -> references/area-platforms.md "Containers".
 - **Keep the engine on `$self`**, not in the exemplar's file-scoped `my $engine;`; no `sub cleanup()` prototype.
 
 ## Transactional test

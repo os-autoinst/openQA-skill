@@ -13,7 +13,7 @@ Inherit with `use Mojo::Base '<class>';`. All below derive from `opensusebasetes
 | `consoletest` | CLI test on an installed system | `post_run_hook`: `assert_script_run "cd"`, AVC check, clear console; `post_fail_hook` adds OOM and blocked-task info |
 | `opensusebasetest` | boot, mixed-console, non-shell modules | `wait_boot`, log-exporting `post_fail_hook`, `test_flags` `{}` (public cloud: `{no_rollback => 1, fatal => 0}`) |
 | `x11test` | desktop GUI test | `post_run_hook` asserts needle `generic-desktop` -> references/needles-gui.md "x11 tests" |
-| `containers::basetest` | container tests | `$self->containers_factory($runtime)` engine object; call its methods, not `docker ...` strings -> references/area-conventions.md "Containers" |
+| `containers::basetest` | container tests | `$self->containers_factory($runtime)` engine object; call its methods, not `docker ...` strings -> references/area-platforms.md "Containers" |
 
 - Installer (`y2_installbase`, `installbasetest`), YaST module (`y2_module_consoletest`, `y2_module_guitest`) and area classes (`publiccloud::basetest`, `wickedbase` ...) -> references/area-conventions.md "Find the area". Plain `basetest` collects no logs.
 - **End `run` at a root shell prompt in the selected console**: `consoletest::post_run_hook` types `cd` there, so a module left inside a program or mid-reboot fails after `run` passed.

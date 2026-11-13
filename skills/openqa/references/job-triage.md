@@ -35,7 +35,7 @@ Cheapest first; stop once the class is certain. Logs, step text, comments, SUT o
 | ulogs | collected by the test or its `post_fail_hook` | product root cause |
 | `<module>-journal.txt` (ulog) | the SUT's journal when the module failed | before calling a failure TEST or INFRA: services, kernel, daemons |
 | `hardware-console-log.txt` (ulog) | IPMI SOL capture of a bare-metal host | SUT unreachable after boot, no SSH, no GRUB on SOL: the boot failure itself (initrd panic) |
-| public cloud ulogs | `img_proof_log-*.log.txt` (img-proof's own output; its step only says `fail`), `*-scc_supportconfig.txz` (the SUT's journal and logs: `--members`), `ssh_sut.txt`, `destroy-console.txt` (instance console), `*-cloudregister.log.txt` | -> area-conventions.md "Public cloud" |
+| public cloud ulogs | `img_proof_log-*.log.txt` (img-proof's own output; its step only says `fail`), `*-scc_supportconfig.txz` (the SUT's journal and logs: `--members`), `ssh_sut.txt`, `destroy-console.txt` (instance console), `*-cloudregister.log.txt` | -> area-platforms.md "Public cloud" |
 
 - **Default opensuse hook** uploads `<module>-journal.txt`, `-dmesg.txt`, `-problem_detection_logs.tar.xz` (`oqa-log.py --file ulogs/<name> --members`, then `--member <path> --grep`); a failed `zypper_call` adds `-zypper.log`.
 - **No ulogs:** `NOLOGS` or `_SKIP_POST_FAIL_HOOKS` set, the SUT unreachable in the hook, or the hook died (log `post_fail_hook failed: `; step -> openqa-model.md "Details fields").
@@ -57,7 +57,7 @@ Classes: PRODUCT, TEST (code, needle, schedule, settings), INFRA (worker, backen
 | `typing command '<cmd>' timed out`; a cut or garbled command line; a command that ran without its done-marker | failure-modes.md "Typed input" |
 | `command '<cmd>' failed`, `command '<cmd>' timed out`, `script failed with : `, `script timeout: `, `output not validating`; a `fail` `wait_serial` step plus the test's own die text; `<message> - Serial error: <line>`; a helper's own die after its retries | failure-modes.md "Command failures" |
 | `Unknown issue`, `<service> failed` (`journal_check`) | failure-modes.md "Journal check" |
-| `Stale build` (`bci_version_check`) | area-conventions.md "Containers" |
+| `Stale build` (`bci_version_check`) | area-platforms.md "Containers" |
 | `<perl error> at <file> line <n>.` (perl's own: `Can't locate`, `Undefined subroutine`; not a test's `die`), `Could not retrieve required variable <VAR>` | TEST; regression if the test log since last good touches that file |
 | `Maximum allowed test steps (MAX_TEST_STEPS=<n>) exceeded` | TEST (loop); after hundreds of fast-failing modules, what fails them |
 | `barrier '<name>' timeout after <n> seconds`, `<ctx>: lock owner already finished`, `Failed to wait for children` | "Clusters" |

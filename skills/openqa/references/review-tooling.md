@@ -81,7 +81,7 @@ Server-side auto-review helpers (github.com/os-autoinst/os-autoinst-scripts). Ba
 | `openqa-review-failed` | yes (feeds candidates to label, then investigate) | **yes** | - |
 
 - **"Shell + DB" rows are for instance operators only.**
-- **Never start `openqa-investigate` to take a look.** Read the existing investigation data and comments -> references/job-triage.md "History and investigation".
+- **Never start `openqa-investigate` to take a look.** Read the existing investigation data and comments -> references/job-history.md "History and investigation".
 
 ## Known-issue dry run
 

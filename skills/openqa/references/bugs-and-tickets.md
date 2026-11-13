@@ -128,7 +128,7 @@ Always latest result in this scenario: [latest](<latest URL>)
 - **Add when it applies:** `## Steps to reproduce` (not qemu, or more than a plain rerun: the `openqa-clone-job` command or manual steps), `## Impact` (a blocked group, release or many scenarios), `## Workaround`, `## Rollback steps` (every label, soft-fail or retrigger rule applied meanwhile).
 - **`auto_review` tickets** carry `## Steps to reproduce`: find jobs referencing this ticket with `openqa-query-for-job-label` and this ticket's `poo#` id (os-autoinst-scripts).
 - **New test:** the Definition of Ready wants the case described (prerequisites, steps, expected result) and SLE and openSUSE applicability considered; `[easy]`, `[medium]` or `[hard]` helps.
-- **Why test, not product:** -> references/job-triage.md "Investigate jobs"
+- **Why test, not product:** -> references/job-history.md "Investigate jobs"
 - **About 2,000 characters**, 4,000 at most as `ticket-lint.py` checks; approver notes as for bugs. Resolving needs a link to a passing production run (Definition of Done).
 
 ## Refute before the ask

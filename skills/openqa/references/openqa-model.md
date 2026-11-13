@@ -121,7 +121,7 @@ Marker `(Automatic carryover from t#<id>)` (old data: `takeover`), plus `(The ho
 | job-done hook | instance script; upstream's labels known issues, may restart | -> references/review-comments-tickets.md "auto_review subjects" |
 | investigation jobs | hook `openqa-investigate` clones a failure with empty `BUILD`, by default into no group | comment starting `Automatic investigation jobs for job <id>` lists `<test>:investigate:retry`, `:last_good_tests:<hash>`, `:last_good_build:<build>`, `:last_good_tests_and_build:...`; clones set `OPENQA_INVESTIGATE_ORIGIN` |
 
-- **A passing retry hides a sporadic failure**: with `restarts > 0` or `origin_id` set, check earlier runs -> references/job-triage.md "History and investigation".
+- **A passing retry hides a sporadic failure**: with `restarts > 0` or `origin_id` set, check earlier runs -> references/job-history.md "History and investigation".
 
 ## Clone chain
 

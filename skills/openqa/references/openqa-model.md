@@ -24,7 +24,7 @@ Contents: Instances; Vocabulary; States and results; Reviewed definition; Bugref
 | job group / parent group | templates and results of one product area / set of job groups |
 | clone | job created by a restart; old job gets `clone_id`, new one reports `origin_id` |
 
-- **Split histories**: jobs differing in `SUBMISSION_ID` (or keys named in `_HISTORY_ISOLATION_KEYS`) share no history.
+- **Split histories**: carry-over and investigation compare only jobs with the same `SUBMISSION_ID` (or keys named in `_HISTORY_ISOLATION_KEYS`); the history routes only with `strict=1`, or on the keys passed in `isolation_keys`.
 
 ## States and results
 
@@ -145,8 +145,9 @@ Marker `(Automatic carryover from t#<id>)` (old data: `takeover`), plus `(The ho
 | `/api/v1/jobs/<id>[/details]` | `follow=1` | `job`, no `modules`; details add `testresults[].details[]`, `logs[]`, `ulogs[]` (0.5-2 MB: use `oqa-job.py`) |
 | `/api/v1/jobs/<id>/comments` | - | `[{id,text,bugrefs[],userName,created}]` |
 | `/api/v1/job_templates_scheduling/<g>` | - | group YAML (80 KB: save and grep, never print). Origin of a setting: here, then `/api/v1/test_suites`, machine, medium, schedule `vars:` |
-| `/tests/<id>/ajax` | `previous_limit`, `next_limit` | scenario history: result, `failedmodules`, `comment_data` (default 500+500 rows, 330 KB; pass 10) |
-| `/tests/<id>/investigation_ajax` | - | `last_good`, `first_bad`, settings/package diffs, test/needle git log |
+| `/tests/<id>/ajax` | `previous_limit`, `next_limit`, `strict=1`, `isolation_keys` | scenario history: result, `failedmodules`, `comment_data` (default 500+500 rows, 330 KB; pass 10) |
+| `/api/v1/jobs/<id>/history` | as `ajax` | `jobs[]`: `result reason clone_id origin_id t_finished settings`; no failed modules, comments or restarts |
+| `/tests/<id>/investigation_ajax` | - | `last_good`, `first_bad`, settings/package diffs, test/needle git log; `failure_test_log`, `failure_needles_log`: commits to the failed modules' files and needles |
 | `/tests/<id>/file/<name>` | name from `logs[]`, `ulogs[]` | raw file, often MBs: use `oqa-log.py` |
 
 - **No `build` on overview routes** = latest build of each group. `overview.json` is page template data, no stable API; cap 2000 jobs (`limit_exceeded`).

@@ -102,7 +102,7 @@ New installation tests follow `ui-framework-documentation.md` (distri README). T
 - **No test data and no `get_var` steering** in controllers or pages. Widget members carry the doc's type prefixes (`btn_`, `chb_`, `txb_`, …).
 - **Register the controller** as `get_<feature>` in `lib/Distribution/Opensuse/Tumbleweed.pm`; override per distribution class only where behaviour differs.
 - **Enable per job:** `YUI_REST_API: 1` under `vars:` and `installation/setup_libyui` right after `installation/bootloader_start` -> references/scheduling.md "YAML schedules".
-- **Waiting:** `YuiRestClient::Wait::wait_until(object => sub {…}, timeout => 10, interval => 1, message => '…')` dies with `Timed out: <message>`. Assertions in modules: `use Test::Assert ':all'`.
+- **Waiting:** `YuiRestClient::Wait::wait_until(object => sub {…}, timeout => 10, interval => 1, message => '…')` dies with `Timed out: <message>`. Assertions in modules: `use Test::Assert 'assert_equals';` -> module-templates.md "YaM validate module".
 
 ## Agama
 

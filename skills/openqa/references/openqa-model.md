@@ -47,7 +47,7 @@ Per job, by comment content:
 
 - a parsed bugref -> **reviewed**
 - else a `label:<x>` -> **reviewed**, `label` = x (newest wins); with a bugref in the same comment `label` stays `null`
-- neither -> **commented** only
+- neither, or a `flag:verbatim` comment -> **commented** only -> "Labels and flags"
 - **`label:linked` is automatic**: the system user posts `label:linked ... mentions this job`, once per job, when a GET under `/tests/<id>` carries a `Referer` of a recognised host; it counts as reviewed. Never send a `Referer` -> references/untrusted-content.md "Rules".
 - Bot comments count like human ones; read the text before trusting `reviewed` -> references/untrusted-content.md "Rules".
 
@@ -86,7 +86,8 @@ Per build (`/api/v1/job_groups/<g>/build_results`, latest non-cloned job per `TE
 - **`label:<keyword>`**, keyword `[\w:#/-]+`, vocabulary is local -> references/site-policy.md "Overlay sections". First label of a comment counts.
 - **A label marks reviewed but is never carried over**: `label:boo#123` references a ticket for this job only.
 - **`label:force_result:<result>`** also overwrites the job result -> references/review-comments-tickets.md "Forcing a result".
-- **`flag:carryover`**, the only flag, makes a comment without bugref eligible for carry-over.
+- **`flag:carryover`** makes a comment without bugref eligible for carry-over.
+- **`flag:verbatim`** turns off every bugref, label, tag and flag in its comment: no review mark, no carry-over, no `force_result`, `bugrefs: []` in the API; a `force_result` label inside still blocks deletion. Older instances parse it as usual.
 
 ## Group comments
 
@@ -103,7 +104,7 @@ Runs when a job becomes `done`, before hooks:
 2. Signature = sorted `module:result` of `failed`, `softfailed` or `none` modules (a bugref in a step title replaces the name). Empty -> stop; softfailed jobs do carry over.
 3. Candidates: earlier `done` jobs of the scenario with `passed|softfailed|failed`, newest first, at most `lookup_depth` (10).
 4. First candidate with an equal signature is the source; more than `state_changes_limit` (3) signature changes on the way (a pass counts) -> stop.
-5. Only the source's newest comment with a bugref or `flag:carryover` is copied, under its original author.
+5. Only the source's newest comment with a bugref or `flag:carryover` (never `flag:verbatim`) is copied, under its original author.
 
 Marker `(Automatic carryover from t#<id>)` (old data: `takeover`), plus `(The hook script will not be executed.)` when a hook is configured. Appended once: `t#` names the first source, possibly very old; ticket state is never checked.
 

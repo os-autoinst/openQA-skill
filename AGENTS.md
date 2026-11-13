@@ -103,6 +103,13 @@ Rules for humans and agents changing this repository.
    `tests/repo/check-skills.py`; its sections then need no pointer.
 5. Run the script tests, `python3 tests/repo/check-skills.py` and `python3 tests/repo/check-flags.py`.
 
+## Scoring evals
+
+- One answer to a prompt is a sample: run each prompt several times on the same revision and compare pass rates
+  between revisions, never single answers.
+- Count failures per distinct cause (a missing or wrong rule, a script defect, a misread fixture), not per
+  assertion: one gap that fails three assertions is one finding.
+
 ## Releasing
 
 1. Bump `metadata.version` in the `SKILL.md` frontmatter of every skill the release changes to the new

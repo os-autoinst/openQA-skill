@@ -71,7 +71,7 @@ Classes: PRODUCT, TEST (code, needle, schedule, settings), INFRA (worker, backen
 | `reason` starts with | Meaning, class |
 |---|---|
 | `asset failure: Failed to download <asset> to <path>` or `Cannot find <KEY> asset <type>/<name>!` | asset missing (download 4xx, not on disk). The check: does it exist for that build (its other jobs, the parent's uploads)? No: not published or synced, or cleaned up, INFRA (a parent that ended not ok -> "Clusters"); under another name: a wrong asset setting, TEST settings |
-| `cache failure: `, `setup failure: `, `api failure`, `worker broken: `, `quit: worker has been stopped or restarted`, `timeout: setup exceeded MAX_SETUP_TIME` | worker side. INFRA |
+| `cache failure: `, `setup failure: `, `api failure`, `worker broken: `, `quit: worker has been stopped or restarted`, `timeout: setup exceeded MAX_SETUP_TIME`, `timeout: upload exceeded MAX_UPLOAD_TIME` or `UPLOAD_INACTIVITY_TIMEOUT` (result `timeout_exceeded`) | worker side. INFRA |
 | `backend died: QEMU exited unexpectedly, ...`, `... QEMU was killed due to the system being out of memory`, `QEMU terminated: ...`, `backend died: Error connecting to <desc> <host:port>: ...` | INFRA; TEST if QEMU settings are wrong |
 | `backend died: qemu-img: Could not open '<file>'` | disk image missing: parent job or asset |
 | `tests died: unable to load <script>, check the log for the cause ...` | compile error (`main.pm`: schedule or library); log near `Compilation failed in require`. TEST |

@@ -1,0 +1,566 @@
+[2026-11-08T08:41:29.208073Z] [info] +++ setup notes +++
+[2026-11-08T08:41:29.208241Z] [info] Running on openqaworker25:40 (Linux 6.12.0-160000.40-default #1 SMP PREEMPT_DYNAMIC Thu Oct 22 09:10:19 UTC 2026 (3fd31e5) x86_64)
+[2026-11-08T08:41:29.212854Z] [debug] Found ASSET_1, caching Tumbleweed.x86_64-1.0-libvirt-Snapshot20261107.vagrant.libvirt.box
+[2026-11-08T08:41:29.215200Z] [info] Downloading Tumbleweed.x86_64-1.0-libvirt-Snapshot20261107.vagrant.libvirt.box, request #852190 sent to Cache Service
+[2026-11-08T08:41:39.347238Z] [info] Download of Tumbleweed.x86_64-1.0-libvirt-Snapshot20261107.vagrant.libvirt.box processed:
+[info] [#852183] Cache size of "/var/lib/openqa/cache" is 400 GiB, with limit 400 GiB
+[info] [#852183] Downloading "Tumbleweed.x86_64-1.0-libvirt-Snapshot20261107.vagrant.libvirt.box" from "https://openqa.opensuse.org/tests/6327883/asset/other/Tumbleweed.x86_64-1.0-libvirt-Snapshot20261107.vagrant.libvirt.box"
+[info] [#852183] Cache size 400 GiB + needed 430 MiB exceeds limit of 400 GiB, purging least used assets
+[info] [#852183] Purging "/var/lib/openqa/cache/openqa.opensuse.org/openSUSE-Tumbleweed-20261103.x86_64-3.331-Snapshot20261103.tar.xz" because we need space for new assets, reclaiming 59 MiB
+[info] [#852183] Size of "/var/lib/openqa/cache/openqa.opensuse.org/Tumbleweed.x86_64-1.0-libvirt-Snapshot20261107.vagrant.libvirt.box" is 430 MiB, with ETag ""6aefe5a8-1adc82c7""
+[info] [#852183] Download of "/var/lib/openqa/cache/openqa.opensuse.org/Tumbleweed.x86_64-1.0-libvirt-Snapshot20261107.vagrant.libvirt.box" successful (13 MiB/s), new cache size is 400 GiB
+
+[2026-11-08T08:41:39.348806Z] [debug] Found ASSET_2, caching Tumbleweed.x86_64-1.0-virtualbox-Snapshot20261107.vagrant.virtualbox.box
+[2026-11-08T08:41:39.350524Z] [info] Downloading Tumbleweed.x86_64-1.0-virtualbox-Snapshot20261107.vagrant.virtualbox.box, request #852199 sent to Cache Service
+[2026-11-08T08:42:14.925180Z] [info] Download of Tumbleweed.x86_64-1.0-virtualbox-Snapshot20261107.vagrant.virtualbox.box processed:
+[info] [#852194] Cache size of "/var/lib/openqa/cache" is 400 GiB, with limit 400 GiB
+[info] [#852194] Downloading "Tumbleweed.x86_64-1.0-virtualbox-Snapshot20261107.vagrant.virtualbox.box" from "https://openqa.opensuse.org/tests/6327881/asset/other/Tumbleweed.x86_64-1.0-virtualbox-Snapshot20261107.vagrant.virtualbox.box"
+[info] [#852194] Size of "/var/lib/openqa/cache/openqa.opensuse.org/Tumbleweed.x86_64-1.0-virtualbox-Snapshot20261107.vagrant.virtualbox.box" is 443 MiB, with ETag ""6aefe59d-1bafe786""
+[info] [#852194] Download of "/var/lib/openqa/cache/openqa.opensuse.org/Tumbleweed.x86_64-1.0-virtualbox-Snapshot20261107.vagrant.virtualbox.box" successful (13 MiB/s), new cache size is 400 GiB
+
+[2026-11-08T08:42:14.926920Z] [debug] Found ASSET_256, caching openSUSE-Tumbleweed-DVD-x86_64-Snapshot20261107-Media.iso.sha256
+[2026-11-08T08:42:14.928865Z] [info] Downloading openSUSE-Tumbleweed-DVD-x86_64-Snapshot20261107-Media.iso.sha256, request #852208 sent to Cache Service
+[2026-11-08T08:42:19.995639Z] [info] Download of openSUSE-Tumbleweed-DVD-x86_64-Snapshot20261107-Media.iso.sha256 processed:
+[info] [#852208] Cache size of "/var/lib/openqa/cache" is 399 GiB, with limit 400 GiB
+[info] [#852208] Downloading "openSUSE-Tumbleweed-DVD-x86_64-Snapshot20261107-Media.iso.sha256" from "https://openqa.opensuse.org/tests/6327850/asset/other/openSUSE-Tumbleweed-DVD-x86_64-Snapshot20261107-Media.iso.sha256"
+[info] [#852208] Content of "/var/lib/openqa/cache/openqa.opensuse.org/openSUSE-Tumbleweed-DVD-x86_64-Snapshot20261107-Media.iso.sha256" has not changed, updating last use
+
+[2026-11-08T08:42:19.997264Z] [debug] Found HDD_1, caching opensuse-15.2-x86_64-GM-cryptlvm@uefi.qcow2
+[2026-11-08T08:42:19.998938Z] [info] Downloading opensuse-15.2-x86_64-GM-cryptlvm@uefi.qcow2, request #852217 sent to Cache Service
+[2026-11-08T08:56:03.700816Z] [info] Download of opensuse-15.2-x86_64-GM-cryptlvm@uefi.qcow2 processed:
+[info] [#852217] Cache size of "/var/lib/openqa/cache" is 399 GiB, with limit 400 GiB
+[info] [#852217] Downloading "opensuse-15.2-x86_64-GM-cryptlvm@uefi.qcow2" from "https://openqa.opensuse.org/tests/6327850/asset/hdd/opensuse-15.2-x86_64-GM-cryptlvm@uefi.qcow2"
+[info] [#852217] Cache size 400 GiB + needed 6.3 GiB exceeds limit of 400 GiB, purging least used assets
+[info] [#852217] Purging "/var/lib/openqa/cache/openqa.opensuse.org/opensuse-15.1-x86_64-GM-kde@64bit.qcow2" because we need space for new assets, reclaiming 2.4 GiB
+[info] [#852217] Purging "/var/lib/openqa/cache/openqa.opensuse.org/openSUSE-MicroOS-DVD-x86_64-Snapshot20261103-Media.iso.sha256" because we need space for new assets, reclaiming 121 Byte
+[info] [#852217] Purging "/var/lib/openqa/cache/openqa.opensuse.org/openSUSE-Tumbleweed-GNOME-Live-x86_64-Snapshot20261103-Media.iso.sha256" because we need space for new assets, reclaiming 131 Byte
+[info] [#852217] Purging "/var/lib/openqa/cache/openqa.opensuse.org/openSUSE-Tumbleweed-XFCE-Live-x86_64-Snapshot20261103-Media.iso.sha256" because we need space for new assets, reclaiming 130 Byte
+[info] [#852217] Purging "/var/lib/openqa/cache/openqa.opensuse.org/openSUSE-MicroOS-DVD-x86_64-Snapshot20261103-Media.iso" because we need space for new assets, reclaiming 2.7 GiB
+[info] [#852217] Purging "/var/lib/openqa/cache/openqa.opensuse.org/openSUSE-Tumbleweed-XFCE-Live-x86_64-Snapshot20261103-Media.iso" because we need space for new assets, reclaiming 1.2 GiB
+[info] [#852217] Size of "/var/lib/openqa/cache/openqa.opensuse.org/opensuse-15.2-x86_64-GM-cryptlvm@uefi.qcow2" is 6.3 GiB, with ETag ""607fc406-1904e0000""
+[info] [#852217] Download of "/var/lib/openqa/cache/openqa.opensuse.org/opensuse-15.2-x86_64-GM-cryptlvm@uefi.qcow2" successful (7.9 MiB/s), new cache size is 400 GiB
+
+[2026-11-08T08:56:03.703212Z] [debug] Found ISO, caching openSUSE-Tumbleweed-DVD-x86_64-Snapshot20261107-Media.iso
+[2026-11-08T08:56:03.705255Z] [info] Downloading openSUSE-Tumbleweed-DVD-x86_64-Snapshot20261107-Media.iso, request #852294 sent to Cache Service
+[2026-11-08T08:56:13.812476Z] [info] Download of openSUSE-Tumbleweed-DVD-x86_64-Snapshot20261107-Media.iso processed:
+[info] [#852294] Cache size of "/var/lib/openqa/cache" is 400 GiB, with limit 400 GiB
+[info] [#852294] Downloading "openSUSE-Tumbleweed-DVD-x86_64-Snapshot20261107-Media.iso" from "https://openqa.opensuse.org/tests/6327850/asset/iso/openSUSE-Tumbleweed-DVD-x86_64-Snapshot20261107-Media.iso"
+[info] [#852294] Content of "/var/lib/openqa/cache/openqa.opensuse.org/openSUSE-Tumbleweed-DVD-x86_64-Snapshot20261107-Media.iso" has not changed, updating last use
+
+[2026-11-08T08:56:13.815959Z] [info] Rsync from 'rsync://openqa.opensuse.org/tests' to '/var/lib/openqa/cache/openqa.opensuse.org', request #852295 sent to Cache Service
+[2026-11-08T08:56:18.984114Z] [info] Output of rsync:
+[info] [#852295] Calling: rsync -avHP --timeout 1800 rsync://openqa.opensuse.org/tests/ --delete /var/lib/openqa/cache/openqa.opensuse.org/tests/
+Try 1:
+STDOUT:
+receiving incremental file list
+opensuse/.git/
+opensuse/.git/FETCH_HEAD
+              0   0%    0.00kB/s    0:00:00              120 100%  117.19kB/s    0:00:00 (xfr#1, ir-chk=1020/16832)
+opensuse/.git/index
+              0   0%    0.00kB/s    0:00:00          803,690 100%   95.81MB/s    0:00:00 (xfr#2, ir-chk=1015/16832)
+opensuse/.git/logs/HEAD
+              0   0%    0.00kB/s    0:00:00          801,297 100%   76.42MB/s    0:00:00 (xfr#3, ir-chk=1002/16838)
+opensuse/.git/objects/
+opensuse/.git/refs/heads/
+opensuse/products/opensuse/needles/.git/
+opensuse/products/opensuse/needles/.git/FETCH_HEAD
+              0   0%    0.00kB/s    0:00:00              113 100%    0.76kB/s    0:00:00 (xfr#4, ir-chk=1019/36193)
+opensuse/products/opensuse/needles/.git/index
+              0   0%    0.00kB/s    0:00:00        1,383,599 100%    6.94MB/s    0:00:00 (xfr#5, ir-chk=1014/36193)
+opensuse/products/opensuse/needles/.git/logs/HEAD
+              0   0%    0.00kB/s    0:00:00       29,266,520 100%  128.62MB/s    0:00:00 (xfr#6, ir-chk=1027/36225)
+opensuse/products/opensuse/needles/.git/objects/
+opensuse/products/opensuse/needles/.git/refs/heads/
+
+sent 56,627 bytes  received 4,348,961 bytes  8,811,176.00 bytes/sec
+total size is 8,202,577,347  speedup is 1,861.86
+
+STDERR:
+
+
+[2026-11-08T08:56:18.984233Z] [info] Finished to rsync tests
+[2026-11-08T08:56:18.989097Z] [debug] +++ worker notes +++
+[2026-11-08T08:56:19.469639Z] [debug] [pid:2188634] [37mCurrent version is 5.1793797288.07b5ebe [interface v60][0m
+[2026-11-08T08:56:19.482090Z] [debug] [pid:2188634] [37mgit hash in 'opensuse': 8be0067f75b240ab9c4f599864b4e8c834d339b0[0m
+[2026-11-08T08:56:19.837561Z] [debug] [pid:2188634] [37mgit url in 'opensuse': "https://github.com/os-autoinst/os-autoinst-distri-opensuse.git"[0m
+[2026-11-08T08:56:19.837738Z] [debug] [pid:2188634] [37mTEST_GIT_HASH=8be0067f75b240ab9c4f599864b4e8c834d339b0 TEST_GIT_URL=https://github.com/os-autoinst/os-autoinst-distri-opensuse.git[0m
+[2026-11-08T08:56:20.222952Z] [debug] [pid:2188634] [37musingenv DESKTOP=gnome[0m
+[2026-11-08T08:56:20.223060Z] [debug] [pid:2188634] [37musingenv LVM=1[0m
+[2026-11-08T08:56:20.223098Z] [debug] [pid:2188634] [37musingenv UPGRADE=1[0m
+[2026-11-08T08:56:20.223131Z] [debug] [pid:2188634] [37musingenv DISTRI=opensuse[0m
+[2026-11-08T08:56:20.223159Z] [debug] [pid:2188634] [37musingenv QEMUCPU=host[0m
+[2026-11-08T08:56:20.223187Z] [debug] [pid:2188634] [37musingenv ENCRYPT=1[0m
+[2026-11-08T08:56:20.223216Z] [debug] [pid:2188634] [37musingenv INSTLANG=en_US[0m
+[2026-11-08T08:56:20.223245Z] [debug] [pid:2188634] [37musingenv QEMUVGA=virtio[0m
+[2026-11-08T08:56:20.223273Z] [debug] [pid:2188634] [37musingenv UEFI=1[0m
+[2026-11-08T08:56:20.223300Z] [debug] [pid:2188634] [37musingenv DVD=1[0m
+[2026-11-08T08:56:20.223325Z] [debug] [pid:2188634] [37musingenv GNOME=1[0m
+[2026-11-08T08:56:20.223353Z] [debug] [pid:2188634] [37musingenv ISO=openSUSE-Tumbleweed-DVD-x86_64-Snapshot20261107-Media.iso[0m
+[2026-11-08T08:56:20.223378Z] [debug] [pid:2188634] [37musingenv ISO_MAXSIZE=4700372992[0m
+[2026-11-08T08:56:20.224502Z] [debug] [pid:2188634] [37mscheduling isosize tests/installation/isosize.pm[0m
+[2026-11-08T08:56:20.226374Z] [debug] [pid:2188634] [37mscheduling bootloader_uefi tests/installation/bootloader_uefi.pm[0m
+[2026-11-08T08:56:20.229864Z] [debug] [pid:2188634] [37mscheduling welcome tests/installation/welcome.pm[0m
+[2026-11-08T08:56:20.230804Z] [debug] [pid:2188634] [37mscheduling upgrade_select tests/installation/upgrade_select.pm[0m
+[2026-11-08T08:56:20.231706Z] [debug] [pid:2188634] [37mscheduling online_repos tests/installation/online_repos.pm[0m
+[2026-11-08T08:56:20.232426Z] [debug] [pid:2188634] [37mscheduling resolve_dependency_issues tests/installation/resolve_dependency_issues.pm[0m
+[2026-11-08T08:56:20.233819Z] [debug] [pid:2188634] [37mscheduling installation_overview tests/installation/installation_overview.pm[0m
+[2026-11-08T08:56:20.234768Z] [debug] [pid:2188634] [37mscheduling configure_bls tests/installation/configure_bls.pm[0m
+[2026-11-08T08:56:20.235735Z] [debug] [pid:2188634] [37mscheduling disable_grub_timeout tests/installation/disable_grub_timeout.pm[0m
+[2026-11-08T08:56:20.236799Z] [debug] [pid:2188634] [37mscheduling start_install tests/installation/start_install.pm[0m
+[2026-11-08T08:56:20.238398Z] [debug] [pid:2188634] [37mscheduling await_install tests/installation/await_install.pm[0m
+[2026-11-08T08:56:20.239510Z] [debug] [pid:2188634] [37mscheduling logs_from_installation_system tests/installation/logs_from_installation_system.pm[0m
+[2026-11-08T08:56:20.240542Z] [debug] [pid:2188634] [37mscheduling reboot_after_installation tests/installation/reboot_after_installation.pm[0m
+[2026-11-08T08:56:20.241901Z] [debug] [pid:2188634] [37mscheduling grub_test tests/installation/grub_test.pm[0m
+[2026-11-08T08:56:20.242484Z] [debug] [pid:2188634] [37mscheduling boot_encrypt tests/installation/boot_encrypt.pm[0m
+[2026-11-08T08:56:20.243528Z] [debug] [pid:2188634] [37mscheduling first_boot tests/installation/first_boot.pm[0m
+[2026-11-08T08:56:20.244402Z] [debug] [pid:2188634] [37mscheduling opensuse_welcome tests/installation/opensuse_welcome.pm[0m
+[2026-11-08T08:56:20.250363Z] [debug] [pid:2188634] [37mscheduling system_prepare tests/console/system_prepare.pm[0m
+[2026-11-08T08:56:20.251220Z] [debug] [pid:2188634] [37mscheduling zypper_clear_repos tests/update/zypper_clear_repos.pm[0m
+[2026-11-08T08:56:20.251973Z] [debug] [pid:2188634] [37mscheduling zypper_ar tests/console/zypper_ar.pm[0m
+[2026-11-08T08:56:20.252573Z] [debug] [pid:2188634] [37mscheduling zypper_ref tests/console/zypper_ref.pm[0m
+[2026-11-08T08:56:20.253387Z] [debug] [pid:2188634] [37mscheduling prepare_system_for_update_tests tests/update/prepare_system_for_update_tests.pm[0m
+[2026-11-08T08:56:20.254773Z] [debug] [pid:2188634] [37mscheduling updates_packagekit_gpk tests/update/updates_packagekit_gpk.pm[0m
+[2026-11-08T08:56:20.255405Z] [debug] [pid:2188634] [37mscheduling check_system_is_updated tests/update/check_system_is_updated.pm[0m
+[2026-11-08T08:56:20.256105Z] [debug] [pid:2188634] [37mscheduling check_network tests/console/check_network.pm[0m
+[2026-11-08T08:56:20.256855Z] [debug] [pid:2188634] [37mscheduling system_state tests/console/system_state.pm[0m
+[2026-11-08T08:56:20.257637Z] [debug] [pid:2188634] [37mscheduling prepare_test_data tests/console/prepare_test_data.pm[0m
+[2026-11-08T08:56:20.258467Z] [debug] [pid:2188634] [37mscheduling consoletest_setup tests/console/consoletest_setup.pm[0m
+[2026-11-08T08:56:20.259620Z] [debug] [pid:2188634] [37mscheduling keymap_or_locale tests/locale/keymap_or_locale.pm[0m
+[2026-11-08T08:56:20.260488Z] [debug] [pid:2188634] [37mscheduling force_scheduled_tasks tests/console/force_scheduled_tasks.pm[0m
+[2026-11-08T08:56:20.261098Z] [debug] [pid:2188634] [37mscheduling textinfo tests/console/textinfo.pm[0m
+[2026-11-08T08:56:20.261854Z] [debug] [pid:2188634] [37mscheduling hostname tests/console/hostname.pm[0m
+[2026-11-08T08:56:20.262738Z] [debug] [pid:2188634] [37mscheduling opensuse_repos tests/console/opensuse_repos.pm[0m
+[2026-11-08T08:56:20.263317Z] [debug] [pid:2188634] [37mscheduling zypper_lr tests/console/zypper_lr.pm[0m
+[2026-11-08T08:56:20.264292Z] [debug] [pid:2188634] [37mscheduling zypper_in tests/console/zypper_in.pm[0m
+[2026-11-08T08:56:20.265103Z] [debug] [pid:2188634] [37mscheduling zypper_log tests/console/zypper_log.pm[0m
+[2026-11-08T08:56:20.265767Z] [debug] [pid:2188634] [37mscheduling systemd_wo_udev tests/console/systemd_wo_udev.pm[0m
+[2026-11-08T08:56:20.268626Z] [debug] [pid:2188634] [37mscheduling yast2_lan tests/console/yast2_lan.pm[0m
+[2026-11-08T08:56:20.269672Z] [debug] [pid:2188634] [37mscheduling curl_https tests/console/curl_https.pm[0m
+[2026-11-08T08:56:20.271974Z] [debug] [pid:2188634] [37mscheduling salt_agnostic tests/console/oqa_agnostic/salt_agnostic.pm[0m
+[2026-11-08T08:56:20.272788Z] [debug] [pid:2188634] [37mscheduling glibc_sanity tests/console/glibc_sanity.pm[0m
+[2026-11-08T08:56:20.273749Z] [debug] [pid:2188634] [37mscheduling glibc_tunables tests/console/glibc_tunables.pm[0m
+[2026-11-08T08:56:20.275100Z] [debug] [pid:2188634] [37mscheduling yast2_i tests/console/yast2_i.pm[0m
+[2026-11-08T08:56:20.276Z] [debug] [pid:2188634] [37mscheduling yast2_bootloader tests/console/yast2_bootloader.pm[0m
+[2026-11-08T08:56:20.276682Z] [debug] [pid:2188634] [37mscheduling vim tests/console/vim.pm[0m
+[2026-11-08T08:56:20.277775Z] [debug] [pid:2188634] [37mscheduling firewall_enabled tests/console/firewall_enabled.pm[0m
+[2026-11-08T08:56:20.280701Z] [debug] [pid:2188634] [37mscheduling sshd tests/console/sshd.pm[0m
+[2026-11-08T08:56:20.281376Z] [debug] [pid:2188634] [37mscheduling ssh_cleanup tests/console/ssh_cleanup.pm[0m
+[2026-11-08T08:56:20.282377Z] [debug] [pid:2188634] [37mscheduling sshfs tests/console/sshfs.pm[0m
+[2026-11-08T08:56:20.282961Z] [debug] [pid:2188634] [37mscheduling mtab tests/console/mtab.pm[0m
+[2026-11-08T08:56:20.284292Z] [debug] [pid:2188634] [37mscheduling nginx tests/console/nginx.pm[0m
+[2026-11-08T08:56:20.285187Z] [debug] [pid:2188634] [37mscheduling orphaned_packages_check tests/console/orphaned_packages_check.pm[0m
+[2026-11-08T08:56:20.286146Z] [debug] [pid:2188634] [37mscheduling consoletest_finish tests/console/consoletest_finish.pm[0m
+[2026-11-08T08:56:20.286736Z] [debug] [pid:2188634] [37mscheduling user_gui_login tests/x11/user_gui_login.pm[0m
+[2026-11-08T08:56:20.287288Z] [debug] [pid:2188634] [37mscheduling desktop_runner tests/x11/desktop_runner.pm[0m
+[2026-11-08T08:56:20.287869Z] [debug] [pid:2188634] [37mscheduling xterm tests/x11/xterm.pm[0m
+[2026-11-08T08:56:20.288471Z] [debug] [pid:2188634] [37mscheduling keymap_or_locale_x11 tests/locale/keymap_or_locale_x11.pm[0m
+[2026-11-08T08:56:20.289082Z] [debug] [pid:2188634] [37mscheduling ssh_default_term tests/x11/ssh_default_term.pm[0m
+[2026-11-08T08:56:20.289741Z] [debug] [pid:2188634] [37mscheduling gnome_control_center tests/x11/gnome_control_center.pm[0m
+[2026-11-08T08:56:20.290471Z] [debug] [pid:2188634] [37mscheduling gnome_tweak_tool tests/x11/gnome_tweak_tool.pm[0m
+[2026-11-08T08:56:20.291242Z] [debug] [pid:2188634] [37mscheduling gnome_console tests/x11/gnome_console.pm[0m
+[2026-11-08T08:56:20.291821Z] [debug] [pid:2188634] [37mscheduling gedit tests/x11/gedit.pm[0m
+[2026-11-08T08:56:20.292626Z] [debug] [pid:2188634] [37mscheduling firefox tests/x11/firefox.pm[0m
+[2026-11-08T08:56:20.293305Z] [debug] [pid:2188634] [37mscheduling firefox_audio tests/x11/firefox_audio.pm[0m
+[2026-11-08T08:56:20.294154Z] [debug] [pid:2188634] [37mscheduling chromium tests/x11/chromium.pm[0m
+[2026-11-08T08:56:20.294905Z] [debug] [pid:2188634] [37mscheduling graphicsMagick tests/x11/graphicsMagick.pm[0m
+[2026-11-08T08:56:20.295530Z] [debug] [pid:2188634] [37mscheduling ooffice tests/x11/ooffice.pm[0m
+[2026-11-08T08:56:20.296163Z] [debug] [pid:2188634] [37mscheduling oomath tests/x11/oomath.pm[0m
+[2026-11-08T08:56:20.296731Z] [debug] [pid:2188634] [37mscheduling oocalc tests/x11/oocalc.pm[0m
+[2026-11-08T08:56:20.297309Z] [debug] [pid:2188634] [37mscheduling glxgears tests/x11/glxgears.pm[0m
+[2026-11-08T08:56:20.297865Z] [debug] [pid:2188634] [37mscheduling nautilus tests/x11/nautilus.pm[0m
+[2026-11-08T08:56:20.298526Z] [debug] [pid:2188634] [37mscheduling gnome_music tests/x11/gnome_music.pm[0m
+[2026-11-08T08:56:20.299202Z] [debug] [pid:2188634] [37mscheduling evolution tests/x11/evolution.pm[0m
+[2026-11-08T08:56:20.299887Z] [debug] [pid:2188634] [37mscheduling desktop_mainmenu tests/x11/desktop_mainmenu.pm[0m
+[2026-11-08T08:56:20.300510Z] [debug] [pid:2188634] [37mscheduling inkscape tests/x11/inkscape.pm[0m
+[2026-11-08T08:56:20.301068Z] [debug] [pid:2188634] [37mscheduling gimp tests/x11/gimp.pm[0m
+[2026-11-08T08:56:20.301696Z] [debug] [pid:2188634] [37mscheduling vlc tests/x11/vlc.pm[0m
+[2026-11-08T08:56:20.302342Z] [debug] [pid:2188634] [37mscheduling reboot_gnome tests/x11/reboot_gnome.pm[0m
+[2026-11-08T08:56:20.303240Z] [debug] [pid:2188634] [37mscheduling zypper_log_packages tests/console/zypper_log_packages.pm[0m
+[2026-11-08T08:56:20.304007Z] [debug] [pid:2188634] [37mscheduling shutdown tests/shutdown/shutdown.pm[0m
+[2026-11-08T08:56:20.310842Z] [info] [pid:2188669] cmdsrv: daemon reachable under http://*:20403/xxxxxxxxxxxxxxxx/
+[2026-11-08T08:56:20.312279Z] [info] [pid:2188669] Listening at "http://[::]:20403"
+Web application available at http://[::]:20403
+[2026-11-08T08:56:20.315702Z] [debug] [pid:2188634] [37mgit hash in 'opensuse/products/opensuse/needles': d0351a079a9fd47394e5aafd4e2101460ee6d558[0m
+[2026-11-08T08:56:22.633173Z] [debug] [pid:2188634] [37mgit url in 'opensuse/products/opensuse/needles': "git@github.com:os-autoinst/os-autoinst-needles-opensuse.git"[0m
+[2026-11-08T08:56:22.633322Z] [debug] [pid:2188634] [37minit needles from opensuse/products/opensuse/needles[0m
+[2026-11-08T08:56:23.207927Z] [debug] [pid:2188634] [37mloaded 6263 needles[0m
+[2026-11-08T08:56:23.352684Z] [debug] [pid:2188634] [37m2188634: channel_out 15, channel_in 14[0m
+[2026-11-08T08:56:23.406658Z] [debug] [pid:2188949] [37m2188949: cmdpipe 13, rsppipe 16[0m
+[2026-11-08T08:56:23.407275Z] [debug] [pid:2188949] [37mstarted mgmt loop with pid 2188949[0m
+[2026-11-08T08:56:23.492307Z] [debug] [pid:2188949] [37mLaunching external video encoder: ffmpeg -y -hide_banner -nostats -r 24 -f image2pipe -vcodec ppm -i - -pix_fmt yuv420p -c:v libsvtav1 -crf 50 -preset 7 -b:v 0 'video.webm'[0m
+[2026-11-08T08:56:23.584316Z] [debug] [pid:2188949] [37mqemu version detected: 10.0.13[0m
+[2026-11-08T08:56:23.584773Z] [warn] [pid:2188949] [31m!!! backend::qemu::_set_graphics_backend: QEMUVGA is deprecated, please set QEMU_VIDEO_DEVICE[0m
+[2026-11-08T08:56:23.586478Z] [debug] [pid:2188949] [37mrunning `/usr/bin/chattr +C /var/lib/openqa/pool/40/raid`[0m
+[2026-11-08T08:56:23.601891Z] [debug] [pid:2188949] [37mCommand `/usr/bin/chattr +C /var/lib/openqa/pool/40/raid` terminated with 1
+  /usr/bin/chattr: Operation not supported while setting flags on /var/lib/openqa/pool/40/raid[0m
+[2026-11-08T08:56:23.602036Z] [debug] [pid:2188949] [37mConfiguring storage controllers and block devices[0m
+[2026-11-08T08:56:23.602628Z] [debug] [pid:2188949] [37mrunning `/usr/bin/qemu-img info --output=json /var/lib/openqa/pool/40/opensuse-15.2-x86_64-GM-cryptlvm@uefi.qcow2`[0m
+[2026-11-08T08:56:23.660107Z] [debug] [pid:2188949] [37mrunning `/usr/bin/qemu-img info --output=json /var/lib/openqa/pool/40/openSUSE-Tumbleweed-DVD-x86_64-Snapshot20261107-Media.iso`[0m
+[2026-11-08T08:56:23.700906Z] [debug] [pid:2188949] [37mrunning `/usr/bin/qemu-img info --output=json /usr/share/qemu/ovmf-x86_64-ms-4m-code.bin`[0m
+[2026-11-08T08:56:23.749939Z] [debug] [pid:2188949] [37mrunning `/usr/bin/qemu-img info --output=json /usr/share/qemu/ovmf-x86_64-ms-4m-vars.bin`[0m
+[2026-11-08T08:56:26.041513Z] [debug] [pid:2188750] [1;34m||| starting isosize tests/installation/isosize.pm[0m
+[2026-11-08T08:56:26.044022Z] [debug] [pid:2188750] [1;34m||| finished isosize installation (runtime: 0 s)[0m
+[2026-11-08T08:56:26.044629Z] [debug] [pid:2188750] [1;34m||| starting bootloader_uefi tests/installation/bootloader_uefi.pm[0m
+[2026-11-08T08:58:39.286823Z] [debug] [pid:2188750] [1;34m||| finished bootloader_uefi installation (runtime: 133 s)[0m
+[2026-11-08T08:58:39.288012Z] [debug] [pid:2188750] [1;34m||| starting welcome tests/installation/welcome.pm[0m
+[2026-11-08T08:59:59.862161Z] [debug] [pid:2188750] [1;34m||| finished welcome installation (runtime: 80 s)[0m
+[2026-11-08T08:59:59.863605Z] [debug] [pid:2188750] [1;34m||| starting upgrade_select tests/installation/upgrade_select.pm[0m
+[2026-11-08T09:00:23.933048Z] [debug] [pid:2188750] [1;34m||| finished upgrade_select installation (runtime: 24 s)[0m
+[2026-11-08T09:00:23.934257Z] [debug] [pid:2188750] [1;34m||| starting online_repos tests/installation/online_repos.pm[0m
+[2026-11-08T09:00:25.869434Z] [debug] [pid:2188750] [1;34m||| finished online_repos installation (runtime: 2 s)[0m
+[2026-11-08T09:00:25.870596Z] [debug] [pid:2188750] [1;34m||| starting resolve_dependency_issues tests/installation/resolve_dependency_issues.pm[0m
+[2026-11-08T09:00:29.549438Z] [debug] [pid:2188750] [1;34m||| finished resolve_dependency_issues installation (runtime: 4 s)[0m
+[2026-11-08T09:00:29.550514Z] [debug] [pid:2188750] [1;34m||| starting installation_overview tests/installation/installation_overview.pm[0m
+[2026-11-08T09:00:30.560550Z] [debug] [pid:2188750] [1;34m||| finished installation_overview installation (runtime: 1 s)[0m
+[2026-11-08T09:00:30.561668Z] [debug] [pid:2188750] [1;34m||| starting configure_bls tests/installation/configure_bls.pm[0m
+[2026-11-08T09:01:23.546774Z] [debug] [pid:2188750] [1;34m||| finished configure_bls installation (runtime: 53 s)[0m
+[2026-11-08T09:01:23.549182Z] [debug] [pid:2188750] [1;34m||| starting disable_grub_timeout tests/installation/disable_grub_timeout.pm[0m
+[2026-11-08T09:02:37.462593Z] [debug] [pid:2188750] [1;34m||| finished disable_grub_timeout installation (runtime: 74 s)[0m
+[2026-11-08T09:02:37.465112Z] [debug] [pid:2188750] [1;34m||| starting start_install tests/installation/start_install.pm[0m
+[2026-11-08T09:02:47.443734Z] [debug] [pid:2188750] [1;34m||| finished start_install installation (runtime: 10 s)[0m
+[2026-11-08T09:02:47.444767Z] [debug] [pid:2188750] [1;34m||| starting await_install tests/installation/await_install.pm[0m
+[2026-11-08T09:13:57.968866Z] [debug] [pid:2188750] [1;34m||| finished await_install installation (runtime: 670 s)[0m
+[2026-11-08T09:13:57.971138Z] [debug] [pid:2188750] [1;34m||| starting logs_from_installation_system tests/installation/logs_from_installation_system.pm[0m
+[2026-11-08T09:15:00.700736Z] [debug] [pid:2188750] [1;34m||| finished logs_from_installation_system installation (runtime: 63 s)[0m
+[2026-11-08T09:15:00.701749Z] [debug] [pid:2188750] [1;34m||| starting reboot_after_installation tests/installation/reboot_after_installation.pm[0m
+[2026-11-08T09:15:02.114457Z] [debug] [pid:2188750] [1;34m||| finished reboot_after_installation installation (runtime: 2 s)[0m
+[2026-11-08T09:15:02.115469Z] [debug] [pid:2188750] [1;34m||| starting grub_test tests/installation/grub_test.pm[0m
+[2026-11-08T09:15:40.543650Z] [debug] [pid:2188750] [1;34m||| finished grub_test installation (runtime: 38 s)[0m
+[2026-11-08T09:15:40.544798Z] [debug] [pid:2188750] [1;34m||| starting boot_encrypt tests/installation/boot_encrypt.pm[0m
+[2026-11-08T09:15:40.545606Z] [debug] [pid:2188750] [1;34m||| finished boot_encrypt installation (runtime: 0 s)[0m
+[2026-11-08T09:15:40.585666Z] [debug] [pid:2188750] [1;34m||| starting first_boot tests/installation/first_boot.pm[0m
+[2026-11-08T09:16:21.438532Z] [debug] [pid:2188750] [1;34m||| finished first_boot installation (runtime: 41 s)[0m
+[2026-11-08T09:16:27.344522Z] [debug] [pid:2188750] [1;34m||| starting opensuse_welcome tests/installation/opensuse_welcome.pm[0m
+[2026-11-08T09:16:33.241265Z] [debug] [pid:2188750] [1;34m||| finished opensuse_welcome installation (runtime: 6 s)[0m
+[2026-11-08T09:16:33.242722Z] [debug] [pid:2188750] [1;34m||| starting system_prepare tests/console/system_prepare.pm[0m
+[2026-11-08T09:16:36.200495Z] [debug] [pid:2188750] [1;34m||| finished system_prepare console (runtime: 3 s)[0m
+[2026-11-08T09:16:39.486447Z] [debug] [pid:2188750] [1;34m||| starting zypper_clear_repos tests/update/zypper_clear_repos.pm[0m
+[2026-11-08T09:16:40.500037Z] [debug] [pid:2188750] [1;34m||| finished zypper_clear_repos update (runtime: 1 s)[0m
+[2026-11-08T09:16:40.500736Z] [debug] [pid:2188750] [1;34m||| starting zypper_ar tests/console/zypper_ar.pm[0m
+[2026-11-08T09:16:42.501287Z] [debug] [pid:2188750] [1;34m||| finished zypper_ar console (runtime: 2 s)[0m
+[2026-11-08T09:16:42.502028Z] [debug] [pid:2188750] [1;34m||| starting zypper_ref tests/console/zypper_ref.pm[0m
+[2026-11-08T09:16:54.276279Z] [debug] [pid:2188750] [1;34m||| finished zypper_ref console (runtime: 12 s)[0m
+[2026-11-08T09:16:54.277085Z] [debug] [pid:2188750] [1;34m||| starting prepare_system_for_update_tests tests/update/prepare_system_for_update_tests.pm[0m
+[2026-11-08T09:16:56.205582Z] [debug] [pid:2188750] [1;34m||| finished prepare_system_for_update_tests update (runtime: 2 s)[0m
+[2026-11-08T09:16:56.206266Z] [debug] [pid:2188750] [1;34m||| starting updates_packagekit_gpk tests/update/updates_packagekit_gpk.pm[0m
+[2026-11-08T09:17:15.165875Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,2] tests/update/updates_packagekit_gpk.pm:88 called x11utils::ensure_unlocked_desktop -> lib/x11utils.pm:85 called testapi::wait_still_screen
+[2026-11-08T09:17:15.166005Z] [debug] [pid:2188750] <<< testapi::wait_still_screen(stilltime=10, timeout=15, similarity_level=47)
+[2026-11-08T09:17:25.411018Z] [debug] [pid:2188750] [32m>>> testapi::wait_still_screen: detected same image for 10 seconds (10.2423219680786 s elapsed), last detected similarity is 1000000[0m
+[2026-11-08T09:17:25.411318Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,2] tests/update/updates_packagekit_gpk.pm:88 called x11utils::ensure_unlocked_desktop -> lib/x11utils.pm:94 called testapi::assert_screen
+[2026-11-08T09:17:25.411483Z] [debug] [pid:2188750] <<< testapi::assert_screen(mustmatch=[
+[2026-11-08T09:17:26.799674Z] [debug] [pid:2188750] [32m>>> testapi::_handle_found_needle: found consoletest_finish-gnome-TW-20241002, similarity 1.00 @ 0/1[0m
+[2026-11-08T09:17:26.800081Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,3] tests/update/updates_packagekit_gpk.pm:88 called x11utils::ensure_unlocked_desktop -> lib/x11utils.pm:175 called testapi::send_key
+[2026-11-08T09:17:26.800177Z] [debug] [pid:2188750] <<< testapi::send_key(key="esc", wait_screen_change=0)
+[2026-11-08T09:17:27.034636Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,3] tests/update/updates_packagekit_gpk.pm:88 called x11utils::ensure_unlocked_desktop -> lib/x11utils.pm:182 called testapi::mouse_hide
+[2026-11-08T09:17:27.034733Z] [debug] [pid:2188750] <<< testapi::mouse_hide(border_offset=1)
+[2026-11-08T09:17:27.035562Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,3] tests/update/updates_packagekit_gpk.pm:88 called x11utils::ensure_unlocked_desktop -> lib/x11utils.pm:183 called testapi::send_key
+[2026-11-08T09:17:27.035642Z] [debug] [pid:2188750] <<< testapi::send_key(key="alt-f2", wait_screen_change=0)
+[2026-11-08T09:17:27.303256Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,3] tests/update/updates_packagekit_gpk.pm:88 called x11utils::ensure_unlocked_desktop -> lib/x11utils.pm:184 called testapi::check_screen
+[2026-11-08T09:17:27.303339Z] [debug] [pid:2188750] <<< testapi::check_screen(mustmatch="desktop-runner", timeout=30)
+[2026-11-08T09:17:28.397589Z] [debug] [pid:2188750] [32m>>> testapi::_handle_found_needle: found desktop-runner-gnome-48-20250205, similarity 1.00 @ 344/310[0m
+[2026-11-08T09:17:28.397830Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,4] tests/update/updates_packagekit_gpk.pm:88 called x11utils::ensure_unlocked_desktop -> lib/x11utils.pm:185 called testapi::send_key
+[2026-11-08T09:17:28.397951Z] [debug] [pid:2188750] <<< testapi::send_key(key="esc", wait_screen_change=0)
+[2026-11-08T09:17:28.635643Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,4] tests/update/updates_packagekit_gpk.pm:88 called x11utils::ensure_unlocked_desktop -> lib/x11utils.pm:186 called testapi::assert_screen
+[2026-11-08T09:17:28.635779Z] [debug] [pid:2188750] <<< testapi::assert_screen(mustmatch="generic-desktop", timeout=30)
+[2026-11-08T09:17:29.888010Z] [debug] [pid:2188750] [32m>>> testapi::_handle_found_needle: found consoletest_finish-gnome-TW-20241002, similarity 1.00 @ 0/1[0m
+[2026-11-08T09:17:29.888294Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,5] tests/update/updates_packagekit_gpk.pm:93 called updates_packagekit_gpk::setup_system -> tests/update/updates_packagekit_gpk.pm:28 called testapi::x11_start_program
+[2026-11-08T09:17:29.888376Z] [debug] [pid:2188750] <<< testapi::x11_start_program(program="kgx")
+[2026-11-08T09:17:29.888520Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,5] tests/update/updates_packagekit_gpk.pm:93 called updates_packagekit_gpk::setup_system -> tests/update/updates_packagekit_gpk.pm:28 called testapi::x11_start_program -> lib/susedistribution.pm:292 called susedistribution::init_desktop_runner -> lib/susedistribution.pm:203 called testapi::send_key
+[2026-11-08T09:17:29.888579Z] [debug] [pid:2188750] <<< testapi::send_key(key="alt-f2", wait_screen_change=0)
+[2026-11-08T09:17:30.162646Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,5] tests/update/updates_packagekit_gpk.pm:93 called updates_packagekit_gpk::setup_system -> tests/update/updates_packagekit_gpk.pm:28 called testapi::x11_start_program -> lib/susedistribution.pm:292 called susedistribution::init_desktop_runner -> lib/susedistribution.pm:205 called testapi::mouse_hide
+[2026-11-08T09:17:30.162779Z] [debug] [pid:2188750] <<< testapi::mouse_hide(border_offset=1)
+[2026-11-08T09:17:30.163581Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,5] tests/update/updates_packagekit_gpk.pm:93 called updates_packagekit_gpk::setup_system -> tests/update/updates_packagekit_gpk.pm:28 called testapi::x11_start_program -> lib/susedistribution.pm:292 called susedistribution::init_desktop_runner -> lib/susedistribution.pm:206 called testapi::check_screen
+[2026-11-08T09:17:30.163653Z] [debug] [pid:2188750] <<< testapi::check_screen(mustmatch="desktop-runner", timeout=30)
+[2026-11-08T09:17:31.397518Z] [debug] [pid:2188750] [32m>>> testapi::_handle_found_needle: found desktop-runner-gnome-48-20250205, similarity 1.00 @ 344/310[0m
+[2026-11-08T09:17:31.397734Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,6] tests/update/updates_packagekit_gpk.pm:93 called updates_packagekit_gpk::setup_system -> tests/update/updates_packagekit_gpk.pm:28 called testapi::x11_start_program -> lib/susedistribution.pm:292 called susedistribution::init_desktop_runner -> lib/susedistribution.pm:211 called testapi::wait_still_screen
+[2026-11-08T09:17:31.397845Z] [debug] [pid:2188750] <<< testapi::wait_still_screen(similarity_level=47, stilltime=2, timeout=30)
+[2026-11-08T09:17:33.628287Z] [debug] [pid:2188750] [32m>>> testapi::wait_still_screen: detected same image for 2 seconds (2.22889804840088 s elapsed), last detected similarity is 1000000[0m
+[2026-11-08T09:17:33.629017Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,6] tests/update/updates_packagekit_gpk.pm:93 called updates_packagekit_gpk::setup_system -> tests/update/updates_packagekit_gpk.pm:28 called testapi::x11_start_program -> lib/susedistribution.pm:292 called susedistribution::init_desktop_runner -> lib/susedistribution.pm:227 called testapi::type_string
+[2026-11-08T09:17:33.629157Z] [debug] [pid:2188750] <<< testapi::type_string(string="kgx", max_interval=250, wait_screen_change=0, wait_still_screen=0, timeout=30, similarity_level=47)
+[2026-11-08T09:17:33.730515Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,6] tests/update/updates_packagekit_gpk.pm:93 called updates_packagekit_gpk::setup_system -> tests/update/updates_packagekit_gpk.pm:28 called testapi::x11_start_program -> lib/susedistribution.pm:299 called testapi::wait_still_screen
+[2026-11-08T09:17:33.730651Z] [debug] [pid:2188750] <<< testapi::wait_still_screen(similarity_level=47, timeout=30, stilltime=3)
+[2026-11-08T09:17:37.383801Z] [debug] [pid:2188750] [32m>>> testapi::wait_still_screen: detected same image for 3 seconds (3.65097093582153 s elapsed), last detected similarity is 1000000[0m
+[2026-11-08T09:17:37.446780Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,7] tests/update/updates_packagekit_gpk.pm:93 called updates_packagekit_gpk::setup_system -> tests/update/updates_packagekit_gpk.pm:28 called testapi::x11_start_program -> lib/susedistribution.pm:301 called testapi::send_key
+[2026-11-08T09:17:37.446910Z] [debug] [pid:2188750] <<< testapi::send_key(key="ret", wait_screen_change=0)
+[2026-11-08T09:17:37.684006Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,7] tests/update/updates_packagekit_gpk.pm:93 called updates_packagekit_gpk::setup_system -> tests/update/updates_packagekit_gpk.pm:28 called testapi::x11_start_program -> lib/susedistribution.pm:310 called testapi::assert_screen
+[2026-11-08T09:17:37.684195Z] [debug] [pid:2188750] <<< testapi::assert_screen(mustmatch=[
+[2026-11-08T09:17:39.739266Z] [debug] [pid:2188750] [32m>>> testapi::_handle_found_needle: found gnome_console-kgx-20250324, similarity 0.99 @ 150/146[0m
+[2026-11-08T09:17:39.739590Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,8] tests/update/updates_packagekit_gpk.pm:93 called updates_packagekit_gpk::setup_system -> tests/update/updates_packagekit_gpk.pm:31 called x11utils::turn_off_gnome_screensaver -> lib/x11utils.pm:537 called testapi::script_run
+[2026-11-08T09:17:39.739771Z] [debug] [pid:2188750] <<< testapi::script_run(cmd="timeout 80 gsettings set org.gnome.desktop.session idle-delay 0", max_interval=250, quiet=undef, output="", timeout=90)
+[2026-11-08T09:17:39.739999Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,8] tests/update/updates_packagekit_gpk.pm:93 called updates_packagekit_gpk::setup_system -> tests/update/updates_packagekit_gpk.pm:31 called x11utils::turn_off_gnome_screensaver -> lib/x11utils.pm:537 called testapi::script_run
+[2026-11-08T09:17:39.740111Z] [debug] [pid:2188750] <<< testapi::type_string(string="echo \"BASH:\$BASH_VERSION:\" > /dev/ttyS0\n", max_interval=250, wait_screen_change=0, wait_still_screen=0, timeout=30, similarity_level=47)
+[2026-11-08T09:17:41.473488Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,8] tests/update/updates_packagekit_gpk.pm:93 called updates_packagekit_gpk::setup_system -> tests/update/updates_packagekit_gpk.pm:31 called x11utils::turn_off_gnome_screensaver -> lib/x11utils.pm:537 called testapi::script_run
+[2026-11-08T09:17:41.473900Z] [debug] [pid:2188750] <<< testapi::wait_serial(regexp=qr/BASH:([^:]*):/u, capture_name=undef, internal_marker=0, buffer_size=undef, record_command=undef, expect_not_found=0, timeout=10, record_output=undef, quiet=undef, no_regex=0)
+[2026-11-08T09:17:42.518376Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,9] tests/update/updates_packagekit_gpk.pm:93 called updates_packagekit_gpk::setup_system -> tests/update/updates_packagekit_gpk.pm:31 called x11utils::turn_off_gnome_screensaver -> lib/x11utils.pm:537 called testapi::script_run
+[2026-11-08T09:17:42.518569Z] [debug] [pid:2188750] [32m>>> testapi::wait_serial: (?^u:BASH:([^:]*):): ok[0m
+[2026-11-08T09:17:42.518705Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,10] tests/update/updates_packagekit_gpk.pm:93 called updates_packagekit_gpk::setup_system -> tests/update/updates_packagekit_gpk.pm:31 called x11utils::turn_off_gnome_screensaver -> lib/x11utils.pm:537 called testapi::script_run
+[2026-11-08T09:17:42.518858Z] [debug] [pid:2188750] <<< testapi::type_string(string="grep -q '_OAPV=3' ~/.bashrc 2>/dev/null||{ sed -i '/_oap/d;/_OAPV=3/d' ~/.bashrc ~/.profile 2>/dev/null;echo '_OAPV=3;_oap(){ r=\$?;if [ -n \"\$_OANM\" ];then unset _OANM;else c=\$(HISTTIMEFORMAT= history 1);c=\${c#*[0-9]  };c=\${c#\${c%%[![:space:]]*}};c=\${c%\${c##*[![:space:]]}};l=\${#c};t=\$c;[ \$l -ge 4 ]&&t=\${c: -4};printf \"OA:DONE-%04x-%d-OA:%s%d%s\\nOA:START\\n\" \$RANDOM \$r \"\${c:0:4}\" \$l \"\$t\">/dev/ttyS0;fi;};PROMPT_COMMAND=_oap'|tee -a ~/.bashrc ~/.profile>/dev/null;};. ~/.bashrc\n", max_interval=250, wait_screen_change=0, wait_still_screen=0, timeout=30, similarity_level=47)
+[2026-11-08T09:18:01.432567Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,10] tests/update/updates_packagekit_gpk.pm:93 called updates_packagekit_gpk::setup_system -> tests/update/updates_packagekit_gpk.pm:31 called x11utils::turn_off_gnome_screensaver -> lib/x11utils.pm:537 called testapi::script_run
+[2026-11-08T09:18:01.433286Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,10] tests/update/updates_packagekit_gpk.pm:93 called updates_packagekit_gpk::setup_system -> tests/update/updates_packagekit_gpk.pm:31 called x11utils::turn_off_gnome_screensaver -> lib/x11utils.pm:537 called testapi::script_run
+[2026-11-08T09:18:01.433402Z] [debug] [pid:2188750] <<< testapi::type_string(string="timeout 80 gsettings set org.gnome.desktop.session idle-delay 0\n", max_interval=250, wait_screen_change=0, wait_still_screen=0, timeout=30, similarity_level=47)
+[2026-11-08T09:18:03.586447Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,10] tests/update/updates_packagekit_gpk.pm:93 called updates_packagekit_gpk::setup_system -> tests/update/updates_packagekit_gpk.pm:31 called x11utils::turn_off_gnome_screensaver -> lib/x11utils.pm:537 called testapi::script_run
+[2026-11-08T09:18:03.586669Z] [debug] [pid:2188750] <<< testapi::wait_serial(timeout=90, quiet=undef, record_output=undef, no_regex=0, capture_name="Exit code", regexp=qr/OA:DONE-[0-9a-f]{4}-(\d+)-OA\:time63ay\ 0/u, buffer_size=undef, internal_marker=1, record_command="timeout 80 gsettings set org.gnome.desktop.session idle-delay 0", expect_not_found=0)
+[2026-11-08T09:18:05.635146Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,11] tests/update/updates_packagekit_gpk.pm:93 called updates_packagekit_gpk::setup_system -> tests/update/updates_packagekit_gpk.pm:31 called x11utils::turn_off_gnome_screensaver -> lib/x11utils.pm:537 called testapi::script_run
+[2026-11-08T09:18:05.635337Z] [debug] [pid:2188750] [32m>>> testapi::wait_serial: (?^u:OA:DONE-[0-9a-f]{4}-(\d+)-OA\:time63ay\ 0): ok[0m
+[2026-11-08T09:18:05.635497Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,12] tests/update/updates_packagekit_gpk.pm:93 called updates_packagekit_gpk::setup_system -> tests/update/updates_packagekit_gpk.pm:32 called x11utils::turn_off_gnome_suspend -> lib/x11utils.pm:575 called testapi::script_run
+[2026-11-08T09:18:05.635623Z] [debug] [pid:2188750] <<< testapi::script_run(cmd="gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-ac-type 'nothing'", quiet=undef, output="", timeout=30, max_interval=250)
+[2026-11-08T09:18:05.636296Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,12] tests/update/updates_packagekit_gpk.pm:93 called updates_packagekit_gpk::setup_system -> tests/update/updates_packagekit_gpk.pm:32 called x11utils::turn_off_gnome_suspend -> lib/x11utils.pm:575 called testapi::script_run
+[2026-11-08T09:18:05.636404Z] [debug] [pid:2188750] <<< testapi::type_string(string="gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-ac-type 'nothing'\n", max_interval=250, wait_screen_change=0, wait_still_screen=0, timeout=30, similarity_level=47)
+[2026-11-08T09:18:08.562468Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,12] tests/update/updates_packagekit_gpk.pm:93 called updates_packagekit_gpk::setup_system -> tests/update/updates_packagekit_gpk.pm:32 called x11utils::turn_off_gnome_suspend -> lib/x11utils.pm:575 called testapi::script_run
+[2026-11-08T09:18:08.562716Z] [debug] [pid:2188750] <<< testapi::wait_serial(no_regex=0, record_output=undef, quiet=undef, timeout=30, record_command="gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-ac-type 'nothing'", expect_not_found=0, internal_marker=1, buffer_size=undef, regexp=qr/OA:DONE-[0-9a-f]{4}-(\d+)-OA\:gset86ing\'/u, capture_name="Exit code")
+[2026-11-08T09:18:09.609134Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,13] tests/update/updates_packagekit_gpk.pm:93 called updates_packagekit_gpk::setup_system -> tests/update/updates_packagekit_gpk.pm:32 called x11utils::turn_off_gnome_suspend -> lib/x11utils.pm:575 called testapi::script_run
+[2026-11-08T09:18:09.609322Z] [debug] [pid:2188750] [32m>>> testapi::wait_serial: (?^u:OA:DONE-[0-9a-f]{4}-(\d+)-OA\:gset86ing\'): ok[0m
+[2026-11-08T09:18:09.609454Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,14] tests/update/updates_packagekit_gpk.pm:93 called updates_packagekit_gpk::setup_system -> tests/update/updates_packagekit_gpk.pm:42 called testapi::send_key
+[2026-11-08T09:18:09.609545Z] [debug] [pid:2188750] <<< testapi::send_key(key="ctrl-d", wait_screen_change=0)
+[2026-11-08T09:18:09.877695Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,14] tests/update/updates_packagekit_gpk.pm:97 called testapi::x11_start_program
+[2026-11-08T09:18:09.877896Z] [debug] [pid:2188750] <<< testapi::x11_start_program(program="gpk-update-viewer", target_match=[
+[2026-11-08T09:18:09.878037Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,14] tests/update/updates_packagekit_gpk.pm:97 called testapi::x11_start_program -> lib/susedistribution.pm:292 called susedistribution::init_desktop_runner -> lib/susedistribution.pm:203 called testapi::send_key
+[2026-11-08T09:18:09.878092Z] [debug] [pid:2188750] <<< testapi::send_key(key="alt-f2", wait_screen_change=0)
+[2026-11-08T09:18:10.147770Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,14] tests/update/updates_packagekit_gpk.pm:97 called testapi::x11_start_program -> lib/susedistribution.pm:292 called susedistribution::init_desktop_runner -> lib/susedistribution.pm:205 called testapi::mouse_hide
+[2026-11-08T09:18:10.147912Z] [debug] [pid:2188750] <<< testapi::mouse_hide(border_offset=1)
+[2026-11-08T09:18:10.148700Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,14] tests/update/updates_packagekit_gpk.pm:97 called testapi::x11_start_program -> lib/susedistribution.pm:292 called susedistribution::init_desktop_runner -> lib/susedistribution.pm:206 called testapi::check_screen
+[2026-11-08T09:18:10.148771Z] [debug] [pid:2188750] <<< testapi::check_screen(mustmatch="desktop-runner", timeout=30)
+[2026-11-08T09:18:11.246949Z] [debug] [pid:2188750] [32m>>> testapi::_handle_found_needle: found desktop-runner-gnome-48-20250205, similarity 1.00 @ 344/310[0m
+[2026-11-08T09:18:11.247182Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,15] tests/update/updates_packagekit_gpk.pm:97 called testapi::x11_start_program -> lib/susedistribution.pm:292 called susedistribution::init_desktop_runner -> lib/susedistribution.pm:211 called testapi::wait_still_screen
+[2026-11-08T09:18:11.247293Z] [debug] [pid:2188750] <<< testapi::wait_still_screen(timeout=30, stilltime=2, similarity_level=47)
+[2026-11-08T09:18:13.466469Z] [debug] [pid:2188750] [32m>>> testapi::wait_still_screen: detected same image for 2 seconds (2.21771001815796 s elapsed), last detected similarity is 1000000[0m
+[2026-11-08T09:18:13.466696Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,15] tests/update/updates_packagekit_gpk.pm:97 called testapi::x11_start_program -> lib/susedistribution.pm:292 called susedistribution::init_desktop_runner -> lib/susedistribution.pm:227 called testapi::type_string
+[2026-11-08T09:18:13.466850Z] [debug] [pid:2188750] <<< testapi::type_string(string="gpk-update-viewer", max_interval=250, wait_screen_change=0, wait_still_screen=0, timeout=30, similarity_level=47)
+[2026-11-08T09:18:14.038871Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,15] tests/update/updates_packagekit_gpk.pm:97 called testapi::x11_start_program -> lib/susedistribution.pm:299 called testapi::wait_still_screen
+[2026-11-08T09:18:14.039026Z] [debug] [pid:2188750] <<< testapi::wait_still_screen(stilltime=3, timeout=30, similarity_level=47)
+[2026-11-08T09:18:17.729151Z] [debug] [pid:2188750] [32m>>> testapi::wait_still_screen: detected same image for 3 seconds (3.68772196769714 s elapsed), last detected similarity is 1000000[0m
+[2026-11-08T09:18:17.800278Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,16] tests/update/updates_packagekit_gpk.pm:97 called testapi::x11_start_program -> lib/susedistribution.pm:301 called testapi::send_key
+[2026-11-08T09:18:17.800429Z] [debug] [pid:2188750] <<< testapi::send_key(key="ret", wait_screen_change=0)
+[2026-11-08T09:18:18.038381Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,16] tests/update/updates_packagekit_gpk.pm:97 called testapi::x11_start_program -> lib/susedistribution.pm:310 called testapi::assert_screen
+[2026-11-08T09:18:18.038591Z] [debug] [pid:2188750] <<< testapi::assert_screen(mustmatch=[
+[2026-11-08T09:18:20.184970Z] [debug] [pid:2188750] [32m>>> testapi::_handle_found_needle: found updates_available_gpk-20250318, similarity 1.00 @ 849/48[0m
+[2026-11-08T09:18:20.185250Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,17] tests/update/updates_packagekit_gpk.pm:116 called testapi::check_screen
+[2026-11-08T09:18:20.185346Z] [debug] [pid:2188750] <<< testapi::check_screen(mustmatch="updates_not_installed", timeout=0)
+[2026-11-08T09:18:21.139725Z] [debug] [pid:2188750] [32m>>> testapi::_check_backend_response: match=updates_not_installed timed out after 0 (check_screen)[0m
+[2026-11-08T09:18:21.156318Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,18] tests/update/updates_packagekit_gpk.pm:116 called testapi::check_screen
+[2026-11-08T09:18:21.157005Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,18] tests/update/updates_packagekit_gpk.pm:125 called testapi::send_key
+[2026-11-08T09:18:21.157104Z] [debug] [pid:2188750] <<< testapi::send_key(key="alt-i", wait_screen_change=0)
+[2026-11-08T09:18:21.425061Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,18] tests/update/updates_packagekit_gpk.pm:130 called testapi::assert_screen
+[2026-11-08T09:18:21.425226Z] [debug] [pid:2188750] <<< testapi::assert_screen(mustmatch=[
+[2026-11-08T09:23:27.556566Z] [debug] [pid:2188750] [32m>>> testapi::_handle_found_needle: found gnome_updates_packagekit_updates_none-20250318, similarity 1.00 @ 22/690[0m
+[2026-11-08T09:23:27.556825Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,19] tests/update/updates_packagekit_gpk.pm:144 called testapi::wait_screen_change
+[2026-11-08T09:23:27.556926Z] [debug] [pid:2188750] <<< testapi::wait_screen_change(timeout=10, similarity_level=50)
+[2026-11-08T09:23:27.557561Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,19] tests/update/updates_packagekit_gpk.pm:144 called testapi::wait_screen_change -> tests/update/updates_packagekit_gpk.pm:144 called testapi::send_key
+[2026-11-08T09:23:27.557627Z] [debug] [pid:2188750] <<< testapi::send_key(key="ret", wait_screen_change=0)
+[2026-11-08T09:23:27.939266Z] [debug] [pid:2188750] [32m>>> testapi::wait_screen_change: screen change seen after 0.143267869949341 seconds (similarity: 23.1426177674669)[0m
+[2026-11-08T09:23:27.939435Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,19] tests/update/updates_packagekit_gpk.pm:145 called testapi::check_screen
+[2026-11-08T09:23:27.939526Z] [debug] [pid:2188750] <<< testapi::check_screen(mustmatch="updates_installed-restart", timeout=0)
+[2026-11-08T09:23:28.703826Z] [debug] [pid:2188750] [32m>>> testapi::_check_backend_response: match=updates_installed-restart timed out after 0 (check_screen)[0m
+[2026-11-08T09:23:28.717484Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,20] tests/update/updates_packagekit_gpk.pm:145 called testapi::check_screen
+[2026-11-08T09:23:28.718231Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,20] tests/update/updates_packagekit_gpk.pm:97 called testapi::x11_start_program
+[2026-11-08T09:23:28.718369Z] [debug] [pid:2188750] <<< testapi::x11_start_program(program="gpk-update-viewer", target_match=[
+[2026-11-08T09:23:28.718500Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,20] tests/update/updates_packagekit_gpk.pm:97 called testapi::x11_start_program -> lib/susedistribution.pm:292 called susedistribution::init_desktop_runner -> lib/susedistribution.pm:203 called testapi::send_key
+[2026-11-08T09:23:28.718556Z] [debug] [pid:2188750] <<< testapi::send_key(key="alt-f2", wait_screen_change=0)
+[2026-11-08T09:23:28.986620Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,20] tests/update/updates_packagekit_gpk.pm:97 called testapi::x11_start_program -> lib/susedistribution.pm:292 called susedistribution::init_desktop_runner -> lib/susedistribution.pm:205 called testapi::mouse_hide
+[2026-11-08T09:23:28.986739Z] [debug] [pid:2188750] <<< testapi::mouse_hide(border_offset=1)
+[2026-11-08T09:23:28.987798Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,20] tests/update/updates_packagekit_gpk.pm:97 called testapi::x11_start_program -> lib/susedistribution.pm:292 called susedistribution::init_desktop_runner -> lib/susedistribution.pm:206 called testapi::check_screen
+[2026-11-08T09:23:28.987899Z] [debug] [pid:2188750] <<< testapi::check_screen(mustmatch="desktop-runner", timeout=30)
+[2026-11-08T09:23:29.646133Z] [debug] [pid:2188750] [32m>>> testapi::_handle_found_needle: found desktop-runner-gnome-48-20250205, similarity 1.00 @ 344/310[0m
+[2026-11-08T09:23:29.646382Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,21] tests/update/updates_packagekit_gpk.pm:97 called testapi::x11_start_program -> lib/susedistribution.pm:292 called susedistribution::init_desktop_runner -> lib/susedistribution.pm:211 called testapi::wait_still_screen
+[2026-11-08T09:23:29.646494Z] [debug] [pid:2188750] <<< testapi::wait_still_screen(similarity_level=47, stilltime=2, timeout=30)
+[2026-11-08T09:23:31.692857Z] [debug] [pid:2188750] [32m>>> testapi::wait_still_screen: detected same image for 2 seconds (2.04463815689087 s elapsed), last detected similarity is 56.9806993186341[0m
+[2026-11-08T09:23:31.693080Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,21] tests/update/updates_packagekit_gpk.pm:97 called testapi::x11_start_program -> lib/susedistribution.pm:292 called susedistribution::init_desktop_runner -> lib/susedistribution.pm:227 called testapi::type_string
+[2026-11-08T09:23:31.693214Z] [debug] [pid:2188750] <<< testapi::type_string(string="gpk-update-viewer", max_interval=250, wait_screen_change=0, wait_still_screen=0, timeout=30, similarity_level=47)
+[2026-11-08T09:23:32.265695Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,21] tests/update/updates_packagekit_gpk.pm:97 called testapi::x11_start_program -> lib/susedistribution.pm:299 called testapi::wait_still_screen
+[2026-11-08T09:23:32.265892Z] [debug] [pid:2188750] <<< testapi::wait_still_screen(stilltime=3, timeout=30, similarity_level=47)
+[2026-11-08T09:23:35.956228Z] [debug] [pid:2188750] [32m>>> testapi::wait_still_screen: detected same image for 3 seconds (3.68781685829163 s elapsed), last detected similarity is 1000000[0m
+[2026-11-08T09:23:36.016727Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,22] tests/update/updates_packagekit_gpk.pm:97 called testapi::x11_start_program -> lib/susedistribution.pm:301 called testapi::send_key
+[2026-11-08T09:23:36.016866Z] [debug] [pid:2188750] <<< testapi::send_key(key="ret", wait_screen_change=0)
+[2026-11-08T09:23:36.254561Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,22] tests/update/updates_packagekit_gpk.pm:97 called testapi::x11_start_program -> lib/susedistribution.pm:310 called testapi::assert_screen
+[2026-11-08T09:23:36.254784Z] [debug] [pid:2188750] <<< testapi::assert_screen(mustmatch=[
+    "updates_none",
+    "updates_available",
+    "package-updater-privileged-user-warning",
+    "updates_restart_application",
+    "updates_installed-restart",
+    "updates_failed",
+    "desktop-runner-border"
+  ], timeout=100, no_wait=0)
+[2026-11-08T09:23:36.460768Z] [debug] [pid:2188949] [37mno match: 99.9s, best candidate: gnome_updates_packagekit_updates_none--20200421 (0.00)[0m
+[2026-11-08T09:23:37.385176Z] [debug] [pid:2188750] [32m>>> testapi::_handle_found_needle: found gnome_updates_packagekit_updates_none-20250312, similarity 1.00 @ 219/694[0m
+[2026-11-08T09:23:37.385531Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,23] tests/update/updates_packagekit_gpk.pm:107 called testapi::send_key
+[2026-11-08T09:23:37.385626Z] [debug] [pid:2188750] <<< testapi::send_key(key="ret", wait_screen_change=0)
+[2026-11-08T09:23:37.620603Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,23] tests/update/updates_packagekit_gpk.pm:108 called updates_packagekit_gpk::close_pop_up_windows -> tests/update/updates_packagekit_gpk.pm:46 called testapi::check_screen
+[2026-11-08T09:23:37.620804Z] [debug] [pid:2188750] <<< testapi::check_screen(mustmatch=[
+    "Could_not_get_updates",
+    "Could_not_get_update_details",
+    "need_restart_application"
+  ], timeout=5)
+[2026-11-08T09:23:38.322506Z] [debug] [pid:2188949] [37mno match: 4.3s, best candidate: need_restart_application-20230810 (0.00)[0m
+[2026-11-08T09:23:39.258036Z] [debug] [pid:2188949] [37mno change: 3.3s[0m
+[2026-11-08T09:23:39.281855Z] [debug] [pid:2188949] [37mno match: 3.3s, best candidate: need_restart_application-20230810 (0.00)[0m
+[2026-11-08T09:23:40.258242Z] [debug] [pid:2188949] [37mno change: 2.3s[0m
+[2026-11-08T09:23:40.280251Z] [debug] [pid:2188949] [37mno match: 2.3s, best candidate: need_restart_application-20230810 (0.00)[0m
+[2026-11-08T09:23:41.259240Z] [debug] [pid:2188949] [37mno change: 1.3s[0m
+[2026-11-08T09:23:41.282293Z] [debug] [pid:2188949] [37mno match: 1.3s, best candidate: need_restart_application-20230810 (0.00)[0m
+[2026-11-08T09:23:42.374478Z] [debug] [pid:2188949] [37mno match: 0.3s, best candidate: need_restart_application-20230810 (0.00)[0m
+[2026-11-08T09:23:43.362483Z] [debug] [pid:2188949] [37mno match: -0.7s, best candidate: need_restart_application-20230810 (0.00)[0m
+[2026-11-08T09:23:43.419565Z] [debug] [pid:2188750] [32m>>> testapi::_check_backend_response: match=Could_not_get_update_details,Could_not_get_updates,need_restart_application timed out after 5 (check_screen)[0m
+[2026-11-08T09:23:43.434746Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,24] tests/update/updates_packagekit_gpk.pm:108 called updates_packagekit_gpk::close_pop_up_windows -> tests/update/updates_packagekit_gpk.pm:46 called testapi::check_screen
+[2026-11-08T09:23:43.435726Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,24] products/opensuse/../../lib/x11test.pm:28 called testapi::assert_screen
+[2026-11-08T09:23:43.435856Z] [debug] [pid:2188750] <<< testapi::assert_screen(mustmatch="generic-desktop", timeout=30)
+[2026-11-08T09:23:44.827202Z] [warn] [pid:2188949] [31m!!! backend::baseclass::check_asserted_screen: check_asserted_screen took 0.57 seconds for 24 candidate needles - make your needles more specific[0m
+[2026-11-08T09:23:44.827319Z] [debug] [pid:2188949] [37mno match: 29.1s, best candidate: application_starts_on_login-generic-desktop-20241025 (0.00)[0m
+[2026-11-08T09:23:45.261948Z] [debug] [pid:2188949] [37mno change: 28.1s[0m
+[2026-11-08T09:23:45.640207Z] [debug] [pid:2188949] [37mno match: 28.1s, best candidate: application_starts_on_login-generic-desktop-20241025 (0.00)[0m
+[2026-11-08T09:23:46.262593Z] [debug] [pid:2188949] [37mno change: 27.1s[0m
+[2026-11-08T09:23:46.654317Z] [debug] [pid:2188949] [37mno match: 27.1s, best candidate: application_starts_on_login-generic-desktop-20241025 (0.00)[0m
+[2026-11-08T09:23:47.263347Z] [debug] [pid:2188949] [37mno change: 26.1s[0m
+[2026-11-08T09:23:47.648297Z] [debug] [pid:2188949] [37mno match: 26.1s, best candidate: application_starts_on_login-generic-desktop-20241025 (0.00)[0m
+[2026-11-08T09:23:48.843273Z] [warn] [pid:2188949] [31m!!! backend::baseclass::check_asserted_screen: check_asserted_screen took 0.58 seconds for 24 candidate needles - make your needles more specific[0m
+[2026-11-08T09:23:48.843376Z] [debug] [pid:2188949] [37mno match: 25.1s, best candidate: application_starts_on_login-generic-desktop-20241025 (0.00)[0m
+[2026-11-08T09:23:49.264297Z] [debug] [pid:2188949] [37mno change: 24.1s[0m
+[2026-11-08T09:23:49.655671Z] [debug] [pid:2188949] [37mno match: 24.1s, best candidate: application_starts_on_login-generic-desktop-20241025 (0.00)[0m
+[2026-11-08T09:23:50.264353Z] [debug] [pid:2188949] [37mno change: 23.1s[0m
+[2026-11-08T09:23:50.658633Z] [debug] [pid:2188949] [37mno match: 23.1s, best candidate: application_starts_on_login-generic-desktop-20241025 (0.00)[0m
+[2026-11-08T09:23:51.265090Z] [debug] [pid:2188949] [37mno change: 22.1s[0m
+[2026-11-08T09:23:51.644563Z] [debug] [pid:2188949] [37mno match: 22.1s, best candidate: application_starts_on_login-generic-desktop-20241025 (0.00)[0m
+[2026-11-08T09:23:52.265778Z] [debug] [pid:2188949] [37mno change: 21.1s[0m
+[2026-11-08T09:23:52.651117Z] [debug] [pid:2188949] [37mno match: 21.1s, best candidate: application_starts_on_login-generic-desktop-20241025 (0.00)[0m
+[2026-11-08T09:23:53.828498Z] [warn] [pid:2188949] [31m!!! backend::baseclass::check_asserted_screen: check_asserted_screen took 0.56 seconds for 24 candidate needles - make your needles more specific[0m
+[2026-11-08T09:23:53.828620Z] [debug] [pid:2188949] [37mno match: 20.1s, best candidate: application_starts_on_login-generic-desktop-20241025 (0.00)[0m
+[2026-11-08T09:23:54.266437Z] [debug] [pid:2188949] [37mno change: 19.1s[0m
+[2026-11-08T09:23:54.649506Z] [debug] [pid:2188949] [37mno match: 19.1s, best candidate: application_starts_on_login-generic-desktop-20241025 (0.00)[0m
+[2026-11-08T09:23:55.267120Z] [debug] [pid:2188949] [37mno change: 18.1s[0m
+[2026-11-08T09:23:55.661976Z] [debug] [pid:2188949] [37mno match: 18.1s, best candidate: application_starts_on_login-generic-desktop-20241025 (0.00)[0m
+[2026-11-08T09:23:56.267743Z] [debug] [pid:2188949] [37mno change: 17.1s[0m
+[2026-11-08T09:23:56.652080Z] [debug] [pid:2188949] [37mno match: 17.1s, best candidate: application_starts_on_login-generic-desktop-20241025 (0.00)[0m
+[2026-11-08T09:23:57.268247Z] [debug] [pid:2188949] [37mno change: 16.1s[0m
+[2026-11-08T09:23:57.650042Z] [debug] [pid:2188949] [37mno match: 16.1s, best candidate: application_starts_on_login-generic-desktop-20241025 (0.00)[0m
+[2026-11-08T09:23:58.824646Z] [warn] [pid:2188949] [31m!!! backend::baseclass::check_asserted_screen: check_asserted_screen took 0.56 seconds for 24 candidate needles - make your needles more specific[0m
+[2026-11-08T09:23:58.824777Z] [debug] [pid:2188949] [37mno match: 15.1s, best candidate: application_starts_on_login-generic-desktop-20241025 (0.00)[0m
+[2026-11-08T09:23:59.269288Z] [debug] [pid:2188949] [37mno change: 14.1s[0m
+[2026-11-08T09:23:59.651695Z] [debug] [pid:2188949] [37mno match: 14.1s, best candidate: application_starts_on_login-generic-desktop-20241025 (0.00)[0m
+[2026-11-08T09:24:00.653580Z] [debug] [pid:2188949] [37mno match: 13.1s, best candidate: application_starts_on_login-generic-desktop-20241025 (0.00)[0m
+[2026-11-08T09:24:01.270641Z] [debug] [pid:2188949] [37mno change: 12.1s[0m
+[2026-11-08T09:24:01.664828Z] [debug] [pid:2188949] [37mno match: 12.1s, best candidate: application_starts_on_login-generic-desktop-20241025 (0.00)[0m
+[2026-11-08T09:24:02.271242Z] [debug] [pid:2188949] [37mno change: 11.1s[0m
+[2026-11-08T09:24:02.671206Z] [debug] [pid:2188949] [37mno match: 11.1s, best candidate: application_starts_on_login-generic-desktop-20241025 (0.00)[0m
+[2026-11-08T09:24:03.835638Z] [warn] [pid:2188949] [31m!!! backend::baseclass::check_asserted_screen: check_asserted_screen took 0.56 seconds for 24 candidate needles - make your needles more specific[0m
+[2026-11-08T09:24:03.835773Z] [debug] [pid:2188949] [37mno match: 10.1s, best candidate: application_starts_on_login-generic-desktop-20241025 (0.00)[0m
+[2026-11-08T09:24:04.272173Z] [debug] [pid:2188949] [37mno change: 9.1s[0m
+[2026-11-08T09:24:04.654747Z] [debug] [pid:2188949] [37mno match: 9.1s, best candidate: application_starts_on_login-generic-desktop-20241025 (0.00)[0m
+[2026-11-08T09:24:05.272387Z] [debug] [pid:2188949] [37mno change: 8.1s[0m
+[2026-11-08T09:24:05.656997Z] [debug] [pid:2188949] [37mno match: 8.1s, best candidate: application_starts_on_login-generic-desktop-20241025 (0.00)[0m
+[2026-11-08T09:24:06.273081Z] [debug] [pid:2188949] [37mno change: 7.1s[0m
+[2026-11-08T09:24:06.663997Z] [debug] [pid:2188949] [37mno match: 7.1s, best candidate: application_starts_on_login-generic-desktop-20241025 (0.00)[0m
+[2026-11-08T09:24:07.273425Z] [debug] [pid:2188949] [37mno change: 6.1s[0m
+[2026-11-08T09:24:07.663114Z] [debug] [pid:2188949] [37mno match: 6.1s, best candidate: application_starts_on_login-generic-desktop-20241025 (0.00)[0m
+[2026-11-08T09:24:08.827610Z] [warn] [pid:2188949] [31m!!! backend::baseclass::check_asserted_screen: check_asserted_screen took 0.55 seconds for 24 candidate needles - make your needles more specific[0m
+[2026-11-08T09:24:08.827715Z] [debug] [pid:2188949] [37mno match: 5.1s, best candidate: application_starts_on_login-generic-desktop-20241025 (0.00)[0m
+[2026-11-08T09:24:09.274641Z] [debug] [pid:2188949] [37mno change: 4.1s[0m
+[2026-11-08T09:24:09.655350Z] [debug] [pid:2188949] [37mno match: 4.1s, best candidate: application_starts_on_login-generic-desktop-20241025 (0.00)[0m
+[2026-11-08T09:24:10.275324Z] [debug] [pid:2188949] [37mno change: 3.1s[0m
+[2026-11-08T09:24:10.648862Z] [debug] [pid:2188949] [37mno match: 3.1s, best candidate: application_starts_on_login-generic-desktop-20241025 (0.00)[0m
+[2026-11-08T09:24:11.276041Z] [debug] [pid:2188949] [37mno change: 2.1s[0m
+[2026-11-08T09:24:11.655933Z] [debug] [pid:2188949] [37mno match: 2.1s, best candidate: application_starts_on_login-generic-desktop-20241025 (0.00)[0m
+[2026-11-08T09:24:12.276973Z] [debug] [pid:2188949] [37mno change: 1.1s[0m
+[2026-11-08T09:24:12.680512Z] [debug] [pid:2188949] [37mno match: 1.1s, best candidate: application_starts_on_login-generic-desktop-20241025 (0.00)[0m
+[2026-11-08T09:24:13.824146Z] [warn] [pid:2188949] [31m!!! backend::baseclass::check_asserted_screen: check_asserted_screen took 0.55 seconds for 24 candidate needles - make your needles more specific[0m
+[2026-11-08T09:24:13.824245Z] [debug] [pid:2188949] [37mno match: 0.1s, best candidate: application_starts_on_login-generic-desktop-20241025 (0.00)[0m
+[2026-11-08T09:24:14.824392Z] [warn] [pid:2188949] [31m!!! backend::baseclass::check_asserted_screen: check_asserted_screen took 0.55 seconds for 24 candidate needles - make your needles more specific[0m
+[2026-11-08T09:24:14.824491Z] [debug] [pid:2188949] [37mno match: -0.9s, best candidate: application_starts_on_login-generic-desktop-20241025 (0.00)[0m
+[2026-11-08T09:24:14.912375Z] [debug] [pid:2188750] [32m>>> testapi::_check_backend_response: match=generic-desktop timed out after 30 (assert_screen)[0m
+[2026-11-08T09:24:14.926386Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,25] products/opensuse/../../lib/x11test.pm:28 called testapi::assert_screen
+[2026-11-08T09:24:14.937731Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,26] products/opensuse/../../lib/x11test.pm:28 called testapi::assert_screen
+[2026-11-08T09:24:14.939338Z] [info] [pid:2188750] [33m::: basetest::_handle_test_exception: # Test died: no candidate needle with tag(s) 'generic-desktop' matched
+  --- # stack trace
+  testapi::assert_screen('generic-desktop') called at products/opensuse/../../lib/x11test.pm line 28
+  [0m
+[2026-11-08T09:24:14.939387Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,26] products/opensuse/../../lib/x11test.pm:28 called testapi::assert_screen
+[2026-11-08T09:24:14.960899Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,28] products/opensuse/../../lib/opensusebasetest.pm:1091 called basetest::run_post_fail -> tests/update/updates_packagekit_gpk.pm:172 called x11test::post_fail_hook -> products/opensuse/../../lib/x11test.pm:33 called serial_terminal::select_serial_terminal -> lib/serial_terminal.pm:408 called testapi::select_console
+[2026-11-08T09:24:14.960991Z] [debug] [pid:2188750] <<< testapi::select_console(testapi_console="root-virtio-terminal")
+[2026-11-08T09:24:14.961546Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,28] products/opensuse/../../lib/opensusebasetest.pm:1091 called basetest::run_post_fail -> tests/update/updates_packagekit_gpk.pm:172 called x11test::post_fail_hook -> products/opensuse/../../lib/x11test.pm:34 called Utils::Logging::export_healthcheck_basic -> products/opensuse/../../lib/Utils/Logging.pm:182 called testapi::script_run
+[2026-11-08T09:24:14.961639Z] [debug] [pid:2188750] <<< testapi::script_run(cmd="health_log_file=\"/tmp/basic_health_check.txt\"", max_interval=250, timeout=30, output="", quiet=undef)
+[2026-11-08T09:24:14.962090Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,28] products/opensuse/../../lib/opensusebasetest.pm:1091 called basetest::run_post_fail -> tests/update/updates_packagekit_gpk.pm:172 called x11test::post_fail_hook -> products/opensuse/../../lib/x11test.pm:34 called Utils::Logging::export_healthcheck_basic -> products/opensuse/../../lib/Utils/Logging.pm:182 called testapi::script_run
+[2026-11-08T09:24:14.962216Z] [debug] [pid:2188750] <<< testapi::wait_serial(no_regex=1, timeout=90, quiet=1, record_output=undef, record_command=undef, expect_not_found=0, capture_name=undef, regexp="# ", buffer_size=undef, internal_marker=0)
+[2026-11-08T09:24:14.962691Z] [debug] [pid:2188949] <<< consoles::serial_screen::read_until(expect_not_found=0, record_command=undef, internal_marker=0, capture_name=undef, regexp="# ", pattern=[
+    "# "
+  ], no_regex=1, record_output=undef, timeout=90, cmd="backend_wait_serial", buffer_size=undef, json_cmd_token="DfcDOFIb", quiet=1)
+[2026-11-08T09:24:14.962778Z] [info] [pid:2188949] [33m::: consoles::serial_screen::read_until: Matched output from SUT in 1 loops & 0.000274075195193291 seconds: # [0m
+[2026-11-08T09:24:14.962947Z] [debug] [pid:2188750] [32m>>> testapi::wait_serial: # : ok[0m
+[2026-11-08T09:24:14.963309Z] [debug] [pid:2188949] <<< consoles::serial_screen::type_string(max_interval=250, cmd="backend_type_string", json_cmd_token="zxkWFHXx", text="_OANM=1; health_log_file=\"/tmp/basic_health_check.txt\"; echo hBshn-\$?-")
+[2026-11-08T09:24:14.963525Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,28] products/opensuse/../../lib/opensusebasetest.pm:1091 called basetest::run_post_fail -> tests/update/updates_packagekit_gpk.pm:172 called x11test::post_fail_hook -> products/opensuse/../../lib/x11test.pm:34 called Utils::Logging::export_healthcheck_basic -> products/opensuse/../../lib/Utils/Logging.pm:182 called testapi::script_run
+[2026-11-08T09:24:14.963653Z] [debug] [pid:2188750] <<< testapi::wait_serial(quiet=1, record_output=undef, timeout=90, no_regex=1, buffer_size=182, internal_marker=1, regexp="_OANM=1; health_log_file=\"/tmp/basic_health_check.txt\"; echo hBshn-\$?-", capture_name=undef, expect_not_found=0, record_command=undef)
+[2026-11-08T09:24:14.964061Z] [debug] [pid:2188949] <<< consoles::serial_screen::read_until(expect_not_found=0, record_command=undef, regexp="_OANM=1; health_log_file=\"/tmp/basic_health_check.txt\"; echo hBshn-\$?-", capture_name=undef, internal_marker=1, no_regex=1, pattern=[
+    "_OANM=1; health_log_file=\"/tmp/basic_health_check.txt\"; echo hBshn-\$?-"
+  ], timeout=90, cmd="backend_wait_serial", record_output=undef, json_cmd_token="dvYkAGdH", buffer_size=182, quiet=1)
+[2026-11-08T09:24:14.967409Z] [info] [pid:2188949] [33m::: consoles::serial_screen::read_until: Matched output from SUT in 3 loops & 0.00340627878904343 seconds: _OANM=1; health_log_file="/tmp/basic_health_check.txt"; echo hBshn-$?-[0m
+[2026-11-08T09:24:14.967932Z] [debug] [pid:2188750] [32m>>> testapi::wait_serial: _OANM=1; health_log_file="/tmp/basic_health_check.txt"; echo hBshn-$?-: ok[0m
+[2026-11-08T09:24:14.968464Z] [debug] [pid:2188949] <<< consoles::serial_screen::type_string(cmd="backend_type_string", json_cmd_token="pCTgUoMQ", text="\n", max_interval=250)
+[2026-11-08T09:24:14.968859Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,28] products/opensuse/../../lib/opensusebasetest.pm:1091 called basetest::run_post_fail -> tests/update/updates_packagekit_gpk.pm:172 called x11test::post_fail_hook -> products/opensuse/../../lib/x11test.pm:34 called Utils::Logging::export_healthcheck_basic -> products/opensuse/../../lib/Utils/Logging.pm:182 called testapi::script_run
+[2026-11-08T09:24:14.969070Z] [debug] [pid:2188750] <<< testapi::wait_serial(buffer_size=undef, internal_marker=1, capture_name="Exit code", regexp=qr/hBshn-(\d+)-/u, record_command="health_log_file=\"/tmp/basic_health_check.txt\"", expect_not_found=0, quiet=undef, record_output=undef, timeout=30, no_regex=0)
+[2026-11-08T09:24:14.969515Z] [debug] [pid:2188949] <<< consoles::serial_screen::read_until(buffer_size=undef, json_cmd_token="ojRKmbQi", quiet=undef, internal_marker=1, capture_name="Exit code", regexp="(?^u:hBshn-(\\d+)-)", record_command="health_log_file=\"/tmp/basic_health_check.txt\"", expect_not_found=0, record_output=undef, cmd="backend_wait_serial", timeout=30, pattern="(?^u:hBshn-(\\d+)-)", no_regex=0)
+[2026-11-08T09:24:14.971655Z] [info] [pid:2188949] [33m::: consoles::serial_screen::read_until: Matched output from SUT in 3 loops & 0.00226696603931487 seconds: hBshn-0-[0m
+[2026-11-08T09:24:14.972023Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,28] products/opensuse/../../lib/opensusebasetest.pm:1091 called basetest::run_post_fail -> tests/update/updates_packagekit_gpk.pm:172 called x11test::post_fail_hook -> products/opensuse/../../lib/x11test.pm:34 called Utils::Logging::export_healthcheck_basic -> products/opensuse/../../lib/Utils/Logging.pm:182 called testapi::script_run
+[2026-11-08T09:24:14.972243Z] [debug] [pid:2188750] [32m>>> testapi::wait_serial: (?^u:hBshn-(\d+)-): ok[0m
+[2026-11-08T09:24:14.972400Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,29] products/opensuse/../../lib/opensusebasetest.pm:1091 called basetest::run_post_fail -> tests/update/updates_packagekit_gpk.pm:172 called x11test::post_fail_hook -> products/opensuse/../../lib/x11test.pm:34 called Utils::Logging::export_healthcheck_basic -> products/opensuse/../../lib/Utils/Logging.pm:182 called testapi::script_run
+[2026-11-08T09:24:14.972500Z] [debug] [pid:2188750] <<< testapi::script_run(cmd="echo -e \"free -h\" > \$health_log_file", max_interval=250, timeout=30, quiet=undef, output="")
+[2026-11-08T09:24:14.972632Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,29] products/opensuse/../../lib/opensusebasetest.pm:1091 called basetest::run_post_fail -> tests/update/updates_packagekit_gpk.pm:172 called x11test::post_fail_hook -> products/opensuse/../../lib/x11test.pm:34 called Utils::Logging::export_healthcheck_basic -> products/opensuse/../../lib/Utils/Logging.pm:182 called testapi::script_run
+[2026-11-08T09:24:14.972761Z] [debug] [pid:2188750] <<< testapi::wait_serial(no_regex=1, timeout=90, quiet=1, record_output=undef, expect_not_found=0, record_command=undef, regexp="# ", capture_name=undef, buffer_size=undef, internal_marker=0)
+[2026-11-08T09:24:14.973159Z] [debug] [pid:2188949] <<< consoles::serial_screen::read_until(quiet=1, buffer_size=undef, json_cmd_token="LHZLEfIa", record_output=undef, timeout=90, cmd="backend_wait_serial", pattern=[
+    "# "
+  ], no_regex=1, internal_marker=0, regexp="# ", capture_name=undef, expect_not_found=0, record_command=undef)
+[2026-11-08T09:24:14.973229Z] [info] [pid:2188949] [33m::: consoles::serial_screen::read_until: Matched output from SUT in 2 loops & 0.000203114002943039 seconds: # [0m
+[2026-11-08T09:24:14.973373Z] [debug] [pid:2188750] [32m>>> testapi::wait_serial: # : ok[0m
+[2026-11-08T09:24:14.973699Z] [debug] [pid:2188949] <<< consoles::serial_screen::type_string(max_interval=250, text="_OANM=1; echo -e \"free -h\" > \$health_log_file; echo P3uHl-\$?-", json_cmd_token="OlCgpiIv", cmd="backend_type_string")
+[2026-11-08T09:24:14.973918Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,29] products/opensuse/../../lib/opensusebasetest.pm:1091 called basetest::run_post_fail -> tests/update/updates_packagekit_gpk.pm:172 called x11test::post_fail_hook -> products/opensuse/../../lib/x11test.pm:34 called Utils::Logging::export_healthcheck_basic -> products/opensuse/../../lib/Utils/Logging.pm:182 called testapi::script_run
+[2026-11-08T09:24:14.974056Z] [debug] [pid:2188750] <<< testapi::wait_serial(record_output=undef, quiet=1, timeout=90, no_regex=1, internal_marker=1, buffer_size=173, regexp="_OANM=1; echo -e \"free -h\" > \$health_log_file; echo P3uHl-\$?-", capture_name=undef, expect_not_found=0, record_command=undef)
+[2026-11-08T09:24:14.974430Z] [debug] [pid:2188949] <<< consoles::serial_screen::read_until(record_command=undef, expect_not_found=0, internal_marker=1, regexp="_OANM=1; echo -e \"free -h\" > \$health_log_file; echo P3uHl-\$?-", capture_name=undef, pattern=[
+    "_OANM=1; echo -e \"free -h\" > \$health_log_file; echo P3uHl-\$?-"
+  ], no_regex=1, record_output=undef, cmd="backend_wait_serial", timeout=90, buffer_size=173, json_cmd_token="vcqVtmVg", quiet=1)
+[2026-11-08T09:24:14.974501Z] [info] [pid:2188949] [33m::: consoles::serial_screen::read_until: Matched output from SUT in 2 loops & 0.000202493974938989 seconds: _OANM=1; echo -e "free -h" > $health_log_file; echo P3uHl-$?-[0m
+[2026-11-08T09:24:14.974637Z] [debug] [pid:2188750] [32m>>> testapi::wait_serial: _OANM=1; echo -e "free -h" > $health_log_file; echo P3uHl-$?-: ok[0m
+[2026-11-08T09:24:14.974904Z] [debug] [pid:2188949] <<< consoles::serial_screen::type_string(max_interval=250, cmd="backend_type_string", text="\n", json_cmd_token="AMWWiQdV")
+[2026-11-08T09:24:14.975181Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,29] products/opensuse/../../lib/opensusebasetest.pm:1091 called basetest::run_post_fail -> tests/update/updates_packagekit_gpk.pm:172 called x11test::post_fail_hook -> products/opensuse/../../lib/x11test.pm:34 called Utils::Logging::export_healthcheck_basic -> products/opensuse/../../lib/Utils/Logging.pm:182 called testapi::script_run
+[2026-11-08T09:24:14.975369Z] [debug] [pid:2188750] <<< testapi::wait_serial(no_regex=0, timeout=30, record_output=undef, quiet=undef, expect_not_found=0, record_command="echo -e \"free -h\" > \$health_log_file", regexp=qr/P3uHl-(\d+)-/u, capture_name="Exit code", internal_marker=1, buffer_size=undef)
+[2026-11-08T09:24:14.975748Z] [debug] [pid:2188949] <<< consoles::serial_screen::read_until(quiet=undef, json_cmd_token="OiElyUkL", buffer_size=undef, no_regex=0, pattern="(?^u:P3uHl-(\\d+)-)", cmd="backend_wait_serial", timeout=30, record_output=undef, expect_not_found=0, record_command="echo -e \"free -h\" > \$health_log_file", regexp="(?^u:P3uHl-(\\d+)-)", capture_name="Exit code", internal_marker=1)
+[2026-11-08T09:24:14.975830Z] [info] [pid:2188949] [33m::: consoles::serial_screen::read_until: Matched output from SUT in 2 loops & 0.000204304000362754 seconds: P3uHl-0-[0m
+[2026-11-08T09:24:14.976124Z] [debug] [pid:2188750] [step:update,updates_packagekit_gpk,29] products/opensuse/../../lib/opensusebasetest.pm:1091 called basetest::run_post_fail -> tests/update/updates_packagekit_gpk.pm:172 called x11test::post_fail_hook -> products/opensuse/../../lib/x11test.pm:34 called Utils::Logging::export_healthcheck_basic -> products/opensuse/../../lib/Utils/Logging.pm:182 called testapi::script_run
+[2026-11-08T09:26:50.253621Z] [debug] [pid:2188750] [1;34m||| finished updates_packagekit_gpk update (runtime: 594 s)[0m
+[2026-11-08T09:26:50.255681Z] [debug] [pid:2188750] [37mscheduled stop of overall test execution after a fatal test failure[0m
+[2026-11-08T09:26:50.287271Z] [debug] [pid:2188750] [37mstopping overall test execution after a fatal test failure[0m
+[2026-11-08T09:26:50.398110Z] [debug] [pid:2188634] [37mdone with autotest process[0m
+[2026-11-08T09:26:50.398420Z] [debug] [pid:2188634] [37misotovideo starting handle_shutdown[0m
+[2026-11-08T09:26:50.398491Z] [debug] [pid:2188634] [37mstopping command server 2188669 because test execution ended[0m
+[2026-11-08T09:26:50.398557Z] [debug] [pid:2188634] [37misotovideo: informing websocket clients before stopping command server: http://127.0.0.1:20403/xxxxxxxxxxxxxxxx/broadcast[0m
+[2026-11-08T09:26:50.411067Z] [debug] [pid:2188634] [37mcommands process exited: 0[0m
+[2026-11-08T09:26:50.511266Z] [debug] [pid:2188634] [37mdone with command server[0m
+[2026-11-08T09:26:50.511670Z] [debug] [pid:2188949] [37mEVENT {"data":{"offset":0,"qom-path":"\/machine\/unattached\/device[4]\/rtc"},"event":"RTC_CHANGE","timestamp":{"microseconds":409676,"seconds":1794129438}}[0m
+[2026-11-08T09:26:50.511854Z] [debug] [pid:2188949] [37mQEMU status is not 'shutdown', it is 'running'[0m
+[2026-11-08T09:26:50.511992Z] [debug] [pid:2188634] [37mbackend shutdown state: 0[0m
+[2026-11-08T09:26:50.512277Z] [info] [pid:2188949] [33m::: OpenQA::Qemu::Proc::save_state: Saving QEMU state to qemu_state.json[0m
+[2026-11-08T09:26:51.598929Z] [debug] [pid:2188949] [37mPassing remaining frames to the video encoder[0m
+[out#0/webm @ 0x557a8cf0c080] video:1649KiB audio:0KiB subtitle:0KiB other streams:0KiB global headers:0KiB muxing overhead: 0.896655%
+frame= 3362 fps=1.8 q=50.0 Lsize=    1664KiB time=00:02:20.04 bitrate=  97.3kbits/s speed=0.0768x    
+[2026-11-08T09:26:51.915152Z] [debug] [pid:2188949] [37mWaiting for video encoder to finalize the video[0m
+[2026-11-08T09:26:51.915232Z] [debug] [pid:2188949] [37mThe external video encoder (pid 2189153) terminated[0m
+[2026-11-08T09:26:51.915275Z] [debug] [pid:2188949] [37mThe built-in video encoder (pid 2189155) terminated[0m
+[2026-11-08T09:26:51.915704Z] [debug] [pid:2188949] [37mQEMU: qemu-system-x86_64: terminating on signal 15 from pid 2188949 (/usr/bin/isotovideo: backend)[0m
+[2026-11-08T09:26:51.916149Z] [debug] [pid:2188949] [37msending magic and exit[0m
+[2026-11-08T09:26:51.916369Z] [debug] [pid:2188634] [37mreceived magic close[0m
+[2026-11-08T09:26:51.954173Z] [debug] [pid:2188634] [37mbackend process exited: 0[0m
+[2026-11-08T09:26:52.054964Z] [debug] [pid:2188634] [37misotovideo completed handle_shutdown: done[0m
+[2026-11-08T09:26:52.055095Z] [debug] [pid:2188634] [37mstopping backend process 2188949[0m
+[2026-11-08T09:26:52.055133Z] [debug] [pid:2188634] [37mdone with backend process[0m
+2188634: EXIT 0
+[2026-11-08T09:26:52.096937Z] [info] Isotovideo exit status: 0
+[2026-11-08T09:26:52.760890Z] [info] +++ worker notes +++
+[2026-11-08T09:26:52.761010Z] [info] End time: 2026-11-08 09:26:52
+[2026-11-08T09:26:52.761066Z] [info] Result: done
+[2026-11-08T09:26:52.763989Z] [info] Uploading logs_from_installation_system-y2logs.tar.bz2
+[2026-11-08T09:26:53.291472Z] [info] Uploading updates_packagekit_gpk-basic_health_check.txt
+[2026-11-08T09:26:53.812074Z] [info] Uploading updates_packagekit_gpk-dmesg.txt
+[2026-11-08T09:26:54.838938Z] [info] Uploading updates_packagekit_gpk-gdm.tar.bz2
+[2026-11-08T09:26:54.877798Z] [info] Uploading updates_packagekit_gpk-journal.txt
+[2026-11-08T09:26:55.518401Z] [info] Uploading updates_packagekit_gpk-loadavg.txt
+[2026-11-08T09:26:56.000099Z] [info] Uploading updates_packagekit_gpk-pk_backend_zypp.tar.bz2
+[2026-11-08T09:26:56.241174Z] [info] Uploading updates_packagekit_gpk-psaxf.txt
+[2026-11-08T09:26:59.008490Z] [info] Uploading updates_packagekit_gpk-sysconfig.tar.gz
+[2026-11-08T09:26:59.279528Z] [info] Uploading video.webm
+[2026-11-08T09:27:00.265280Z] [info] Uploading autoinst-log.txt

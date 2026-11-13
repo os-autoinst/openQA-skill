@@ -1,0 +1,399 @@
+[2026-11-07T17:59:27.274123Z] [info] +++ setup notes +++
+[2026-11-07T17:59:27.274421Z] [info] Running on openqaworker21:5 (Linux 6.12.0-160000.40-default #1 SMP PREEMPT_DYNAMIC Thu Oct 22 09:10:19 UTC 2026 (3fd31e5) x86_64)
+[2026-11-07T17:59:27.278611Z] [debug] Found ASSET_1, caching Tumbleweed.x86_64-1.0-libvirt-Snapshot20261106.vagrant.libvirt.box
+[2026-11-07T17:59:27.280468Z] [info] Downloading Tumbleweed.x86_64-1.0-libvirt-Snapshot20261106.vagrant.libvirt.box, request #1010831 sent to Cache Service
+[2026-11-07T17:59:32.378882Z] [info] Download of Tumbleweed.x86_64-1.0-libvirt-Snapshot20261106.vagrant.libvirt.box processed:
+[info] [#1010832] Cache size of "/var/lib/openqa/cache" is 399 GiB, with limit 400 GiB
+[info] [#1010832] Downloading "Tumbleweed.x86_64-1.0-libvirt-Snapshot20261106.vagrant.libvirt.box" from "https://openqa.opensuse.org/tests/6326697/asset/other/Tumbleweed.x86_64-1.0-libvirt-Snapshot20261106.vagrant.libvirt.box"
+[info] [#1010832] Content of "/var/lib/openqa/cache/openqa.opensuse.org/Tumbleweed.x86_64-1.0-libvirt-Snapshot20261106.vagrant.libvirt.box" has not changed, updating last use
+
+[2026-11-07T17:59:32.380790Z] [debug] Found ASSET_2, caching Tumbleweed.x86_64-1.0-virtualbox-Snapshot20261106.vagrant.virtualbox.box
+[2026-11-07T17:59:32.382716Z] [info] Downloading Tumbleweed.x86_64-1.0-virtualbox-Snapshot20261106.vagrant.virtualbox.box, request #1010838 sent to Cache Service
+[2026-11-07T17:59:37.445839Z] [info] Download of Tumbleweed.x86_64-1.0-virtualbox-Snapshot20261106.vagrant.virtualbox.box processed:
+[info] [#1010838] Cache size of "/var/lib/openqa/cache" is 399 GiB, with limit 400 GiB
+[info] [#1010838] Downloading "Tumbleweed.x86_64-1.0-virtualbox-Snapshot20261106.vagrant.virtualbox.box" from "https://openqa.opensuse.org/tests/6326725/asset/other/Tumbleweed.x86_64-1.0-virtualbox-Snapshot20261106.vagrant.virtualbox.box"
+[info] [#1010838] Content of "/var/lib/openqa/cache/openqa.opensuse.org/Tumbleweed.x86_64-1.0-virtualbox-Snapshot20261106.vagrant.virtualbox.box" has not changed, updating last use
+
+[2026-11-07T17:59:37.447615Z] [debug] Found ASSET_256, caching openSUSE-Tumbleweed-DVD-x86_64-Snapshot20261106-Media.iso.sha256
+[2026-11-07T17:59:37.452457Z] [info] Downloading openSUSE-Tumbleweed-DVD-x86_64-Snapshot20261106-Media.iso.sha256, request #1010845 sent to Cache Service
+[2026-11-07T17:59:42.513427Z] [info] Download of openSUSE-Tumbleweed-DVD-x86_64-Snapshot20261106-Media.iso.sha256 processed:
+[info] [#1010845] Cache size of "/var/lib/openqa/cache" is 399 GiB, with limit 400 GiB
+[info] [#1010845] Downloading "openSUSE-Tumbleweed-DVD-x86_64-Snapshot20261106-Media.iso.sha256" from "https://openqa.opensuse.org/tests/6326725/asset/other/openSUSE-Tumbleweed-DVD-x86_64-Snapshot20261106-Media.iso.sha256"
+[info] [#1010845] Content of "/var/lib/openqa/cache/openqa.opensuse.org/openSUSE-Tumbleweed-DVD-x86_64-Snapshot20261106-Media.iso.sha256" has not changed, updating last use
+
+[2026-11-07T17:59:42.515450Z] [debug] Found HDD_1, caching opensuse-15.2-x86_64-GM-cryptlvm@uefi.qcow2
+[2026-11-07T17:59:42.517384Z] [info] Downloading opensuse-15.2-x86_64-GM-cryptlvm@uefi.qcow2, request #1010852 sent to Cache Service
+[2026-11-07T18:10:21.472691Z] [info] Download of opensuse-15.2-x86_64-GM-cryptlvm@uefi.qcow2 processed:
+[info] [#1010852] Cache size of "/var/lib/openqa/cache" is 399 GiB, with limit 400 GiB
+[info] [#1010852] Downloading "opensuse-15.2-x86_64-GM-cryptlvm@uefi.qcow2" from "https://openqa.opensuse.org/tests/6326725/asset/hdd/opensuse-15.2-x86_64-GM-cryptlvm@uefi.qcow2"
+[info] [#1010852] Cache size 399 GiB + needed 6.3 GiB exceeds limit of 400 GiB, purging least used assets
+[info] [#1010852] Purging "/var/lib/openqa/cache/openqa.opensuse.org/opensuse-Tumbleweed-x86_64-20261103-textmode@uefi-uefi-vars.qcow2" because we need space for new assets, reclaiming 332 KiB
+[info] [#1010852] Purging "/var/lib/openqa/cache/openqa.opensuse.org/autounattend_UEFI.raw" because we need space for new assets, reclaiming 16 MiB
+[info] [#1010852] Purging "/var/lib/openqa/cache/openqa.opensuse.org/TW-Staging:I-offline-installer-x86_64-Build13.2.install.iso.sha512" because we need space for new assets, reclaiming 180 Byte
+[info] [#1010852] Purging "/var/lib/openqa/cache/openqa.opensuse.org/openSUSE-Staging:I-MicroOS.x86_64-16.0.0-ContainerHost-kvm-and-xen-Build105.4.qcow2.sha256" because we need space for new assets, reclaiming 140 Byte
+[info] [#1010852] Purging "/var/lib/openqa/cache/openqa.opensuse.org/openSUSE-Staging:I-MicroOS-DVD-x86_64-Build761.4-Media.iso.sha256" because we need space for new assets, reclaiming 115 Byte
+[info] [#1010852] Purging "/var/lib/openqa/cache/openqa.opensuse.org/openSUSE-Staging:I-MicroOS.x86_64-16.0.0-ContainerHost-kvm-and-xen-Build105.4.qcow2" because we need space for new assets, reclaiming 558 MiB
+[info] [#1010852] Purging "/var/lib/openqa/cache/openqa.opensuse.org/openSUSE-Staging:I-MicroOS-DVD-x86_64-Build761.4-Media.iso" because we need space for new assets, reclaiming 2.7 GiB
+[info] [#1010852] Purging "/var/lib/openqa/cache/openqa.opensuse.org/TW-Staging:I-offline-installer-x86_64-Build13.2.install.iso" because we need space for new assets, reclaiming 4.1 GiB
+[info] [#1010852] Size of "/var/lib/openqa/cache/openqa.opensuse.org/opensuse-15.2-x86_64-GM-cryptlvm@uefi.qcow2" is 6.3 GiB, with ETag ""607fc406-1904e0000""
+[info] [#1010852] Download of "/var/lib/openqa/cache/openqa.opensuse.org/opensuse-15.2-x86_64-GM-cryptlvm@uefi.qcow2" successful (10 MiB/s), new cache size is 398 GiB
+
+[2026-11-07T18:10:21.477591Z] [debug] Found ISO, caching openSUSE-Tumbleweed-DVD-x86_64-Snapshot20261106-Media.iso
+[2026-11-07T18:10:21.481712Z] [info] Downloading openSUSE-Tumbleweed-DVD-x86_64-Snapshot20261106-Media.iso, request #1010907 sent to Cache Service
+[2026-11-07T18:10:31.603714Z] [info] Download of openSUSE-Tumbleweed-DVD-x86_64-Snapshot20261106-Media.iso processed:
+[info] [#1010907] Cache size of "/var/lib/openqa/cache" is 398 GiB, with limit 400 GiB
+[info] [#1010907] Downloading "openSUSE-Tumbleweed-DVD-x86_64-Snapshot20261106-Media.iso" from "https://openqa.opensuse.org/tests/6326725/asset/iso/openSUSE-Tumbleweed-DVD-x86_64-Snapshot20261106-Media.iso"
+[info] [#1010907] Content of "/var/lib/openqa/cache/openqa.opensuse.org/openSUSE-Tumbleweed-DVD-x86_64-Snapshot20261106-Media.iso" has not changed, updating last use
+
+[2026-11-07T18:10:31.645501Z] [info] Rsync from 'rsync://openqa.opensuse.org/tests' to '/var/lib/openqa/cache/openqa.opensuse.org', request #1010908 sent to Cache Service
+[2026-11-07T18:10:36.721687Z] [info] Output of rsync:
+[info] [#1010908] Calling: rsync -avHP --timeout 1800 rsync://openqa.opensuse.org/tests/ --delete /var/lib/openqa/cache/openqa.opensuse.org/tests/
+Try 1:
+STDOUT:
+receiving incremental file list
+opensuse/.git/
+opensuse/.git/index
+              0   0%    0.00kB/s    0:00:00          803,690 100%  127.74MB/s    0:00:00 (xfr#1, ir-chk=1015/16832)
+opensuse/products/opensuse/needles/.git/
+opensuse/products/opensuse/needles/.git/index
+              0   0%    0.00kB/s    0:00:00        1,383,599 100%    8.46MB/s    0:00:00 (xfr#2, ir-chk=1014/36193)
+
+sent 18,633 bytes  received 4,318,489 bytes  2,891,414.67 bytes/sec
+total size is 8,202,535,263  speedup is 1,891.24
+
+STDERR:
+
+
+[2026-11-07T18:10:36.721788Z] [info] Finished to rsync tests
+[2026-11-07T18:10:36.725790Z] [debug] +++ worker notes +++
+[2026-11-07T18:10:37.192288Z] [debug] [pid:567099] [37mCurrent version is 5.1793797288.07b5ebe [interface v60][0m
+[2026-11-07T18:10:37.204452Z] [debug] [pid:567099] [37mgit hash in 'opensuse': 8be0067f75b240ab9c4f599864b4e8c834d339b0[0m
+[2026-11-07T18:10:37.553182Z] [debug] [pid:567099] [37mgit url in 'opensuse': "https://github.com/os-autoinst/os-autoinst-distri-opensuse.git"[0m
+[2026-11-07T18:10:37.553353Z] [debug] [pid:567099] [37mTEST_GIT_HASH=8be0067f75b240ab9c4f599864b4e8c834d339b0 TEST_GIT_URL=https://github.com/os-autoinst/os-autoinst-distri-opensuse.git[0m
+[2026-11-07T18:10:37.927685Z] [debug] [pid:567099] [37musingenv DESKTOP=gnome[0m
+[2026-11-07T18:10:37.927794Z] [debug] [pid:567099] [37musingenv LVM=1[0m
+[2026-11-07T18:10:37.927830Z] [debug] [pid:567099] [37musingenv UPGRADE=1[0m
+[2026-11-07T18:10:37.927871Z] [debug] [pid:567099] [37musingenv DISTRI=opensuse[0m
+[2026-11-07T18:10:37.927898Z] [debug] [pid:567099] [37musingenv QEMUCPU=host[0m
+[2026-11-07T18:10:37.927925Z] [debug] [pid:567099] [37musingenv ENCRYPT=1[0m
+[2026-11-07T18:10:37.927954Z] [debug] [pid:567099] [37musingenv INSTLANG=en_US[0m
+[2026-11-07T18:10:37.927982Z] [debug] [pid:567099] [37musingenv QEMUVGA=virtio[0m
+[2026-11-07T18:10:37.928010Z] [debug] [pid:567099] [37musingenv UEFI=1[0m
+[2026-11-07T18:10:37.928033Z] [debug] [pid:567099] [37musingenv DVD=1[0m
+[2026-11-07T18:10:37.928056Z] [debug] [pid:567099] [37musingenv GNOME=1[0m
+[2026-11-07T18:10:37.928081Z] [debug] [pid:567099] [37musingenv ISO=openSUSE-Tumbleweed-DVD-x86_64-Snapshot20261106-Media.iso[0m
+[2026-11-07T18:10:37.928105Z] [debug] [pid:567099] [37musingenv ISO_MAXSIZE=4700372992[0m
+[2026-11-07T18:10:37.929241Z] [debug] [pid:567099] [37mscheduling isosize tests/installation/isosize.pm[0m
+[2026-11-07T18:10:37.931061Z] [debug] [pid:567099] [37mscheduling bootloader_uefi tests/installation/bootloader_uefi.pm[0m
+[2026-11-07T18:10:37.934563Z] [debug] [pid:567099] [37mscheduling welcome tests/installation/welcome.pm[0m
+[2026-11-07T18:10:37.935503Z] [debug] [pid:567099] [37mscheduling upgrade_select tests/installation/upgrade_select.pm[0m
+[2026-11-07T18:10:37.936408Z] [debug] [pid:567099] [37mscheduling online_repos tests/installation/online_repos.pm[0m
+[2026-11-07T18:10:37.937115Z] [debug] [pid:567099] [37mscheduling resolve_dependency_issues tests/installation/resolve_dependency_issues.pm[0m
+[2026-11-07T18:10:37.938478Z] [debug] [pid:567099] [37mscheduling installation_overview tests/installation/installation_overview.pm[0m
+[2026-11-07T18:10:37.939423Z] [debug] [pid:567099] [37mscheduling configure_bls tests/installation/configure_bls.pm[0m
+[2026-11-07T18:10:37.940406Z] [debug] [pid:567099] [37mscheduling disable_grub_timeout tests/installation/disable_grub_timeout.pm[0m
+[2026-11-07T18:10:37.941480Z] [debug] [pid:567099] [37mscheduling start_install tests/installation/start_install.pm[0m
+[2026-11-07T18:10:37.943070Z] [debug] [pid:567099] [37mscheduling await_install tests/installation/await_install.pm[0m
+[2026-11-07T18:10:37.944182Z] [debug] [pid:567099] [37mscheduling logs_from_installation_system tests/installation/logs_from_installation_system.pm[0m
+[2026-11-07T18:10:37.945186Z] [debug] [pid:567099] [37mscheduling reboot_after_installation tests/installation/reboot_after_installation.pm[0m
+[2026-11-07T18:10:37.946489Z] [debug] [pid:567099] [37mscheduling grub_test tests/installation/grub_test.pm[0m
+[2026-11-07T18:10:37.947055Z] [debug] [pid:567099] [37mscheduling boot_encrypt tests/installation/boot_encrypt.pm[0m
+[2026-11-07T18:10:37.948088Z] [debug] [pid:567099] [37mscheduling first_boot tests/installation/first_boot.pm[0m
+[2026-11-07T18:10:37.948965Z] [debug] [pid:567099] [37mscheduling opensuse_welcome tests/installation/opensuse_welcome.pm[0m
+[2026-11-07T18:10:37.954966Z] [debug] [pid:567099] [37mscheduling system_prepare tests/console/system_prepare.pm[0m
+[2026-11-07T18:10:37.955824Z] [debug] [pid:567099] [37mscheduling zypper_clear_repos tests/update/zypper_clear_repos.pm[0m
+[2026-11-07T18:10:37.956573Z] [debug] [pid:567099] [37mscheduling zypper_ar tests/console/zypper_ar.pm[0m
+[2026-11-07T18:10:37.957191Z] [debug] [pid:567099] [37mscheduling zypper_ref tests/console/zypper_ref.pm[0m
+[2026-11-07T18:10:37.958009Z] [debug] [pid:567099] [37mscheduling prepare_system_for_update_tests tests/update/prepare_system_for_update_tests.pm[0m
+[2026-11-07T18:10:37.959296Z] [debug] [pid:567099] [37mscheduling updates_packagekit_gpk tests/update/updates_packagekit_gpk.pm[0m
+[2026-11-07T18:10:37.959918Z] [debug] [pid:567099] [37mscheduling check_system_is_updated tests/update/check_system_is_updated.pm[0m
+[2026-11-07T18:10:37.960622Z] [debug] [pid:567099] [37mscheduling check_network tests/console/check_network.pm[0m
+[2026-11-07T18:10:37.961369Z] [debug] [pid:567099] [37mscheduling system_state tests/console/system_state.pm[0m
+[2026-11-07T18:10:37.962104Z] [debug] [pid:567099] [37mscheduling prepare_test_data tests/console/prepare_test_data.pm[0m
+[2026-11-07T18:10:37.962919Z] [debug] [pid:567099] [37mscheduling consoletest_setup tests/console/consoletest_setup.pm[0m
+[2026-11-07T18:10:37.964061Z] [debug] [pid:567099] [37mscheduling keymap_or_locale tests/locale/keymap_or_locale.pm[0m
+[2026-11-07T18:10:37.964870Z] [debug] [pid:567099] [37mscheduling force_scheduled_tasks tests/console/force_scheduled_tasks.pm[0m
+[2026-11-07T18:10:37.965472Z] [debug] [pid:567099] [37mscheduling textinfo tests/console/textinfo.pm[0m
+[2026-11-07T18:10:37.966223Z] [debug] [pid:567099] [37mscheduling hostname tests/console/hostname.pm[0m
+[2026-11-07T18:10:37.967108Z] [debug] [pid:567099] [37mscheduling opensuse_repos tests/console/opensuse_repos.pm[0m
+[2026-11-07T18:10:37.967698Z] [debug] [pid:567099] [37mscheduling zypper_lr tests/console/zypper_lr.pm[0m
+[2026-11-07T18:10:37.968668Z] [debug] [pid:567099] [37mscheduling zypper_in tests/console/zypper_in.pm[0m
+[2026-11-07T18:10:37.969477Z] [debug] [pid:567099] [37mscheduling zypper_log tests/console/zypper_log.pm[0m
+[2026-11-07T18:10:37.970082Z] [debug] [pid:567099] [37mscheduling systemd_wo_udev tests/console/systemd_wo_udev.pm[0m
+[2026-11-07T18:10:37.972409Z] [debug] [pid:567099] [37mscheduling yast2_lan tests/console/yast2_lan.pm[0m
+[2026-11-07T18:10:37.973212Z] [debug] [pid:567099] [37mscheduling curl_https tests/console/curl_https.pm[0m
+[2026-11-07T18:10:37.974910Z] [debug] [pid:567099] [37mscheduling salt_agnostic tests/console/oqa_agnostic/salt_agnostic.pm[0m
+[2026-11-07T18:10:37.975657Z] [debug] [pid:567099] [37mscheduling glibc_sanity tests/console/glibc_sanity.pm[0m
+[2026-11-07T18:10:37.976366Z] [debug] [pid:567099] [37mscheduling glibc_tunables tests/console/glibc_tunables.pm[0m
+[2026-11-07T18:10:37.977668Z] [debug] [pid:567099] [37mscheduling yast2_i tests/console/yast2_i.pm[0m
+[2026-11-07T18:10:37.978517Z] [debug] [pid:567099] [37mscheduling yast2_bootloader tests/console/yast2_bootloader.pm[0m
+[2026-11-07T18:10:37.979155Z] [debug] [pid:567099] [37mscheduling vim tests/console/vim.pm[0m
+[2026-11-07T18:10:37.979937Z] [debug] [pid:567099] [37mscheduling firewall_enabled tests/console/firewall_enabled.pm[0m
+[2026-11-07T18:10:37.982820Z] [debug] [pid:567099] [37mscheduling sshd tests/console/sshd.pm[0m
+[2026-11-07T18:10:37.983425Z] [debug] [pid:567099] [37mscheduling ssh_cleanup tests/console/ssh_cleanup.pm[0m
+[2026-11-07T18:10:37.984150Z] [debug] [pid:567099] [37mscheduling sshfs tests/console/sshfs.pm[0m
+[2026-11-07T18:10:37.984713Z] [debug] [pid:567099] [37mscheduling mtab tests/console/mtab.pm[0m
+[2026-11-07T18:10:37.986046Z] [debug] [pid:567099] [37mscheduling nginx tests/console/nginx.pm[0m
+[2026-11-07T18:10:37.986923Z] [debug] [pid:567099] [37mscheduling orphaned_packages_check tests/console/orphaned_packages_check.pm[0m
+[2026-11-07T18:10:37.987875Z] [debug] [pid:567099] [37mscheduling consoletest_finish tests/console/consoletest_finish.pm[0m
+[2026-11-07T18:10:37.988472Z] [debug] [pid:567099] [37mscheduling user_gui_login tests/x11/user_gui_login.pm[0m
+[2026-11-07T18:10:37.989021Z] [debug] [pid:567099] [37mscheduling desktop_runner tests/x11/desktop_runner.pm[0m
+[2026-11-07T18:10:37.989587Z] [debug] [pid:567099] [37mscheduling xterm tests/x11/xterm.pm[0m
+[2026-11-07T18:10:37.990187Z] [debug] [pid:567099] [37mscheduling keymap_or_locale_x11 tests/locale/keymap_or_locale_x11.pm[0m
+[2026-11-07T18:10:37.990802Z] [debug] [pid:567099] [37mscheduling ssh_default_term tests/x11/ssh_default_term.pm[0m
+[2026-11-07T18:10:37.991447Z] [debug] [pid:567099] [37mscheduling gnome_control_center tests/x11/gnome_control_center.pm[0m
+[2026-11-07T18:10:37.992005Z] [debug] [pid:567099] [37mscheduling gnome_tweak_tool tests/x11/gnome_tweak_tool.pm[0m
+[2026-11-07T18:10:37.992583Z] [debug] [pid:567099] [37mscheduling gnome_console tests/x11/gnome_console.pm[0m
+[2026-11-07T18:10:37.993145Z] [debug] [pid:567099] [37mscheduling gedit tests/x11/gedit.pm[0m
+[2026-11-07T18:10:37.993903Z] [debug] [pid:567099] [37mscheduling firefox tests/x11/firefox.pm[0m
+[2026-11-07T18:10:37.994584Z] [debug] [pid:567099] [37mscheduling firefox_audio tests/x11/firefox_audio.pm[0m
+[2026-11-07T18:10:37.995423Z] [debug] [pid:567099] [37mscheduling chromium tests/x11/chromium.pm[0m
+[2026-11-07T18:10:37.996173Z] [debug] [pid:567099] [37mscheduling graphicsMagick tests/x11/graphicsMagick.pm[0m
+[2026-11-07T18:10:37.996788Z] [debug] [pid:567099] [37mscheduling ooffice tests/x11/ooffice.pm[0m
+[2026-11-07T18:10:37.997435Z] [debug] [pid:567099] [37mscheduling oomath tests/x11/oomath.pm[0m
+[2026-11-07T18:10:37.998004Z] [debug] [pid:567099] [37mscheduling oocalc tests/x11/oocalc.pm[0m
+[2026-11-07T18:10:37.998570Z] [debug] [pid:567099] [37mscheduling glxgears tests/x11/glxgears.pm[0m
+[2026-11-07T18:10:37.999101Z] [debug] [pid:567099] [37mscheduling nautilus tests/x11/nautilus.pm[0m
+[2026-11-07T18:10:37.999776Z] [debug] [pid:567099] [37mscheduling gnome_music tests/x11/gnome_music.pm[0m
+[2026-11-07T18:10:38.000454Z] [debug] [pid:567099] [37mscheduling evolution tests/x11/evolution.pm[0m
+[2026-11-07T18:10:38.001145Z] [debug] [pid:567099] [37mscheduling desktop_mainmenu tests/x11/desktop_mainmenu.pm[0m
+[2026-11-07T18:10:38.001737Z] [debug] [pid:567099] [37mscheduling inkscape tests/x11/inkscape.pm[0m
+[2026-11-07T18:10:38.002285Z] [debug] [pid:567099] [37mscheduling gimp tests/x11/gimp.pm[0m
+[2026-11-07T18:10:38.002912Z] [debug] [pid:567099] [37mscheduling vlc tests/x11/vlc.pm[0m
+[2026-11-07T18:10:38.003560Z] [debug] [pid:567099] [37mscheduling reboot_gnome tests/x11/reboot_gnome.pm[0m
+[2026-11-07T18:10:38.004452Z] [debug] [pid:567099] [37mscheduling zypper_log_packages tests/console/zypper_log_packages.pm[0m
+[2026-11-07T18:10:38.005219Z] [debug] [pid:567099] [37mscheduling shutdown tests/shutdown/shutdown.pm[0m
+[2026-11-07T18:10:38.011788Z] [info] [pid:567155] cmdsrv: daemon reachable under http://*:20053/xxxxxxxxxxxxxxxx/
+[2026-11-07T18:10:38.013147Z] [info] [pid:567155] Listening at "http://[::]:20053"
+Web application available at http://[::]:20053
+[2026-11-07T18:10:38.015396Z] [debug] [pid:567099] [37mgit hash in 'opensuse/products/opensuse/needles': d0351a079a9fd47394e5aafd4e2101460ee6d558[0m
+[2026-11-07T18:10:40.393014Z] [debug] [pid:567099] [37mgit url in 'opensuse/products/opensuse/needles': "git@github.com:os-autoinst/os-autoinst-needles-opensuse.git"[0m
+[2026-11-07T18:10:40.393178Z] [debug] [pid:567099] [37minit needles from opensuse/products/opensuse/needles[0m
+[2026-11-07T18:10:40.993655Z] [debug] [pid:567099] [37mloaded 6263 needles[0m
+[2026-11-07T18:10:41.122117Z] [debug] [pid:567099] [37m567099: channel_out 15, channel_in 14[0m
+[2026-11-07T18:10:41.174982Z] [debug] [pid:567443] [37m567443: cmdpipe 13, rsppipe 16[0m
+[2026-11-07T18:10:41.175485Z] [debug] [pid:567443] [37mstarted mgmt loop with pid 567443[0m
+[2026-11-07T18:10:41.269181Z] [debug] [pid:567443] [37mLaunching external video encoder: ffmpeg -y -hide_banner -nostats -r 24 -f image2pipe -vcodec ppm -i - -pix_fmt yuv420p -c:v libsvtav1 -crf 50 -preset 7 -b:v 0 'video.webm'[0m
+[2026-11-07T18:10:41.348927Z] [debug] [pid:567443] [37mqemu version detected: 10.0.13[0m
+[2026-11-07T18:10:41.349384Z] [warn] [pid:567443] [31m!!! backend::qemu::_set_graphics_backend: QEMUVGA is deprecated, please set QEMU_VIDEO_DEVICE[0m
+[2026-11-07T18:10:41.351107Z] [debug] [pid:567443] [37mrunning `/usr/bin/chattr +C /var/lib/openqa/pool/5/raid`[0m
+[2026-11-07T18:10:41.360971Z] [debug] [pid:567443] [37mCommand `/usr/bin/chattr +C /var/lib/openqa/pool/5/raid` terminated with 1
+  /usr/bin/chattr: Operation not supported while setting flags on /var/lib/openqa/pool/5/raid[0m
+[2026-11-07T18:10:41.361066Z] [debug] [pid:567443] [37mConfiguring storage controllers and block devices[0m
+[2026-11-07T18:10:41.361565Z] [debug] [pid:567443] [37mrunning `/usr/bin/qemu-img info --output=json /var/lib/openqa/pool/5/opensuse-15.2-x86_64-GM-cryptlvm@uefi.qcow2`[0m
+[2026-11-07T18:10:41.401809Z] [debug] [pid:567443] [37mrunning `/usr/bin/qemu-img info --output=json /var/lib/openqa/pool/5/openSUSE-Tumbleweed-DVD-x86_64-Snapshot20261106-Media.iso`[0m
+[2026-11-07T18:10:41.441156Z] [debug] [pid:567443] [37mrunning `/usr/bin/qemu-img info --output=json /usr/share/qemu/ovmf-x86_64-ms-4m-code.bin`[0m
+[2026-11-07T18:10:41.501591Z] [debug] [pid:567443] [37mrunning `/usr/bin/qemu-img info --output=json /usr/share/qemu/ovmf-x86_64-ms-4m-vars.bin`[0m
+[2026-11-07T18:10:41.541377Z] [debug] [pid:567443] [37mInitializing block device images[0m
+[2026-11-07T18:10:41.541648Z] [debug] [pid:567443] [37mrunning `/usr/bin/qemu-img create -f qcow2 -F qcow2 -b /var/lib/openqa/pool/5/opensuse-15.2-x86_64-GM-cryptlvm@uefi.qcow2 /var/lib/openqa/pool/5/raid/hd0-overlay0 42949672960`[0m
+[2026-11-07T18:10:41.581989Z] [debug] [pid:567443] [37mFormatting '/var/lib/openqa/pool/5/raid/hd0-overlay0', fmt=qcow2 cluster_size=65536 extended_l2=off compression_type=zlib size=42949672960 backing_file=/var/lib/openqa/pool/5/opensuse-15.2-x86_64-GM-cryptlvm@uefi.qcow2 backing_fmt=qcow2 lazy_refcounts=off refcount_bits=16[0m
+[2026-11-07T18:10:41.582098Z] [debug] [pid:567443] [37mrunning `/usr/bin/qemu-img create -f qcow2 -F raw -b /var/lib/openqa/pool/5/openSUSE-Tumbleweed-DVD-x86_64-Snapshot20261106-Media.iso /var/lib/openqa/pool/5/raid/cd0-overlay0 4650434560`[0m
+[2026-11-07T18:10:41.620056Z] [debug] [pid:567443] [37mFormatting '/var/lib/openqa/pool/5/raid/cd0-overlay0', fmt=qcow2 cluster_size=65536 extended_l2=off compression_type=zlib size=4650434560 backing_file=/var/lib/openqa/pool/5/openSUSE-Tumbleweed-DVD-x86_64-Snapshot20261106-Media.iso backing_fmt=raw lazy_refcounts=off refcount_bits=16[0m
+[2026-11-07T18:10:41.620183Z] [debug] [pid:567443] [37mrunning `/usr/bin/qemu-img create -f qcow2 -F raw -b /usr/share/qemu/ovmf-x86_64-ms-4m-code.bin /var/lib/openqa/pool/5/raid/pflash-code-overlay0 3653632`[0m
+[2026-11-07T18:10:41.657903Z] [debug] [pid:567443] [37mFormatting '/var/lib/openqa/pool/5/raid/pflash-code-overlay0', fmt=qcow2 cluster_size=65536 extended_l2=off compression_type=zlib size=3653632 backing_file=/usr/share/qemu/ovmf-x86_64-ms-4m-code.bin backing_fmt=raw lazy_refcounts=off refcount_bits=16[0m
+[2026-11-07T18:10:41.658012Z] [debug] [pid:567443] [37mrunning `/usr/bin/qemu-img create -f qcow2 -F raw -b /usr/share/qemu/ovmf-x86_64-ms-4m-vars.bin /var/lib/openqa/pool/5/raid/pflash-vars-overlay0 540672`[0m
+[2026-11-07T18:10:41.712859Z] [debug] [pid:567443] [37mFormatting '/var/lib/openqa/pool/5/raid/pflash-vars-overlay0', fmt=qcow2 cluster_size=65536 extended_l2=off compression_type=zlib size=540672 backing_file=/usr/share/qemu/ovmf-x86_64-ms-4m-vars.bin backing_fmt=raw lazy_refcounts=off refcount_bits=16[0m
+[2026-11-07T18:10:41.712966Z] [debug] [pid:567443] [37minit_blockdev_images: Finished creating block devices[0m
+[2026-11-07T18:10:41.714060Z] [debug] [pid:567443] [37mstarting: /usr/bin/qemu-system-x86_64 -device virtio-vga,edid=on,xres=1024,yres=768 -only-migratable -chardev ringbuf,id=serial0,logfile=serial0,logappend=on -serial chardev:serial0 -audiodev none,id=snd0 -device intel-hda -device hda-output,audiodev=snd0 -global isa-fdc.fdtypeA=none -m 2048 -cpu host -netdev user,id=qanet0 -device virtio-net,netdev=qanet0,mac=52:54:00:12:34:56 -device qemu-xhci -device usb-tablet -smp 1 -enable-kvm -no-shutdown -vnc :95,share=force-shared -device virtio-serial -chardev pipe,id=virtio_console,path=virtio_console,logfile=virtio_console.log,logappend=on -device virtconsole,chardev=virtio_console,name=org.openqa.console.virtio_console -chardev pipe,id=virtio_console_user,path=virtio_console_user,logfile=virtio_console_user.log,logappend=on -device virtconsole,chardev=virtio_console_user,name=org.openqa.console.virtio_console_user -chardev socket,path=qmp_socket,server=on,wait=off,id=qmp_socket,logfile=qmp_socket.log,logappend=on -qmp chardev:qmp_socket -S -device virtio-scsi-pci,id=scsi0 -blockdev driver=file,node-name=hd0-overlay0-file,filename=/var/lib/openqa/pool/5/raid/hd0-overlay0,cache.no-flush=on -blockdev driver=qcow2,node-name=hd0-overlay0,file=hd0-overlay0-file,cache.no-flush=on,discard=unmap -device virtio-blk,id=hd0-device,drive=hd0-overlay0,serial=hd0 -blockdev driver=file,node-name=cd0-overlay0-file,filename=/var/lib/openqa/pool/5/raid/cd0-overlay0,cache.no-flush=on -blockdev driver=qcow2,node-name=cd0-overlay0,file=cd0-overlay0-file,cache.no-flush=on,discard=unmap -device scsi-cd,id=cd0-device,drive=cd0-overlay0,serial=cd0 -drive id=pflash-code-overlay0,if=pflash,file=/var/lib/openqa/pool/5/raid/pflash-code-overlay0,unit=0,readonly=on -drive id=pflash-vars-overlay0,if=pflash,file=/var/lib/openqa/pool/5/raid/pflash-vars-overlay0,unit=1[0m
+[2026-11-07T18:10:41.719916Z] [debug] [pid:567443] [37mWaiting for 0 attempts[0m
+[2026-11-07T18:10:42.720468Z] [debug] [pid:567443] [37mWaiting for 1 attempts[0m
+[2026-11-07T18:10:43.720841Z] [debug] [pid:567443] [37mFinished after 2 attempts[0m
+[2026-11-07T18:10:43.799152Z] [debug] [pid:567245] [1;34m||| starting isosize tests/installation/isosize.pm[0m
+[2026-11-07T18:10:43.801885Z] [debug] [pid:567245] [1;34m||| finished isosize installation (runtime: 0 s)[0m
+[2026-11-07T18:10:43.802734Z] [debug] [pid:567245] [1;34m||| starting bootloader_uefi tests/installation/bootloader_uefi.pm[0m
+[2026-11-07T18:12:58.126534Z] [debug] [pid:567245] [1;34m||| finished bootloader_uefi installation (runtime: 135 s)[0m
+[2026-11-07T18:12:58.127785Z] [debug] [pid:567245] [1;34m||| starting welcome tests/installation/welcome.pm[0m
+[2026-11-07T18:14:18.475315Z] [debug] [pid:567245] [1;34m||| finished welcome installation (runtime: 80 s)[0m
+[2026-11-07T18:14:18.476749Z] [debug] [pid:567245] [1;34m||| starting upgrade_select tests/installation/upgrade_select.pm[0m
+[2026-11-07T18:14:42.558726Z] [debug] [pid:567245] [1;34m||| finished upgrade_select installation (runtime: 24 s)[0m
+[2026-11-07T18:14:42.559757Z] [debug] [pid:567245] [1;34m||| starting online_repos tests/installation/online_repos.pm[0m
+[2026-11-07T18:14:44.492923Z] [debug] [pid:567245] [1;34m||| finished online_repos installation (runtime: 2 s)[0m
+[2026-11-07T18:14:44.493992Z] [debug] [pid:567245] [1;34m||| starting resolve_dependency_issues tests/installation/resolve_dependency_issues.pm[0m
+[2026-11-07T18:14:48.157044Z] [debug] [pid:567245] [1;34m||| finished resolve_dependency_issues installation (runtime: 4 s)[0m
+[2026-11-07T18:14:48.158086Z] [debug] [pid:567245] [1;34m||| starting installation_overview tests/installation/installation_overview.pm[0m
+[2026-11-07T18:14:49.182094Z] [debug] [pid:567245] [1;34m||| finished installation_overview installation (runtime: 1 s)[0m
+[2026-11-07T18:14:49.183221Z] [debug] [pid:567245] [1;34m||| starting configure_bls tests/installation/configure_bls.pm[0m
+[2026-11-07T18:15:42.698976Z] [debug] [pid:567245] [1;34m||| finished configure_bls installation (runtime: 53 s)[0m
+[2026-11-07T18:15:42.701227Z] [debug] [pid:567245] [1;34m||| starting disable_grub_timeout tests/installation/disable_grub_timeout.pm[0m
+[2026-11-07T18:16:56.939192Z] [debug] [pid:567245] [1;34m||| finished disable_grub_timeout installation (runtime: 74 s)[0m
+[2026-11-07T18:16:56.941365Z] [debug] [pid:567245] [1;34m||| starting start_install tests/installation/start_install.pm[0m
+[2026-11-07T18:17:06.916225Z] [debug] [pid:567245] [1;34m||| finished start_install installation (runtime: 10 s)[0m
+[2026-11-07T18:17:06.917191Z] [debug] [pid:567245] [1;34m||| starting await_install tests/installation/await_install.pm[0m
+[2026-11-07T18:28:24.700220Z] [debug] [pid:567245] [1;34m||| finished await_install installation (runtime: 678 s)[0m
+[2026-11-07T18:28:24.702452Z] [debug] [pid:567245] [1;34m||| starting logs_from_installation_system tests/installation/logs_from_installation_system.pm[0m
+[2026-11-07T18:29:26.468364Z] [debug] [pid:567245] [1;34m||| finished logs_from_installation_system installation (runtime: 62 s)[0m
+[2026-11-07T18:29:26.469781Z] [debug] [pid:567245] [1;34m||| starting reboot_after_installation tests/installation/reboot_after_installation.pm[0m
+[2026-11-07T18:29:27.884478Z] [debug] [pid:567245] [1;34m||| finished reboot_after_installation installation (runtime: 1 s)[0m
+[2026-11-07T18:29:27.885423Z] [debug] [pid:567245] [1;34m||| starting grub_test tests/installation/grub_test.pm[0m
+[2026-11-07T18:30:06.327040Z] [debug] [pid:567245] [1;34m||| finished grub_test installation (runtime: 39 s)[0m
+[2026-11-07T18:30:06.328119Z] [debug] [pid:567245] [1;34m||| starting boot_encrypt tests/installation/boot_encrypt.pm[0m
+[2026-11-07T18:30:06.328906Z] [debug] [pid:567245] [1;34m||| finished boot_encrypt installation (runtime: 0 s)[0m
+[2026-11-07T18:30:06.373326Z] [debug] [pid:567245] [1;34m||| starting first_boot tests/installation/first_boot.pm[0m
+[2026-11-07T18:30:44.289562Z] [debug] [pid:567245] [1;34m||| finished first_boot installation (runtime: 38 s)[0m
+[2026-11-07T18:30:50.405856Z] [debug] [pid:567245] [1;34m||| starting opensuse_welcome tests/installation/opensuse_welcome.pm[0m
+[2026-11-07T18:30:56.234430Z] [debug] [pid:567245] [1;34m||| finished opensuse_welcome installation (runtime: 6 s)[0m
+[2026-11-07T18:30:56.236115Z] [debug] [pid:567245] [1;34m||| starting system_prepare tests/console/system_prepare.pm[0m
+[2026-11-07T18:30:57.756769Z] [debug] [pid:567245] [1;34m||| finished system_prepare console (runtime: 1 s)[0m
+[2026-11-07T18:31:00.861867Z] [debug] [pid:567245] [1;34m||| starting zypper_clear_repos tests/update/zypper_clear_repos.pm[0m
+[2026-11-07T18:31:01.404272Z] [debug] [pid:567245] [1;34m||| finished zypper_clear_repos update (runtime: 1 s)[0m
+[2026-11-07T18:31:01.405087Z] [debug] [pid:567245] [1;34m||| starting zypper_ar tests/console/zypper_ar.pm[0m
+[2026-11-07T18:31:02.817443Z] [debug] [pid:567245] [1;34m||| finished zypper_ar console (runtime: 1 s)[0m
+[2026-11-07T18:31:02.818160Z] [debug] [pid:567245] [1;34m||| starting zypper_ref tests/console/zypper_ref.pm[0m
+[2026-11-07T18:31:29.217115Z] [debug] [pid:567245] [1;34m||| finished zypper_ref console (runtime: 27 s)[0m
+[2026-11-07T18:31:29.217787Z] [debug] [pid:567245] [1;34m||| starting prepare_system_for_update_tests tests/update/prepare_system_for_update_tests.pm[0m
+[2026-11-07T18:31:31.038180Z] [debug] [pid:567245] [1;34m||| finished prepare_system_for_update_tests update (runtime: 2 s)[0m
+[2026-11-07T18:31:31.039029Z] [debug] [pid:567245] [1;34m||| starting updates_packagekit_gpk tests/update/updates_packagekit_gpk.pm[0m
+[2026-11-07T18:37:24.642449Z] [debug] [pid:567245] [1;34m||| finished updates_packagekit_gpk update (runtime: 353 s)[0m
+[2026-11-07T18:37:29.412881Z] [debug] [pid:567245] [1;34m||| starting check_system_is_updated tests/update/check_system_is_updated.pm[0m
+[2026-11-07T18:37:30.171888Z] [debug] [pid:567245] [1;34m||| finished check_system_is_updated update (runtime: 1 s)[0m
+[2026-11-07T18:37:30.172838Z] [debug] [pid:567245] [1;34m||| starting check_network tests/console/check_network.pm[0m
+[2026-11-07T18:37:30.198772Z] [debug] [pid:567245] [1;34m||| finished check_network console (runtime: 0 s)[0m
+[2026-11-07T18:37:30.199415Z] [debug] [pid:567245] [1;34m||| starting system_state tests/console/system_state.pm[0m
+[2026-11-07T18:37:30.351187Z] [debug] [pid:567245] [1;34m||| finished system_state console (runtime: 0 s)[0m
+[2026-11-07T18:37:30.351905Z] [debug] [pid:567245] [1;34m||| starting prepare_test_data tests/console/prepare_test_data.pm[0m
+[2026-11-07T18:38:13.501634Z] [debug] [pid:567245] [1;34m||| finished prepare_test_data console (runtime: 43 s)[0m
+[2026-11-07T18:38:13.502853Z] [debug] [pid:567245] [1;34m||| starting consoletest_setup tests/console/consoletest_setup.pm[0m
+[2026-11-07T18:38:59.615263Z] [debug] [pid:567245] [1;34m||| finished consoletest_setup console (runtime: 46 s)[0m
+[2026-11-07T18:39:02.582815Z] [debug] [pid:567245] [1;34m||| starting keymap_or_locale tests/locale/keymap_or_locale.pm[0m
+[2026-11-07T18:39:50.079253Z] [debug] [pid:567245] [1;34m||| finished keymap_or_locale locale (runtime: 48 s)[0m
+[2026-11-07T18:39:50.080624Z] [debug] [pid:567245] [1;34m||| starting force_scheduled_tasks tests/console/force_scheduled_tasks.pm[0m
+[2026-11-07T18:42:06.070841Z] [debug] [pid:567245] [1;34m||| finished force_scheduled_tasks console (runtime: 136 s)[0m
+[2026-11-07T18:42:09.304628Z] [debug] [pid:567245] [1;34m||| starting textinfo tests/console/textinfo.pm[0m
+[2026-11-07T18:42:17.871641Z] [debug] [pid:567245] [1;34m||| finished textinfo console (runtime: 8 s)[0m
+[2026-11-07T18:42:17.872360Z] [debug] [pid:567245] [1;34m||| starting hostname tests/console/hostname.pm[0m
+[2026-11-07T18:42:18.010423Z] [debug] [pid:567245] [1;34m||| finished hostname console (runtime: 1 s)[0m
+[2026-11-07T18:42:21.085814Z] [debug] [pid:567245] [1;34m||| starting opensuse_repos tests/console/opensuse_repos.pm[0m
+[2026-11-07T18:42:43.022002Z] [debug] [pid:567245] [1;34m||| finished opensuse_repos console (runtime: 22 s)[0m
+[2026-11-07T18:42:46.004986Z] [debug] [pid:567245] [1;34m||| starting zypper_lr tests/console/zypper_lr.pm[0m
+[2026-11-07T18:42:46.487277Z] [debug] [pid:567245] [1;34m||| finished zypper_lr console (runtime: 0 s)[0m
+[2026-11-07T18:42:46.488167Z] [debug] [pid:567245] [1;34m||| starting zypper_in tests/console/zypper_in.pm[0m
+[2026-11-07T18:43:33.747217Z] [debug] [pid:567245] [1;34m||| finished zypper_in console (runtime: 47 s)[0m
+[2026-11-07T18:43:33.748231Z] [debug] [pid:567245] [1;34m||| starting zypper_log tests/console/zypper_log.pm[0m
+[2026-11-07T18:43:33.861403Z] [debug] [pid:567245] [1;34m||| finished zypper_log console (runtime: 0 s)[0m
+[2026-11-07T18:43:33.862119Z] [debug] [pid:567245] [1;34m||| starting systemd_wo_udev tests/console/systemd_wo_udev.pm[0m
+[2026-11-07T18:43:34.533563Z] [debug] [pid:567245] [1;34m||| finished systemd_wo_udev console (runtime: 1 s)[0m
+[2026-11-07T18:43:34.534253Z] [debug] [pid:567245] [1;34m||| starting yast2_lan tests/console/yast2_lan.pm[0m
+[2026-11-07T18:44:15.932632Z] [debug] [pid:567245] [1;34m||| finished yast2_lan console (runtime: 41 s)[0m
+[2026-11-07T18:44:15.933760Z] [debug] [pid:567245] [1;34m||| starting curl_https tests/console/curl_https.pm[0m
+[2026-11-07T18:44:16.515986Z] [debug] [pid:567245] [1;34m||| finished curl_https console (runtime: 1 s)[0m
+[2026-11-07T18:44:16.520072Z] [debug] [pid:567245] [1;34m||| starting salt_agnostic tests/console/oqa_agnostic/salt_agnostic.pm[0m
+[2026-11-07T18:45:48.166597Z] [debug] [pid:567245] [1;34m||| finished salt_agnostic console/oqa_agnostic (runtime: 92 s)[0m
+[2026-11-07T18:45:48.167478Z] [debug] [pid:567245] [1;34m||| starting glibc_sanity tests/console/glibc_sanity.pm[0m
+[2026-11-07T18:45:52.645587Z] [debug] [pid:567245] [1;34m||| finished glibc_sanity console (runtime: 4 s)[0m
+[2026-11-07T18:45:52.646314Z] [debug] [pid:567245] [1;34m||| starting glibc_tunables tests/console/glibc_tunables.pm[0m
+[2026-11-07T18:45:52.662708Z] [debug] [pid:567245] [1;34m||| finished glibc_tunables console (runtime: 0 s)[0m
+[2026-11-07T18:45:52.664087Z] [debug] [pid:567245] [1;34m||| starting yast2_i tests/console/yast2_i.pm[0m
+[2026-11-07T18:47:26.309532Z] [debug] [pid:567245] [1;34m||| finished yast2_i console (runtime: 94 s)[0m
+[2026-11-07T18:47:26.310568Z] [debug] [pid:567245] [1;34m||| starting yast2_bootloader tests/console/yast2_bootloader.pm[0m
+[2026-11-07T18:47:52.425122Z] [debug] [pid:567245] [1;34m||| finished yast2_bootloader console (runtime: 26 s)[0m
+[2026-11-07T18:47:52.426157Z] [debug] [pid:567245] [1;34m||| starting vim tests/console/vim.pm[0m
+[2026-11-07T18:48:01.557363Z] [debug] [pid:567245] [1;34m||| finished vim console (runtime: 9 s)[0m
+[2026-11-07T18:48:01.558250Z] [debug] [pid:567245] [1;34m||| starting firewall_enabled tests/console/firewall_enabled.pm[0m
+[2026-11-07T18:48:01.836768Z] [debug] [pid:567245] [1;34m||| finished firewall_enabled console (runtime: 0 s)[0m
+[2026-11-07T18:48:01.837506Z] [debug] [pid:567245] [1;34m||| starting sshd tests/console/sshd.pm[0m
+[2026-11-07T18:48:44.139725Z] [debug] [pid:567245] [1;34m||| finished sshd console (runtime: 43 s)[0m
+[2026-11-07T18:48:44.140833Z] [debug] [pid:567245] [1;34m||| starting ssh_cleanup tests/console/ssh_cleanup.pm[0m
+[2026-11-07T18:48:44.223044Z] [debug] [pid:567245] [1;34m||| finished ssh_cleanup console (runtime: 0 s)[0m
+[2026-11-07T18:48:48.113009Z] [debug] [pid:567245] [1;34m||| starting sshfs tests/console/sshfs.pm[0m
+[2026-11-07T18:49:00.047172Z] [debug] [pid:567245] [1;34m||| finished sshfs console (runtime: 12 s)[0m
+[2026-11-07T18:49:00.047878Z] [debug] [pid:567245] [1;34m||| starting mtab tests/console/mtab.pm[0m
+[2026-11-07T18:49:00.077628Z] [debug] [pid:567245] [1;34m||| finished mtab console (runtime: 0 s)[0m
+[2026-11-07T18:49:00.078239Z] [debug] [pid:567245] [1;34m||| starting nginx tests/console/nginx.pm[0m
+[2026-11-07T18:49:15.268164Z] [debug] [pid:567245] [1;34m||| finished nginx console (runtime: 15 s)[0m
+[2026-11-07T18:49:15.268920Z] [debug] [pid:567245] [1;34m||| starting orphaned_packages_check tests/console/orphaned_packages_check.pm[0m
+[2026-11-07T18:49:16.124551Z] [debug] [pid:567245] [1;34m||| finished orphaned_packages_check console (runtime: 1 s)[0m
+[2026-11-07T18:49:16.125270Z] [debug] [pid:567245] [1;34m||| starting consoletest_finish tests/console/consoletest_finish.pm[0m
+[2026-11-07T18:50:04.021973Z] [debug] [pid:567245] [1;34m||| finished consoletest_finish console (runtime: 48 s)[0m
+[2026-11-07T18:50:07.017848Z] [debug] [pid:567245] [1;34m||| starting user_gui_login tests/x11/user_gui_login.pm[0m
+[2026-11-07T18:51:15.163817Z] [debug] [pid:567245] [1;34m||| finished user_gui_login x11 (runtime: 68 s)[0m
+[2026-11-07T18:51:15.165620Z] [debug] [pid:567245] [1;34m||| starting desktop_runner tests/x11/desktop_runner.pm[0m
+[2026-11-07T18:51:23.844690Z] [debug] [pid:567245] [1;34m||| finished desktop_runner x11 (runtime: 8 s)[0m
+[2026-11-07T18:51:23.845603Z] [debug] [pid:567245] [1;34m||| starting xterm tests/x11/xterm.pm[0m
+[2026-11-07T18:53:44.408866Z] [debug] [pid:567245] [1;34m||| finished xterm x11 (runtime: 141 s)[0m
+[2026-11-07T18:53:44.410488Z] [debug] [pid:567245] [1;34m||| starting keymap_or_locale_x11 tests/locale/keymap_or_locale_x11.pm[0m
+[2026-11-07T18:55:32.088185Z] [debug] [pid:567245] [1;34m||| finished keymap_or_locale_x11 locale (runtime: 108 s)[0m
+[2026-11-07T18:55:35.003018Z] [debug] [pid:567245] [1;34m||| starting ssh_default_term tests/x11/ssh_default_term.pm[0m
+[2026-11-07T18:57:34.709159Z] [debug] [pid:567245] [1;34m||| finished ssh_default_term x11 (runtime: 119 s)[0m
+[2026-11-07T18:57:34.710769Z] [debug] [pid:567245] [1;34m||| starting gnome_control_center tests/x11/gnome_control_center.pm[0m
+[2026-11-07T18:58:14.498255Z] [debug] [pid:567245] [1;34m||| finished gnome_control_center x11 (runtime: 40 s)[0m
+[2026-11-07T18:58:14.499716Z] [debug] [pid:567245] [1;34m||| starting gnome_tweak_tool tests/x11/gnome_tweak_tool.pm[0m
+[2026-11-07T18:58:29.371678Z] [debug] [pid:567245] [1;34m||| finished gnome_tweak_tool x11 (runtime: 15 s)[0m
+[2026-11-07T18:58:29.372812Z] [debug] [pid:567245] [1;34m||| starting gnome_console tests/x11/gnome_console.pm[0m
+[2026-11-07T18:59:11.959298Z] [debug] [pid:567245] [1;34m||| finished gnome_console x11 (runtime: 42 s)[0m
+[2026-11-07T18:59:11.961208Z] [debug] [pid:567245] [1;34m||| starting gedit tests/x11/gedit.pm[0m
+[2026-11-07T19:01:03.878749Z] [debug] [pid:567245] [1;34m||| finished gedit x11 (runtime: 112 s)[0m
+[2026-11-07T19:01:03.880036Z] [debug] [pid:567245] [1;34m||| starting firefox tests/x11/firefox.pm[0m
+[2026-11-07T19:03:32.069404Z] [debug] [pid:567245] [1;34m||| finished firefox x11 (runtime: 149 s)[0m
+[2026-11-07T19:03:32.070917Z] [debug] [pid:567245] [1;34m||| starting firefox_audio tests/x11/firefox_audio.pm[0m
+[2026-11-07T19:04:15.185159Z] [debug] [pid:567245] [1;34m||| finished firefox_audio x11 (runtime: 43 s)[0m
+[2026-11-07T19:04:15.186584Z] [debug] [pid:567245] [1;34m||| starting chromium tests/x11/chromium.pm[0m
+[2026-11-07T19:06:50.909839Z] [debug] [pid:567245] [1;34m||| finished chromium x11 (runtime: 155 s)[0m
+[2026-11-07T19:06:50.911628Z] [debug] [pid:567245] [1;34m||| starting graphicsMagick tests/x11/graphicsMagick.pm[0m
+[2026-11-07T19:08:35.280532Z] [debug] [pid:567245] [1;34m||| finished graphicsMagick x11 (runtime: 105 s)[0m
+[2026-11-07T19:08:35.282509Z] [debug] [pid:567245] [1;34m||| starting ooffice tests/x11/ooffice.pm[0m
+[2026-11-07T19:09:19.710901Z] [debug] [pid:567245] [1;34m||| finished ooffice x11 (runtime: 44 s)[0m
+[2026-11-07T19:09:19.712052Z] [debug] [pid:567245] [1;34m||| starting oomath tests/x11/oomath.pm[0m
+[2026-11-07T19:09:49.637157Z] [debug] [pid:567245] [1;34m||| finished oomath x11 (runtime: 30 s)[0m
+[2026-11-07T19:09:49.638210Z] [debug] [pid:567245] [1;34m||| starting oocalc tests/x11/oocalc.pm[0m
+[2026-11-07T19:10:30.778399Z] [debug] [pid:567245] [1;34m||| finished oocalc x11 (runtime: 41 s)[0m
+[2026-11-07T19:10:30.779466Z] [debug] [pid:567245] [1;34m||| starting glxgears tests/x11/glxgears.pm[0m
+[2026-11-07T19:12:16.309964Z] [debug] [pid:567245] [1;34m||| finished glxgears x11 (runtime: 106 s)[0m
+[2026-11-07T19:12:16.311513Z] [debug] [pid:567245] [1;34m||| starting nautilus tests/x11/nautilus.pm[0m
+[2026-11-07T19:12:28.788947Z] [debug] [pid:567245] [1;34m||| finished nautilus x11 (runtime: 12 s)[0m
+[2026-11-07T19:12:28.789929Z] [debug] [pid:567245] [1;34m||| starting gnome_music tests/x11/gnome_music.pm[0m
+[2026-11-07T19:13:53.313544Z] [debug] [pid:567245] [1;34m||| finished gnome_music x11 (runtime: 85 s)[0m
+[2026-11-07T19:13:53.314783Z] [debug] [pid:567245] [1;34m||| starting evolution tests/x11/evolution.pm[0m
+[2026-11-07T19:14:08.796399Z] [debug] [pid:567245] [1;34m||| finished evolution x11 (runtime: 15 s)[0m
+[2026-11-07T19:14:08.797581Z] [debug] [pid:567245] [1;34m||| starting desktop_mainmenu tests/x11/desktop_mainmenu.pm[0m
+[2026-11-07T19:14:21.546728Z] [debug] [pid:567245] [1;34m||| finished desktop_mainmenu x11 (runtime: 13 s)[0m
+[2026-11-07T19:14:21.547746Z] [debug] [pid:567245] [1;34m||| starting inkscape tests/x11/inkscape.pm[0m
+[2026-11-07T19:16:28.260055Z] [debug] [pid:567245] [1;34m||| finished inkscape x11 (runtime: 127 s)[0m
+[2026-11-07T19:16:28.261833Z] [debug] [pid:567245] [1;34m||| starting gimp tests/x11/gimp.pm[0m
+[2026-11-07T19:18:34.140485Z] [debug] [pid:567245] [1;34m||| finished gimp x11 (runtime: 126 s)[0m
+[2026-11-07T19:18:34.145425Z] [debug] [pid:567245] [1;34m||| starting vlc tests/x11/vlc.pm[0m
+[2026-11-07T19:20:57.090274Z] [debug] [pid:567245] [1;34m||| finished vlc x11 (runtime: 143 s)[0m
+[2026-11-07T19:20:57.092356Z] [debug] [pid:567245] [1;34m||| starting reboot_gnome tests/x11/reboot_gnome.pm[0m
+[2026-11-07T19:22:08.730813Z] [debug] [pid:567245] [1;34m||| finished reboot_gnome x11 (runtime: 71 s)[0m
+[2026-11-07T19:22:13.479933Z] [debug] [pid:567245] [1;34m||| starting zypper_log_packages tests/console/zypper_log_packages.pm[0m
+[2026-11-07T19:22:17.070637Z] [debug] [pid:567245] [1;34m||| finished zypper_log_packages console (runtime: 4 s)[0m
+[2026-11-07T19:22:17.071500Z] [debug] [pid:567245] [1;34m||| starting shutdown tests/shutdown/shutdown.pm[0m
+[2026-11-07T19:23:39.650061Z] [debug] [pid:567245] [1;34m||| finished shutdown shutdown (runtime: 82 s)[0m
+[2026-11-07T19:23:39.664422Z] [debug] [pid:567099] [37m[autotest] process exited: 0[0m
+[2026-11-07T19:23:39.764679Z] [debug] [pid:567099] [37mdone with autotest process[0m
+[2026-11-07T19:23:39.765046Z] [debug] [pid:567099] [37misotovideo starting handle_shutdown[0m
+[2026-11-07T19:23:39.765124Z] [debug] [pid:567099] [37mstopping command server 567155 because test execution ended[0m
+[2026-11-07T19:23:39.765204Z] [debug] [pid:567099] [37misotovideo: informing websocket clients before stopping command server: http://127.0.0.1:20053/xxxxxxxxxxxxxxxx/broadcast[0m
+[2026-11-07T19:23:39.777428Z] [debug] [pid:567099] [37mcommands process exited: 0[0m
+[2026-11-07T19:23:39.877675Z] [debug] [pid:567099] [37mdone with command server[0m
+[2026-11-07T19:23:39.878432Z] [debug] [pid:567099] [37mbackend shutdown state: 1[0m
+[2026-11-07T19:23:39.878747Z] [info] [pid:567443] [33m::: OpenQA::Qemu::Proc::save_state: Saving QEMU state to qemu_state.json[0m
+[2026-11-07T19:23:40.929107Z] [debug] [pid:567443] [37mPassing remaining frames to the video encoder[0m
+[out#0/webm @ 0x55c49c53d080] video:4406KiB audio:0KiB subtitle:0KiB other streams:0KiB global headers:0KiB muxing overhead: 0.749475%
+frame= 7605 fps=1.7 q=50.0 Lsize=    4439KiB time=00:05:16.83 bitrate= 114.8kbits/s speed=0.0724x    
+[2026-11-07T19:23:41.590183Z] [debug] [pid:567443] [37mWaiting for video encoder to finalize the video[0m
+[2026-11-07T19:23:41.590285Z] [debug] [pid:567443] [37mThe built-in video encoder (pid 567647) terminated[0m
+[2026-11-07T19:23:41.590351Z] [debug] [pid:567443] [37mThe external video encoder (pid 567646) terminated[0m
+[2026-11-07T19:23:41.590961Z] [debug] [pid:567443] [37mQEMU: qemu-system-x86_64: terminating on signal 15 from pid 567443 (/usr/bin/isotovideo: backend)[0m
+[2026-11-07T19:23:41.591548Z] [debug] [pid:567443] [37msending magic and exit[0m
+[2026-11-07T19:23:41.591766Z] [debug] [pid:567099] [37mreceived magic close[0m
+[2026-11-07T19:23:41.640106Z] [debug] [pid:567099] [37mbackend process exited: 0[0m
+[2026-11-07T19:23:41.741025Z] [debug] [pid:567099] [37misotovideo completed handle_shutdown: done[0m
+[2026-11-07T19:23:41.741202Z] [debug] [pid:567099] [37mstopping backend process 567443[0m
+[2026-11-07T19:23:41.741250Z] [debug] [pid:567099] [37mdone with backend process[0m
+567099: EXIT 0
+[2026-11-07T19:23:41.781821Z] [info] Isotovideo exit status: 0
+[2026-11-07T19:23:41.810837Z] [info] +++ worker notes +++
+[2026-11-07T19:23:41.810936Z] [info] End time: 2026-11-07 19:23:41
+[2026-11-07T19:23:41.810993Z] [info] Result: done
+[2026-11-07T19:23:41.813782Z] [info] Uploading graphicsMagick-run.log
+[2026-11-07T19:23:41.919645Z] [info] Uploading logs_from_installation_system-y2logs.tar.bz2
+[2026-11-07T19:23:41.986719Z] [info] Uploading salt_agnostic-testSalt_output.log
+[2026-11-07T19:23:42.017931Z] [info] Uploading salt_agnostic-testsalt_results.xml
+[2026-11-07T19:23:42.046545Z] [info] Uploading sshd-ssh_log0
+[2026-11-07T19:23:42.068746Z] [info] Uploading sshd-sshd_config
+[2026-11-07T19:23:42.091087Z] [info] Uploading system_state-stats_during_installation.tar.bz2
+[2026-11-07T19:23:42.120770Z] [info] Uploading textinfo-info.txt
+[2026-11-07T19:23:42.166829Z] [info] Uploading textinfo-logs.tar.bz2
+[2026-11-07T19:23:42.451359Z] [info] Uploading zypper_packages.json
+[2026-11-07T19:23:42.487466Z] [info] Uploading video.webm
+[2026-11-07T19:23:42.559794Z] [info] Uploading autoinst-log.txt

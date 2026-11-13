@@ -1,0 +1,168 @@
+
+    <h5>Result files
+    </h5>
+    <ul class="resultfile-list">
+    <li>
+            <i title="Video of this testrun" class="fa-regular fa-file-video"></i>
+            <a href="/tests/6326725/video?filename=video.webm">
+                Video
+            </a>
+        <a href="/tests/6326725/file/video.webm" target="blank" title="Raw/download">
+            <i class="fa-solid fa-download"></i>
+        </a>
+    </li>
+    <li>
+            <i title="Logfile produced by this testrun" class="fa-solid fa-terminal"></i>
+            <a href="/tests/6326725/logfile?filename=autoinst-log.txt">
+                autoinst-log.txt
+            </a>
+        <a href="/tests/6326725/file/autoinst-log.txt" target="blank" title="Raw/download">
+            <i class="fa-solid fa-download"></i>
+        </a>
+    </li>
+    <li>
+            <i title="Logfile produced by this testrun" class="fa-solid fa-terminal"></i>
+            <a href="/tests/6326725/logfile?filename=worker-log.txt">
+                worker-log.txt
+            </a>
+        <a href="/tests/6326725/file/worker-log.txt" target="blank" title="Raw/download">
+            <i class="fa-solid fa-download"></i>
+        </a>
+    </li>
+    <li>
+            <i class="fa-regular fa-file"></i>
+            <a href="/tests/6326725/file/vars.json">
+                vars.json
+            </a>
+    <li>
+            <i title="Logfile produced by this testrun" class="fa-solid fa-terminal"></i>
+            <a href="/tests/6326725/logfile?filename=serial0.txt">
+                serial0.txt
+            </a>
+        <a href="/tests/6326725/file/serial0.txt" target="blank" title="Raw/download">
+            <i class="fa-solid fa-download"></i>
+        </a>
+    </li>
+    <li>
+            <i title="Logfile produced by this testrun" class="fa-solid fa-terminal"></i>
+            <a href="/tests/6326725/logfile?filename=serial_terminal.txt">
+                serial_terminal.txt
+            </a>
+        <a href="/tests/6326725/file/serial_terminal.txt" target="blank" title="Raw/download">
+            <i class="fa-solid fa-download"></i>
+        </a>
+    </li>
+    <li>
+            <i title="Logfile produced by this testrun" class="fa-solid fa-terminal"></i>
+            <a href="/tests/6326725/logfile?filename=serial_terminal_user.txt">
+                serial_terminal_user.txt
+            </a>
+        <a href="/tests/6326725/file/serial_terminal_user.txt" target="blank" title="Raw/download">
+            <i class="fa-solid fa-download"></i>
+        </a>
+    </li>
+</ul>
+
+    <h6>Uploaded logs
+    </h6>
+    <ul class="resultfile-list">
+    <li>
+            <i class="fa-regular fa-file"></i>
+            <a href="http://openqa-assets.opensuse.org/tests/6326725/file/graphicsMagick-run.log">
+                graphicsMagick-run.log
+            </a>
+    <li>
+            <i class="fa-regular fa-file"></i>
+            <a href="http://openqa-assets.opensuse.org/tests/6326725/file/logs_from_installation_system-y2logs.tar.bz2">
+                logs_from_installation_system-y2logs.tar.bz2
+            </a>
+    <li>
+            <i class="fa-regular fa-file"></i>
+            <a href="http://openqa-assets.opensuse.org/tests/6326725/file/salt_agnostic-testSalt_output.log">
+                salt_agnostic-testSalt_output.log
+            </a>
+    <li>
+            <i class="fa-regular fa-file"></i>
+            <a href="http://openqa-assets.opensuse.org/tests/6326725/file/salt_agnostic-testsalt_results.xml">
+                salt_agnostic-testsalt_results.xml
+            </a>
+    <li>
+            <i class="fa-regular fa-file"></i>
+            <a href="http://openqa-assets.opensuse.org/tests/6326725/file/sshd-ssh_log0">
+                sshd-ssh_log0
+            </a>
+    <li>
+            <i class="fa-regular fa-file"></i>
+            <a href="http://openqa-assets.opensuse.org/tests/6326725/file/sshd-sshd_config">
+                sshd-sshd_config
+            </a>
+    <li>
+            <i class="fa-regular fa-file"></i>
+            <a href="http://openqa-assets.opensuse.org/tests/6326725/file/system_state-stats_during_installation.tar.bz2">
+                system_state-stats_during_installation.tar.bz2
+            </a>
+    <li>
+            <i title="Logfile produced by this testrun" class="fa-solid fa-terminal"></i>
+            <a href="/tests/6326725/logfile?filename=textinfo-info.txt">
+                textinfo-info.txt
+            </a>
+        <a href="http://openqa-assets.opensuse.org/tests/6326725/file/textinfo-info.txt" target="blank" title="Raw/download">
+            <i class="fa-solid fa-download"></i>
+        </a>
+    </li>
+    <li>
+            <i class="fa-regular fa-file"></i>
+            <a href="http://openqa-assets.opensuse.org/tests/6326725/file/textinfo-logs.tar.bz2">
+                textinfo-logs.tar.bz2
+            </a>
+    <li>
+            <i class="fa-regular fa-file"></i>
+            <a href="http://openqa-assets.opensuse.org/tests/6326725/file/zypper_packages.json">
+                zypper_packages.json
+            </a>
+</ul>
+
+
+    <h5>Assets
+    </h5>
+    <ul id="asset-list">            <li>
+                    <a href="/tests/6326725/asset/other/Tumbleweed.x86_64-1.0-libvirt-Snapshot20261106.vagrant.libvirt.box" id="asset_102333135">
+                    Tumbleweed.x86_64-1.0-libvirt-Snapshot20261106.vagrant.libvirt.box
+</a>                    (430 MiB)
+                <a href="/admin/assets?search=Tumbleweed.x86_64-1.0-libvirt-Snapshot20261106.vagrant.libvirt.box" title="Find in assets table">
+                    <i class="fa-solid fa-table"></i>
+                </a>
+            </li>
+            <li>
+                    <a href="/tests/6326725/asset/other/Tumbleweed.x86_64-1.0-virtualbox-Snapshot20261106.vagrant.virtualbox.box" id="asset_102332855">
+                    Tumbleweed.x86_64-1.0-virtualbox-Snapshot20261106.vagrant.virtualbox.box
+</a>                    (443 MiB)
+                <a href="/admin/assets?search=Tumbleweed.x86_64-1.0-virtualbox-Snapshot20261106.vagrant.virtualbox.box" title="Find in assets table">
+                    <i class="fa-solid fa-table"></i>
+                </a>
+            </li>
+            <li>
+                    <a href="/tests/6326725/asset/iso/openSUSE-Tumbleweed-DVD-x86_64-Snapshot20261106-Media.iso" id="asset_102333134">
+                    openSUSE-Tumbleweed-DVD-x86_64-Snapshot20261106-Media.iso
+</a>                    (4.3 GiB)
+                <a href="/admin/assets?search=openSUSE-Tumbleweed-DVD-x86_64-Snapshot20261106-Media.iso" title="Find in assets table">
+                    <i class="fa-solid fa-table"></i>
+                </a>
+            </li>
+            <li>
+                    <a href="/tests/6326725/asset/other/openSUSE-Tumbleweed-DVD-x86_64-Snapshot20261106-Media.iso.sha256" id="asset_102333133">
+                    openSUSE-Tumbleweed-DVD-x86_64-Snapshot20261106-Media.iso.sha256
+</a>                    (124 Byte)
+                <a href="/admin/assets?search=openSUSE-Tumbleweed-DVD-x86_64-Snapshot20261106-Media.iso.sha256" title="Find in assets table">
+                    <i class="fa-solid fa-table"></i>
+                </a>
+            </li>
+            <li>
+                    <a href="/tests/6326725/asset/hdd/opensuse-15.2-x86_64-GM-cryptlvm@uefi.qcow2" id="asset_66444813">
+                    opensuse-15.2-x86_64-GM-cryptlvm@uefi.qcow2
+</a>                    (6.3 GiB)
+                <a href="/admin/assets?search=opensuse-15.2-x86_64-GM-cryptlvm%40uefi.qcow2" title="Find in assets table">
+                    <i class="fa-solid fa-table"></i>
+                </a>
+            </li>
+</ul>

@@ -1,0 +1,160 @@
+[2J[01;01H[=3h[2J[01;01H[2J[01;01H[=3h[2J[01;01H[2J[01;01H[=3h[2J[01;01HBdsDxe: loading Boot0001 "UEFI QEMU QEMU CD-ROM " from PciRoot(0x0)/Pci(0x7,0x0)/Scsi(0x0,0x0)
+BdsDxe: starting Boot0001 "UEFI QEMU QEMU CD-ROM " from PciRoot(0x0)/Pci(0x7,0x0)/Scsi(0x0,0x0)
+Please press 't' to show the boot menu on this console
+[2J[01;01H[=3h[2J[01;01H[2J[01;01H[=3h[2J[01;01H[2J[01;01H[=3h[2J[01;01HBdsDxe: loading Boot0008 "opensuse-secureboot" from HD(1,GPT,9494CC7F-F114-4B14-89BC-B5F5F1167419,0x800,0xFA000)/\EFI\opensuse\shim.efi
+BdsDxe: starting Boot0008 "opensuse-secureboot" from HD(1,GPT,9494CC7F-F114-4B14-89BC-B5F5F1167419,0x800,0xFA000)/\EFI\opensuse\shim.efi
+[0m[37m[44m[01;01H┘[01;01H┌──────────────────────────────────────────────────────────────────────────────────────────────────┐[02;01H│                                     Shim UEFI key management                                     │[03;01H│                                                                                                  │[04;01H│                                                                                                  │[05;01H│                                                                                                  │[06;01H│                                                                                                  │[07;01H│                                                                                                  │[08;01H│                                                                                                  │[09;01H│                                                                                                  │[10;01H│                                                                                                  │[11;01H│                                                                                                  │[12;01H│                                                                                                  │[13;01H│                                                                                                  │[14;01H│                                                                                                  │[15;01H│                                                                                                  │[16;01H│                                                                                                  │[17;01H│                                                                                                  │[18;01H│                                                                                                  │[19;01H│                                                                                                  │[20;01H│                                                                                                  │[21;01H│                                                                                                  │[22;01H│                                                                                                  │[23;01H│                                                                                                  │[24;01H│                                                                                                  │[25;01H│                                                                                                  │[26;01H│                                                                                                  │[27;01H│                                                                                                  │[28;01H│                                                                                                  │[29;01H│                                                                                                  │[30;01H└──────────────────────────────────────────────────────────────────────────────────────────────────┘[16;31HPress any key to perform MOK management[29;03HBooting in 10 seconds  [29;03HBooting in 9 seconds  [29;03HBooting in 8 seconds  [29;03HBooting in 7 seconds  [29;03HBooting in 6 seconds  [29;03HBooting in 5 seconds  [29;03HBooting in 4 seconds  [29;03HBooting in 3 seconds  [29;03HBooting in 2 seconds  [29;03HBooting in 1 second   [05;01H[0m[37m[40m[2J[01;01H[=3h[2J[01;01H[2J[01;01H[2J[01;01HEnter passphrase for hd0,gpt2 (f7d245d7-c48f-49ff-bb90-a2d49d96969e): 
+Attempting to decrypt master key...
+Slot 0 opened
+[0m[30m[40m[2J[01;01H[0m[37m[40mPlease press 't' to show the boot menu on this console
+[!p]104\[0m[?7h[1G[0J7[32766;32766H[6n8[!p]104\[0m[?7h[1G[0J7[32766;32766H[6n8]3008;start=92561443e0394ee49b0374b25fe99131;user=root;hostname=susetest;machineid=b2c7ab47de60407b95032871fc7a2e11;bootid=baced9014f77442bbbc6e1c888c2c498;pid=2323;pidfdid=2323;comm=(agetty);servicename=serial-getty@hvc0.service;invocationid=b084f4736dc2416595b84316b1706561;type=service\P+q6E616D65\
+Welcome to openSUSE Tumbleweed 20261107 - Kernel 7.3.1-1-default (hvc0).
+
+ens4: 10.0.2.15
+
+
+
+susetest login: 
+susetest login: root
+Password: 
+]3008;start=61efa04b2e7540419ce32edce09adda2;user=root;hostname=susetest;machineid=b2c7ab47de60407b95032871fc7a2e11;bootid=baced9014f77442bbbc6e1c888c2c498;pid=2323;pidfdid=2323;comm=login;targetuser=root;sessionid=3;type=session\Have a lot of fun...
+[1msusetest:~ #[m(B export PAGER=cat TERM=dumb; stty cols 2048; exec $SHELL
+susetest:~ # PS1="# "
+# unset PROMPT_COMMAND
+# _OANM=1; export TERM=dumb; echo Gi8yV-$?-
+Gi8yV-0-
+# _OANM=1; echo Logged into $(tty); echo 1XrKo-$?-
+Logged into /dev/hvc0
+1XrKo-0-
+# _OANM=1; id bernhard; echo gUt20-$?-
+uid=1000(bernhard) gid=100(users) groups=100(users),5(tty),489(dialout)
+gUt20-0-
+# _OANM=1; chown bernhard /dev/ttyS0 && usermod -a -G tty,dialout,$(stat -c %G /dev/ttyS0) bernhard; echo avWL9-$?-
+avWL9-0-
+# _OANM=1; id bernhard; echo gUt20-$?-
+uid=1000(bernhard) gid=100(users) groups=100(users),5(tty),489(dialout)
+gUt20-0-
+# cat > /tmp/scriptS9bln.sh << 'EOT_S9bln'; echo S9bln-$?-
+> systemctl | grep serial-getty
+> EOT_S9bln
+S9bln-0-
+[    7.097214] [    T686] kvm_amd: Virtual GIF supported
+[    7.285444] [     T27] audit: type=1400 audit(1794129349.143:5): apparmor="STATUS" operation="profile_load" profile="unconfined" name="1password" pid=774 comm="apparmor_parser"
+[    7.296512] [     T27] audit: type=1400 audit(1794129349.158:6): apparmor="STATUS" operation="profile_load" profile="unconfined" name="Discord" pid=776 comm="apparmor_parser"
+[    7.307647] [     T27] audit: type=1400 audit(1794129349.168:7): apparmor="STATUS" operation="profile_load" profile="unconfined" name=4D6F6E676F444220436F6D70617373 pid=778 comm="apparmor_parser"
+[    7.324815] [     T27] audit: type=1400 audit(1794129349.186:8): apparmor="STATUS" operation="profile_load" profile="unconfined" name="QtWebEngineProcess" pid=780 comm="apparmor_parser"
+[   12.388706] [   T1057] Lockdown: numlockbios: /dev/mem,kmem,port is restricted; see man kernel_lockdown.7
+[   12.413526] [   T1063] Lockdown: numlockbios: /dev/mem,kmem,port is restricted; see man kernel_lockdown.7
+[   12.436884] [   T1069] Lockdown: numlockbios: /dev/mem,kmem,port is restricted; see man kernel_lockdown.7
+[   12.460756] [   T1079] Lockdown: numlockbios: /dev/mem,kmem,port is restricted; see man kernel_lockdown.7
+[   12.487372] [   T1088] Lockdown: numlockbios: /dev/mem,kmem,port is restricted; see man kernel_lockdown.7
+[   12.507896] [   T1093] Lockdown: numlockbios: /dev/mem,kmem,port is restricted; see man kernel_lockdown.7
+[   13.346859] [   T1154] NET: Registered PF_QIPCRTR protocol family
+[   13.623542] [   T1158] NET: Registered PF_PACKET protocol family
+[   15.479869] [   T1503] Lockdown: numlockbios: /dev/mem,kmem,port is restricted; see man kernel_lockdown.7
+[   15.492753] [   T1507] Lockdown: numlockbios: /dev/mem,kmem,port is restricted; see man kernel_lockdown.7
+[   15.503841] [   T1511] Lockdown: numlockbios: /dev/mem,kmem,port is restricted; see man kernel_lockdown.7
+[   15.516016] [   T1515] Lockdown: numlockbios: /dev/mem,kmem,port is restricted; see man kernel_lockdown.7
+[   20.454092] [   T1047] lockdown_is_locked_down: 2 callbacks suppressed
+[   20.454095] [   T1047] Lockdown: systemd-logind: hibernation is restricted; see man kernel_lockdown.7
+[   21.168588] [   T1865] rfkill: input handler disabled
+[   24.425097] [   T2017] ISO 9660 Extensions: Microsoft Joliet Level 3
+[   24.425242] [   T2017] ISO 9660 Extensions: RRIP_1991A
+[   39.991757] [      C0] clocksource: Marking clocksource tsc unstable due to frequency skew
+[   39.991762] [      C0] clocksource: Watchdog               kvm-clock interval:        503989438ns
+[   39.991765] [      C0] clocksource: Clocksource                  tsc interval:       6198113657ns
+[   39.991768] [      C0] tsc: Marking TSC unstable due to clocksource watchdog
+[   75.428110] [   T3877] NOTICE: Automounting of tracing to debugfs is deprecated and will be removed in 2030
+[  437.142492] [  T13827] NET: Registered PF_ALG protocol family
+7kumX-0-
+# _OANM=1; ping -c 1 10.0.2.2; echo X5qi2-$?-
+PING 10.0.2.2 (10.0.2.2) 56(84) bytes of data.
+64 bytes from 10.0.2.2: icmp_seq=1 ttl=255 time=0.076 ms
+
+--- 10.0.2.2 ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 0.076/0.076/0.076/0.000 ms
+X5qi2-0-
+# _OANM=1; curl --form upload=@/tmp/dmesg.txt --form upname=updates_packagekit_gpk-dmesg.txt --max-time 90 http://10.0.2.2:20403/xxxxxxxxxxxxxxxx/uploadlog/dmesg.txt; echo uTJ98-$?-
+OK: updates_packagekit_gpk-dmesg.txt
+uTJ98-0-
+# _OANM=1; tar -zcv -f /tmp/sysconfig.tar.gz /etc/sysconfig; echo PoKGO-$?-
+tar: Removing leading `/' from member names
+/etc/sysconfig/
+/etc/sysconfig/bootloader
+/etc/sysconfig/SuSEfirewall2.d/
+/etc/sysconfig/SuSEfirewall2.d/services/
+/etc/sysconfig/network/
+/etc/sysconfig/network/if-up.d/
+/etc/sysconfig/network/scripts/
+/etc/sysconfig/network/scripts/functions.netconfig
+/etc/sysconfig/network/ifcfg-lo
+/etc/sysconfig/network/config
+/etc/sysconfig/network/routes
+/etc/sysconfig/network/dhcp
+/etc/sysconfig/network/ifcfg.template
+/etc/sysconfig/services
+/etc/sysconfig/language
+/etc/sysconfig/security
+/etc/sysconfig/sound
+/etc/sysconfig/console
+/etc/sysconfig/windowmanager
+/etc/sysconfig/snapper
+/etc/sysconfig/rpcbind
+/etc/sysconfig/postfix
+/etc/sysconfig/mail
+/etc/sysconfig/irqbalance
+/etc/sysconfig/mouse
+/etc/sysconfig/ipmi
+/etc/sysconfig/nfs
+/etc/sysconfig/mcelog
+/etc/sysconfig/pcscd
+/etc/sysconfig/ssh
+/etc/sysconfig/chronyd
+/etc/sysconfig/cron
+/etc/sysconfig/lifecycle-report
+/etc/sysconfig/btrfsmaintenance
+/etc/sysconfig/firewalld
+/etc/sysconfig/avahi
+/etc/sysconfig/proxy
+/etc/sysconfig/yast2
+/etc/sysconfig/backup
+/etc/sysconfig/fonts-config
+/etc/sysconfig/autofs
+/etc/sysconfig/mdadm
+/etc/sysconfig/storage
+/etc/sysconfig/samba
+/etc/sysconfig/dmraid
+/etc/sysconfig/clock
+/etc/sysconfig/keyboard
+/etc/sysconfig/wsdd
+/etc/sysconfig/displaymanager
+/etc/sysconfig/boot
+/etc/sysconfig/smartmontools
+/etc/sysconfig/syslog
+PoKGO-0-
+# _OANM=1; curl --form upload=@/tmp/sysconfig.tar.gz --form upname=updates_packagekit_gpk-sysconfig.tar.gz --max-time 90 http://10.0.2.2:20403/xxxxxxxxxxxxxxxx/uploadlog/sysconfig.tar.gz; echo UUnyB-$?-
+OK: updates_packagekit_gpk-sysconfig.tar.gz
+UUnyB-0-
+# _OANM=1; test -d /sys/fs/selinux; echo 0TMpX-$?-
+0TMpX-1-
+# _OANM=1; tar -jcv -f /tmp/gdm.tar.bz2 /home/bernhard/.cache/gdm; echo 8qSPP-$?-
+tar: Removing leading `/' from member names
+tar: /home/bernhard/.cache/gdm: Cannot stat: No such file or directory
+tar: Exiting with failure status due to previous errors
+8qSPP-2-
+# _OANM=1; curl --form upload=@/tmp/gdm.tar.bz2 --form upname=updates_packagekit_gpk-gdm.tar.bz2 --max-time 90 http://10.0.2.2:20403/xxxxxxxxxxxxxxxx/uploadlog/gdm.tar.bz2; echo 2l~uJ-$?-
+OK: updates_packagekit_gpk-gdm.tar.bz2
+2l~uJ-0-
+# _OANM=1; test -d /home/*/.local/share/xorg/; echo c329h-$?-
+c329h-1-
+# _OANM=1; ls -l /var/log/X*; echo foNN9-$?-
+ls: cannot access '/var/log/X*': No such file or directory
+foNN9-2-
+# _OANM=1; ls -l /home/*/.xsession-errors*; echo qd~hb-$?-
+ls: cannot access '/home/*/.xsession-errors*': No such file or directory
+qd~hb-2-
+# _OANM=1; ls -l /home/*/.local/share/sddm/*session.txt; echo hwf1J-$?-
+ls: cannot access '/home/*/.local/share/sddm/*session.txt': No such file or directory
+hwf1J-2-
+# 

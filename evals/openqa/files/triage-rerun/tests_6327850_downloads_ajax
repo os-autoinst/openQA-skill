@@ -1,0 +1,179 @@
+
+    <h5>Result files
+    </h5>
+    <ul class="resultfile-list">
+    <li>
+            <i title="Video of this testrun" class="fa-regular fa-file-video"></i>
+            <a href="/tests/6327850/video?filename=video.webm">
+                Video
+            </a>
+        <a href="/tests/6327850/file/video.webm" target="blank" title="Raw/download">
+            <i class="fa-solid fa-download"></i>
+        </a>
+    </li>
+    <li>
+            <i title="Logfile produced by this testrun" class="fa-solid fa-terminal"></i>
+            <a href="/tests/6327850/logfile?filename=autoinst-log.txt">
+                autoinst-log.txt
+            </a>
+        <a href="/tests/6327850/file/autoinst-log.txt" target="blank" title="Raw/download">
+            <i class="fa-solid fa-download"></i>
+        </a>
+    </li>
+    <li>
+            <i title="Logfile produced by this testrun" class="fa-solid fa-terminal"></i>
+            <a href="/tests/6327850/logfile?filename=worker-log.txt">
+                worker-log.txt
+            </a>
+        <a href="/tests/6327850/file/worker-log.txt" target="blank" title="Raw/download">
+            <i class="fa-solid fa-download"></i>
+        </a>
+    </li>
+    <li>
+            <i class="fa-regular fa-file"></i>
+            <a href="/tests/6327850/file/vars.json">
+                vars.json
+            </a>
+    <li>
+            <i title="Logfile produced by this testrun" class="fa-solid fa-terminal"></i>
+            <a href="/tests/6327850/logfile?filename=serial0.txt">
+                serial0.txt
+            </a>
+        <a href="/tests/6327850/file/serial0.txt" target="blank" title="Raw/download">
+            <i class="fa-solid fa-download"></i>
+        </a>
+    </li>
+    <li>
+            <i title="Logfile produced by this testrun" class="fa-solid fa-terminal"></i>
+            <a href="/tests/6327850/logfile?filename=serial_terminal.txt">
+                serial_terminal.txt
+            </a>
+        <a href="/tests/6327850/file/serial_terminal.txt" target="blank" title="Raw/download">
+            <i class="fa-solid fa-download"></i>
+        </a>
+    </li>
+    <li>
+            <i title="Logfile produced by this testrun" class="fa-solid fa-terminal"></i>
+            <a href="/tests/6327850/logfile?filename=serial_terminal_user.txt">
+                serial_terminal_user.txt
+            </a>
+        <a href="/tests/6327850/file/serial_terminal_user.txt" target="blank" title="Raw/download">
+            <i class="fa-solid fa-download"></i>
+        </a>
+    </li>
+</ul>
+
+    <h6>Uploaded logs
+    </h6>
+    <ul class="resultfile-list">
+    <li>
+            <i class="fa-regular fa-file"></i>
+            <a href="http://openqa-assets.opensuse.org/tests/6327850/file/logs_from_installation_system-y2logs.tar.bz2">
+                logs_from_installation_system-y2logs.tar.bz2
+            </a>
+    <li>
+            <i title="Logfile produced by this testrun" class="fa-solid fa-terminal"></i>
+            <a href="/tests/6327850/logfile?filename=updates_packagekit_gpk-basic_health_check.txt">
+                updates_packagekit_gpk-basic_health_check.txt
+            </a>
+        <a href="http://openqa-assets.opensuse.org/tests/6327850/file/updates_packagekit_gpk-basic_health_check.txt" target="blank" title="Raw/download">
+            <i class="fa-solid fa-download"></i>
+        </a>
+    </li>
+    <li>
+            <i title="Logfile produced by this testrun" class="fa-solid fa-terminal"></i>
+            <a href="/tests/6327850/logfile?filename=updates_packagekit_gpk-dmesg.txt">
+                updates_packagekit_gpk-dmesg.txt
+            </a>
+        <a href="http://openqa-assets.opensuse.org/tests/6327850/file/updates_packagekit_gpk-dmesg.txt" target="blank" title="Raw/download">
+            <i class="fa-solid fa-download"></i>
+        </a>
+    </li>
+    <li>
+            <i class="fa-regular fa-file"></i>
+            <a href="http://openqa-assets.opensuse.org/tests/6327850/file/updates_packagekit_gpk-gdm.tar.bz2">
+                updates_packagekit_gpk-gdm.tar.bz2
+            </a>
+    <li>
+            <i title="Logfile produced by this testrun" class="fa-solid fa-terminal"></i>
+            <a href="/tests/6327850/logfile?filename=updates_packagekit_gpk-journal.txt">
+                updates_packagekit_gpk-journal.txt
+            </a>
+        <a href="http://openqa-assets.opensuse.org/tests/6327850/file/updates_packagekit_gpk-journal.txt" target="blank" title="Raw/download">
+            <i class="fa-solid fa-download"></i>
+        </a>
+    </li>
+    <li>
+            <i title="Logfile produced by this testrun" class="fa-solid fa-terminal"></i>
+            <a href="/tests/6327850/logfile?filename=updates_packagekit_gpk-loadavg.txt">
+                updates_packagekit_gpk-loadavg.txt
+            </a>
+        <a href="http://openqa-assets.opensuse.org/tests/6327850/file/updates_packagekit_gpk-loadavg.txt" target="blank" title="Raw/download">
+            <i class="fa-solid fa-download"></i>
+        </a>
+    </li>
+    <li>
+            <i class="fa-regular fa-file"></i>
+            <a href="http://openqa-assets.opensuse.org/tests/6327850/file/updates_packagekit_gpk-pk_backend_zypp.tar.bz2">
+                updates_packagekit_gpk-pk_backend_zypp.tar.bz2
+            </a>
+    <li>
+            <i title="Logfile produced by this testrun" class="fa-solid fa-terminal"></i>
+            <a href="/tests/6327850/logfile?filename=updates_packagekit_gpk-psaxf.txt">
+                updates_packagekit_gpk-psaxf.txt
+            </a>
+        <a href="http://openqa-assets.opensuse.org/tests/6327850/file/updates_packagekit_gpk-psaxf.txt" target="blank" title="Raw/download">
+            <i class="fa-solid fa-download"></i>
+        </a>
+    </li>
+    <li>
+            <i class="fa-regular fa-file"></i>
+            <a href="http://openqa-assets.opensuse.org/tests/6327850/file/updates_packagekit_gpk-sysconfig.tar.gz">
+                updates_packagekit_gpk-sysconfig.tar.gz
+            </a>
+</ul>
+
+
+    <h5>Assets
+    </h5>
+    <ul id="asset-list">            <li>
+                    <a href="/tests/6327850/asset/other/Tumbleweed.x86_64-1.0-libvirt-Snapshot20261107.vagrant.libvirt.box" id="asset_102394223">
+                    Tumbleweed.x86_64-1.0-libvirt-Snapshot20261107.vagrant.libvirt.box
+</a>                    (430 MiB)
+                <a href="/admin/assets?search=Tumbleweed.x86_64-1.0-libvirt-Snapshot20261107.vagrant.libvirt.box" title="Find in assets table">
+                    <i class="fa-solid fa-table"></i>
+                </a>
+            </li>
+            <li>
+                    <a href="/tests/6327850/asset/other/Tumbleweed.x86_64-1.0-virtualbox-Snapshot20261107.vagrant.virtualbox.box" id="asset_102394222">
+                    Tumbleweed.x86_64-1.0-virtualbox-Snapshot20261107.vagrant.virtualbox.box
+</a>                    (443 MiB)
+                <a href="/admin/assets?search=Tumbleweed.x86_64-1.0-virtualbox-Snapshot20261107.vagrant.virtualbox.box" title="Find in assets table">
+                    <i class="fa-solid fa-table"></i>
+                </a>
+            </li>
+            <li>
+                    <a href="/tests/6327850/asset/iso/openSUSE-Tumbleweed-DVD-x86_64-Snapshot20261107-Media.iso" id="asset_102394224">
+                    openSUSE-Tumbleweed-DVD-x86_64-Snapshot20261107-Media.iso
+</a>                    (4.3 GiB)
+                <a href="/admin/assets?search=openSUSE-Tumbleweed-DVD-x86_64-Snapshot20261107-Media.iso" title="Find in assets table">
+                    <i class="fa-solid fa-table"></i>
+                </a>
+            </li>
+            <li>
+                    <a href="/tests/6327850/asset/other/openSUSE-Tumbleweed-DVD-x86_64-Snapshot20261107-Media.iso.sha256" id="asset_102393938">
+                    openSUSE-Tumbleweed-DVD-x86_64-Snapshot20261107-Media.iso.sha256
+</a>                    (124 Byte)
+                <a href="/admin/assets?search=openSUSE-Tumbleweed-DVD-x86_64-Snapshot20261107-Media.iso.sha256" title="Find in assets table">
+                    <i class="fa-solid fa-table"></i>
+                </a>
+            </li>
+            <li>
+                    <a href="/tests/6327850/asset/hdd/opensuse-15.2-x86_64-GM-cryptlvm@uefi.qcow2" id="asset_66444813">
+                    opensuse-15.2-x86_64-GM-cryptlvm@uefi.qcow2
+</a>                    (6.3 GiB)
+                <a href="/admin/assets?search=opensuse-15.2-x86_64-GM-cryptlvm%40uefi.qcow2" title="Find in assets table">
+                    <i class="fa-solid fa-table"></i>
+                </a>
+            </li>
+</ul>

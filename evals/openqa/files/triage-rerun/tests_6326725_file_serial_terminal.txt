@@ -1,0 +1,230 @@
+[2J[01;01H[=3h[2J[01;01H[2J[01;01H[=3h[2J[01;01H[2J[01;01H[=3h[2J[01;01HBdsDxe: loading Boot0001 "UEFI QEMU QEMU CD-ROM " from PciRoot(0x0)/Pci(0x7,0x0)/Scsi(0x0,0x0)
+BdsDxe: starting Boot0001 "UEFI QEMU QEMU CD-ROM " from PciRoot(0x0)/Pci(0x7,0x0)/Scsi(0x0,0x0)
+Please press 't' to show the boot menu on this console
+[2J[01;01H[=3h[2J[01;01H[2J[01;01H[=3h[2J[01;01H[2J[01;01H[=3h[2J[01;01HBdsDxe: loading Boot0008 "opensuse-secureboot" from HD(1,GPT,9494CC7F-F114-4B14-89BC-B5F5F1167419,0x800,0xFA000)/\EFI\opensuse\shim.efi
+BdsDxe: starting Boot0008 "opensuse-secureboot" from HD(1,GPT,9494CC7F-F114-4B14-89BC-B5F5F1167419,0x800,0xFA000)/\EFI\opensuse\shim.efi
+[0m[37m[44m[01;01H┘[01;01H┌──────────────────────────────────────────────────────────────────────────────────────────────────┐[02;01H│                                     Shim UEFI key management                                     │[03;01H│                                                                                                  │[04;01H│                                                                                                  │[05;01H│                                                                                                  │[06;01H│                                                                                                  │[07;01H│                                                                                                  │[08;01H│                                                                                                  │[09;01H│                                                                                                  │[10;01H│                                                                                                  │[11;01H│                                                                                                  │[12;01H│                                                                                                  │[13;01H│                                                                                                  │[14;01H│                                                                                                  │[15;01H│                                                                                                  │[16;01H│                                                                                                  │[17;01H│                                                                                                  │[18;01H│                                                                                                  │[19;01H│                                                                                                  │[20;01H│                                                                                                  │[21;01H│                                                                                                  │[22;01H│                                                                                                  │[23;01H│                                                                                                  │[24;01H│                                                                                                  │[25;01H│                                                                                                  │[26;01H│                                                                                                  │[27;01H│                                                                                                  │[28;01H│                                                                                                  │[29;01H│                                                                                                  │[30;01H└──────────────────────────────────────────────────────────────────────────────────────────────────┘[16;31HPress any key to perform MOK management[29;03HBooting in 10 seconds  [29;03HBooting in 9 seconds  [29;03HBooting in 8 seconds  [29;03HBooting in 7 seconds  [29;03HBooting in 6 seconds  [29;03HBooting in 5 seconds  [29;03HBooting in 4 seconds  [29;03HBooting in 3 seconds  [29;03HBooting in 2 seconds  [29;03HBooting in 1 second   [05;01H[0m[37m[40m[2J[01;01H[=3h[2J[01;01H[2J[01;01H[2J[01;01HEnter passphrase for hd0,gpt2 (f7d245d7-c48f-49ff-bb90-a2d49d96969e): 
+Attempting to decrypt master key...
+Slot 0 opened
+[0m[30m[40m[2J[01;01H[0m[37m[40mPlease press 't' to show the boot menu on this console
+[!p]104\[0m[?7h[1G[0J7[32766;32766H[6n8[!p]104\[0m[?7h[1G[0J7[32766;32766H[6n8]3008;start=086bce57bd314f3b91ec0719a2caf1fa;user=root;hostname=susetest;machineid=b2c7ab47de60407b95032871fc7a2e11;bootid=06196c4f88524c1c85b6cc9d76a052a5;pid=2386;pidfdid=2386;comm=(agetty);servicename=serial-getty@hvc0.service;invocationid=64df126aaa264ed68f9f60d28465d071;type=service\P+q6E616D65\
+Welcome to openSUSE Tumbleweed 20261106 - Kernel 7.3.1-1-default (hvc0).
+
+ens4: 10.0.2.15
+
+
+
+susetest login: 
+susetest login: root
+Password: 
+]3008;start=4d24beb551764c1e95317caec40493ad;user=root;hostname=susetest;machineid=b2c7ab47de60407b95032871fc7a2e11;bootid=06196c4f88524c1c85b6cc9d76a052a5;pid=2386;pidfdid=2386;comm=login;targetuser=root;sessionid=3;type=session\Have a lot of fun...
+[1msusetest:~ #[m(B export PAGER=cat TERM=dumb; stty cols 2048; exec $SHELL
+susetest:~ # PS1="# "
+# unset PROMPT_COMMAND
+# _OANM=1; export TERM=dumb; echo Gi8yV-$?-
+Gi8yV-0-
+# _OANM=1; echo Logged into $(tty); echo 1XrKo-$?-
+Logged into /dev/hvc0
+1XrKo-0-
+# _OANM=1; id bernhard; echo gUt20-$?-
+uid=1000(bernhard) gid=100(users) groups=100(users),5(tty),489(dialout)
+gUt20-0-
+# _OANM=1; chown bernhard /dev/ttyS0 && usermod -a -G tty,dialout,$(stat -c %G /dev/ttyS0) bernhard; echo avWL9-$?-
+avWL9-0-
+# _OANM=1; id bernhard; echo gUt20-$?-
+uid=1000(bernhard) gid=100(users) groups=100(users),5(tty),489(dialout)
+gUt20-0-
+# cat > /tmp/scriptS9bln.sh << 'EOT_S9bln'; echo S9bln-$?-
+> systemctl | grep serial-getty
+> EOT_S9bln
+S9bln-0-
+kernel-firmware-ath12k-20261009-1.1.noarch
+kernel-firmware-all-20250206-1.3.noarch
+kernel-firmware-qcom-20261031-1.1.noarch
+kernel-firmware-radeon-20260610-1.2.noarch
+kernel-firmware-realtek-20261104-1.1.noarch
+kernel-firmware-ti-20260610-1.2.noarch
+kernel-firmware-ueagle-20260703-1.1.noarch
+kernel-firmware-usb-network-20261012-1.1.noarch
+kernel-firmware-i915-20261031-1.1.noarch
+kernel-firmware-dpaa2-20260610-1.2.noarch
+kernel-firmware-liquidio-20260610-1.2.noarch
+kernel-firmware-brcm-20260915-1.1.noarch
+kernel-firmware-network-20261031-1.1.noarch
+kernel-firmware-chelsio-20260610-1.2.noarch
+kernel-firmware-amdgpu-20261031-1.1.noarch
+kernel-firmware-sound-20261022-1.1.noarch
+kernel-firmware-marvell-20260610-1.2.noarch
+kernel-firmware-bnx2-20260610-1.2.noarch
+kernel-firmware-media-20261031-1.1.noarch
+kernel-firmware-atheros-20260610-1.2.noarch
+kernel-firmware-mediatek-20261031-1.1.noarch
+kernel-firmware-nfp-20260610-1.2.noarch
+kernel-firmware-prestera-20260610-1.2.noarch
+kernel-firmware-mwifiex-20260926-1.1.noarch
+kernel-firmware-qlogic-20260731-2.1.noarch
+kernel-firmware-ath10k-20261022-1.1.noarch
+kernel-firmware-bluetooth-20261104-1.1.noarch
+kernel-firmware-intel-20261104-1.1.noarch
+kernel-firmware-mellanox-20260610-1.2.noarch
+kernel-firmware-ath11k-20261031-1.1.noarch
+kernel-firmware-iwlwifi-20260926-1.1.noarch
+kernel-firmware-nvidia-20261014-1.1.noarch
+kernel-firmware-platform-20261026-1.1.noarch
+kernel-firmware-serial-20260610-2.1.noarch
+kernel-default-7.3.1-1.1.x86_64
+kernel-default-7.3.1-1.1.x86_64
+kernel-firmware-all-20250206-1.3.noarch
+kernel-firmware-amdgpu-20261031-1.1.noarch
+kernel-firmware-ath10k-20261022-1.1.noarch
+kernel-firmware-ath11k-20261031-1.1.noarch
+kernel-firmware-ath12k-20261009-1.1.noarch
+kernel-firmware-atheros-20260610-1.2.noarch
+kernel-firmware-bluetooth-20261104-1.1.noarch
+kernel-firmware-bnx2-20260610-1.2.noarch
+kernel-firmware-brcm-20260915-1.1.noarch
+kernel-firmware-chelsio-20260610-1.2.noarch
+kernel-firmware-dpaa2-20260610-1.2.noarch
+kernel-firmware-i915-20261031-1.1.noarch
+kernel-firmware-intel-20261104-1.1.noarch
+kernel-firmware-iwlwifi-20260926-1.1.noarch
+kernel-firmware-liquidio-20260610-1.2.noarch
+kernel-firmware-marvell-20260610-1.2.noarch
+kernel-firmware-media-20261031-1.1.noarch
+kernel-firmware-mediatek-20261031-1.1.noarch
+kernel-firmware-mellanox-20260610-1.2.noarch
+kernel-firmware-mwifiex-20260926-1.1.noarch
+kernel-firmware-network-20261031-1.1.noarch
+kernel-firmware-nfp-20260610-1.2.noarch
+kernel-firmware-nvidia-20261014-1.1.noarch
+kernel-firmware-platform-20261026-1.1.noarch
+kernel-firmware-prestera-20260610-1.2.noarch
+kernel-firmware-qcom-20261031-1.1.noarch
+kernel-firmware-qlogic-20260731-2.1.noarch
+kernel-firmware-radeon-20260610-1.2.noarch
+kernel-firmware-realtek-20261104-1.1.noarch
+kernel-firmware-serial-20260610-2.1.noarch
+kernel-firmware-sound-20261022-1.1.noarch
+kernel-firmware-ti-20260610-1.2.noarch
+kernel-firmware-ueagle-20260703-1.1.noarch
+kernel-firmware-usb-network-20261012-1.1.noarch
+2026-11-07 13:44:06 <1> susetest(28346) [Progress++] progressdata.cc(report):95 {#26|Installing: python313-ptyprocess-0.7.0-6.1.noarch} END
+2026-11-07 13:44:07 <1> susetest(28346) [Progress++] progressdata.cc(report):95 {#27|Installing: python313-pyasn1-modules-0.4.2-2.4.noarch} END
+2026-11-07 13:44:07 <1> susetest(28346) [Progress++] progressdata.cc(report):95 {#28|Installing: python313-pycares-5.2.1-1.1.x86_64} END
+2026-11-07 13:44:07 <1> susetest(28346) [Progress++] progressdata.cc(report):95 {#29|Installing: python313-pylsqpack-0.3.24-1.4.x86_64} END
+2026-11-07 13:44:07 <1> susetest(28346) [Progress++] progressdata.cc(report):95 {#30|Installing: python313-scrypt-0.8.27-2.6.x86_64} END
+2026-11-07 13:44:07 <1> susetest(28346) [Progress++] progressdata.cc(report):95 {#31|Installing: python313-simplejson-4.1.1-1.4.x86_64} END
+2026-11-07 13:44:07 <1> susetest(28346) [Progress++] progressdata.cc(report):95 {#32|Installing: python313-sniffio-1.3.1-1.9.noarch} END
+2026-11-07 13:44:07 <1> susetest(28346) [Progress++] progressdata.cc(report):95 {#33|Installing: python313-socksio-1.0.0-2.1.noarch} END
+2026-11-07 13:44:07 <1> susetest(28346) [Progress++] progressdata.cc(report):95 {#34|Installing: python313-tzdata-2026.5-1.1.noarch} END
+2026-11-07 13:44:07 <1> susetest(28346) [Progress++] progressdata.cc(report):95 {#35|Installing: python313-zope.event-6.2-1.2.noarch} END
+2026-11-07 13:44:07 <1> susetest(28346) [Progress++] progressdata.cc(report):95 {#36|Installing: python313-zope.interface-8.6-1.1.x86_64} END
+2026-11-07 13:44:08 <1> susetest(28346) [Progress++] progressdata.cc(report):95 {#37|Installing: python313-zypp-plugin-0.6.6-1.4.noarch} END
+2026-11-07 13:44:08 <1> susetest(28346) [Progress++] progressdata.cc(report):95 {#38|Installing: python313-numpy-2.5.3-1.1.x86_64} END
+2026-11-07 13:44:08 <1> susetest(28346) [Progress++] progressdata.cc(report):95 {#39|Installing: libgit2-1_9-1.9.7-2.1.x86_64} END
+2026-11-07 13:44:08 <1> susetest(28346) [Progress++] progressdata.cc(report):95 {#40|Installing: python313-argon2-cffi-25.1.0-1.5.noarch} END
+2026-11-07 13:44:08 <1> susetest(28346) [Progress++] progressdata.cc(report):95 {#41|Installing: python313-contextvars-2.4-7.4.noarch} END
+2026-11-07 13:44:09 <1> susetest(28346) [Progress++] progressdata.cc(report):95 {#42|Installing: python313-markdown-it-py-4.2.0-1.2.noarch} END
+2026-11-07 13:44:09 <1> susetest(28346) [Progress++] progressdata.cc(report):95 {#43|Installing: python313-pexpect-4.9.0-5.1.noarch} END
+2026-11-07 13:44:09 <1> susetest(28346) [Progress++] progressdata.cc(report):95 {#44|Installing: python313-service_identity-26.1.0-1.2.noarch} END
+2026-11-07 13:44:09 <1> susetest(28346) [Progress++] progressdata.cc(report):95 {#45|Installing: python313-httpcore-1.0.9-1.5.noarch} END
+2026-11-07 13:44:09 <1> susetest(28346) [Progress++] progressdata.cc(report):95 {#46|Installing: python313-Babel-2.18.0-1.4.noarch} END
+2026-11-07 13:44:10 <1> susetest(28346) [Progress++] progressdata.cc(report):95 {#47|Installing: python313-incremental-24.11.0-1.3.noarch} END
+2026-11-07 13:44:10 <1> susetest(28346) [Progress++] progressdata.cc(report):95 {#48|Installing: python313-pygit2-1.19.3-2.1.x86_64} END
+2026-11-07 13:44:10 <1> susetest(28346) [Progress++] progressdata.cc(report):95 {#49|Installing: python313-passlib-1.7.4-9.4.noarch} END
+2026-11-07 13:44:10 <1> susetest(28346) [Progress++] progressdata.cc(report):95 {#50|Installing: python313-rich-15.0.0-3.1.noarch} END
+2026-11-07 13:44:10 <1> susetest(28346) [Progress++] progressdata.cc(report):95 {#51|Installing: python313-aioquic-1.3.0-1.6.x86_64} END
+2026-11-07 13:44:10 <1> susetest(28346) [Progress++] progressdata.cc(report):95 {#52|Installing: python313-Jinja2-3.1.6-2.4.x86_64} END
+2026-11-07 13:44:10 <1> susetest(28346) [Progress++] progressdata.cc(report):95 {#53|Installing: python313-Automat-25.4.16-2.4.noarch} END
+2026-11-07 13:44:10 <1> susetest(28346) [Progress++] progressdata.cc(report):95 {#54|Installing: python313-httpx-0.28.1-5.1.noarch} END
+2026-11-07 13:44:10 <1> susetest(28346) [Progress++] progressdata.cc(report):95 {#55|Installing: python313-Twisted-tls-26.10.0-1.1.noarch} END
+2026-11-07 13:44:11 <1> susetest(28346) [Progress++] progressdata.cc(report):95 {#56|Installing: python313-Twisted-26.10.0-1.1.noarch} END
+2026-11-07 13:44:11 <1> susetest(28346) [Progress++] progressdata.cc(report):95 {#57|Installing: python313-dnspython-2.9.0-1.1.noarch} END
+2026-11-07 13:44:11 <1> susetest(28346) [Progress++] progressdata.cc(report):95 {#58|Installing: python313-tornado6-6.6-1.1.x86_64} END
+2026-11-07 13:44:12 <1> susetest(28346) [Progress++] progressdata.cc(report):95 {#59|Installing: python313-gevent-26.8.0-1.1.x86_64} END
+2026-11-07 13:44:12 <1> susetest(28346) [Progress++] progressdata.cc(report):95 {#60|Installing: python313-pyzmq-27.2.0-1.1.x86_64} END
+2026-11-07 13:44:13 <1> susetest(28346) [Progress++] progressdata.cc(report):95 {#61|Installing: python313-salt-3006.0-73.1.x86_64} END
+2026-11-07 13:44:13 <1> susetest(28346) [Progress++] progressdata.cc(report):95 {#62|Installing: salt-3006.0-73.1.x86_64} END
+2026-11-07 13:44:13 <1> susetest(28346) [Progress++] progressdata.cc(report):95 {#63|Installing: salt-minion-3006.0-73.1.x86_64} END
+2026-11-07 13:44:13 <1> susetest(28346) [Progress++] progressdata.cc(report):95 {#64|Installing: salt-master-3006.0-73.1.x86_64} END
+2026-11-07 13:44:19 <1> susetest(30618) [Progress++] progressdata.cc(report):95 {#2|Installing: python313-iniconfig-2.3.1-1.1.noarch} END
+2026-11-07 13:44:19 <1> susetest(30618) [Progress++] progressdata.cc(report):95 {#3|Installing: python313-pluggy-1.6.0-2.7.noarch} END
+2026-11-07 13:44:19 <1> susetest(30618) [Progress++] progressdata.cc(report):95 {#4|Installing: python313-pytest-9.0.3-1.2.noarch} END
+2026-11-07 13:45:34 <1> susetest(34489) [Progress++] progressdata.cc(report):95 {#2|Installing: glibc-32bit-2.44-3.1.x86_64} END
+2026-11-07 13:45:34 <1> susetest(34489) [Progress++] progressdata.cc(report):95 {#3|Installing: glibc-gconv-modules-extra-32bit-2.44-3.1.x86_64} END
+2026-11-07 13:45:34 <1> susetest(34489) [Progress++] progressdata.cc(report):95 {#4|Installing: samba-client-32bit-4.25.1+git.476.bfc358351cb-1.1.x86_64} END
+2026-11-07 13:45:34 <1> susetest(34489) [Progress++] progressdata.cc(report):95 {#5|Installing: nss-mdns-32bit-0.15.1-2.5.x86_64} END
+2026-11-07 13:48:31 <1> susetest(50000) [Progress++] progressdata.cc(report):95 {#2|Installing: sshfs-3.7.6-1.3.x86_64} END
+2026-11-07 13:48:36 <1> susetest(52986) [Progress++] progressdata.cc(report):95 {#2|Installing: xdelta3-3.1.0-6.5.x86_64} END
+2026-11-07 13:48:43 <1> susetest(56049) [Progress++] progressdata.cc(report):95 {#2|Installing: lua-resty-core-0.1.31-1.4.noarch} END
+2026-11-07 13:48:43 <1> susetest(56049) [Progress++] progressdata.cc(report):95 {#3|Installing: lua-resty-lrucache-0.15-1.4.noarch} END
+2026-11-07 13:48:43 <1> susetest(56049) [Progress++] progressdata.cc(report):95 {#4|Installing: lua-resty-mysql-0.31-1.1.noarch} END
+2026-11-07 13:48:43 <1> susetest(56049) [Progress++] progressdata.cc(report):95 {#5|Installing: lua-resty-redis-0.33-1.3.noarch} END
+2026-11-07 13:48:43 <1> susetest(56049) [Progress++] progressdata.cc(report):95 {#6|Installing: luajit-2.1.20250826-3.3.x86_64} END
+2026-11-07 13:48:43 <1> susetest(56049) [Progress++] progressdata.cc(report):95 {#7|Installing: luajit-cjson-2.1.0.16-1.4.x86_64} END
+2026-11-07 13:48:43 <1> susetest(56049) [Progress++] progressdata.cc(report):95 {#8|Installing: nginx-1.31.8-1.1.x86_64} END
+2026-11-07 13:48:43 <1> susetest(56049) [Progress++] progressdata.cc(report):95 {#9|Installing: nginx-module-echo-0.64-1.13.x86_64} END
+2026-11-07 13:48:43 <1> susetest(56049) [Progress++] progressdata.cc(report):95 {#10|Installing: nginx-module-lua-0.10.29-1.20.x86_64} END
+2026-11-07 14:05:41 <1> susetest(64516) [Progress++] progressdata.cc(report):95 {#2|Installing: libc++abi1-23.1.4-1.2.x86_64} END
+2026-11-07 14:05:42 <1> susetest(64516) [Progress++] progressdata.cc(report):95 {#3|Installing: libc++1-23.1.4-1.2.x86_64} END
+2026-11-07 14:05:47 <1> susetest(64516) [Progress++] progressdata.cc(report):95 {#4|Installing: chromium-157.0.8103.38-1.1.x86_64} END
+2026-11-07 14:06:58 <1> susetest(68314) [Progress++] progressdata.cc(report):95 {#2|Installing: libGraphicsMagick3-config-1.3.49-2.1.x86_64} END
+2026-11-07 14:06:58 <1> susetest(68314) [Progress++] progressdata.cc(report):95 {#3|Installing: libGraphicsMagick-Q16-3-1.3.49-2.1.x86_64} END
+2026-11-07 14:06:59 <1> susetest(68314) [Progress++] progressdata.cc(report):95 {#4|Installing: GraphicsMagick-1.3.49-2.1.x86_64} END
+2026-11-07 14:15:45 <1> susetest(75770) [Progress++] progressdata.cc(report):95 {#2|Installing: libGraphicsMagick++-Q16-12-1.3.49-2.1.x86_64} END
+2026-11-07 14:15:45 <1> susetest(75770) [Progress++] progressdata.cc(report):95 {#3|Installing: libgsl28-2.8-5.4.x86_64} END
+2026-11-07 14:15:45 <1> susetest(75770) [Progress++] progressdata.cc(report):95 {#4|Installing: libgslcblas0-2.8-5.4.x86_64} END
+2026-11-07 14:15:45 <1> susetest(75770) [Progress++] progressdata.cc(report):95 {#5|Installing: libimagequant0_4-4.4.1-1.1.x86_64} END
+2026-11-07 14:15:45 <1> susetest(75770) [Progress++] progressdata.cc(report):95 {#6|Installing: libpotrace0-1.16-2.8.x86_64} END
+2026-11-07 14:15:45 <1> susetest(75770) [Progress++] progressdata.cc(report):95 {#7|Installing: python313-cssselect-1.5.0-1.1.noarch} END
+2026-11-07 14:15:45 <1> susetest(75770) [Progress++] progressdata.cc(report):95 {#8|Installing: python313-olefile-0.47-1.8.noarch} END
+2026-11-07 14:15:46 <1> susetest(75770) [Progress++] progressdata.cc(report):95 {#9|Installing: python313-scour-0.38.2-3.4.noarch} END
+2026-11-07 14:15:46 <1> susetest(75770) [Progress++] progressdata.cc(report):95 {#10|Installing: python313-webencodings-0.5.1-6.4.noarch} END
+2026-11-07 14:15:46 <1> susetest(75770) [Progress++] progressdata.cc(report):95 {#11|Installing: lib2geom1_4_0-1.4.0-3.5.x86_64} END
+2026-11-07 14:15:46 <1> susetest(75770) [Progress++] progressdata.cc(report):95 {#12|Installing: python313-lxml-6.1.1-2.2.x86_64} END
+2026-11-07 14:15:46 <1> susetest(75770) [Progress++] progressdata.cc(report):95 {#13|Installing: python313-Pillow-13.0.0-2.1.x86_64} END
+2026-11-07 14:15:46 <1> susetest(75770) [Progress++] progressdata.cc(report):95 {#14|Installing: python313-tinycss2-1.5.1-1.4.noarch} END
+2026-11-07 14:15:49 <1> susetest(75770) [Progress++] progressdata.cc(report):95 {#15|Installing: inkscape-1.4.4+git2.3454cb1dab-1.5.x86_64} END
+2026-11-07 14:15:49 <1> susetest(75770) [Progress++] progressdata.cc(report):95 {#16|Installing: inkscape-extensions-extra-1.4.4+git2.3454cb1dab-1.5.x86_64} END
+2026-11-07 14:15:49 <1> susetest(75770) [Progress++] progressdata.cc(report):95 {#17|Installing: inkscape-extensions-gimp-1.4.4+git2.3454cb1dab-1.5.x86_64} END
+2026-11-07 14:19:56 <1> susetest(82425) [Progress++] progressdata.cc(report):95 {#2|Installing: libBasicUsageEnvironment2-2026.10.29-1.1.x86_64} END
+2026-11-07 14:19:56 <1> susetest(82425) [Progress++] progressdata.cc(report):95 {#3|Installing: libUsageEnvironment3-2026.10.29-1.1.x86_64} END
+2026-11-07 14:19:56 <1> susetest(82425) [Progress++] progressdata.cc(report):95 {#4|Installing: libaa1-1.4.0-518.5.x86_64} END
+2026-11-07 14:19:56 <1> susetest(82425) [Progress++] progressdata.cc(report):95 {#5|Installing: libcaca0-0.99.beta20+git.1776622070.7c8e333-2.3.x86_64} END
+2026-11-07 14:19:57 <1> susetest(82425) [Progress++] progressdata.cc(report):95 {#6|Installing: libcddb2-1.3.2-30.5.x86_64} END
+2026-11-07 14:19:57 <1> susetest(82425) [Progress++] progressdata.cc(report):95 {#7|Installing: libchromaprint1-1.6.2-1.1.x86_64} END
+2026-11-07 14:19:57 <1> susetest(82425) [Progress++] progressdata.cc(report):95 {#8|Installing: libdvbpsi10-1.3.3-1.23.x86_64} END
+2026-11-07 14:19:57 <1> susetest(82425) [Progress++] progressdata.cc(report):95 {#9|Installing: libebml5-1.4.7-1.1.x86_64} END
+2026-11-07 14:19:57 <1> susetest(82425) [Progress++] progressdata.cc(report):95 {#10|Installing: libgroupsock33-2026.10.29-1.1.x86_64} END
+2026-11-07 14:19:57 <1> susetest(82425) [Progress++] progressdata.cc(report):95 {#11|Installing: libidn12-1.44-1.3.x86_64} END
+2026-11-07 14:19:57 <1> susetest(82425) [Progress++] progressdata.cc(report):95 {#12|Installing: libixml22-22.2.0-1.1.x86_64} END
+2026-11-07 14:19:57 <1> susetest(82425) [Progress++] progressdata.cc(report):95 {#13|Installing: liblirc_client0-0.10.2-2.5.x86_64} END
+2026-11-07 14:19:58 <1> susetest(82425) [Progress++] progressdata.cc(report):95 {#14|Installing: libliveMedia122-2026.10.29-1.1.x86_64} END
+2026-11-07 14:19:58 <1> susetest(82425) [Progress++] progressdata.cc(report):95 {#15|Installing: libplacebo264-5.264.1-5.5.x86_64} END
+2026-11-07 14:19:58 <1> susetest(82425) [Progress++] progressdata.cc(report):95 {#16|Installing: libprotobuf-lite36_2_0-36.2-1.1.x86_64} END
+2026-11-07 14:19:58 <1> susetest(82425) [Progress++] progressdata.cc(report):95 {#17|Installing: libtheora1-1.2.0-3.1.x86_64} END
+2026-11-07 14:19:58 <1> susetest(82425) [Progress++] progressdata.cc(report):95 {#18|Installing: libva-wayland2-2.24.1-1.1.x86_64} END
+2026-11-07 14:19:58 <1> susetest(82425) [Progress++] progressdata.cc(report):95 {#19|Installing: libxcb-composite0-1.17.0-2.7.x86_64} END
+2026-11-07 14:19:58 <1> susetest(82425) [Progress++] progressdata.cc(report):95 {#20|Installing: gimp-plugin-aa-3.2.6-4.2.x86_64} END
+2026-11-07 14:19:58 <1> susetest(82425) [Progress++] progressdata.cc(report):95 {#21|Installing: libmatroska7-1.7.2-1.1.x86_64} END
+2026-11-07 14:19:59 <1> susetest(82425) [Progress++] progressdata.cc(report):95 {#22|Installing: libvlccore9-3.0.24-6.2.x86_64} END
+2026-11-07 14:19:59 <1> susetest(82425) [Progress++] progressdata.cc(report):95 {#23|Installing: libupnp22-22.2.0-1.1.x86_64} END
+2026-11-07 14:19:59 <1> susetest(82425) [Progress++] progressdata.cc(report):95 {#24|Installing: libshout3-2.4.6-3.7.x86_64} END
+2026-11-07 14:19:59 <1> susetest(82425) [Progress++] progressdata.cc(report):95 {#25|Installing: libvlc5-3.0.24-6.2.x86_64} END
+2026-11-07 14:20:00 <1> susetest(82425) [Progress++] progressdata.cc(report):95 {#26|Installing: vlc-noX-3.0.24-6.2.x86_64} END
+2026-11-07 14:20:00 <1> susetest(82425) [Progress++] progressdata.cc(report):95 {#27|Installing: vlc-qt-3.0.24-6.2.x86_64} END
+2026-11-07 14:20:00 <1> susetest(82425) [Progress++] progressdata.cc(report):95 {#28|Installing: vlc-plugins-desktop-3.0.24-6.2.x86_64} END
+2026-11-07 14:20:01 <1> susetest(82425) [Progress++] progressdata.cc(report):95 {#29|Installing: vlc-codec-gstreamer-3.0.24-6.2.x86_64} END
+2026-11-07 14:20:02 <1> susetest(82425) [Progress++] progressdata.cc(report):95 {#30|Installing: vlc-3.0.24-6.2.x86_64} END
+SCRIPT_FINISHEDnwYKD-0-
+# _OANM=1; cd; echo SYy2c-$?-
+SYy2c-0-
+# _OANM=1; test -d /sys/fs/selinux; echo 0TMpX-$?-
+0TMpX-1-
+# clear
+# 
+Broadcast message from bernhard@susetest (Sat 2026-11-07 14:23:35 EST):
+
+The system will power off now!
+
+]3008;end=2421b24d4ebb46dbb12a135704102532\[!p]104\[0m[?7h[1G[0J7[32766;32766H[6n8]3008;end=bbfd26ac8e8946b5aa20d3c2cf86136e\

@@ -1,0 +1,159 @@
+[2J[01;01H[=3h[2J[01;01H[2J[01;01H[=3h[2J[01;01H[2J[01;01H[=3h[2J[01;01H[2J[01;01H[=3h[2J[01;01HBdsDxe: loading Boot0001 "UEFI QEMU QEMU CD-ROM " from PciRoot(0x0)/Pci(0x7,0x0)/Scsi(0x0,0x0)
+BdsDxe: starting Boot0001 "UEFI QEMU QEMU CD-ROM " from PciRoot(0x0)/Pci(0x7,0x0)/Scsi(0x0,0x0)
+Please press 't' to show the boot menu on this console
+[    0.000000][    T0] Linux version 7.3.1-1-default (geeko@buildhost) (gcc (SUSE Linux) 16.2.1 20260929, GNU ld (GNU Binutils; openSUSE Tumbleweed) 2.47.0.20260921-2) #1 SMP PREEMPT_DYNAMIC Sat Oct 31 11:17:21 UTC 2026 (8815021)
+[    0.000000][    T0] Command line: BOOT_IMAGE=/boot/x86_64/loader/linux splash=silent upgrade=1 Y2DEBUG=1 vga=791 video=1024x768 plymouth.ignore-serial-consoles console=ttyS0 console=tty linuxrc.log=/dev/ttyS0 linuxrc.core=/dev/ttyS0 linuxrc.debug=4,trace reboot_timeout=0 kernel.softlockup_panic=1
+[    0.000000][    T0] x86 CPU feature dependency check failure: CPU0 has '18*32+31' enabled but '18*32+26' disabled. Kernel might be fine, but no guarantees.
+[    0.000000][    T0] BIOS-provided physical RAM map:
+[    0.000000][    T0] BIOS-e820: [mem 0x0000000000000000-0x000000000009ffff]  System RAM
+[    0.000000][    T0] BIOS-e820: [gap 0x00000000000a0000-0x00000000000fffff]
+[    0.000000][    T0] BIOS-e820: [mem 0x0000000000100000-0x00000000007fffff]  System RAM
+[    0.000000][    T0] BIOS-e820: [mem 0x0000000000800000-0x0000000000807fff]  ACPI NVS
+[    0.000000][    T0] BIOS-e820: [mem 0x0000000000808000-0x000000000080afff]  System RAM
+[    0.000000][    T0] BIOS-e820: [mem 0x000000000080b000-0x000000000080bfff]  ACPI NVS
+[    0.000000][    T0] BIOS-e820: [mem 0x000000000080c000-0x0000000000811fff]  System RAM
+[    0.000000][    T0] BIOS-e820: [mem 0x0000000000812000-0x00000000008fffff]  ACPI NVS
+[    0.000000][    T0] BIOS-e820: [mem 0x0000000000900000-0x000000007ea06fff]  System RAM
+[    0.000000][    T0] BIOS-e820: [mem 0x000000007ea07000-0x000000007ea0afff]  device reserved
+[    0.000000][    T0] BIOS-e820: [mem 0x000000007ea0b000-0x000000007ea11fff]  System RAM
+[    0.000000][    T0] BIOS-e820: [mem 0x000000007ea12000-0x000000007ebe6fff]  device reserved
+[    0.000000][    T0] BIOS-e820: [mem 0x000000007ebe7000-0x000000007f8ecfff]  System RAM
+[    0.000000][    T0] BIOS-e820: [mem 0x000000007f8ed000-0x000000007fb6cfff]  device reserved
+[    0.000000][    T0] BIOS-e820: [mem 0x000000007fb6d000-0x000000007fb7efff]  ACPI data
+[    0.000000][    T0] BIOS-e820: [mem 0x000000007fb7f000-0x000000007fbfefff]  ACPI NVS
+[    0.000000][    T0] BIOS-e820: [mem 0x000000007fbff000-0x000000007feaefff]  System RAM
+[    0.000000][    T0] BIOS-e820: [mem 0x000000007feaf000-0x000000007feb2fff]  device reserved
+[    0.000000][    T0] BIOS-e820: [mem 0x000000007feb3000-0x000000007feb4fff]  ACPI NVS
+[    0.000000][    T0] BIOS-e820: [mem 0x000000007feb5000-0x000000007fef3fff]  System RAM
+[    0.000000][    T0] BIOS-e820: [mem 0x000000007fef4000-0x000000007ff77fff]  device reserved
+[    0.000000][    T0] BIOS-e820: [mem 0x000000007ff78000-0x000000007fffffff]  ACPI NVS
+[    0.000000][    T0] BIOS-e820: [gap 0x0000000080000000-0x00000000feffbfff]
+[    0.000000][    T0] BIOS-e820: [mem 0x00000000feffc000-0x00000000feffffff]  device reserved
+[    0.000000][    T0] BIOS-e820: [gap 0x00000000ff000000-0x00000000ffbfffff]
+[    0.000000][    T0] BIOS-e820: [mem 0x00000000ffc00000-0x00000000ffffffff]  device reserved
+[    0.000000][    T0] BIOS-e820: [gap 0x0000000100000000-0x000000fcffffffff]
+[    0.000000][    T0] BIOS-e820: [mem 0x000000fd00000000-0x000000ffffffffff]  device reserved
+[    0.000000][    T0] NX (Execute Disable) protection: active
+[    0.000000][    T0] APIC: Static calls initialized
+[    0.000000][    T0] efi: EFI v2.7 by EDK II
+[    0.000000][    T0] efi: SMBIOS=0x7f972000 ACPI=0x7fb7e000 ACPI 2.0=0x7fb7e014 MEMATTR=0x7d6bd018 MOKvar=0x7f969000 INITRD=0x7d695a98 RNG=0x7fb74018 
+[    0.000000][    T0] random: crng init done
+[  456.013926] PackageKit[4011]: [0;90m[0;38:5:245min /6_cdbcecea for update-packages package typelib-1_0-PeasGtk-1_0;1.38.1-1.4;x86_64;OSS was installing for uid 1000[0m
+[  456.020211] PackageKit[4011]: [0;90m[0;38:5:245min /6_cdbcecea for update-packages package libpeas-gtk-1_0-0;1.24.1-lp152.1.5;x86_64;installed: was removing for uid 1000[0m
+[  456.024631] PackageKit[4011]: [0;90m[0;38:5:245min /6_cdbcecea for update-packages package libpeas-1_0-0;1.24.1-lp152.1.5;x86_64;installed: was removing for uid 1000[0m
+[  456.028405] PackageKit[4011]: [0;90m[0;38:5:245min /6_cdbcecea for update-packages package gtkspell-lang;2.0.16-25.4;noarch;OSS was installing for uid 1000[0m
+[  456.031758] PackageKit[4011]: [0;90m[0;38:5:245min /6_cdbcecea for update-packages package sac;1.3-15.5;noarch;OSS was installing for uid 1000[0m
+[  456.034576] PackageKit[4011]: [0;90m[0;38:5:245min /6_cdbcecea for update-packages package apache-commons-logging;1.4.0-1.3;noarch;OSS was installing for uid 1000[0m
+[  456.041236] PackageKit[4011]: [0;90m[0;38:5:245min /6_cdbcecea for update-packages package readcd;3.02~a10-53.5;x86_64;OSS was installing for uid 1000[0m
+[  456.047158] PackageKit[4011]: [0;90m[0;38:5:245min /6_cdbcecea for update-packages package gnome-video-effects;0.6.0-1.7;noarch;OSS was installing for uid 1000[0m
+[  456.053092] PackageKit[4011]: [0;90m[0;38:5:245min /6_cdbcecea for update-packages package graphviz-gd;16.1.0-2.2;x86_64;OSS was installing for uid 1000[0m
+[  456.059188] PackageKit[4011]: [0;90m[0;38:5:245min /6_cdbcecea for update-packages package libgraphviz6;2.40.1-lp152.6.107;x86_64;installed: was removing for uid 1000[0m
+[  456.065203] PackageKit[4011]: [0;90m[0;38:5:245min /6_cdbcecea for update-packages package supportutils;3.2.14.2-1.2;noarch;OSS was installing for uid 1000[0m
+[  456.069753] PackageKit[4011]: [0;90m[0;38:5:245min /6_cdbcecea for update-packages package xorg-x11;7.6_1-17.3;noarch;OSS was installing for uid 1000[0m
+[  456.073383] PackageKit[4011]: [0;90m[0;38:5:245min /6_cdbcecea for update-packages package libquvi-scripts;0.9.20131130-4.14;x86_64;OSS was installing for uid 1000[0m
+[  456.077223] PackageKit[4011]: [0;90m[0;38:5:245min /6_cdbcecea for update-packages package enchant-2-backend-voikko;2.8.21-2.1;x86_64;OSS was installing for uid 1000[0m
+[  456.081177] PackageKit[4011]: [0;90m[0;38:5:245min /6_cdbcecea for update-packages package urlscan;1.2.0-1.1;noarch;OSS was installing for uid 1000[0m
+[  456.084310] PackageKit[4011]: [0;90m[0;38:5:245min /6_cdbcecea for update-packages package typelib-1_0-TelepathyLogger-0_2;0.8.2-11.4;x86_64;OSS was installing for uid 1000[0m
+[  456.087974] PackageKit[4011]: [0;90m[0;38:5:245min /6_cdbcecea for update-packages package telepathy-logger;0.8.2-11.4;x86_64;OSS was installing for uid 1000[0m
+[  456.091289] PackageKit[4011]: [0;90m[0;38:5:245min /6_cdbcecea for update-packages package flute;1.3.0-6.18;noarch;OSS was installing for uid 1000[0m
+[  456.094806] PackageKit[4011]: [0;90m[0;38:5:245min /6_cdbcecea for update-packages package libbase;1.1.6-2.9;noarch;OSS was installing for uid 1000[0m
+[  456.098409] PackageKit[4011]: [0;90m[0;38:5:245min /6_cdbcecea for update-packages package cdrecord;3.02~a10-53.5;x86_64;OSS was installing for uid 1000[0m
+[  456.101751] PackageKit[4011]: [0;90m[0;38:5:245min /6_cdbcecea for update-packages package libschily1_0;3.02~a09-lp152.5.10;x86_64;installed: was removing for uid 1000[0m
+[  456.105222] PackageKit[4011]: [0;90m[0;38:5:245min /6_cdbcecea for update-packages package cheese;44.1+12-1.7;x86_64;OSS was installing for uid 1000[0m
+[  456.108478] PackageKit[4011]: [0;90m[0;38:5:245min /6_cdbcecea for update-packages package libgnome-desktop-3-18;3.34.4-lp152.1.4;x86_64;installed: was removing for uid 1000[0m
+[  456.112306] PackageKit[4011]: [0;90m[0;38:5:245min /6_cdbcecea for update-packages package graphviz-gnome;16.1.0-2.2;x86_64;OSS was installing for uid 1000[0m
+[  456.116029] PackageKit[4011]: [0;90m[0;38:5:245min /6_cdbcecea for update-packages package libquvi-0_9-0_9_4;0.9.4-8.9;x86_64;OSS was installing for uid 1000[0m
+[  456.119454] PackageKit[4011]: [0;90m[0;38:5:245min /6_cdbcecea for update-packages package mutt;2.4.3-1.1;x86_64;OSS was installing for uid 1000[0m
+[  456.122575] PackageKit[4011]: [0;90m[0;38:5:245min /6_cdbcecea for update-packages package mutt-doc;2.4.3-1.1;noarch;OSS was installing for uid 1000[0m
+[  456.126124] PackageKit[4011]: [0;90m[0;38:5:245min /6_cdbcecea for update-packages package polari;50.0-1.3;x86_64;OSS was installing for uid 1000[0m
+[  456.129407] PackageKit[4011]: [0;90m[0;38:5:245min /6_cdbcecea for update-packages package typelib-1_0-WebKit2-4_0;2.28.2-lp152.1.13;x86_64;installed: was removing for uid 1000[0m
+[  456.133223] PackageKit[4011]: [0;90m[0;38:5:245min /6_cdbcecea for update-packages package typelib-1_0-JavaScriptCore-4_0;2.28.2-lp152.1.13;x86_64;installed: was removing for uid 1000[0m
+[  456.137100] PackageKit[4011]: [0;90m[0;38:5:245min /6_cdbcecea for update-packages package libwebkit2gtk-4_0-37;2.28.2-lp152.1.13;x86_64;installed: was removing for uid 1000[0m
+[  456.140874] PackageKit[4011]: [0;90m[0;38:5:245min /6_cdbcecea for update-packages package webkit2gtk-4_0-injected-bundles;2.28.2-lp152.1.13;x86_64;installed: was removing for uid 1000[0m
+[  456.145081] PackageKit[4011]: [0;90m[0;38:5:245min /6_cdbcecea for update-packages package libjavascriptcoregtk-4_0-18;2.28.2-lp152.1.13;x86_64;installed: was removing for uid 1000[0m
+[  456.151482] PackageKit[4011]: [0;90m[0;38:5:245min /6_cdbcecea for update-packages package libserializer;1.1.6-2.9;noarch;OSS was installing for uid 1000[0m
+[  456.157561] PackageKit[4011]: [0;90m[0;38:5:245min /6_cdbcecea for update-packages package librepository;1.1.6-2.9;noarch;OSS was installing for uid 1000[0m
+[  456.162627] PackageKit[4011]: [0;90m[0;38:5:245min /6_cdbcecea for update-packages package libloader;1.1.6-2.9;noarch;OSS was installing for uid 1000[0m
+[  456.166097] PackageKit[4011]: [0;90m[0;38:5:245min /6_cdbcecea for update-packages package libformula;1.1.6-2.9;noarch;OSS was installing for uid 1000[0m
+[  456.169856] PackageKit[4011]: [0;90m[0;38:5:245min /6_cdbcecea for update-packages package brasero;3.12.4-1.1;x86_64;OSS was installing for uid 1000[0m
+[  456.172974] PackageKit[4011]: [0;90m[0;38:5:245min /6_cdbcecea for update-packages package libtracker-sparql-2_0-0;2.3.2-lp152.2.4;x86_64;installed: was removing for uid 1000[0m
+[  456.176553] PackageKit[4011]: [0;90m[0;38:5:245min /6_cdbcecea for update-packages package libxml2-2;2.9.7-lp152.9.1;x86_64;installed: was removing for uid 1000[0m
+[  456.179768] PackageKit[4011]: [0;90m[0;38:5:245min /6_cdbcecea for update-packages package libtracker-common-2_0;2.3.2-lp152.2.4;x86_64;installed: was removing for uid 1000[0m
+[  456.183642] PackageKit[4011]: [0;90m[0;38:5:245min /6_cdbcecea for update-packages package libicu-suse65_1;65.1-lp152.2.1;x86_64;installed: was removing for uid 1000[0m
+[  456.186964] PackageKit[4011]: [0;90m[0;38:5:245min /6_cdbcecea for update-packages package libicu65_1-ledata;65.1-lp152.2.1;noarch;installed: was removing for uid 1000[0m
+[  456.190408] PackageKit[4011]: [0;90m[0;38:5:245min /6_cdbcecea for update-packages package cheese-lang;44.1+12-1.7;noarch;OSS was installing for uid 1000[0m
+[  456.193775] PackageKit[4011]: [0;90m[0;38:5:245min /6_cdbcecea for update-packages package mutt-lang;2.4.3-1.1;noarch;OSS was installing for uid 1000[0m
+[  456.197054] PackageKit[4011]: [0;90m[0;38:5:245min /6_cdbcecea for update-packages package libgpgme11;1.13.1-lp152.2.4;x86_64;installed: was removing for uid 1000[0m
+[  456.200643] PackageKit[4011]: [0;90m[0;38:5:245min /6_cdbcecea for update-packages package libassuan0;2.5.1-lp152.4.6;x86_64;installed: was removing for uid 1000[0m
+[  456.203985] PackageKit[4011]: [0;90m[0;38:5:245min /6_cdbcecea for update-packages package polari-lang;50.0-1.3;noarch;OSS was installing for uid 1000[0m
+[  456.207297] PackageKit[4011]: [0;90m[0;38:5:245min /6_cdbcecea for update-packages package pentaho-libxml;1.1.6-2.9;noarch;OSS was installing for uid 1000[0m
+[  456.210756] PackageKit[4011]: [0;90m[0;38:5:245min /6_cdbcecea for update-packages package libfonts;1.1.6-2.9;noarch;OSS was installing for uid 1000[0m
+[  456.213832] PackageKit[4011]: [0;90m[0;38:5:245min /6_cdbcecea for update-packages package brasero-lang;3.12.4-1.1;noarch;OSS was installing for uid 1000[0m
+[  456.217258] PackageKit[4011]: [0;90m[0;38:5:245min /6_cdbcecea for update-packages package liblayout;0.2.10-6.18;noarch;OSS was installing for uid 1000[0m
+[  456.220567] PackageKit[4011]: [0;90m[0;38:5:245min /6_cdbcecea for update-packages package pentaho-reporting-flow-engine;0.9.4-6.18;noarch;OSS was installing for uid 1000[0m
+[  456.224207] PackageKit[4011]: [0;90m[0;38:5:245mupdate-packages transaction /6_cdbcecea from uid 1000 finished with success after 300360ms[0m
+[  456.865827] PackageKit[4011]: [0;90m[0;38:5:245mget-updates transaction /7_ceacabde from uid 1000 finished with success after 1667ms[0m
+[  460.002749] gpk-update-viewer[3974]: [0;1;33m[0;1;38:5:185mg_task_return_pointer: assertion '!task->ever_returned' failed[0m
+[  462.002212] gpk-update-viewer[3974]: [0;1;33m[0;1;38:5:185mg_task_return_pointer: assertion '!task->ever_returned' failed[0m
+[  465.391396] systemd[1574]: Started Application launched by gnome-shell.
+[  475.006433] PackageKit[4011]: [0;90m[0;38:5:245mdaemon quit[0m
+[  475.041119] systemd[1]: packagekit.service: Deactivated successfully.
+[  475.044708] systemd[1]: packagekit.service: Consumed 1min 41.136s CPU time over 5min 27.617s wall clock time.
+[  505.331757] systemd[1]: Started Getty on tty5.
+[  505.401766] systemd[2721]: Reached target Sound Card.
+[  505.442609] systemd[1]: kbdsettings.service: Deactivated successfully.
+[  505.448938] systemd[1]: Stopped Apply settings from /etc/sysconfig/keyboard.
+[  505.458195] systemd[1]: Stopping Apply settings from /etc/sysconfig/keyboard...
+[  505.470292] 55-scsi-sg3_id.rules[14658]: [0;1;33m[0;1;38:5:185mWARNING: SCSI device sr0 has no device ID, consider changing .SCSI_ID_SERIAL_SRC in 00-scsi-sg3_config.rules[0m
+[  505.491460] systemd[1]: systemd-vconsole-setup.service: Deactivated successfully.
+[  505.497876] systemd[1]: Stopped Virtual Console Setup.
+[  505.503445] systemd[1]: Stopping Virtual Console Setup...
+[  505.508254] systemd[1]: Starting Virtual Console Setup...
+[  505.536775] (udev-worker)[14644]: [0;1;33m[0;1;38:5:185msr0: Process '/usr/sbin/pktsetup -i -d 11:0' failed with exit code 1.[0m
+[  505.603025] gsd-media-keys[1857]: [0;1;33m[0;1;38:5:185mUnable to get default sink[0m
+[  505.687244] systemd[1]: Finished Virtual Console Setup.
+[  505.693666] systemd[1]: Starting Apply settings from /etc/sysconfig/keyboard...
+[  505.751934] systemd[1]: Finished Apply settings from /etc/sysconfig/keyboard.
+[  509.529213] systemd-logind[1047]: New session '9' of user 'root' with class 'user-early' and type 'tty'.
+[  509.538748] systemd[1]: Started Session 9 of User root.
+[  509.544482] login[14638]: pam_unix(login:session): session opened for user root(uid=0) by root(uid=0)
+[  509.565049] login[14638]: [0;1;39mROOT LOGIN ON tty5[0m
+[  509.606291] 55-scsi-sg3_id.rules[14761]: [0;1;33m[0;1;38:5:185mWARNING: SCSI device sr0 has no device ID, consider changing .SCSI_ID_SERIAL_SRC in 00-scsi-sg3_config.rules[0m
+[  509.656477] (udev-worker)[14740]: [0;1;33m[0;1;38:5:185msr0: Process '/usr/sbin/pktsetup -i -d 11:0' failed with exit code 1.[0m
+[  512.104300] systemd[1]: snapperd.service: Deactivated successfully.
+[  512.107631] systemd[1]: snapperd.service: Consumed 4.725s CPU time over 5min 23.385s wall clock time.
+BASH:5.3.20(1)-release:
+[  515.659060] gpk-update-viewer[3974]: [0;1;33m[0;1;38:5:185mg_application_release: assertion 'application->priv->use_count > 0' failed[0m
+[  515.679432] systemd[1574]: app-gnome-gpk\x2dupdate\x2dviewer-3974.scope: Consumed 1min 38.681s CPU time over 6min 8.464s wall clock time.
+[  516.002278] accounts-daemon[1487]: [0;1;33m[0;1;38:5:185mUnable to open /etc/tcb: No such file or directory[0m
+[  516.005334] accounts-daemon[1487]: [0;1;33m[0;1;38:5:185mcouldn't list homed users: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name is not activatable[0m
+OA:DONE-14ba-0-OA:grep476shrc
+OA:START
+OA:DONE-7368-0-OA:sett16nk 0
+OA:START
+OA:DONE-0875-0-OA:test23gger
+OA:START
+[  543.807541] root[14815]: [0;1;39m### Beginning of show_tasks_in_blocked_state[0m
+OA:DONE-796c-0-OA:logg53ate"
+OA:START
+OA:DONE-6d64-0-OA:test27gger
+OA:START
+[  547.860467][T14742] sysrq: Show State
+[  548.148156] rsyslogd[1374]: [0;1;33m[0;1;38:5:185maction 'action-1-builtin:ompipe' suspended (module 'builtin:ompipe'), retry 0. There should be messages before this one giving the reason for suspension. [v8.2608.0 try https://www.rsyslog.com/e/2007 ][0m
+OA:DONE-1a93-0-OA:echo28gger
+OA:START
+[  548.160346] rsyslogd[1374]: [0;1;33m[0;1;38:5:185maction 'action-1-builtin:ompipe' suspended (module 'builtin:ompipe'), next retry is Sun Nov  8 04:25:28 2026, retry nbr 0. There should be messages before this one giving the reason for suspension. [v8.2608.0 try https://www.rsyslog.com/e/2007 ][0m
+[  550.898443][T14742] sysrq: Show Blocked State
+OA:DONE-4dda-0-OA:echo28gger
+OA:START
+[  644.104902] systemd[1]: flatpak-system-helper.service: Deactivated successfully.
+[  644.109456] systemd[1]: flatpak-system-helper.service: Consumed 3.757s CPU time over 10min 13.304s wall clock time.
+[  644.790705] root[14825]: [0;1;39m### End of show_tasks_in_blocked_state[0m
+OA:DONE-1af6-0-OA:logg47ate"
+OA:START
+OA:DONE-32c9-0-OA:logg47ate"
+OA:START
+OA:DONE-61ab-0-OA:tar 66ypp*
+OA:START
+OA:DONE-3f76-0-OA:curl196.bz2
+OA:START

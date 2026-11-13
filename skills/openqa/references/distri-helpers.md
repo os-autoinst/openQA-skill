@@ -68,7 +68,7 @@ install_package('7zip', trup_apply => 1) if (script_run('rpm -q 7zip'));   # tes
 | `script_output_retry($cmd, ...)` | `retry => 10, delay => 30, timeout => 30, die => 1` | returns the first **non-empty, non-zero** output; legitimately empty output is retried until it dies. Command gets `timeout - 3` s |
 | `validate_script_output_retry($cmd, $check, ...)` | `retry => 10, delay => 30, timeout => 90` | `$check` is a regex or coderef (`sub { m/PONG/ }`); always dies after the last retry |
 
-- Worst case is about `retry * (timeout + retry_grace + delay)`. A leading `!` in `$cmd` is moved in front of `timeout`, so negation works. In a pipeline only the first command is wrapped by `timeout`.
+- Worst case is about `retry * (timeout + retry_grace + delay)`. A leading `!` in `$cmd` is moved in front of `timeout`, so negation works. `timeout` runs `$cmd` as a program: a shell builtin or function (`cd`, `export`, `source`) fails every attempt, and of a chain (`&&`, `;`, `|`) only the first command is bounded; wrap a chain in `sh -c '...'`. `timeout =>` is not scaled -> references/module-templates.md "Anti-patterns"
 - Interactive programs: `script_start_io($cmd)`, then `script_finish_io(timeout => N, exitcodes => [..])`; the POD's `exitcode` key is silently ignored.
 
 ## Services

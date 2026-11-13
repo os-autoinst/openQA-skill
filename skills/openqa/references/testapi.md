@@ -1,6 +1,6 @@
 # os-autoinst test API
 
-Owns: the test API as os-autoinst executes it. Distri wrappers: `zypper_call` -> references/distri-helpers.md "zypper_call"; `script_retry` -> references/distri-helpers.md "Retry and poll".
+Owns: the test API as os-autoinst executes it. Distri wrappers: `zypper_call` -> references/distri-system.md "zypper_call"; `script_retry` -> references/distri-helpers.md "Retry and poll".
 
 Contents: Module contract; Hook order; test_flags; Function cheat sheet; Variables; Result recording; Uploads and URLs; Serial terminal; Traps
 
@@ -101,7 +101,7 @@ Needle strategy -> references/needles-gui.md "GUI idioms".
 | Call | Notes |
 |---|---|
 | `select_console($name [, @args])` | dies with the backend error; first selection runs the distri's `activate_console` (login); names are distri-defined -> references/distri-helpers.md "Console selection" |
-| `reset_consoles` | next select re-activates (after anything that kills logins) -> references/distri-helpers.md "Reboot" |
+| `reset_consoles` | next select re-activates (after anything that kills logins) -> references/distri-system.md "Reboot" |
 | `check_shutdown([$t = 60])`, `assert_shutdown([$t])` | only watch, never initiate; backends lacking `is_shutdown` sleep the timeout and report success |
 
 ## Variables
@@ -142,7 +142,7 @@ Needle strategy -> references/needles-gui.md "GUI idioms".
 | `autoinst_url([$path])` | `http://<host>:<QEMUPORT+1>/<JOBTOKEN>$path`; host `10.0.2.2` on qemu, else `WORKER_HOSTNAME` |
 
 - **Uploads are `curl` run inside the SUT on the selected console** — they need a shell prompt, `curl` and a route to the worker; with `OFFLINE_SUT=1` they become an info box.
-- Log-collection helpers -> references/distri-helpers.md "Log upload"; `data/` layout -> references/scheduling.md "Files from data".
+- Log-collection helpers -> references/distri-system.md "Log upload"; `data/` layout -> references/scheduling.md "Files from data".
 
 ## Serial terminal
 

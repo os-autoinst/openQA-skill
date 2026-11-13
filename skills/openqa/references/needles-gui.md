@@ -9,7 +9,7 @@ Contents: When not to use needles; Needle JSON; Needle naming and CI; Tags and E
 - **Needles only where the rendered UI is the thing under test.** Anything checkable as text goes through a console; a font change invalidates needles -> references/distri-helpers.md "Console selection".
 - **YaST (libyui) installer:** REST page objects, no needles -> references/needles-gui.md "libyui-REST page objects".
 - **Agama web UI logic** belongs to the external browser test suite; the distri keeps needles only as synchronisation points -> references/needles-gui.md "Agama".
-- **Hidden dependence:** boot/reboot helpers match bootloader and login needles, so a module without asserts can still fail on one -> references/distri-helpers.md "Reboot".
+- **Hidden dependence:** boot/reboot helpers match bootloader and login needles, so a module without asserts can still fail on one -> references/distri-system.md "Reboot".
 
 ## Needle JSON
 

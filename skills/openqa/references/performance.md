@@ -36,13 +36,13 @@ assert_script_run 'ip netns add ns0 && ip netns add ns1 && ip link set veth0 net
 - **One timeout covers the chain** (`assert_script_run`: 90 s): pass `timeout =>` when the sum needs more.
 - **A check of the product stays its own call**: the failure quotes the whole command string, so a chain hides which part failed; `fail_message =>` says what was expected.
 - **Bounded in-SUT polling is an accepted batching pattern.** A retry loop that waits for a condition (e.g. `snapper cleanup` while `Config is in use`) runs as one `timeout N sh -c '...; sleep 1; done'` call: it costs one serial round-trip, where a Perl loop costs one per tick. Make the loop `exit 1` on an error a retry cannot fix, so the call fails at once instead of when `timeout N` expires.
-- **Helpers are not chained.** `zypper_call`, `install_package`, `systemctl`, `script_retry` cannot run inside a chain or an uploaded script, and their plain shell form loses what they add -> references/distri-helpers.md "zypper_call", "Services". Give a helper its whole list instead of one call per item (`systemctl` registers only the first word after `start|restart|enable` for the journal upload on failure):
+- **Helpers are not chained.** `zypper_call`, `install_package`, `systemctl`, `script_retry` cannot run inside a chain or an uploaded script, and their plain shell form loses what they add -> references/distri-system.md "zypper_call", distri-helpers.md "Services". Give a helper its whole list instead of one call per item (`systemctl` registers only the first word after `start|restart|enable` for the journal upload on failure):
 
 ```perl
 systemctl("disable --now @timers");    # not: foreach my $timer (@timers) { systemctl(...) }
 ```
 
-- **A multi-line script is uploaded, not typed as a here-doc or `echo` lines.** Run once: `script_output($script)` puts it in a file itself and stops at the first failing command -> references/testapi.md "Traps". A file that stays or runs again: `write_sut_file($path, $text)`, then `assert_script_run("bash -e $path")`; without `-e` only the last command counts -> references/distri-helpers.md "Files on the SUT". An upload is two or three round trips itself, so a short chain is cheaper; `write_sut_file` needs the SUT to reach the worker.
+- **A multi-line script is uploaded, not typed as a here-doc or `echo` lines.** Run once: `script_output($script)` puts it in a file itself and stops at the first failing command -> references/testapi.md "Traps". A file that stays or runs again: `write_sut_file($path, $text)`, then `assert_script_run("bash -e $path")`; without `-e` only the last command counts -> references/distri-system.md "Files on the SUT". An upload is two or three round trips itself, so a short chain is cheaper; `write_sut_file` needs the SUT to reach the worker.
 - **Public cloud**: one remote operation per ssh call, no `&&` chains -> references/area-conventions.md "Public cloud".
 - Faster or not is measured -> "Measure and size". Where else the time goes (typing, fixed waits, waiting nodes) -> "Cost model".
 

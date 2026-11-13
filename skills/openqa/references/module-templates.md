@@ -106,7 +106,7 @@ sub post_fail_hook {
 
 - **One idempotent `cleanup` called from both hooks**, each chained to the same-named `SUPER`: without it the console reset (success) or the log export (failure) is lost.
 - **Nothing fatal in `cleanup` or `post_fail_hook`** (`script_run`, `ignore_failure => 1`, `failok => 1`): a second death hides the first.
-- **`post_fail_hook`: SUPER first, cleanup last**, so logs are exported before cleanup removes them; upload only test-specific files -> references/distri-helpers.md "Log upload".
+- **`post_fail_hook`: SUPER first, cleanup last**, so logs are exported before cleanup removes them; upload only test-specific files -> references/distri-system.md "Log upload".
 - **`pkill -f` matches argv; a typed command is not**: any wrapper holding it in argv (`sudo`, `timeout` in `*_retry`, `ssh`, `sh -c`) dies too.
 
 ## X11 needle test
@@ -192,7 +192,7 @@ sub run {
 ```
 
 - **A change under the read-only root needs a new snapshot and a reboot**: several commands -> trup shell as above; one `transactional-update` subcommand -> `trup_call('initrd'); check_reboot_changes;` (`trup_call` timeout default 180 s; `check_reboot_changes` dies when no new snapshot appeared).
-- Helper semantics -> references/distri-helpers.md "Transactional systems". Verify on an immutable job -> references/pr-review-rules.md "Verification runs".
+- Helper semantics -> references/distri-system.md "Transactional systems". Verify on an immutable job -> references/pr-review-rules.md "Verification runs".
 
 ## YaM validate module
 

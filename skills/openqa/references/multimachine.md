@@ -151,4 +151,4 @@ With `PARALLEL_CANCEL_WHOLE_CLUSTER=0` a dead child no longer cancels the rest: 
 | `has_ttys` | not ipmi/s390x/pvm, not zKVM, not `PUBLIC_CLOUD`, not generalhw without `GENERAL_HW_VNC_IP` |
 | `has_serial_over_ssh` | ikvm/ipmi/pvm/generalhw with neither `GENERAL_HW_VNC_IP` nor `GENERAL_HW_SOL_CMD` |
 
-`is_hyperv`, `is_xen_pv` read `VIRSH_VMM_FAMILY`; no `is_vmware` — use `check_var('VIRSH_VMM_FAMILY', 'vmware')`. Per-backend reboot -> references/distri-helpers.md "Reboot"
+`is_hyperv`, `is_xen_pv` read `VIRSH_VMM_FAMILY`; no `is_vmware` — use `check_var('VIRSH_VMM_FAMILY', 'vmware')`. Per-backend reboot -> references/distri-system.md "Reboot"

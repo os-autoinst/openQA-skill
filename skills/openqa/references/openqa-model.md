@@ -33,7 +33,7 @@ States: `scheduled assigned setup running uploading` (pending, result `none`) ->
 | Meta group | Results |
 |---|---|
 | complete | `passed`, `softfailed` (known non-critical issue: workaround needle, `record_soft_failure`, forced), `failed` |
-| not_complete | `incomplete` (worker, backend or setup problem; `reason` key only when set -> references/job-triage.md "Incomplete reasons"), `timeout_exceeded` (`MAX_JOB_TIME` or `MAX_SETUP_TIME`; also a job still `scheduled` more than `max_job_scheduled_time` days, default 7, after its creation: cancelled without a run, `reason` `scheduled for more than <n> days`) |
+| not_complete | `incomplete` (worker, backend or setup problem; `reason` key only when set -> references/job-triage.md "Incomplete reasons"), `timeout_exceeded` (`MAX_JOB_TIME`, `MAX_SETUP_TIME`, an upload past `MAX_UPLOAD_TIME` or `UPLOAD_INACTIVITY_TIMEOUT`; also a job still `scheduled` more than `max_job_scheduled_time` days, default 7, after its creation: cancelled without a run, `reason` `scheduled for more than <n> days`) |
 | aborted | `skipped obsoleted parallel_failed parallel_restarted user_cancelled user_restarted`: no verdict, check the parent or sibling job |
 | ok / not_ok | `passed softfailed` / everything else above |
 
@@ -118,10 +118,11 @@ Marker `(Automatic carryover from t#<id>)` (old data: `takeover`), plus `(The ho
 | Mechanism | Trigger | Trace |
 |---|---|---|
 | `RETRY=<n>[:<text>]` | `failed`, `incomplete`, `timeout_exceeded`, fewer than n restarts | system comment `Restarting because RETRY is set to <n> ...` |
-| `auto_clone_regex` | `incomplete`/`timeout_exceeded` whose `reason` matches (default: `cache failure: `, `terminated prematurely: `, `api failure: ... 503`, VNC `backend died`, QEMU KVM HPT allocation), at most `auto_clone_limit` (20) times | `reason` ends `[Auto-restarting because reason matches ...]` or `[Not restarting job despite ...]` |
+| `auto_clone_regex` | `incomplete`/`timeout_exceeded` whose `reason` matches (default: `cache failure: `, `terminated prematurely: `, `api failure: ... 503`, `api failure: 403 response: timestamp mismatch`, VNC or `Open vSwitch command ... failed:` `backend died`, QEMU KVM HPT allocation), at most `auto_clone_limit` (20) times | `reason` ends `[Auto-restarting because reason matches ...]` or `[Not restarting job despite ...]` |
 | job-done hook | instance script; upstream's labels known issues, may restart | -> references/review-comments-tickets.md "auto_review subjects" |
 | investigation jobs | hook `openqa-investigate` clones a failure with empty `BUILD`, by default into no group | comment starting `Automatic investigation jobs for job <id>` lists `<test>:investigate:retry`, `:last_good_tests:<hash>`, `:last_good_build:<build>`, `:last_good_tests_and_build:...`; clones set `OPENQA_INVESTIGATE_ORIGIN` |
 
+- **`min_restarts=<n>`** on the overview routes keeps jobs restarted at least n times (n above 10 counts as 10).
 - **A passing retry hides a sporadic failure**: with `restarts > 0` or `origin_id` set, check earlier runs -> references/job-history.md "History and investigation".
 
 ## Clone chain

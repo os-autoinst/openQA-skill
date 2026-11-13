@@ -191,12 +191,23 @@ actual=$(lint labels)
 contains "only the first label counts" '"second" (ignored as a label, only the first one counts)' "$actual"
 contains "label cut at an illegal character" 'W label-cut line 2: the label ends before "."' "$actual"
 contains "capitalised label with a space" 'W near-miss-label line 1: "Label: sporadic" is not parsed' "$actual"
-contains "unknown flag" 'W unknown-flag line 2: "flag:carry" has no effect, the only flag is flag:carryover' "$actual"
+contains "unknown flag" 'W unknown-flag line 2: "flag:carry" has no effect, the flags are flag:carryover and flag:verbatim' "$actual"
 
 actual=$(lint flag)
 check "flag:carryover: exit 0" 0 $?
 contains "flag:carryover carries over without being reviewed" "counts as reviewed: no" "$actual"
 contains "flag:carryover verdict" "will carry over: yes (flag:carryover)" "$actual"
+
+actual=$(lint verbatim)
+check "flag:verbatim: nothing is parsed, the job is not reviewed, nothing carries over, no warning for an ignored ref" "0 bugrefs: 0 (flag:verbatim: the 3 written are ignored)
+labels: 0 (flag:verbatim: the 1 written are ignored)
+flags: \"carryover\" \"verbatim\"
+counts as reviewed: no (flag:verbatim: openQA parses no bugref or label in it)
+will carry over: no (flag:verbatim)
+force_result: NOT parsed (flag:verbatim); the label still blocks deleting the comment through the API
+warnings: 0
+notes: 1
+  N flag:verbatim is honoured by newer openQA only; an older instance parses the bugrefs, labels and flags as usual" "$? $actual"
 
 actual=$(lint plain)
 check "plain comment: exit 0" 0 $?

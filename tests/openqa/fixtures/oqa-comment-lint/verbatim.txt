@@ -1,0 +1,2 @@
+Automatic investigation summary, unverified: bsc#1234567 looks like poo#123456
+label:force_result:softfailed bootloader_uefi#1 flag:carryover flag:verbatim

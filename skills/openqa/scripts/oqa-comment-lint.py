@@ -213,12 +213,24 @@ def lint(draft, extra_suffixes=()):
     refs = list(BUGREF.finditer(text))
     labels = list(LABEL.finditer(text))
     flags = list(FLAG.finditer(text))
+    # lib/OpenQA/Schema/Result/Comments.pm, is_verbatim: openQA uses no bugref, label,
+    # other flag or force_result of such a comment.
+    verbatim = any(match.group("match") == "verbatim" for match in flags)
+    if verbatim:
+        notes.append(
+            "flag:verbatim is honoured by newer openQA only; an older instance parses the "
+            "bugrefs, labels and flags as usual"
+        )
     ref_spans = [match.span("match") for match in refs]
     in_refs = covered(ref_spans)
     in_labels = covered(match.span() for match in labels)
 
     # --- bugrefs ---
-    out.append(f"bugrefs: {len(refs)}")
+    if verbatim:
+        out.append(f"bugrefs: 0 (flag:verbatim: the {len(refs)} written are ignored)")
+        refs = []
+    else:
+        out.append(f"bugrefs: {len(refs)}")
     real_refs, shown = 0, []
     for match in refs:
         ref = match.group("match")
@@ -333,6 +345,13 @@ def lint(draft, extra_suffixes=()):
             )
 
     # --- labels ---
+    written = labels
+    if verbatim:
+        if labels:
+            out.append(
+                f"labels: 0 (flag:verbatim: the {len(labels)} written are ignored)"
+            )
+        labels = []
     if labels:
         out.append(f"labels: {len(labels)}")
     shown = []
@@ -390,15 +409,19 @@ def lint(draft, extra_suffixes=()):
             "flags: " + " ".join(quoted(name) for name in names[:MAX_LISTED]) + more
         )
     for match in flags:
-        if match.group("match") != "carryover":
+        if match.group("match") not in ("carryover", "verbatim"):
             warnings.append(
                 f"unknown-flag line {line_of(text, match.start())}: {quoted(match.group())} has no "
-                "effect, the only flag is flag:carryover"
+                "effect, the flags are flag:carryover and flag:verbatim"
             )
-    carry_flag = "carryover" in names
+    carry_flag = "carryover" in names and not verbatim
 
     # --- verdicts ---
-    if refs:
+    if verbatim:
+        out.append(
+            "counts as reviewed: no (flag:verbatim: openQA parses no bugref or label in it)"
+        )
+    elif refs:
         out.append("counts as reviewed: yes (bugref)")
     elif labels:
         out.append("counts as reviewed: yes (label)")
@@ -407,7 +430,9 @@ def lint(draft, extra_suffixes=()):
             "counts as reviewed: no (plain comment: needs a bugref or a label:<keyword>)"
         )
     conditions = "the WHOLE text is copied onto the next job of the scenario that fails in the same modules"
-    if refs or carry_flag:
+    if verbatim:
+        out.append("will carry over: no (flag:verbatim)")
+    elif refs or carry_flag:
         cause = "bugref" if refs else "flag:carryover"
         out.append(f"will carry over: yes ({cause}) - {conditions}")
         if refs and not real_refs:
@@ -454,6 +479,14 @@ def lint(draft, extra_suffixes=()):
                 "this force_result will not be re-applied on later jobs: a ref inside the label "
                 "is no bugref, add one on its own line or flag:carryover"
             )
+    elif verbatim and any(
+        m.group("match").startswith("force_result:") for m in written
+    ):
+        # Controller/API/V1/Comment.pm "delete" looks at the labels whatever the flags.
+        out.append(
+            "force_result: NOT parsed (flag:verbatim); the label still blocks deleting the "
+            "comment through the API"
+        )
     elif broken:
         out.append("force_result: NOT parsed")
         warnings.append(

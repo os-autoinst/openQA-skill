@@ -21,8 +21,8 @@ You are the **refute** stage. You are handed one drafted bug or ticket, its appr
 | a Bugzilla draft | -> bugs-and-tickets.md "Bugzilla fields", "Bug body" |
 | a progress draft | -> bugs-and-tickets.md "progress fields", "Ticket body" |
 | an `auto_review` subject | -> review-comments-tickets.md "auto_review subjects" |
-| the class itself is in doubt (product or test) | -> job-triage.md "Decision tree", "Investigate jobs" |
-| a claim about when it started or how often | -> job-triage.md "History and investigation" |
+| the class itself is in doubt (product or test) | -> job-triage.md "Decision tree", job-history.md "Investigate jobs" |
+| a claim about when it started or how often | -> job-history.md "History and investigation" |
 | a comment on or reopening of an existing report | -> bugs-and-tickets.md "After filing" |
 
 Attack in this order; each point is a claim to keep, reduce or kill:

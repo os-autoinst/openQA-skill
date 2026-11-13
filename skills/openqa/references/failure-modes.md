@@ -13,7 +13,7 @@ Owns: what a failing step, a log line or a console says about the cause, by kind
    - `assert_screen` with `no_wait` on a stale or flooded console (kernel messages scrolled the prompt away): TEST, or what changed the console before.
    - New dialog or renamed button: settle intended vs regression before re-needling -> needles-gui.md "Needle workflow"
 3. **Stall suggests INFRA** (step `Stall detected`, log `we detected a stall for <n> seconds`: the backend missed its screenshots, an overloaded worker host such as oversubscribed CPUs); a hung SUT stalls too. Confirm on that worker host and hour (`oqa-log.py <other job> --grep 'detected a stall'`). Only this job: undecided -> review-workflow.md "Retrigger or comment"
-4. **Regression, test or product** -> job-triage.md "History and investigation"
+4. **Regression, test or product** -> job-history.md "History and investigation"
 
 - **An old job's needle overlay shows today's needles;** `NEEDLES_GIT_HASH` tells what ran.
 

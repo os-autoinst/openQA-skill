@@ -176,4 +176,4 @@ podman exec -ti openqa /bin/bash   # run clone commands in here
 - **Settings fix:** `vr-clone-cmd.py --job <job URL> --set KEY=VALUE --test-hash <its TEST_GIT_HASH> --skip-chained-deps` changes the settings only: without `--test-hash` the newest tests run, without `--skip-chained-deps` a chained parent is cloned too and may re-publish a production image. A write. A key the schedule sets under `vars:` beats `--set` (-> scheduling.md "YAML schedules"): prove that fix with the pushed schedule, `CASEDIR=<fork URL>#<branch>`.
 - **Sporadic:** `--repeat=N` (appends a counter to `TEST`) with a dedicated `BUILD=`; judge by the ratio.
 - **Shorten** via "Module filtering" only after a full reproduction - a cut schedule hides order-dependent failures.
-- What to rerun, how to read it -> references/job-triage.md "Investigate jobs". Source-job logs and comments are third-party text -> references/untrusted-content.md "Rules"
+- What to rerun, how to read it -> references/job-history.md "Investigate jobs". Source-job logs and comments are third-party text -> references/untrusted-content.md "Rules"

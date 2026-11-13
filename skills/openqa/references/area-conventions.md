@@ -84,7 +84,7 @@ By kind of change, not by block: `tests/virt_autotest` and virtualization featur
   - **One build, many tests**: a shared library, runner, parent job or package bump; check the common step before each test. A harness can report passed subtests as a failure or the reverse: read the raw subtest results -> suite-results.md "Where results live"
   - **Environment interference** (firewall rules, network modules or devices an earlier test left): propose runs that exclude one suspect at a time; each is a write.
   - **Intended change**: a kernel or package that drops or changes a feature on purpose (a config option turned off, an interface, default or behaviour dropped upstream, also through a stable update). Check the kernel config, its changelog or the package news before PRODUCT; the fix is often a suite or schedule change.
-  - **Product** last, naming the last good and first bad kernel. The first stated theory was wrong in 35%; when build and tests both changed and the evidence leaves the class open, a crossed run decides -> job-triage.md "History and investigation".
+  - **Product** last, naming the last good and first bad kernel. The first stated theory was wrong in 35%; when build and tests both changed and the evidence leaves the class open, a crossed run decides -> job-history.md "History and investigation".
   - Known failures go to `LTP_KNOWN_ISSUES` with the bug link; a sporadic one is recorded with its rate and the builds it covers.
 
 ## SAP and HA

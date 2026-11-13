@@ -25,7 +25,7 @@ You are the **author** stage. Goal: the smallest module that tests the real prop
 | which team owns the path, what it asks | -> area-conventions.md "Find the area", then the area section |
 | the module polls or waits | -> distri-helpers.md "Retry and poll" |
 | commands in a row, a per-item loop, a here-doc; runtime | -> performance.md "Batch and upload", "Measure and size" |
-| services, reboot, transactional host, version or arch branch | -> distri-helpers.md "Services", "Reboot", "Transactional systems", "Product predicates", "Version specs" |
+| services, reboot, transactional host, version or arch branch | -> distri-helpers.md "Services", "Product predicates", "Version specs", distri-system.md "Reboot", "Transactional systems" |
 | tolerating a known bug | -> distri-helpers.md "Soft-fail on a known bug", contributing-gates.md "Soft-failure reference" |
 | flags or timeouts seem needed | -> module-templates.md "Choosing test_flags" |
 | the check is visual | -> needles-gui.md "When not to use needles", "GUI idioms", "Needle JSON" |

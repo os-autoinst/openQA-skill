@@ -118,7 +118,9 @@ available. `make tidy` applies ruff's formatting and fixes.
 
 The references were checked against these upstream revisions in October 2026: openQA `61bb066`,
 os-autoinst `2b02af1`, os-autoinst-distri-opensuse `786e32d`, os-autoinst-distri-example `274346e`,
-os-autoinst-scripts `e86ee5d` and qem-bot `c3b6275`. Contribution rules are in [AGENTS.md](AGENTS.md).
+os-autoinst-scripts `e86ee5d` and qem-bot `c3b6275`. What changed since was checked in November 2026 against
+openQA `b38b164`, os-autoinst `d6803d9`, os-autoinst-distri-opensuse `884668a` and os-autoinst-scripts
+`52f5d15`. Contribution rules are in [AGENTS.md](AGENTS.md).
 
 ## Acknowledgements
 

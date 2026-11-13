@@ -64,7 +64,7 @@ Comment text -> references/review-comments-tickets.md "Comment recipes". Restart
 
 **Bugzilla and Redmine MCP servers** file and read back bugs and tickets -> references/bugs-and-tickets.md "Filing and read-back"
 
-**Built-in `/mcp` endpoint**: off unless the instance sets `mcp_enabled = read-only`; needs a Bearer `USER:KEY:SECRET` header the user configures -> references/untrusted-content.md "Rules". Read-only tools: `openqa_get_info`, `openqa_get_job_info {job_id}` (result, modules, settings, log names, comments), `openqa_get_log_file {job_id, file_name}` (`*.txt` only; refused above `mcp_max_result_size`, default 500000 bytes). No listing tools.
+**Built-in `/mcp` endpoint**: off unless the instance sets `mcp_enabled = read-only`; needs a Bearer `USER:KEY:SECRET` header the user configures -> references/untrusted-content.md "Rules". Read-only tools: `openqa_get_info`, `openqa_get_job_info {job_id}` (result, modules, settings, names in `logs[]` but no `ulogs`, comments as rendered HTML with author and date, no bugrefs), `openqa_get_log_file {job_id, file_name}` (a top-level `*.txt` name of word characters, `.` and `-`, so no `ulogs/`; refused above `mcp_max_result_size`, default 500000 bytes). No listing tools.
 
 ## os-autoinst-scripts
 

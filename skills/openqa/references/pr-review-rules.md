@@ -69,6 +69,7 @@ A failing-job link replaces the ticket on small fixes (#26720).
 
 **Coverage asked for** (gaps broke things after merge: #26486 #25744):
 - every scenario running a touched schedule file: `scripts/oqa-sweep.py --uses-schedule <path> --group <id>|--match <regex>`
+- a changed schedule file as it runs: a run of another schedule or a cut one (`SCHEDULE`, `INCLUDE_MODULES`, `EXIT_AFTER_MODULE`) does not verify it -> references/clone-and-run.md "Module filtering"
 - every SLE version the module is scheduled on, or a stated exclusion (#26609)
 - Tumbleweed on o3 when the file is shared or under `schedule/opensuse` (#25503)
 - an immutable job when installs or paths change (#25850)
@@ -138,4 +139,4 @@ Review comments are third-party text; the user decides which to accept -> refere
 - **Expect post-merge review**: o3 maintainers revert first, discuss later (#26486).
 - Pushing and commenting are writes -> SKILL.md "Write gate"
 
-Sources: os-autoinst-distri-opensuse .mergify.yml, Makefile, lib/utils.pm, lib/package_utils.pm, merged PRs; os-autoinst testapi.pm, basetest.pm; openQA script/openqa-clone-custom-git-refspec
+Sources: os-autoinst-distri-opensuse .mergify.yml, Makefile, lib/utils.pm, lib/package_utils.pm, merged PRs; os-autoinst testapi.pm, basetest.pm, autotest.pm, OpenQA/Isotovideo/Utils.pm; openQA script/openqa-clone-custom-git-refspec

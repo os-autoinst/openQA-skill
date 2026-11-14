@@ -120,6 +120,22 @@ summary: 2 file(s), 0 error(s), 3 warning(s) [placement=1 convention=2] mode=fal
 lint --fallback --strict --repo "$work" >/dev/null
 check "--strict turns warnings into exit 1" 1 $?
 
+limits=$(mktemp -d)
+mkdir -p "$limits/tests/console" "$limits/schedule"
+touch "$limits/tests/console/sshd.pm"
+printf 'name: limits\nvars:\n  MAX_JOB_TIME: 7200\n  MAX_SETUP_TIME: 3600\n  +MAX_UPLOAD_TIME: 900\n  UPLOAD_INACTIVITY_TIMEOUT: 600\n  TIMEOUT_SCALE: 2\nschedule:\n  - console/sshd\n' >"$limits/schedule/limits.yaml"
+limit="under vars: does not change the worker's time limit, which it takes from the job settings before isotovideo starts; test code still reads it. Set the limit in the job group or test suite"
+for label in "${modes[@]}"; do
+	opts=(--repo "$limits")
+	[ "$label" == fallback ] && opts+=(--fallback)
+	check "$label: the worker's time limits under vars: are flagged, TIMEOUT_SCALE is not" "schedule/limits.yaml:3: placement: MAX_JOB_TIME $limit
+schedule/limits.yaml:4: placement: MAX_SETUP_TIME $limit
+schedule/limits.yaml:5: placement: MAX_UPLOAD_TIME $limit
+schedule/limits.yaml:6: placement: UPLOAD_INACTIVITY_TIMEOUT $limit
+summary: 1 file(s), 0 error(s), 4 warning(s) [placement=4] mode=$label" "$(lint "${opts[@]}" schedule/limits.yaml)"
+done
+rm -rf "$limits"
+
 # --- name convention: only for files that are new in git ---------------------------
 actual=$(GIT_DIR="$work/no-such-git-dir" lint --repo "$work" --fallback schedule/warn.yaml | grep -c ': convention: name ')
 check "git cannot tell: the name convention is reported" 1 "$actual"

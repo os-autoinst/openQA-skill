@@ -39,6 +39,14 @@ SCHEDULER = re.compile(
     r"|ISO|ISO_\d+|HDD_\d+|UEFI_PFLASH_(?:CODE|VARS)|REPO_\d+|ASSET_\d+|KERNEL|INITRD"
     r"|(?:FORCE_)?PUBLISH_HDD_\d+|PUBLISH_PFLASH_VARS|STORE_HDD_\d+)$"
 )
+# The worker takes its time limits from the job settings before isotovideo starts
+# (lib/OpenQA/Worker/Job.pm "_compute_timeouts"); test code may still read them.
+TIME_LIMITS = (
+    "MAX_JOB_TIME",
+    "MAX_SETUP_TIME",
+    "MAX_UPLOAD_TIME",
+    "UPLOAD_INACTIVITY_TIMEOUT",
+)
 ERRORS = ("syntax", "schema", "module", "format")
 WARNINGS = ("conditional", "placement", "convention")
 
@@ -330,6 +338,15 @@ def check(doc, path, repo, name_rule=True):
             why = "declarative-schedule-doc.md forbids it there"
         elif SCHEDULER.match(plain):
             why = "openQA reads it before vars: are applied"
+        elif plain in TIME_LIMITS:
+            doc.add(
+                line,
+                "placement",
+                f"{plain} under vars: does not change the worker's time limit, which it "
+                "takes from the job settings before isotovideo starts; test code still "
+                "reads it. Set the limit in the job group or test suite",
+            )
+            continue
         else:
             continue
         doc.add(

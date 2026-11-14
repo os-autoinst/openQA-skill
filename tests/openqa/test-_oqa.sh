@@ -170,6 +170,9 @@ refused
 EOF
 )" "$actual"
 
+check "link_name decodes entities and percent-escapes, a plus stays" "generate_report#1-dmesg.txt a&b+c.log" \
+	"$(py 'from _oqa import link_name; print(link_name("generate_report%231-dmesg.txt"), link_name("a&amp;b+c.log"))')"
+
 actual=$(py '
 from _oqa import FAILURE_RESULTS, RESULT_GROUPS, RESULTS, OqaError, expand_results as e
 print(",".join(e(["not_complete", "failed", "incomplete"])))

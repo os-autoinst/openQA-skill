@@ -1,0 +1,8 @@
+<h5>Result files</h5>
+<ul class="resultfile-list">
+    <li><a href="/tests/4275/file/vars.json">vars.json</a></li>
+</ul>
+<h6>Uploaded logs</h6>
+<ul class="resultfile-list">
+    <li><a href="/tests/4275/file/report.html">report.html</a></li>
+</ul>

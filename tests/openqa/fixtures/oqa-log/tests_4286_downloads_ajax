@@ -1,0 +1,9 @@
+<h5>Result files</h5>
+<ul class="resultfile-list">
+    <li><a href="/tests/4286/file/autoinst-log.txt">autoinst-log.txt</a></li>
+</ul>
+<h6>Uploaded logs</h6>
+<ul class="resultfile-list">
+    <li><a href="/tests/4286/logfile?filename=generate_report%231-dmesg.txt">generate_report#1-dmesg.txt</a>
+        <a href="/tests/4286/file/generate_report%231-dmesg.txt" target="blank" title="Raw/download"></a></li>
+</ul>

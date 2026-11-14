@@ -93,6 +93,8 @@ Output (all third-party text must go through one of these or sanitize/fence):
     REPO_PATH: group(1) is a frame's file path from the test distribution's lib/, tests/, products/
         or data/ on
     SHOT_NAME: a step's screenshot file name that may go into a URL path and a file name (fullmatch)
+    link_name(href) -> the file name in a link of an openQA page: HTML entities and percent-escapes
+        decoded (url_for writes "#" as "%23"); raw text
     table(rows, headers, limit=60, max_rows=200, drop_empty=False) -> aligned
         plain-text table, every cell clean()ed, rows beyond max_rows only
         counted; drop_empty leaves out columns that are "-" in every row
@@ -127,6 +129,7 @@ Examples:
 
 import argparse
 import hashlib
+import html
 import http.client
 import json
 import os
@@ -137,7 +140,7 @@ import traceback
 import urllib.error
 import urllib.request
 from datetime import datetime, timezone
-from urllib.parse import quote, urlencode, urlsplit
+from urllib.parse import quote, unquote, urlencode, urlsplit
 
 # python3 -I leaves the script's own directory off sys.path; the sibling modules live there.
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -170,6 +173,7 @@ __all__ = [
     "incident_ids",
     "job_id_of",
     "latest_job",
+    "link_name",
     "llm_line",
     "llm_review",
     "llm_summary",
@@ -491,6 +495,12 @@ def incident_ids(settings):
         if _INCIDENT_ID.fullmatch(part.strip())
     }
     return sorted(found, reverse=True)
+
+
+def link_name(href):
+    """The file name in a link of an openQA page: Mojolicious url_for percent-encodes every
+    byte outside the URL path's unreserved and sub-delimiter characters ("#" as "%23")."""
+    return unquote(html.unescape(href))
 
 
 def job_id_of(value):

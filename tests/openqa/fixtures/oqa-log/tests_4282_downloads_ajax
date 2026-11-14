@@ -1,0 +1,6 @@
+<h5>Result files</h5>
+<ul class="resultfile-list">
+    <li><a href="/tests/4282/logfile?filename=autoinst-log.txt">autoinst-log.txt</a>
+        <a href="/tests/4282/file/autoinst-log.txt" target="blank" title="Raw/download"></a></li>
+    <li><a href="/tests/4282/file/vars.json">vars.json</a></li>
+</ul>

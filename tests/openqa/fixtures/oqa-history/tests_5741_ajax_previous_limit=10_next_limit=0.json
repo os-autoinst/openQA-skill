@@ -1,0 +1,52 @@
+{
+ "data": [
+  {
+   "id": 5746,
+   "build": "20300110",
+   "state": "done",
+   "result": "softfailed",
+   "failedmodules": [],
+   "finished": "2030-01-03T00:46:00Z",
+   "duration": "10:00 minutes",
+   "distri": "exampleos",
+   "version": "1",
+   "flavor": "DVD",
+   "arch": "x86_64",
+   "test": "textmode",
+   "machine": "64bit",
+   "group": 7,
+   "iscurrent": null,
+   "clone": null,
+   "comment_data": {
+    "bugs": [
+     {
+      "content": "boo#1000002"
+     }
+    ],
+    "label": null
+   },
+   "islatest": 1
+  },
+  {
+   "id": 5741,
+   "build": "20300110",
+   "state": "done",
+   "result": "failed",
+   "failedmodules": [
+    "zypper_in"
+   ],
+   "finished": "2030-01-03T00:41:00Z",
+   "duration": "10:00 minutes",
+   "distri": "exampleos",
+   "version": "1",
+   "flavor": "DVD",
+   "arch": "x86_64",
+   "test": "textmode",
+   "machine": "64bit",
+   "group": 7,
+   "iscurrent": 1,
+   "clone": null,
+   "comment_data": 0
+  }
+ ]
+}

@@ -17,7 +17,6 @@ import argparse
 import bz2
 import calendar
 import contextlib
-import html
 import lzma
 import os
 import re
@@ -422,15 +421,23 @@ _HTML_PAGE = re.compile(
 )
 
 
+class PageServed(_oqa.NotFound):
+    """An HTML page served for a file that is no page; missing() asks the file list."""
+
+    def __init__(self, name):
+        super().__init__(
+            f"file gone (HTML page served): {_oqa.clean(name)}; "
+            "the job's files were probably cleaned up"
+        )
+        self.name = name
+
+
 def not_a_page(body, path):
     """Return body, or refuse an HTML page served for a file that is no page."""
     name = path.rsplit("/", 1)[1]
     if _HTML_PAGE.match(body[:256]) and not re.search(r"\.html?$", name, re.IGNORECASE):
         # NotFound: where a missing file is expected (--compare, serial logs), so is this.
-        raise _oqa.NotFound(
-            f"file gone (HTML page served): {_oqa.clean(name)}; "
-            "the job's files were probably cleaned up"
-        )
+        raise PageServed(name)
     return body
 
 
@@ -750,13 +757,23 @@ def ranged_tail(client, path, total, wanted, limit):
 
 
 def missing(client, job_id, error):
-    """The error for a file the job lacks, saying whether the job has any file left."""
-    if str(error).startswith("file gone"):
-        return error
+    """The error for a file the job lacks, saying whether the job has any file left; for an
+    HTML page served instead of a file, whether the job still lists that file."""
     try:
         results, uploads = list_files(client, job_id)
     except _oqa.OqaError:
         return error
+    if isinstance(error, PageServed):
+        name = _oqa.clean(error.name)
+        if error.name in results + uploads:
+            return _oqa.OqaError(
+                f"an HTML page was served for {name}, a file job {job_id} lists (a block "
+                "or login page, say): its logs are not known to be gone"
+            )
+        return _oqa.OqaError(
+            f"file gone (HTML page served): {name}; job {job_id} does not list it: its "
+            "logs were cleaned up"
+        )
     if not results and not uploads:
         return _oqa.OqaError(
             f"{error}; job {job_id} has no files at all: its logs were cleaned up, "
@@ -824,6 +841,13 @@ def list_files(client, job_id):
         f"/tests/{job_id}/downloads_ajax", max_bytes=1 << 20, accept="text/html"
     )
     page = body.decode("utf-8", "replace")
+    # openQA's tab (templates/webapi/test/downloads.html.ep) is blank or has its headings
+    # or file and asset links; any other page parses to no names, which is no cleanup.
+    ours = rf"<h[56]>\s*(?:Result files|Uploaded logs|Assets)\b|/tests/{job_id}/(?:file|asset)/"
+    if page.strip() and not re.search(ours, page):
+        raise _oqa.OqaError(
+            f"the file list of job {job_id} is not openQA's downloads tab"
+        )
     results, _, uploads = page.partition("Uploaded logs")
     # A name without its delimiter was cut by the size cap, maybe inside a credential.
     link = re.compile(rf"/tests/{job_id}/file/([^\"'?#<>\s]+)(?=[\"'?#<>\s])")
@@ -831,7 +855,7 @@ def list_files(client, job_id):
     for part in (results, uploads):
         names = []
         for name in link.findall(part):
-            name = html.unescape(name)
+            name = _oqa.link_name(name)
             if name not in names:
                 names.append(name)
         found.append(names)

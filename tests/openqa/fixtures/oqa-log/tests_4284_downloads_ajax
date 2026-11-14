@@ -1,0 +1,3 @@
+<!doctype html>
+<html><head><title>Sign in</title></head>
+<body><form action="/login?return_page=/tests/4284/downloads_ajax"><p>Please sign in to continue.</p></form></body></html>

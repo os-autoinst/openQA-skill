@@ -312,9 +312,14 @@ oqa-sweep.py) compiles the pattern as given: a nested quantifier such as
 `(a+)+b` can hang on a single line, the same way `grep -E` would, and the script cannot time it out.
 Prefer anchored patterns without nested quantifiers. Names from `--list` go to `--file`, which validates
 them; do not paste one into a shell. An HTML page served for a file whose name does not end in `.html`
-(openQA's answer for an expired or purged file, maybe after a redirect) is never read as log text:
-`error: file gone (HTML page served): <name>`, exit 2, and for `--compare` and the serial logs of
-`--errors` it counts as a missing file. `--tail` reads a file whole when a ranged read is answered with HTTP
+(openQA's answer for an expired or purged file, maybe after a redirect) is never read as log text, exit 2;
+one more request reads the job's file list: `error: file gone (HTML page served): <name>; job <id> does not
+list it: its logs were cleaned up`, or, when it still lists the file, `error: an HTML page was served for
+<name>, a file job <id> lists (a block or login page, say): its logs are not known to be gone` (an unreadable
+list leaves `the job's files were probably cleaned up`). A file list that is neither blank nor carries the
+downloads tab's headings or file links is another page, the proxy's own, and counts as unreadable; `--list`
+then exits 2 with `the file list of job <id> is not openQA's downloads tab`. For `--compare` and the serial logs of `--errors`
+such a page counts as a missing file. `--tail` reads a file whole when a ranged read is answered with HTTP
 416 (a range past the end, as any range of a file of 0 bytes is), header `range=unsatisfiable`; a file of 0
 bytes gives `note: the file is empty` and exit 0 in every mode. A missing file (HTTP 404) is an error that
 says whether the job has any file left: none means its logs were cleaned up or it has not run yet; else

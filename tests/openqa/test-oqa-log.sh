@@ -84,15 +84,37 @@ contains "a missing file: the job has others, --list names them" "; job 4242 has
 actual=$(log 4245 --errors)
 check "a job without any file: its logs were cleaned up (exit 2)" "2 1" \
 	"$? $(grep -c '; job 4245 has no files at all: its logs were cleaned up, or it has not run yet$' <<<"$actual")"
-gone="error: file gone (HTML page served): autoinst-log.txt; the job's files were probably cleaned up"
+gone="error: file gone (HTML page served): autoinst-log.txt; job 4275 does not list it: its logs were cleaned up"
 for mode in --errors "--tail 3" "--grep ."; do
 	# shellcheck disable=SC2086 # the mode is two words on purpose
 	actual=$(log 4275 $mode)
-	check "an HTML page served for a log is no log ($mode): exit 2, nothing of it printed" "2 $gone" "$? $actual"
+	check "an HTML page served for a log the job no longer lists is no log ($mode): exit 2, nothing of it printed" "2 $gone" "$? $actual"
 done
 actual=$(log 4275 --file ulogs/logs.tar.gz --members)
-check "an HTML page served for an archive is no archive" \
-	"2 error: file gone (HTML page served): logs.tar.gz; the job's files were probably cleaned up" "$? $actual"
+check "an HTML page served for an archive the job no longer lists is no archive" \
+	"2 error: file gone (HTML page served): logs.tar.gz; job 4275 does not list it: its logs were cleaned up" "$? $actual"
+served="error: an HTML page was served for autoinst-log.txt, a file job 4282 lists (a block or login page, say): its logs are not known to be gone"
+for mode in --errors "--tail 3"; do
+	# shellcheck disable=SC2086 # the mode is two words on purpose
+	actual=$(log 4282 $mode)
+	check "an HTML page served for a log the job still lists is not called gone ($mode): exit 2, nothing of it printed" \
+		"2 $served" "$? $actual"
+done
+actual=$(log 4283 --errors)
+check "an HTML page served and no file list readable: the logs are only probably gone" \
+	"2 error: file gone (HTML page served): autoinst-log.txt; the job's files were probably cleaned up" "$? $actual"
+actual=$(log 4284 --errors)
+check "an HTML page served as the file list too is no list: the logs are only probably gone" \
+	"2 error: file gone (HTML page served): autoinst-log.txt; the job's files were probably cleaned up" "$? $actual"
+actual=$(log 4284 --list)
+check "--list: a page that is not openQA's downloads tab is an error, not an empty list" \
+	"2 error: the file list of job 4284 is not openQA's downloads tab" "$? $actual"
+actual=$(log 4286 --file 'ulogs/generate_report#1-dmesg.txt' --tail 2)
+check "a listed name with a '#' (linked as %23) is found in the list" \
+	"2 error: an HTML page was served for generate_report#1-dmesg.txt, a file job 4286 lists (a block or login page, say): its logs are not known to be gone" "$? $actual"
+actual=$(log 4285 --errors)
+check "an HTML page served and openQA's empty downloads tab: the logs were cleaned up" \
+	"2 error: file gone (HTML page served): autoinst-log.txt; job 4285 does not list it: its logs were cleaned up" "$? $actual"
 actual=$(log 4275 --file ulogs/report.html --tail 2)
 check "an uploaded .html file is read as it is" "0 1" "$? $(grep -c '^2: <html><body><h1>LTP report</h1></body></html>$' <<<"$actual")"
 actual=$(log 4253 --runtimes --compare 4275)

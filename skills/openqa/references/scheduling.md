@@ -48,7 +48,7 @@ Which directory -> "Where a module goes". Running a module without touching sche
 | `conditional_schedule` | -> "Conditional schedule" |
 | `test_data` | keys `^[a-zA-Z0-9_-]+$` -> "Test data" |
 
-- **`vars:` is an unconditional runtime `set_var`** - it beats every job setting, even `openqa-clone-job ... VAR=x`, and the openQA scheduler and web UI never see it. Keep `HDD_1`, `START_AFTER_TEST`, `UEFI_PFLASH_VARS`, `DESKTOP` in the job group (else: image not published, dependency not linked, wrong web UI data); likewise `WORKER_CLASS`, `PARALLEL_WITH`, `PUBLISH_HDD_1`, `MACHINE` (inferred). Many schedules set `DESKTOP` there; do not copy it.
+- **`vars:` is an unconditional runtime `set_var`** - it beats every job setting, even `openqa-clone-job ... VAR=x`, and the openQA scheduler and web UI never see it. Keep `HDD_1`, `START_AFTER_TEST`, `UEFI_PFLASH_VARS`, `DESKTOP` in the job group (else: image not published, dependency not linked, wrong web UI data); likewise `WORKER_CLASS`, `PARALLEL_WITH`, `PUBLISH_HDD_1`, `MACHINE` (inferred). `MAX_JOB_TIME`, `MAX_SETUP_TIME`, `MAX_UPLOAD_TIME` and `UPLOAD_INACTIVITY_TIMEOUT` there do not change the worker's time limits, which it takes from the job settings before isotovideo starts; test code still reads them. Set a limit in the job group or test suite (`TIMEOUT_SCALE` under `vars:` scales testapi waits, not these limits). Many schedules set `DESKTOP` there; do not copy it.
 - **`%NAME%` in a `vars` value** becomes `get_var('NAME')`.
 - **`check_env` (in `init_main`) runs before `vars` apply** - `DESKTOP` (`kde gnome xfce lxde minimalx textmode serverro`) and `VIDEOMODE` (`""`, `text`, `ssh-x`) are validated from job settings only; any other value dies.
 - **Wrong `YAML_SCHEDULE` path** -> incomplete job, "unable to load main.pm, ..."; the real line `YAML_SCHEDULE file not found:` is in autoinst-log.txt (data -> references/untrusted-content.md "Rules").
@@ -183,4 +183,4 @@ A merged schedule runs nowhere until a job-group entry sets `YAML_SCHEDULE`.
 
 **`products/*/templates*` are `load_templates` seed files**, not the live job groups; never edit them to add a test.
 
-Sources: os-autoinst-distri-opensuse lib/scheduler.pm, lib/main_*.pm, products/*/main.pm, t/schema/, tools/, Makefile, declarative-schedule-doc.md, variables.md; os-autoinst autotest.pm, testapi.pm, commands.pm, doc/backend_vars.md; openQA lib/OpenQA/JobSettings.pm; opensuse-jobgroups
+Sources: os-autoinst-distri-opensuse lib/scheduler.pm, lib/main_*.pm, products/*/main.pm, t/schema/, tools/, Makefile, declarative-schedule-doc.md, variables.md; os-autoinst autotest.pm, testapi.pm, commands.pm, doc/backend_vars.md; openQA lib/OpenQA/JobSettings.pm, lib/OpenQA/Worker/Job.pm; os-autoinst bmwqemu.pm; opensuse-jobgroups

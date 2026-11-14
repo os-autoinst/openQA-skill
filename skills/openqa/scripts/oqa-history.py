@@ -965,6 +965,7 @@ def investigation(
         return
     if data.get("error"):
         print(f"  server says: {_oqa.quoted(data['error'], 160)}")
+        failure_logs(client, job_id, data, limit, verbose)
         return
     first_bad = link_id(data.get("first_bad"))
     print(f"  last_good={link_id(data.get('last_good'))} first_bad={first_bad}")
@@ -980,6 +981,7 @@ def investigation(
             "  nothing to compare: openQA found no passed or softfailed run of this scenario "
             "before this job, in all of its history, not only the --previous shown"
         )
+        failure_logs(client, job_id, data, limit, verbose)
         return
     good_id = link_id(data.get("last_good"))
     good_files = uploads(client, int(good_id)) if good_id.isdigit() else None
@@ -1089,6 +1091,38 @@ def investigation(
                 )
             print(f"  {title} diff stat: {_oqa.quoted(stat, 160)}{gap}")
         omitted = total - shown
+        print(
+            fenced(
+                client,
+                job_id,
+                key,
+                heads + ([f"[... {omitted} more commits omitted]"] if omitted else []),
+                65536 if verbose else 16384,
+            ),
+            end="",
+        )
+    failure_logs(client, job_id, data, limit, verbose)
+
+
+def failure_logs(client, job_id, data, limit, verbose):
+    """Newer openQA: commits to the files of the failing steps' stack traces and needles
+    only, also without a previous or a last good run."""
+    for key, title, url_key in (
+        ("failure_test_log", "failure test", "testgiturl"),
+        ("failure_needles_log", "failure needle", "needlegiturl"),
+    ):
+        text = data.get(key)
+        if not isinstance(text, str) or not text.strip():
+            continue
+        if "\n" not in text.strip():
+            print(f"  {title} changes: {_oqa.quoted(text, 160)}")
+            continue
+        heads, total = git_heads(text, limit)
+        omitted = total - len(heads)
+        print(
+            f"  {title} changes: commits={total} (newest first) "
+            f"url={_oqa.tok(data.get(url_key), 120)}"
+        )
         print(
             fenced(
                 client,
@@ -1299,6 +1333,35 @@ def main():
         )
     if notes:
         print("note: " + "; ".join(notes))
+    # Only the runs already read, of this job's build: its clone first, else the newest.
+    failing = bad(current) or current["id"] in forced_ok
+    reruns = []
+    if failing and current.get("state") == "done" and current.get("build"):
+        reruns = [
+            row
+            for row in newer
+            if row.get("state") == "done"
+            and not bad(row)
+            and not force_label(row)
+            and row.get("build") == current.get("build")
+        ]
+    # As for the ok runs above: a label beside a bugref hides a force_result.
+    known, rerun_forcing = references, forcing
+    if not args.before:
+        unsure = [row for row in reruns if has_reference(row)]
+        known, _, _, rerun_forcing = comments_as_of(client, None, unsure)
+    reruns = [
+        row
+        for row in reruns
+        if row["id"] not in rerun_forcing and known.get(row["id"]) != ("?", "?")
+    ]
+    reruns.sort(key=lambda row: row["id"] != current.get("clone"))
+    if reruns:
+        rerun = reruns[0]
+        print(
+            f"rerun passed: t#{rerun['id']} ({_oqa.tok(rerun.get('result'))}, "
+            f"build {build_of(rerun)})"
+        )
 
     status = 0
     if current.get("state") != "done":

@@ -421,6 +421,12 @@ the runs of this job's build, interleaved with ok runs of another, the hint is `
 last good on build Y`, not `intermittent`. With the worker column and runs on two workers or more, `workers:
 <worker> ok=N not_ok=M, ...` tallies them, the most failing first; when every run on one worker failed and every
 run on the others was ok, the hint is `bound to one machine`.
+`rerun passed: t#<id> (<result>, build <build>)`: a run after this not-ok job, of the same build, ended passed
+or softfailed and is done (its clone first, else the newest). A result a `label:force_result` set does not count:
+the comments of a candidate with a bugref or label are read, as for the ok runs above (one request each, none
+without one; one whose comments cannot be read does not count either). Only the runs the
+table already holds are looked at, openQA's nearest and latest run after this job (the 21 nearest with
+`--before`), so a passed run between them is not seen; a run of another build never counts, and the rerun counts in none of the lines below.
 
 `--before TIME` (ISO 8601 such as `2030-01-02T10:00Z`, UTC without an offset): the history as it stood then,
 for a review as of a ticket's date. The same request also asks for the 20 runs after the job, nearest first,
@@ -475,6 +481,10 @@ range with `git log --no-merges`, stopped at twice the diff stat's maximum, but 
 many commits (N)`: the `diff stat` line then adds `<n> listed, the other <m> are merge commits`, or, when the
 log stopped, `openQA's git log stops at <n>` and `commits=<n> (list cut by openQA)`. A module loaded under
 another `name` is not matched. `-v` lists every test commit, each followed by its files.
+`failure test changes:` and `failure needle changes:` (newer openQA, also after `server says` or `nothing to
+compare`): the commits openQA found to the files of the failed modules' stack traces and to the needles of
+their failed screen steps, since last good or within a window before this job, newest first and fenced like
+the test log, or openQA's one-line message; no line when the answer has neither.
 
     job=6273362 host=https://openqa.opensuse.org scenario=opensuse-Tumbleweed-JeOS-for-kvm-and-xen-x86_64-jeos-ltp-syscalls@uefi_virtio-2G
     id       build     started            worker             result      failed_modules  bugrefs     clone

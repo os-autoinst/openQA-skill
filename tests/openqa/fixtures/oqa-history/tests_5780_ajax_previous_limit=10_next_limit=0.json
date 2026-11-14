@@ -1,0 +1,45 @@
+{
+ "data": [
+  {
+   "id": 5785,
+   "build": "20300110",
+   "state": "uploading",
+   "result": "passed",
+   "failedmodules": [],
+   "finished": null,
+   "duration": null,
+   "distri": "exampleos",
+   "version": "1",
+   "flavor": "DVD",
+   "arch": "x86_64",
+   "test": "textmode",
+   "machine": "64bit",
+   "group": 7,
+   "iscurrent": null,
+   "clone": null,
+   "comment_data": 0,
+   "islatest": 1
+  },
+  {
+   "id": 5780,
+   "build": "20300110",
+   "state": "done",
+   "result": "failed",
+   "failedmodules": [
+    "zypper_in"
+   ],
+   "finished": "2030-01-03T01:20:00Z",
+   "duration": "10:00 minutes",
+   "distri": "exampleos",
+   "version": "1",
+   "flavor": "DVD",
+   "arch": "x86_64",
+   "test": "textmode",
+   "machine": "64bit",
+   "group": 7,
+   "iscurrent": 1,
+   "clone": 5785,
+   "comment_data": 0
+  }
+ ]
+}

@@ -11,7 +11,7 @@ Inherit with `use Mojo::Base '<class>';`. All below derive from `opensusebasetes
 | Class | Use for | Adds |
 |---|---|---|
 | `consoletest` | CLI test on an installed system | `post_run_hook`: `assert_script_run "cd"`, AVC check, clear console; `post_fail_hook` adds OOM and blocked-task info |
-| `opensusebasetest` | boot, mixed-console, non-shell modules | `wait_boot`, log-exporting `post_fail_hook`, `test_flags` `{}` (public cloud: `{no_rollback => 1, fatal => 0}`) |
+| `opensusebasetest` | boot, mixed-console, non-shell modules | `wait_boot`, log-exporting `post_fail_hook`, `test_flags` `{}` (public cloud, `BINARY_COVERAGE`: `{no_rollback => 1, fatal => 0}`) |
 | `x11test` | desktop GUI test | `post_run_hook` asserts needle `generic-desktop` -> references/needles-gui.md "x11 tests" |
 | `containers::basetest` | container tests | `$self->containers_factory($runtime)` engine object; call its methods, not `docker ...` strings -> references/area-platforms.md "Containers" |
 

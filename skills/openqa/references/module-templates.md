@@ -242,7 +242,7 @@ def run(self):
 
 ## Choosing test_flags
 
-**Default: define none.** Base returns `{}` (`opensusebasetest`: `{no_rollback => 1, fatal => 0}` on public cloud only); reviewers challenge every non-default flag. Semantics -> references/testapi.md "test_flags".
+**Default: define none.** Base returns `{}` (`opensusebasetest`: `{no_rollback => 1, fatal => 0}` on public cloud and with `BINARY_COVERAGE`, where a module's own flags must keep both); reviewers challenge every non-default flag. Semantics -> references/testapi.md "test_flags".
 
 | Flag | Justified when | Example |
 |---|---|---|

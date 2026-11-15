@@ -642,6 +642,14 @@ mkdir -p "$work/repo/tests/x/fixtures"
 printf 'caf\351 https://%s/x\n' "$host" | tee "$work/repo/tests/x/fixtures/log.txt" >"$work/repo/logo.png"
 check "public: a fixture and a file that is no text by its suffix stay unread" \
 	"ok - all repository checks pass" "$(gate public,attribution)"
+# A dot-directory of an assistant's name is a path, with or without a slash after it.
+fresh
+name="cla""ude"
+printf 'case $f in .%s | .tmp*) continue ;; esac\n' "$name" >"$work/repo/skip.sh"
+check "attribution: a dot-directory named like an assistant is a path" \
+	"ok - all repository checks pass" "$(gate attribution)"
+printf 'Thanks to %s.\n' "$name" >"$work/repo/README.md"
+finds "attribution: the bare name is still found" attribution "README.md:1: assistant name: "
 fresh
 printf 'caf\351\n-> testapi.md "No such section"\n' >>"$skill/agents/job-triage.md"
 lines=$(wc -l <"$root/skills/openqa/agents/job-triage.md")

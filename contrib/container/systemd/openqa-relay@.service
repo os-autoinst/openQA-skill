@@ -1,0 +1,12 @@
+[Unit]
+Description=Socket relay to the openQA agent (%i)
+BindsTo=openqa-agent@%i.service
+After=openqa-agent@%i.service
+
+[Service]
+ExecStart=/usr/bin/socat UNIX-LISTEN:%t/openqa-%i.sock,mode=0600,unlink-early,fork 'EXEC:"/usr/bin/podman exec -i openqa-%i-agent socat - TCP:127.0.0.1:4096"'
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,6 @@
+[Unit]
+Description=Update the openQA agent (%i)
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/openqa-container update %i

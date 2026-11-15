@@ -1,0 +1,10 @@
+# Pushes to GitHub go out as its git user with the container's own key, to the
+# host key the image was built with and to no other: a host key file of the
+# user's own would be one in the work directory, which the agent writes.
+Host github.com
+    User git
+    IdentityFile /agent-logins/ssh/id_ed25519
+    IdentitiesOnly yes
+    StrictHostKeyChecking yes
+    UserKnownHostsFile /dev/null
+    GlobalKnownHostsFile /etc/ssh/ssh_known_hosts

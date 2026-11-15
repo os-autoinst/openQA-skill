@@ -163,8 +163,9 @@ ATTRIBUTION_PATTERNS = [
 ]
 # The upstream rule on commit trailers is described, neutrally, in exactly one place.
 ATTRIBUTION_ALLOW_FILES = {"skills/openqa/references/contributing-gates.md"}
+# A dot-directory of that name is a path: with a slash after it or, in a list of names, without.
 ATTRIBUTION_SKIP_CONTEXT = re.compile(
-    r"\.claude(?:-plugin)?/|CLAUDE\.md|Claude Code", re.IGNORECASE
+    r"\.claude\b|CLAUDE\.md|Claude Code", re.IGNORECASE
 )
 
 # Documentation must never teach an agent to handle a credential itself: that is how an

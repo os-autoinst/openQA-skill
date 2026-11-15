@@ -1,0 +1,452 @@
+#!/bin/bash
+# Fails when the image is not fit to publish. It is the last build step, so a
+# failure leaves no image; it also runs on a built image started without mounts.
+set -euo pipefail
+
+fail() {
+	echo "image-check: $*" >&2
+	exit 1
+}
+
+skill=/etc/opencode/skills/openqa
+share=/usr/local/share/image-check
+logins=/agent-logins
+policy=/home/agent/.config/opencode/openqa-policy.md
+scratch=$(mktemp -d)
+# opencode and its runtime leave files in the temporary directory.
+export TMPDIR=$scratch
+server=
+model=
+planted=
+cleanup() {
+	local pid
+	for pid in $server $model; do
+		kill "$pid" 2>/dev/null || true
+		wait "$pid" 2>/dev/null || true
+	done
+	[ -z "$planted" ] || rm -f "$logins/openqa/client.conf" "$logins/gh/hosts.yml" "$logins/bugzilla/api-key" "$logins/ssh/id_ed25519" "$policy"
+	rm -rf "$scratch"
+}
+trap cleanup EXIT
+cd "$scratch"
+
+[ "$HOME" = /home/agent ] || fail "HOME is $HOME"
+[ "${OPENCODE_DISABLE_PROJECT_CONFIG:-}" = 1 ] || fail "project config is not disabled"
+[ "${OPENCODE_DISABLE_AUTOUPDATE:-}" = 1 ] || fail "self-update is not disabled"
+[ "${OPENCODE_DISABLE_CLAUDE_CODE_SKILLS:-}" = 1 ] || fail "skills from a .claude directory are not disabled"
+# shellcheck disable=SC2016  # the inner shell expands it
+[ "$(OPENCODE_PASSWORD=x bash -c 'echo "${OPENCODE_PASSWORD-unset}"')" = unset ] ||
+	fail "the shell of a command starts with the server password"
+
+while read -r tool; do
+	HOME=$scratch bash -c "$tool" >/dev/null 2>&1 || fail "does not run: $tool"
+done <<EOF
+opencode --version
+openqa-cli --help
+openqa-clone-job --help
+openqa-clone-custom-git-refspec --help
+gh --version
+bugwarden --version
+git --version
+ssh -V
+jq --version
+python3 -c 'import yaml, PIL'
+python3 $skill/scripts/refsection.py --list $skill/references/openqa-model.md
+python3 $skill/scripts/oqa-job.py --help
+make --version
+perltidy --version
+tidyall --version
+perlcritic --version
+perl -MCode::DRY -MJSON::Validator -MYAML::PP -MMojo::Base -e 1
+perl -MTest::MockModule -MTest::Warnings -MTest::Exception -MTest::Mock::Time -MTest::MockObject -MTest::Most -MTest::Fatal -e 1
+jsonnet --version
+yamllint --version
+gitlint --version
+shellcheck --version
+parallel --version
+rg --version
+find --version
+xargs --version
+grep --version
+sed --version
+awk --version
+diff --version
+patch --version
+socat -V
+curl --version
+xz --version
+bzip2 --help
+file --version
+EOF
+
+# What the README says is not here: qemu, a compiler, podman and sudo, under
+# whatever version suffix.
+tool=$(compgen -c | grep -m1 -E '^(qemu.*|([a-z0-9_]+-suse-linux-)?(gcc|g\+\+|cc|c\+\+|cpp|clang|tcc|podman|podman-remote|docker|sudo)(-[0-9.]+)?)$' || true)
+[ -z "$tool" ] || fail "in the image, against the README: $tool"
+[ -s /usr/lib/os-autoinst/testapi.pm ] || fail "no os-autoinst tree in /usr/lib/os-autoinst"
+
+for f in /etc/opencode/opencode.jsonc /etc/opencode/opencode.json /etc/opencode/skill.obsinfo \
+	/etc/opencode/CONTAINER.md "$skill/SKILL.md"; do
+	[ -s "$f" ] || fail "missing: $f"
+done
+jq -e '.instructions | index("/etc/opencode/CONTAINER.md")' /etc/opencode/opencode.json >/dev/null ||
+	fail "/etc/opencode/opencode.json does not name CONTAINER.md as instructions"
+jq -e '.mcp.servers.bugzilla.command | length > 0' /etc/opencode/opencode.json >/dev/null ||
+	fail "no bugzilla server in /etc/opencode/opencode.json"
+# The launcher names another graph through this variable: no config pins one.
+[[ ${MEMORY_FILE_PATH:-} == /home/agent/.local/share/mcp-memory/* ]] || fail "MEMORY_FILE_PATH is ${MEMORY_FILE_PATH:-unset}"
+jq -e '.mcp.servers.memory | has("environment") | not' /etc/opencode/opencode.json >/dev/null ||
+	fail "the memory server's config pins its environment"
+# The logins are mounted into one directory outside the home directory, and each
+# tool is pointed at its own part of it.
+for d in openqa gh bugzilla ssh; do
+	[ -d "$logins/$d" ] || fail "no directory to mount a login in: $logins/$d"
+done
+[ "${OPENQA_CONFIG:-}" = "$logins/openqa" ] || fail "OPENQA_CONFIG is ${OPENQA_CONFIG:-unset}"
+[ "${GH_CONFIG_DIR:-}" = "$logins/gh" ] || fail "GH_CONFIG_DIR is ${GH_CONFIG_DIR:-unset}"
+[ -s "$logins/gh/config.yml" ] || fail "gh has no config.yml beside the mounted login"
+jq -e --arg f "$logins/bugzilla/api-key" '.mcp.servers.bugzilla.command | index($f)' /etc/opencode/opencode.json >/dev/null ||
+	fail "the bugzilla server does not read its key from $logins"
+# Nothing of a login is left to mount below the home directory.
+for d in .ssh .config/openqa .config/gh .config/mcp-bugzilla; do
+	[ ! -e "/home/agent/$d" ] || fail "a login directory below the home directory: $d"
+done
+# A push to GitHub: its git user, the mounted key alone, the baked host key and
+# no other. ssh takes a user's own config and host keys from the home directory
+# of the password entry, which in the running container is the work directory:
+# git is told to start ssh on the image's own config file alone.
+[ "${GIT_SSH_COMMAND:-}" = "ssh -F /etc/ssh/ssh_config.d/50-github.conf" ] || fail "GIT_SSH_COMMAND is ${GIT_SSH_COMMAND:-unset}"
+ssh=$(HOME=$scratch $GIT_SSH_COMMAND -G github.com 2>&1) || fail "ssh cannot read its config: $ssh"
+for line in "user git" "identityfile $logins/ssh/id_ed25519" "identitiesonly yes" \
+	"stricthostkeychecking true" "userknownhostsfile /dev/null" \
+	"globalknownhostsfile /etc/ssh/ssh_known_hosts"; do
+	grep -qxF "$line" <<<"$ssh" || fail "ssh for github.com lacks: $line"
+done
+ssh-keygen -F github.com -f /etc/ssh/ssh_known_hosts >/dev/null ||
+	fail "no host key of github.com in /etc/ssh/ssh_known_hosts"
+[ -d /home/agent/.config/git ] || fail "no mount point for the git identity"
+[ "$(readlink /home/agent/.config/openqa-skill/policy.md)" = ../opencode/openqa-policy.md ] ||
+	fail "the site policy does not lead to the per-user directory"
+# An openQA instance inside SUSE has a certificate that this authority signs.
+anchors=$(trust list --filter=ca-anchors 2>/dev/null) || true
+[[ $anchors == *'SUSE Trust Root'* ]] || fail "the SUSE CA is not trusted"
+# No key is mounted here: the server must stop at the key, not at its own options.
+mapfile -t mcp < <(jq -r '.mcp.servers.bugzilla.command[]' /etc/opencode/opencode.json)
+out=$("${mcp[@]}" </dev/null 2>&1 || true)
+[[ $out == *"failed to read the API key file"* ]] || fail "bugzilla server does not start: $out"
+# The other two need no login: each must answer the opening request.
+init='{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"image-check","version":"0"}}}'
+for s in memory sequentialthinking; do
+	mapfile -t mcp < <(jq -r --arg s "$s" '.mcp.servers[$s].command[]' /etc/opencode/opencode.json)
+	out=$(MEMORY_FILE_PATH=$scratch/memory.jsonl timeout 30 "${mcp[@]}" <<<"$init" 2>&1 || true)
+	[[ $out == *'"serverInfo"'* ]] || fail "MCP server $s does not answer: $out"
+done
+
+loose=$(find /etc/opencode /home/agent "$logins" \( ! -user root -o \( ! -type l -perm /022 \) \) -print -quit)
+[ -z "$loose" ] || fail "not root-owned, or writable by others: $loose"
+
+# For the rule table further down, a made-up login lies in each place a real one
+# is mounted, and a made-up site policy where the user's would be. They are there
+# before the server starts, so that the Bugzilla server finds a key and offers
+# its tools. That takes a root this check may write: the build's, or a container
+# started without --read-only. Elsewhere it leaves the table out and says so.
+if [ -w "$logins/openqa" ] && [ -w "$logins/gh" ] && [ -w "$logins/bugzilla" ] && [ -w "$logins/ssh" ] &&
+	[ -w "${policy%/*}" ]; then
+	planted=1
+	printf '[openqa.opensuse.org]\nkey = 0123456789ABCDEF\nsecret = FEDCBA9876543210\n' >"$logins/openqa/client.conf"
+	printf 'github.com:\n    oauth_token: gho_MADEUPTOKEN0000\n' >"$logins/gh/hosts.yml"
+	printf 'MADEUPBUGZILLAKEY0000\n' >"$logins/bugzilla/api-key"
+	printf '%s\nMADEUPSSHKEY0000\n%s\n' '-----BEGIN OPENSSH PRIVATE KEY-----' '-----END OPENSSH PRIVATE KEY-----' >"$logins/ssh/id_ed25519"
+	echo '# A made-up site policy' >"$policy"
+else
+	echo "image-check: the rule table is left out: the logins' directory cannot be written here" >&2
+fi
+
+# A server on the baked config: without the password it must refuse, with it
+# it must list the skill's sub-agents and carry every rule of both config files.
+# Its user configuration names one thing: a stand-in model on the loopback, which
+# answers a turn with the tool call it is handed. Through it the rule table
+# further down reaches the server's own matcher. What the table lets through must
+# reach no network: four names that would stand first on the server's PATH.
+export XDG_DATA_HOME=$scratch/data XDG_STATE_HOME=$scratch/state XDG_CACHE_HOME=$scratch/cache
+export XDG_CONFIG_HOME=$scratch/config
+mkdir -p "$XDG_CONFIG_HOME/opencode" "$scratch/inert" "$scratch/project"
+cat >"$XDG_CONFIG_HOME/opencode/opencode.json" <<'EOF'
+{"providers":{"stub":{"package":"@ai-sdk/openai-compatible","settings":{"baseURL":"http://127.0.0.1:8085/v1","apiKey":"x"},"models":{"m":{"capabilities":{"tools":true}}}}},"model":"stub/m"}
+EOF
+for tool in openqa-cli gh curl python3; do
+	printf '#!/bin/sh\nexit 0\n' >"$scratch/inert/$tool"
+done
+chmod 0755 "$scratch"/inert/*
+/usr/bin/python3 "$share/model-stub.py" "$scratch/call" "$scratch/result" >/dev/null 2>&1 &
+model=$!
+OPENCODE_PASSWORD=$(head -c 18 /dev/urandom | base64)
+export OPENCODE_PASSWORD
+PATH=$scratch/inert:$PATH opencode serve --hostname 127.0.0.1 --port 4097 >"$scratch/serve.log" 2>&1 &
+server=$!
+cd /work
+# Read from a file: the listing is cut short when it goes to a pipe.
+SECONDS=0
+while ((SECONDS < 90)); do
+	if opencode debug agents --server http://127.0.0.1:4097 >"$scratch/agents.json" 2>&1 &&
+		jq -e 'any(.[]; .id == "build")' "$scratch/agents.json" >/dev/null 2>&1; then break; fi
+	sleep 0.3
+done
+jq -e 'any(.[]; .id == "build")' "$scratch/agents.json" >/dev/null 2>&1 ||
+	fail "no agent listing: $(head -c 300 "$scratch/agents.json") $(cat "$scratch/serve.log")"
+# The agent's commands reach the port: without the password the server must refuse.
+# The full path: a build service puts its own curl first on PATH.
+code=$(/usr/bin/curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:4097/api/plugin || true)
+[ "$code" = 401 ] || fail "the server answers $code without its password"
+
+for f in "$skill"/agents/*.md; do
+	name=$(sed -n '2,/^---$/s/^name: //p' "$f")
+	jq -e --arg n "$name" 'any(.[]; .id == $n and .mode == "subagent")' "$scratch/agents.json" >/dev/null ||
+		fail "$f is not registered as the sub-agent $name"
+done
+# The rules of opencode.json as they must be: the questions before a write, the
+# reads that go through without one, and the denies that keep a command away
+# from the server, its password and the logins. A rule lost, added or moved in
+# that file fails here.
+want=$(
+	jq -Rnc '[inputs | capture("^(?<e>[a-z]+) (?<a>[^ ]+) (?<r>.+)$")
+		| [.a, (.r | gsub("\\{TAB\\}"; "\t") | gsub("\\{NL\\}"; "\n")), .e]]' <<'EOF'
+ask shell *openqa-cli *
+ask shell *openqa-client *
+ask shell *openqa-clone-job *
+ask shell *openqa-clone-custom-git-refspec *
+ask shell *openqa-load-templates *
+ask shell *openqa/script/*
+ask shell *clone_job.pl*
+ask shell *load_templates*
+allow shell openqa-cli api *
+allow shell openqa-cli archive *
+allow shell openqa-cli monitor *
+ask shell *openqa-cli*-X*
+ask shell *openqa-cli*--m*
+ask shell *openqa-cli* -m*
+ask shell *openqa-cli* +*
+ask shell *openqa-cli*'-*
+ask shell *openqa-cli*"-*
+ask shell *openqa-cli*data-file*
+ask shell *openqa-cli*param-file*
+ask shell *openqa-cli* -D*
+ask shell *openqa-cli'*
+ask shell *openqa-cli"*
+ask shell *git*push*
+ask shell *git*send-pack*
+ask shell gh *
+ask shell */gh *
+ask shell * gh *
+ask shell *'gh'*
+ask shell *"gh"*
+allow shell gh pr view *
+allow shell gh pr diff *
+allow shell gh pr checks *
+allow shell gh pr list *
+allow shell gh pr status *
+allow shell gh pr checkout *
+allow shell gh issue view *
+allow shell gh issue list *
+allow shell gh issue status *
+allow shell gh search *
+allow shell gh run view *
+allow shell gh run list *
+allow shell gh run watch *
+allow shell gh run download *
+allow shell gh repo view *
+allow shell gh repo list *
+allow shell gh repo clone *
+allow shell gh release view *
+allow shell gh release list *
+allow shell gh release download *
+allow shell gh workflow view *
+allow shell gh workflow list *
+allow shell gh label list *
+allow shell gh api *
+allow shell gh --version
+ask shell *gh api*-X*
+ask shell *gh api* -i*
+ask shell *gh api*--method*
+ask shell *gh api*ethod*
+ask shell *gh api*ETHOD*
+ask shell *gh api*--input*
+ask shell *gh api* -f*
+ask shell *gh api* -F*
+ask shell *gh api*--field*
+ask shell *gh api*--raw-field*
+ask shell *gh api*'-*
+ask shell *gh api*"-*
+ask shell *{TAB}*
+ask shell *\{NL}*
+ask bugzilla_* *
+allow bugzilla_bugs_quicksearch *
+allow bugzilla_quicksearch_syntax *
+allow bugzilla_bug_info *
+allow bugzilla_bug_comments *
+allow bugzilla_bug_history *
+allow bugzilla_summarize_bug *
+allow bugzilla_bug_url *
+allow bugzilla_list_attachments *
+allow bugzilla_download_attachment *
+allow bugzilla_bugzilla_server_info *
+allow bugzilla_mcp_server_info *
+deny shell *gh pr merge*
+deny shell *gh *auth *token*
+deny shell *gh *auth *status*
+deny shell *gh *auth *git-credential*
+deny shell sudo *
+deny external_directory *
+allow external_directory /etc/*
+allow external_directory /usr/*
+allow external_directory /tmp/*
+allow external_directory /var/tmp/*
+allow external_directory /home/agent/*
+deny external_directory /agent-logins/*
+deny read *agent-logins*
+deny shell *agent-logins*
+deny shell *hosts.yml*
+deny shell *client.conf*
+deny shell *id_ed25519*
+deny shell *api-key*
+deny shell *OPENQA_CONFIG*
+deny shell *GH_CONFIG_DIR*
+deny shell *OPENQA_API_KEY*
+deny shell *OPENQA_API_SECRET*
+deny edit *.local/share/opencode*
+deny shell opencode *
+deny opencode_* *
+deny shell *opencode auth*
+deny shell *opencode.db*
+deny read *opencode.db*
+deny shell *opencode api*
+deny shell *opencode run*
+deny shell *opencode serve*
+deny shell *opencode acp*
+deny shell *opencode mini*
+deny shell *opencode session*
+deny shell *opencode service*
+deny shell *opencode pair*
+deny shell *opencode*--server*
+deny shell *opencode*--standalone*
+deny shell *OPENCODE_PASSWORD*
+deny shell *oauth_token*
+deny shell */proc/*environ*
+deny read */proc/*environ*
+EOF
+)
+[ "$(jq -c '[.permissions[] | [.action, .resource, .effect]]' /etc/opencode/opencode.json)" = "$want" ] ||
+	fail "the rules of /etc/opencode/opencode.json are not the ones listed here"
+# The skill's own rules: its file is JSON once the comment lines are out. The
+# server lists a rule on a directory below ~ with the home directory written out.
+home='map(.[1] |= sub("^~/"; env.HOME + "/"))'
+skills=$(sed '/^[[:space:]]*\/\//d' /etc/opencode/opencode.jsonc |
+	jq -c "[.permissions[] | [.action, .resource, .effect]] | $home") ||
+	fail "cannot read the rules of /etc/opencode/opencode.jsonc"
+jq -e 'index([["execute", "*", "deny"]]) != null' <<<"$skills" >/dev/null ||
+	fail "/etc/opencode/opencode.jsonc does not hold the skill's rules"
+both=$(jq -c --argjson skills "$skills" "$home + \$skills" <<<"$want")
+# The last rule that fits a command decides. Every agent, the sub-agents
+# included, carries the rules of opencode.json and then every rule of the
+# skill's file, in their order and in one piece: an allow here never undoes a
+# deny there. What an agent adds after them denies and nothing else: an ask
+# there would turn a deny into a question.
+jq -e --argjson both "$both" 'all(.[]; [.permissions[] | [.action, .resource, .effect]]
+	| index($both) as $at
+	| $at != null and all(.[$at + ($both | length):][]; .[2] == "deny"))' \
+	"$scratch/agents.json" >/dev/null ||
+	fail "an agent does not hold the rules of opencode.json and then those of opencode.jsonc in one piece, or adds more than denies after them"
+
+# The rule table: what the server's own matcher says to each command, in a run
+# without the interface, where a rule that asks refuses. An answer holds one of
+# the made-up logins only where the table says the rules do not reach.
+cd "$scratch/project"
+[ -z "$planted" ] ||
+	/usr/bin/python3 - "$share/rule-table.txt" "$scratch" <<'EOF' || fail "the server's verdicts are not those of the rule table"
+import json
+import os
+import subprocess
+import sys
+
+table, scratch = sys.argv[1], sys.argv[2]
+made_up = ("0123456789ABCDEF", "FEDCBA9876543210", "MADEUPTOKEN", "MADEUPBUGZILLAKEY", "MADEUPSSHKEY")
+wrong = 0
+for line in open(table):
+    line = line.rstrip("\n")
+    if not line or line.startswith("#"):
+        continue
+    want, spec = line.split("\t", 1)
+    spec = spec.replace("{NL}", "\n").replace("{TAB}", "\t")
+    if spec.startswith("TOOL "):
+        call = json.loads(spec[5:])
+    else:
+        call = {"name": "shell", "args": {"command": spec, "description": "rule table"}}
+    with open(f"{scratch}/call", "w") as f:
+        json.dump(call, f)
+    if os.path.exists(f"{scratch}/result"):
+        os.remove(f"{scratch}/result")
+    subprocess.run(
+        ["timeout", "90", "opencode", "run", "--server", "http://127.0.0.1:4097", "-m", "stub/m", "go"],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+    try:
+        with open(f"{scratch}/result") as f:
+            result = json.load(f)
+    except (OSError, ValueError):
+        result = None
+    text = result if isinstance(result, str) else json.dumps(result)
+    try:
+        error = json.loads(text).get("error", {})
+    except (ValueError, AttributeError):
+        error = {}
+    leaked = any(value in text for value in made_up)
+    if result is None:
+        got = "no answer"
+    elif error.get("type") == "permission.rejected":
+        got = "ask" if "cannot ask the user" in error.get("message", "") else "deny"
+    elif error:
+        # A call the tool itself refused, a wrong argument or a missing file, proves nothing.
+        got = "an error (" + str(error.get("message", ""))[:60] + ")"
+    elif leaked:
+        got = "leaks"
+    else:
+        got = "allow"
+    if got != want:
+        wrong += 1
+        shown = spec.replace("\n", "{NL}").replace("\t", "{TAB}")
+        print(f"image-check: rule table: {want} expected, {got}: {shown}", file=sys.stderr)
+sys.exit(1 if wrong else 0)
+EOF
+cd /work
+if [ -n "$planted" ]; then
+	rm -f "$logins/openqa/client.conf" "$logins/gh/hosts.yml" "$logins/bugzilla/api-key" "$logins/ssh/id_ed25519" "$policy"
+	planted=
+fi
+left=$(find "$logins" /home/agent/.config/opencode -type f ! -path "$logins/gh/config.yml" -print -quit)
+[ -z "$left" ] || fail "left behind by the rule table: $left"
+
+# The server takes the container's instructions from the baked config.
+opencode api GET /api/config --server http://127.0.0.1:4097 2>/dev/null |
+	jq -e 'any(.[]; (.info.instructions? // []) | index("/etc/opencode/CONTAINER.md"))' >/dev/null ||
+	fail "the server does not load CONTAINER.md as instructions"
+
+# A command the server runs starts without the server's password. The call
+# returns before the command has run.
+# shellcheck disable=SC2016  # the server's shell expands it
+cmd='echo "${OPENCODE_PASSWORD-unset}" > '$scratch/shell-password
+opencode api shell.create --server http://127.0.0.1:4097 -d "$(jq -n --arg c "$cmd" '{command: $c}')" \
+	>/dev/null 2>&1 || fail "the server runs no command"
+for _ in $(seq 100); do
+	[ ! -s "$scratch/shell-password" ] || break
+	sleep 0.3
+done
+[ "$(cat "$scratch/shell-password" 2>/dev/null)" = unset ] ||
+	fail "a command the server runs starts with the server password"
+
+# A container starts with a copy of the image's /tmp, owned by root, and a new
+# scratch volume with a copy of its /var/tmp.
+left=$(find /tmp /var/tmp -mindepth 1 -maxdepth 1 ! -path "$scratch" -print -quit)
+[ -z "$left" ] || fail "left in /tmp or /var/tmp: $left"
+
+echo "image-check: ok"

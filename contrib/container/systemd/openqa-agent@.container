@@ -1,0 +1,38 @@
+[Unit]
+Description=openQA agent (%i)
+# A start that cannot work, a missing secret for one, is not tried for ever.
+StartLimitIntervalSec=600
+StartLimitBurst=5
+
+[Container]
+Image=localhost/openqa-agent:latest
+ContainerName=openqa-%i-agent
+UserNS=keep-id
+User=%U
+Group=%G
+ReadOnly=true
+DropCapability=all
+NoNewPrivileges=true
+RunInit=true
+Pull=never
+Secret=openqa-%i-server-password,type=env,target=OPENCODE_PASSWORD
+Secret=openqa-openqa,target=/agent-logins/openqa/client.conf,uid=%U,gid=%G,mode=0400
+Secret=openqa-github,target=/agent-logins/gh/hosts.yml,uid=%U,gid=%G,mode=0400
+Secret=openqa-bugzilla,target=/agent-logins/bugzilla/api-key,uid=%U,gid=%G,mode=0400
+Secret=openqa-ssh,target=/agent-logins/ssh/id_ed25519,uid=%U,gid=%G,mode=0400
+Volume=openqa-%i-state:/home/agent/.local/share/opencode:U
+Volume=openqa-%i-memory:/home/agent/.local/share/mcp-memory:U
+Volume=openqa-%i-toolstate:/home/agent/.local/state:U
+Volume=openqa-%i-scratch:/var/tmp
+Tmpfs=/home/agent/.cache:rw,mode=0700,U
+Volume=%h/.config/skill-container/openqa:/home/agent/.config/opencode:ro,Z
+Exec=opencode serve --hostname 127.0.0.1 --port 4096
+
+[Service]
+Restart=on-failure
+# The server ends on the stop signal: that is no failure.
+SuccessExitStatus=143
+TimeoutStartSec=300
+
+[Install]
+WantedBy=default.target

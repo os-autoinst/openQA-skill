@@ -1,0 +1,651 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "instructions": [
+    "/etc/opencode/CONTAINER.md"
+  ],
+  "mcp": {
+    "servers": {
+      "bugzilla": {
+        "type": "local",
+        "command": [
+          "bugwarden",
+          "--transport",
+          "stdio",
+          "--bugzilla-server",
+          "https://bugzilla.suse.com",
+          "--api-key-file",
+          "/agent-logins/bugzilla/api-key",
+          "--policy",
+          "/etc/bugwarden/policy.toml"
+        ],
+        "codemode": false
+      },
+      "memory": {
+        "type": "local",
+        "command": [
+          "mcp-server-memory"
+        ],
+        "codemode": false
+      },
+      "sequentialthinking": {
+        "type": "local",
+        "command": [
+          "mcp-server-sequential-thinking"
+        ],
+        "codemode": false
+      }
+    }
+  },
+  "permissions": [
+    {
+      "action": "shell",
+      "resource": "*openqa-cli *",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "*openqa-client *",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "*openqa-clone-job *",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "*openqa-clone-custom-git-refspec *",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "*openqa-load-templates *",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "*openqa/script/*",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "*clone_job.pl*",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "*load_templates*",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "openqa-cli api *",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "openqa-cli archive *",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "openqa-cli monitor *",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "*openqa-cli*-X*",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "*openqa-cli*--m*",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "*openqa-cli* -m*",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "*openqa-cli* +*",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "*openqa-cli*'-*",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "*openqa-cli*\"-*",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "*openqa-cli*data-file*",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "*openqa-cli*param-file*",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "*openqa-cli* -D*",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "*openqa-cli'*",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "*openqa-cli\"*",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "*git*push*",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "*git*send-pack*",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "gh *",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "*/gh *",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "* gh *",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "*'gh'*",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "*\"gh\"*",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "gh pr view *",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "gh pr diff *",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "gh pr checks *",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "gh pr list *",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "gh pr status *",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "gh pr checkout *",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "gh issue view *",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "gh issue list *",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "gh issue status *",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "gh search *",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "gh run view *",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "gh run list *",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "gh run watch *",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "gh run download *",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "gh repo view *",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "gh repo list *",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "gh repo clone *",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "gh release view *",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "gh release list *",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "gh release download *",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "gh workflow view *",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "gh workflow list *",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "gh label list *",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "gh api *",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "gh --version",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "*gh api*-X*",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "*gh api* -i*",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "*gh api*--method*",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "*gh api*ethod*",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "*gh api*ETHOD*",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "*gh api*--input*",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "*gh api* -f*",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "*gh api* -F*",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "*gh api*--field*",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "*gh api*--raw-field*",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "*gh api*'-*",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "*gh api*\"-*",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "*\t*",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "*\\\n*",
+      "effect": "ask"
+    },
+    {
+      "action": "bugzilla_*",
+      "resource": "*",
+      "effect": "ask"
+    },
+    {
+      "action": "bugzilla_bugs_quicksearch",
+      "resource": "*",
+      "effect": "allow"
+    },
+    {
+      "action": "bugzilla_quicksearch_syntax",
+      "resource": "*",
+      "effect": "allow"
+    },
+    {
+      "action": "bugzilla_bug_info",
+      "resource": "*",
+      "effect": "allow"
+    },
+    {
+      "action": "bugzilla_bug_comments",
+      "resource": "*",
+      "effect": "allow"
+    },
+    {
+      "action": "bugzilla_bug_history",
+      "resource": "*",
+      "effect": "allow"
+    },
+    {
+      "action": "bugzilla_summarize_bug",
+      "resource": "*",
+      "effect": "allow"
+    },
+    {
+      "action": "bugzilla_bug_url",
+      "resource": "*",
+      "effect": "allow"
+    },
+    {
+      "action": "bugzilla_list_attachments",
+      "resource": "*",
+      "effect": "allow"
+    },
+    {
+      "action": "bugzilla_download_attachment",
+      "resource": "*",
+      "effect": "allow"
+    },
+    {
+      "action": "bugzilla_bugzilla_server_info",
+      "resource": "*",
+      "effect": "allow"
+    },
+    {
+      "action": "bugzilla_mcp_server_info",
+      "resource": "*",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "*gh pr merge*",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "*gh *auth *token*",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "*gh *auth *status*",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "*gh *auth *git-credential*",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "sudo *",
+      "effect": "deny"
+    },
+    {
+      "action": "external_directory",
+      "resource": "*",
+      "effect": "deny"
+    },
+    {
+      "action": "external_directory",
+      "resource": "/etc/*",
+      "effect": "allow"
+    },
+    {
+      "action": "external_directory",
+      "resource": "/usr/*",
+      "effect": "allow"
+    },
+    {
+      "action": "external_directory",
+      "resource": "/tmp/*",
+      "effect": "allow"
+    },
+    {
+      "action": "external_directory",
+      "resource": "/var/tmp/*",
+      "effect": "allow"
+    },
+    {
+      "action": "external_directory",
+      "resource": "/home/agent/*",
+      "effect": "allow"
+    },
+    {
+      "action": "external_directory",
+      "resource": "/agent-logins/*",
+      "effect": "deny"
+    },
+    {
+      "action": "read",
+      "resource": "*agent-logins*",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "*agent-logins*",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "*hosts.yml*",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "*client.conf*",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "*id_ed25519*",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "*api-key*",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "*OPENQA_CONFIG*",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "*GH_CONFIG_DIR*",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "*OPENQA_API_KEY*",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "*OPENQA_API_SECRET*",
+      "effect": "deny"
+    },
+    {
+      "action": "edit",
+      "resource": "*.local/share/opencode*",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "opencode *",
+      "effect": "deny"
+    },
+    {
+      "action": "opencode_*",
+      "resource": "*",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "*opencode auth*",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "*opencode.db*",
+      "effect": "deny"
+    },
+    {
+      "action": "read",
+      "resource": "*opencode.db*",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "*opencode api*",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "*opencode run*",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "*opencode serve*",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "*opencode acp*",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "*opencode mini*",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "*opencode session*",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "*opencode service*",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "*opencode pair*",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "*opencode*--server*",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "*opencode*--standalone*",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "*OPENCODE_PASSWORD*",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "*oauth_token*",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "*/proc/*environ*",
+      "effect": "deny"
+    },
+    {
+      "action": "read",
+      "resource": "*/proc/*environ*",
+      "effect": "deny"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+[Unit]
+Description=Nightly update of the openQA agent (%i)
+
+[Timer]
+OnCalendar=*-*-* 03:17
+Persistent=true
+RandomizedDelaySec=1200
+Unit=openqa-update@%i.service
+
+[Install]
+WantedBy=timers.target

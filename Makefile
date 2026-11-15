@@ -1,5 +1,9 @@
 # Mirrors .github/workflows/ci.yml and the README "Development" block; change all three together.
-SHELL_TESTS := $(wildcard tests/*/test-*.sh)
+# The container launcher's suite fakes podman and systemd and runs for minutes: it has a
+# target and a CI job of its own.
+CONTAINER_TEST := tests/container/test-skill-container.sh
+CONTAINER_SCRIPTS := contrib/container/skill-container contrib/container/image-check
+SHELL_TESTS := $(filter-out $(CONTAINER_TEST),$(wildcard tests/*/test-*.sh))
 
 # CI pins these; a different version on PATH can flag or reformat differently.
 RUFF_VERSION ?= 0.16.8
@@ -25,7 +29,7 @@ help: ## Display this help
 all: help
 
 .PHONY: test-scripts
-test-scripts: ## Run the offline script test suites (tests/*/test-*.sh)
+test-scripts: ## Run the offline script test suites (tests/*/test-*.sh, the container launcher's apart)
 	@rc=0; for t in $(SHELL_TESTS); do bash "$$t" || rc=1; done; exit $$rc
 
 .PHONY: check-repo
@@ -34,8 +38,12 @@ check-repo: ## Run the repository gates: skill structure and script flag index
 	python3 tests/repo/check-flags.py
 
 .PHONY: test
-test: ## Run every test suite and repository gate (CI "tests" job)
+test: ## Run the script test suites and the repository gates (CI "tests" job; test-container is apart)
 	@$(MAKE) -j test-scripts check-repo
+
+.PHONY: test-container
+test-container: ## Run the container launcher's suite (CI "container" job; takes minutes)
+	bash $(CONTAINER_TEST)
 
 .PHONY: check-ruff
 check-ruff: ## Run ruff lint and format checks
@@ -43,12 +51,12 @@ check-ruff: ## Run ruff lint and format checks
 	$(RUFF) format --check .
 
 .PHONY: check-shellcheck
-check-shellcheck: ## Run shellcheck on the test suites
-	$(SHELLCHECK) $(SHELL_TESTS)
+check-shellcheck: ## Run shellcheck on the test suites and the container scripts
+	$(SHELLCHECK) $(SHELL_TESTS) $(CONTAINER_TEST) $(CONTAINER_SCRIPTS)
 
 .PHONY: check-shfmt
-check-shfmt: ## Check shell formatting of the test suites
-	$(SHFMT) -d $(SHELL_TESTS)
+check-shfmt: ## Check shell formatting of the test suites and the container scripts
+	$(SHFMT) -d $(SHELL_TESTS) $(CONTAINER_TEST) $(CONTAINER_SCRIPTS)
 
 .PHONY: check-skills-spec
 check-skills-spec: ## Advisory Agent Skills publish check via gh (CI does not fail on it)
@@ -71,7 +79,8 @@ check-tool-versions: ## Warn if the PATH tools differ from the CI-pinned version
 	fi
 
 .PHONY: check-all
-check-all: ## Run every check: tests, lint and the advisory spec check
+check-all: ## Run every check: tests, the container suite, lint and the advisory spec check
 	@$(MAKE) test
+	@$(MAKE) test-container
 	@$(MAKE) lint
 	@$(MAKE) check-skills-spec

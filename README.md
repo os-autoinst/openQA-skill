@@ -26,8 +26,10 @@ skills/openqa/
   agents/         delegation playbooks: role prompts for sub-agents, also usable as standalone session prompts
                   (their frontmatter is metadata for harnesses that register agents from files)
 tests/openqa/     script tests with offline fixtures
+tests/container/  the suite of the container launcher, against a fake podman and a fake systemd
 tests/repo/       repository gate: frontmatter, size caps (SKILL.md body and lines, file, section, pointer), pointers that resolve and reach, a contents line in long references, content checks, valid evals.json and triggers.json, cited flags
 evals/openqa/     evaluation prompts, trigger queries
+contrib/          drafts you install yourself: harness deny rules, and a container image with its launcher
 ```
 
 Tests and evals live outside the skill directory because installers copy the skill directory verbatim.
@@ -75,6 +77,10 @@ Claude Code, opencode, grok, Gemini CLI, antigravity-cli, Codex CLI and Kimi Cod
 reading credential files; that README states the limits of each. You merge them into your own settings; the skill
 cannot install them.
 
+[`contrib/container/`](contrib/container/README.md) goes further for opencode: an image with opencode, this skill
+and the tools it calls, run as a user service, so the agent works away from the rest of your home directory.
+That README states what the container does not keep apart.
+
 ## Safety model
 
 - **Read-only by construction.** The bundled API scripts can only issue GET requests, never send a `Referer`
@@ -107,10 +113,11 @@ real vulnerability in this repository would look like.
 ## Development
 
 ```
-make help      # list all targets
-make test      # script suites and repository gates (CI "tests" job)
-make lint      # ruff, shellcheck and shfmt (CI "lint" job)
-make check-all # test, lint and the advisory Agent Skills spec check
+make help           # list all targets
+make test           # script suites and repository gates (CI "tests" job)
+make test-container # the suite of the container launcher in contrib/ (CI "container" job, minutes)
+make lint           # ruff, shellcheck and shfmt (CI "lint" job)
+make check-all      # all of the above and the advisory Agent Skills spec check
 ```
 
 The Makefile runs the same commands CI runs, with ruff pinned to CI's version through `uvx` when `uv` is

@@ -13,7 +13,7 @@ description: >-
   other CI systems or general Perl questions.
 license: GPL-2.0-or-later
 metadata:
-  version: "1.3.0"
+  version: "1.4.0"
 ---
 
 # openQA: write tests, review results

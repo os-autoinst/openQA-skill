@@ -623,7 +623,8 @@ Exit 1: warnings (`  W <id> line N: ...`), e.g. `placeholder-bugref` (`poo#<id>`
 parsed, job stays unreviewed). `labels:`, `flags:`, `force_result:` only when present. With `flag:verbatim`
 newer openQA parses nothing else in the comment: `bugrefs: 0 (flag:verbatim: the N written are ignored)`,
 `counts as reviewed: no (flag:verbatim: ...)`, `will carry over: no (flag:verbatim)`, a `force_result` label
-`NOT parsed` but still blocking deletion, and a note that an older instance parses as usual. Exit 2: draft over
+`NOT parsed`, the comment deletable through the API on newer openQA (an older one, verbatim support or not,
+refuses to delete it), and a note that an older instance parses as usual. Exit 2: draft over
 65536 characters or a line over 1000; every list stops after 40 entries (`... N more not shown`).
 
 ## review-lint.py - size and form of a drafted PR review (offline)

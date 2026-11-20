@@ -204,7 +204,7 @@ labels: 0 (flag:verbatim: the 1 written are ignored)
 flags: \"carryover\" \"verbatim\"
 counts as reviewed: no (flag:verbatim: openQA parses no bugref or label in it)
 will carry over: no (flag:verbatim)
-force_result: NOT parsed (flag:verbatim); the label still blocks deleting the comment through the API
+force_result: NOT parsed (flag:verbatim); newer openQA also lets the comment be deleted through the API, an older one refuses that
 warnings: 0
 notes: 1
   N flag:verbatim is honoured by newer openQA only; an older instance parses the bugrefs, labels and flags as usual" "$? $actual"

@@ -482,10 +482,11 @@ def lint(draft, extra_suffixes=()):
     elif verbatim and any(
         m.group("match").startswith("force_result:") for m in written
     ):
-        # Controller/API/V1/Comment.pm "delete" looks at the labels whatever the flags.
+        # Controller/API/V1/Comment.pm "delete" asks Comments.pm "force_result", which newer
+        # openQA answers empty for a verbatim comment; older revisions read the labels anyway.
         out.append(
-            "force_result: NOT parsed (flag:verbatim); the label still blocks deleting the "
-            "comment through the API"
+            "force_result: NOT parsed (flag:verbatim); newer openQA also lets the comment be "
+            "deleted through the API, an older one refuses that"
         )
     elif broken:
         out.append("force_result: NOT parsed")

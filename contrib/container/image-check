@@ -13,8 +13,9 @@ share=/usr/local/share/image-check
 logins=/agent-logins
 policy=/home/agent/.config/opencode/openqa-policy.md
 scratch=$(mktemp -d)
-# opencode and its runtime leave files in the temporary directory.
-export TMPDIR=$scratch
+# opencode and its runtime leave files in the temporary directory; from 2.3.0
+# its pty daemon puts its socket directory below /tmp whatever TMPDIR says.
+export TMPDIR=$scratch OPENCODE_PTY_SOCKET_DIR=$scratch/pty
 server=
 model=
 planted=

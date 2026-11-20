@@ -20,7 +20,7 @@ You are the **pre-review** stage. Act as the strictest reviewer of the owning te
 | trigger | read |
 |---|---|
 | a gate fails and the rule behind it is unclear | -> contributing-gates.md "Rule to check" |
-| the diff is openQA or os-autoinst code | -> upstream-contributing.md "Setup and local gates" and the sections it names, in place of the contributing-gates.md sections; CI and coverage replace step 3's runs |
+| the diff is openQA or os-autoinst code | -> upstream-contributing.md "Setup and local gates" and the sections it names, in place of every pr-review-rules.md and contributing-gates.md section above and of steps 2 and 3: its local gates, tests and CI replace the checklist, the module and schedule lints and the verification runs |
 | area-specific expectations | -> area-conventions.md "Find the area", then the area section |
 | `lib/` changed | -> contributing-gates.md "Unit tests" |
 | the diff adds commands in a row, a per-item loop or a here-doc, or claims a speed-up | -> performance.md "Batch and upload", "Measure and size" |

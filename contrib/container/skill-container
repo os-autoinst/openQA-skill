@@ -6,6 +6,9 @@ set -euo pipefail
 # Elsewhere a range such as A-Z takes letters of other alphabets too.
 export LC_ALL=C
 name=${SKILL_CONTAINER_NAME:-openqa}
+# The name it was run as: installed as openqa-container, its messages name that
+# command, not skill-container, which may be another skill's launcher.
+prog=${0##*/}
 conf=${XDG_CONFIG_HOME:-$HOME/.config}
 userconf=$conf/skill-container/$name
 opencode=${OPENCODE:-opencode}
@@ -13,7 +16,7 @@ inner=http://127.0.0.1:4096
 # The memory graph the image reads when no volume holds one yet.
 memname=memory.jsonl
 die() {
-	echo "skill-container: $*" >&2
+	echo "$prog: $*" >&2
 	exit 1
 }
 # The agent writes the work directory, and a command takes more than its
@@ -98,19 +101,19 @@ known() {
 }
 usage() {
 	cat <<EOF
-usage: skill-container secrets --model-auth <integration> [--openqa-host HOST]...
+usage: $prog secrets --model-auth <integration> [--openqa-host HOST]...
                                [--openqa-conf FILE] [--bugzilla-key FILE] [--new-ssh-key]
-       skill-container ssh-key
-       skill-container install <instance> --workdir DIR [--as DIR] [--memory FILE] [--image IMAGE]
-       skill-container up <instance> [--model provider/model]
-       skill-container attach <instance> [flags]
-       skill-container run <instance> [flags] <message>
-       skill-container down <instance>
-       skill-container uninstall <instance>
-       skill-container password <instance>
-       skill-container import <instance> --from DIR [--memory FILE]
-       skill-container update <instance>
-       skill-container idle <instance>
+       $prog ssh-key
+       $prog install <instance> --workdir DIR [--as DIR] [--memory FILE] [--image IMAGE]
+       $prog up <instance> [--model provider/model]
+       $prog attach <instance> [flags]
+       $prog run <instance> [flags] <message>
+       $prog down <instance>
+       $prog uninstall <instance>
+       $prog password <instance>
+       $prog import <instance> --from DIR [--memory FILE]
+       $prog update <instance>
+       $prog idle <instance>
 secrets  copies the openQA API key of each HOST (openqa.opensuse.org when none
          is named), the github.com login of gh, the Bugzilla API key and one
          opencode integration into podman secrets, and makes an SSH key for
@@ -284,7 +287,7 @@ cmd_secrets() {
 # The public half is no secret; the private one goes to ssh-keygen through a pipe.
 cmd_ssh_key() {
 	[ $# = 0 ] || die "ssh-key takes no argument"
-	podman secret exists "$name-ssh" 2>/dev/null || die "no secret $name-ssh: run 'skill-container secrets' first"
+	podman secret exists "$name-ssh" 2>/dev/null || die "no secret $name-ssh: run '$prog secrets' first"
 	secret ssh | ssh-keygen -y -f /dev/stdin || die "cannot read the key in $name-ssh"
 }
 # One instance: a name for the container, its server password and its volumes.
@@ -307,7 +310,7 @@ take_instance() {
 readstate() {
 	# The user's own install wins; otherwise the role's state under /etc does.
 	[ -f "$statefile" ] || [ ! -f "$sysstate" ] || statefile=$sysstate
-	[ -f "$statefile" ] || die "$inst is not installed: 'skill-container install $inst' writes it, or the role owns it in $sysstate"
+	[ -f "$statefile" ] || die "$inst is not installed: '$prog install $inst' writes it, or the role owns it in $sysstate"
 	{
 		workdir=$(sed -n 1p "$statefile")
 		inside=$(sed -n 2p "$statefile")
@@ -378,7 +381,7 @@ forget() {
 	done <<<"$sessions"
 	{ approvals=$(saved) && sessions=$(ruled) && [ -z "$approvals$sessions" ]; } ||
 		die "the permissions $ctr keeps cannot be removed: $reset"
-	echo "skill-container: removed the saved approvals and session rules of $ctr" >&2
+	echo "$prog: removed the saved approvals and session rules of $ctr" >&2
 }
 # The model login is the secret's alone: one the state volume keeps from an
 # earlier secret would stay the active one. The server's list holds the keys.
@@ -593,7 +596,7 @@ cmd_install() {
 		esac
 	done
 	for s in openqa github bugzilla model ssh; do
-		podman secret exists "$name-$s" || die "no secret $name-$s: run 'skill-container secrets' first"
+		podman secret exists "$name-$s" || die "no secret $name-$s: run '$prog secrets' first"
 	done
 	cmp -s "$self" "$fixedcopy" || die "copy the launcher to $fixedcopy first, then run install again"
 	[ -x "$fixedcopy" ] || die "$fixedcopy is not executable"
@@ -709,9 +712,9 @@ cmd_up() {
 	done
 	readstate
 	check_workdir
-	! running || die "$inst is already running: 'skill-container down $inst' stops it"
+	! running || die "$inst is already running: '$prog down $inst' stops it"
 	for s in openqa github bugzilla model ssh; do
-		podman secret exists "$name-$s" || die "no secret $name-$s: run 'skill-container secrets' first"
+		podman secret exists "$name-$s" || die "no secret $name-$s: run '$prog secrets' first"
 	done
 	mkdir -p "$userconf"
 	if [ -n "$model" ]; then
@@ -754,8 +757,8 @@ cmd_uninstall() {
 # works in.
 connect() {
 	readstate
-	running || die "$inst is not running: 'skill-container up $inst' starts it"
-	answers || die "the server of $inst does not answer: 'skill-container down $inst', then 'up'"
+	running || die "$inst is not running: '$prog up $inst' starts it"
+	answers || die "the server of $inst does not answer: '$prog down $inst', then 'up'"
 	forget
 	image=$(podman inspect --format '{{.Image}}' "$ctr")
 	[[ $image =~ ^[0-9a-f]{64}$ ]] || die "cannot read the image of $ctr"
@@ -822,14 +825,14 @@ idle_check() {
 	local busy rc=0
 	busy=$(busy_sessions) || die "cannot list the sessions of $ctr"
 	if [ -n "$busy" ]; then
-		echo "skill-container: a session of $inst is busy:" >&2
+		echo "$prog: a session of $inst is busy:" >&2
 		printf '%s\n' "$busy" >&2
 		return 1
 	fi
 	client_containers || rc=$?
 	case $rc in
 	0)
-		echo "skill-container: a client is on $inst" >&2
+		echo "$prog: a client is on $inst" >&2
 		return 1
 		;;
 	1) return 0 ;;
@@ -847,7 +850,7 @@ cmd_update() {
 	[ $# = 0 ] || die "update takes no argument"
 	readstate
 	check_workdir
-	running || die "$inst is not running: 'skill-container up $inst' starts it"
+	running || die "$inst is not running: '$prog up $inst' starts it"
 	if [[ $image != localhost/* ]]; then
 		podman pull "$image" >/dev/null || die "the image was not pulled"
 	fi
@@ -886,7 +889,7 @@ cmd_import() {
 	[ -n "$from" ] || die "import: --from <directory> is required"
 	[[ $from == /* ]] || from=$start/$from
 	readstate
-	running || die "$inst is not running: 'skill-container up $inst' starts it"
+	running || die "$inst is not running: '$prog up $inst' starts it"
 	[ -d "$from" ] || die "not a directory: $from"
 	real "$from"
 	from=$(realpath -- "$from")

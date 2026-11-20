@@ -690,6 +690,12 @@ out="$(sc idle "$long" 2>&1)"
 rc=$?
 [ "$rc" != 0 ] && [[ $out == "skill-container: $long is not installed"* ]] &&
 	pass "an instance name of 64 characters is taken" || fail "the instance of 64 characters: rc=$rc $out"
+# Installed under another name, the launcher's messages name the command run.
+ln -s "$SC" "$work/openqa-container"
+out="$("${scenv[@]}" HOME="$work/home" bash "$work/openqa-container" idle "$long" 2>&1)"
+rc=$?
+[ "$rc" != 0 ] && [[ $out == "openqa-container: $long is not installed: 'openqa-container install $long'"* ]] &&
+	pass "the messages name the command the launcher was run as" || fail "the launcher's own name: rc=$rc $out"
 for bad in "${long}a" -x - '' a.b; do
 	out="$(sc idle "$bad" 2>&1)"
 	rc=$?

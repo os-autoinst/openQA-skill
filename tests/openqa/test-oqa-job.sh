@@ -238,6 +238,15 @@ data["job"]["testresults"] = [
     # Only two lines fit in the scanned first MiB, the BEGIN line among them: no line is left for the tail.
     module("key_scan_edge", "cmd", "\n".join(["-----BEGIN OPENSSH PRIVATE KEY-----", "Q" * (1 << 20)]
                                              + ["tail line"] * 7)),
+    # grep --color=always splits the BEGIN marker with colour codes: in the tail, and in the lines not
+    # shown, where the key's last line shares its END line.
+    module("key_coloured", "cmd", "\n".join(["grep -r -A4 PRIVATE /root", "output:"] + ["filler"] * 10
+                                            + ["-----BEGIN OPENSSH \u001b[01;31m\u001b[KPRIVATE\u001b[m\u001b[K KEY-----"]
+                                            + [f"Q09MT1VSRUQ{n:02d}" for n in range(4)])),
+    module("key_end_line", "cmd", "\n".join(["grep -r -A5 PRIVATE /root", "output:"] + ["filler"] * 6
+                                            + ["-----BEGIN RSA \u001b[01;31m\u001b[KPRIVATE\u001b[m\u001b[K KEY-----"]
+                                            + [f"RU5ETElORQ{n:02d}" for n in range(4)]
+                                            + ["RU5ETElORQ99-----END RSA PRIVATE KEY-----", "after the coloured key"])),
 ]
 json.dump(data, open(f"{sys.argv[1]}/api_v1_jobs_872_details.json", "w"))
 json.dump([], open(f"{sys.argv[1]}/api_v1_jobs_872_comments.json", "w"))
@@ -277,6 +286,8 @@ check "a private key whose BEGIN line falls in the cut stays redacted in the lin
 	"$(grep -c 'QUFBQUJC' <<<"$key")|$(sed -n '/^module=key_in_cut /,/^<<<END/p' <<<"$key" | tail -n 2 | head -n 1)"
 check "a private key in the lines kept, sanitised one by one, keeps its body hidden" "0 1 1" \
 	"$(grep -c 'RUVFRUZG' <<<"$key") $(sed -n '/^module=key_in_tail /,/^<<<END/p' <<<"$key" | grep -c '^\[REDACTED:private-key\]$') $(grep -c '^after the key$' <<<"$key")"
+check "a BEGIN marker split by colour codes still hides the key's body, in the tail and from lines not shown" "0 2 1 1" \
+	"$(grep -c 'Q09MT1VSRUQ\|RU5ETElORQ' <<<"$key") $(sed -n '/^module=key_coloured /,/^<<<END/p' <<<"$key" | grep -c '^\[REDACTED:private-key\]$') $(sed -n '/^module=key_end_line /,/^<<<END/p' <<<"$key" | grep -c '^\[REDACTED:private-key\]$') $(grep -c '^after the coloured key$' <<<"$key")"
 
 # --- a zypper solver conflict ------------------------------------------------------
 actual=$(job 880 | normalize)

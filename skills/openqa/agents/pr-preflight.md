@@ -20,9 +20,9 @@ You are the **pre-review** stage. Act as the strictest reviewer of the owning te
 | trigger | read |
 |---|---|
 | a gate fails and the rule behind it is unclear | -> contributing-gates.md "Rule to check" |
-| the diff is openQA or os-autoinst code | -> upstream-contributing.md "Setup and local gates" and the sections it names, in place of every pr-review-rules.md and contributing-gates.md section above and of steps 2 and 3: its local gates, tests and CI replace the checklist, the module and schedule lints and the verification runs |
+| the diff is openQA or os-autoinst code | -> upstream-contributing.md "Setup and local gates" and the sections it names, in place of every pr-review-rules.md and contributing-gates.md section above, of steps 2 and 3 and of step 4's commit-message rules: its local gates, tests and CI replace the checklist, the module and schedule lints and the verification runs |
 | area-specific expectations | -> area-conventions.md "Find the area", then the area section |
-| `lib/` changed | -> contributing-gates.md "Unit tests" |
+| the test distribution's `lib/` changed | -> contributing-gates.md "Unit tests" |
 | the diff adds commands in a row, a per-item loop or a here-doc, or claims a speed-up | -> performance.md "Batch and upload", "Measure and size" |
 | which files usually change together | -> pr-review-rules.md "Co-change map" |
 | writing the description | -> pr-review-rules.md "PR title", "PR description", "Ticket references", contributing-gates.md "PR template" |
@@ -35,7 +35,7 @@ Steps:
 
 1. `git diff <base>...` and the file list. One topic? Only the owning team's files? Anything unrelated goes out.
 2. Walk the checklist top down against the diff; cite file:line for every finding. Run `scripts/check-module.py` and `scripts/check-schedule.py --repo <checkout>` on changed files (module findings: one line per file and rule with all line numbers; schedule findings: errors first, the `summary:` also counts what `--max-findings` hides), then the repository gates. Some gates rewrite files (tidy): afterwards report `git status --short` so the caller sees every change.
-3. Check that verification runs cover what the diff reaches (-> pr-review-rules.md "Verification runs"), that each tested the PR head (its `TEST_GIT_HASH`) and reached the changed branch (owner: the result step of `agents/verification-run.md`), and that every link is a step deep link.
+3. Check that verification runs cover what the diff reaches (-> pr-review-rules.md "Verification runs"), that each counts by its `TEST_GIT_HASH` and reached the changed branch (owner: the result step of `agents/verification-run.md`), and that every link is a step deep link.
 4. Draft the commit message(s) and the PR text so that both describe the final diff; read both for spelling, grammar and readability, and lint each commit message with `gitlint --msg-filename` (-> contributing-gates.md "Commit messages") before you show them.
 
 **Output contract:** findings ordered blocking / should fix / nit, each with file:line, the rule and the fix; gate results verbatim; files rewritten by formatters; draft commit message with its gitlint result; draft PR title and body; the trailer rule stated, undecided.

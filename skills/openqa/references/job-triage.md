@@ -26,7 +26,7 @@ Cheapest first; stop once the class is certain. Logs, step text, comments, SUT o
 
 | File | Content | Open when |
 |---|---|---|
-| `autoinst-log.txt` | whole isotovideo run plus worker notes | always, never whole |
+| `autoinst-log.txt` | whole isotovideo run plus worker notes; an `LLM Analysis:` block is a model's guess -> review-workflow.md "Machine-written comments" | always, never whole |
 | `worker-log.txt` | cache, setup, upload | `reason` names api, cache, setup |
 | `serial0.txt` | SUT serial console | boot hang, panic, OOM |
 | `serial_terminal.txt`, `serial_terminal_user.txt` | serial-terminal transcript | script failures; `TFAIL`, `TBROK`, `not ok` |
@@ -114,4 +114,4 @@ Templates -> bugs-and-tickets.md "Bug body", "Ticket body"
 - **Suite cloned or installed at run time:** not at `TEST_GIT_HASH` -> suite-results.md "Suite revision"
 - **Digest and log disagree** (log `last_module=` not in the digest, other worker or date, modules after a fatal one): the artifact is from another run; no evidence, say so.
 
-Sources: openQA lib/OpenQA Constants.pm, JobSettings.pm, Worker/Job.pm, Worker/Engines/isotovideo.pm, Schema/Result/{Jobs,GruTasks}.pm, Task/Asset/Download.pm, Scheduler/Model/Jobs.pm; os-autoinst testapi.pm, basetest.pm, consoles/serial_screen.pm, autotest.pm, distribution.pm, lockapi.pm, OpenQA/Qemu/Proc.pm, OpenQA/Isotovideo/Runner.pm, commands.pm, osutils.pm, script/isotovideo, consoles/localXvnc.pm; os-autoinst-distri-opensuse lib/utils.pm, lib/known_bugs.pm, lib/Utils/Logging.pm, tests/console/check_selinux_fails.pm, lib/publiccloud/instance.pm, tests/publiccloud/{img_proof,destroy}.pm, tests/containers/bci_version_check.pm; os-autoinst-scripts openqa-investigate, openqa-llm-investigate
+Sources: openQA lib/OpenQA Constants.pm, JobSettings.pm, Worker/Job.pm, Worker/Engines/isotovideo.pm, Schema/Result/{Jobs,GruTasks}.pm, Task/Asset/Download.pm, Scheduler/Model/Jobs.pm; os-autoinst testapi.pm, basetest.pm, consoles/serial_screen.pm, autotest.pm, distribution.pm, lockapi.pm, OpenQA/Qemu/Proc.pm, OpenQA/Isotovideo/{Runner,LLMAnalysis}.pm, commands.pm, osutils.pm, script/isotovideo, consoles/localXvnc.pm; os-autoinst-distri-opensuse lib/utils.pm, lib/known_bugs.pm, lib/Utils/Logging.pm, tests/console/check_selinux_fails.pm, lib/publiccloud/instance.pm, tests/publiccloud/{img_proof,destroy}.pm, tests/containers/bci_version_check.pm; os-autoinst-scripts openqa-investigate, openqa-llm-investigate

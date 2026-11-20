@@ -6,14 +6,14 @@ Contents: When to choose; Layout and languages; Runner API; Result contract; run
 
 ## When to choose
 
-**Choose it** when every check is "run a command, inspect exit code, output or files" on one SUT and the body fits python, go or java.
+**Choose it** when every check is "run a command, inspect exit code, output or files" on one SUT and the body fits python, go, java or shell (a self-contained `runtest` that prints TAP; nothing is installed for it, so it suits minimal images).
 
 | Disqualifier | Detail |
 |---|---|
 | Multi-machine (mutex, `PARALLEL_WITH`) | unless both roles run on localhost in one script (`testApacheSSLPQC`) |
 | Needle/GUI assertions | the artifact sees no screen |
 | Reboot inside the test logic | a reboot *before* the runner goes in the wrapper (`yama.pm`) |
-| Other language | `new` dies unless `language` matches `^(go\|python\|java)$`; bash is only the launcher |
+| Other language | `new` dies unless `language` matches `^(go\|python\|java\|shell)$` |
 
 **Chosen**: artifact -> "Layout and languages", "Runner API", "Result contract", "runtest script"; Python -> "Python 3.6 rule"; wrapper -> "Wrapper skeleton", "Packages and state"; schedule -> "Scheduling"; run without openQA -> "Standalone run"; before the PR -> "Review pitfalls".
 
@@ -28,12 +28,12 @@ Contents: When to choose; Layout and languages; Runner API; Result contract; run
 
 ## Runner API
 
-`agnosticTestRunner->new({...})`: hashref, `name` and `language` mandatory. Defaults: `domain` `security` (unvalidated, pass it; `security` and `console` exist), `test_dir` `~/<name>`, `result_file` `/tmp/<lc name>_results.xml`, `run_timeout` 90 (seconds); java: `result_format` `TAP` (else `XUnit`) and `.tap`. Methods chain:
+`agnosticTestRunner->new({...})`: hashref, `name` and `language` mandatory. Defaults: `domain` `security` (unvalidated, pass it; `security` and `console` exist), `test_dir` `~/<name>`, `result_file` `/tmp/<lc name>_results.xml`, `run_timeout` 90 (seconds), `run_command` `runtest`, `helper_path` `openqa_agnostic/lib/helper.sh`, `data_url_path` `<domain>/openqa_agnostic/<language>/<name>`; java and shell: `result_format` `TAP` (else `XUnit`) and `.tap`. Methods chain:
 
 | Method | Does |
 |---|---|
-| `setup` | python older than 3.6, or no `python3` at all (probe output not starting with a digit counts as minor 0): `record_info('skip', ...)`, then every method does nothing and the module passes; else adds the `phub` product on SLE < 16.0 unless `skip_phub => 1`; installs `go gotestsum`, `python3-pytest` (only when `python3 -m pytest --version` fails) or the highest `java-N-openjdk-devel` via `install_package(..., trup_reboot => 1)`; downloads `helper.sh` to `<test_dir>/../lib/`, `runtest` and the files `./runtest -f` prints |
-| `run_test` | one `assert_script_run`, timeout `run_timeout`: `cd <test_dir> && ( set -o pipefail; ./runtest 2>&1 \| tee /tmp/<name>_output.log ) && mv results.xml <result_file>` (`results.tap` for TAP) |
+| `setup` | python only: `python3` older than 3.6, or none (probe output not starting with a digit counts as minor 0): `record_info('skip', ...)`, then every method does nothing and the module passes. shell: installs nothing. Otherwise adds the `phub` product on SLE < 16.0 unless `skip_phub => 1` and installs via `install_package(..., trup_reboot => 1)`: `go gotestsum`, the highest `java-N-openjdk-devel`, or `python3-pytest` when `python3 -m pytest --version` fails (on SLE < 16.0 after enabling the Public Cloud Module, best effort; if that install fails, `pip3 install pytest`, with `--break-system-packages` from Python 3.12). Then downloads `helper.sh` to `<test_dir>/../lib/`, the `run_command` script and the files `./runtest -f` prints |
+| `run_test` | one `assert_script_run`, timeout `run_timeout`: `cd <test_dir> && chmod +x ./runtest && ( set -o pipefail; ./runtest 2>&1 \| tee /tmp/<name>_output.log ) && mv results.xml <result_file>` (`results.tap` for TAP); python runs get `PYTEST_ADDOPTS='-o junit_suite_name=<name>_pytest'`, so two tests in one job keep apart in the XUnit results; then uploads the output log (`failok`) and runs `reset` |
 | `parse_results` | `parse_extra_log`, then one `record_info` per testcase (`PASSED: ...`/`FAILED: ...`/`SKIPPED: ...`); `<failure>`, `<error>` or TAP `not ok` sets the module result to `fail`, never dies |
 | `cleanup` | `rm -rf <test_dir>`, nothing else |
 
@@ -41,7 +41,7 @@ Contents: When to choose; Layout and languages; Runner API; Result contract; run
 
 ## Result contract
 
-- **`runtest` writes `results.xml` (go, python) or `results.tap` (java) into the cwd and exits 0 whenever that file exists**. A non-zero exit breaks the `&&` chain, the module dies before `mv`, and per-testcase results, log upload and `cleanup` are lost.
+- **`runtest` writes `results.xml` (go, python) or `results.tap` (java, shell) into the cwd and exits 0 whenever that file exists**. A non-zero exit breaks the `&&` chain, the module dies before `mv`, and per-testcase results, log upload and `cleanup` are lost.
 
 ```bash
 rc=0
@@ -51,7 +51,7 @@ exit $rc
 ```
 
 - **Do not copy** `set +e`/`set -e` toggling (most merged `runtest` files; reviewers want `cmd || rc=$?`) or bare `pytest` under `set -e` (`testPostQuantumCrypto`, `testApacheSSLPQC`: one failing test kills the module).
-- **Java has no JUnit on the SUT**: `javac X.java; java X > results.tap`; the class prints `X.java ..` first (the openQA TAP parser dies without it), then `1..N`, `ok N - name` / `not ok N - name` (skip: `ok N - why # SKIP`); exit 0.
+- **Java has no JUnit on the SUT**: `javac X.java; java X > results.tap`; the class prints `X.java ..` first (the openQA TAP parser dies without it), then `1..N`, `ok N - name` / `not ok N - name` (skip: `ok N - why # SKIP`); exit 0. A shell `runtest` writes the same TAP into `results.tap` itself.
 
 ## runtest script
 
@@ -109,7 +109,7 @@ sub run {
 
 SLE 15 ships Python 3.6 as `python3`: no 3.7+ features (f-strings are fine). Pass `subprocess.run` `stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True`, not `capture_output=True, text=True` as `testApacheSSLPQC` and `yama` do.
 
-**`python3` older than 3.6 (SLE 12) or none: `setup` records a `skip` box and the module passes untested.** A conversion therefore keeps the old module wherever a touched schedule or loader still reaches such a product, else that coverage is gone while the job stays green:
+**A python test on a `python3` older than 3.6 (SLE 12), or none: `setup` records a `skip` box and the module passes untested** (go, java and shell tests still run there). A conversion therefore keeps the old module wherever a touched schedule or loader still reaches such a product, else that coverage is gone while the job stays green:
 
 ```perl
 loadtest(is_sle('<15') ? "console/unzip" : "console/oqa_agnostic/unzip_agnostic");   # lib/main_common.pm

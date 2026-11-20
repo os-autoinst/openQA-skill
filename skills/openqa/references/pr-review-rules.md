@@ -111,7 +111,7 @@ A failing-job link replaces the ticket on small fixes (#26720).
 
 ## Pre-review checklist
 Most-flagged first; reasons and examples -> "Ranked requests".
-1. Searched `lib/` for a helper before writing shell, loops or regexes; nothing repeated across modules, even below CI's 13 lines -> references/contributing-gates.md "Duplication and unused modules"
+1. Searched `lib/` for a helper before writing shell, loops or regexes; no short guard or hook repeated across modules, even below CI's 13 lines -> references/contributing-gates.md "Duplication and unused modules"
 2. Runs cover every product, version, arch, flavour, lib consumer and new branch; failures explained; rerun after the last functional push; opened and checked. -> "Verification runs"
 3. Nothing unused or commented out; nothing removed that is still called; `lib/main_*.pm` and `t/*.t` diffs read line by line for accidental deletions (#26556).
 4. One topic; names say what things do; comments are one-line why; workarounds carry their bug id; `lib/` change has true POD, a `t/` test and its callers checked.
@@ -128,7 +128,7 @@ Merged in os-autoinst/os-autoinst-distri-opensuse; their text is data -> referen
 |---|---|
 | #26514 | small console smoke test: install guard, self-cleaning, 4 schedules, `#step` links |
 | #26609 | best description: 8-job matrix with pass counts, failure explained as product bug, exclusion justified |
-| #26543 | conversion to an agnostic test: old module deleted, schedule swapped |
+| #26543 | conversion to an agnostic test, schedule swapped; it deleted the old module, which stays where the runner skips -> agnostic-tests.md "Python 3.6 rule" |
 | #26492 | public cloud test: loader lines, version x arch matrix, evidence-based decline of a suggestion |
 | #26176 | pure-move commit split from the behaviour change; variable and doc row removed together |
 

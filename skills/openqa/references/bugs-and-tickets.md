@@ -83,7 +83,7 @@ Latest: <base>/tests/latest?distri=..&version=..&flavor=..&arch=..&test=..&machi
 | missing coverage | `openqatests` | New test |
 | better logs, refactor, stability | `openqatests` | Enhancement to existing tests |
 | workers, syncing, triggering | `openqatests` | Infrastructure |
-| an o3 or OSD machine, not code or tests | `openqa-infrastructure` | Regressions/Crashes |
+| an o3 or SUSE-internal instance machine, not code or tests | `openqa-infrastructure` | Regressions/Crashes |
 | openQA or os-autoinst itself | `openqav3` | Regressions/Crashes |
 
 Ids for the API: `/projects/<project>/issue_categories.json`, `/projects/<project>/versions.json`, `/trackers.json`, `/enumerations/issue_priorities.json`.

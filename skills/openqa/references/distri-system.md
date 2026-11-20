@@ -69,6 +69,15 @@ add_suseconnect_product("PackageHub", undef, undef, undef, 300, 1) if is_sle;   
 - `tar_and_upload_log($sources, $dest, {timeout => N, screenshot => 1, noupload => 1, gzip => 1})` writes **bzip2** (POD says xz) unless a `gzip` key is present, even `gzip => 0`; name the archive to match.
 - `save_ulog($string, $name)` (`Utils::Logging`) writes worker-side without SUT network; `serial_terminal::upload_file($src, $dst)` moves a file over the serial line into `ulogs/`.
 - **Only non-fatal calls inside `post_fail_hook`** (`script_run`, `upload_logs(..., failok => 1)`): a dying `assert_script_run` aborts the remaining collection. They are non-fatal for an exit code only: each, the helpers above included, dies when its marker does not come back in time.
+- **After a timeout the command still holds its console**: the call stopped waiting, the command did not. Before anything that types, `SUPER::post_fail_hook` included (it types on the serial terminal), interrupt it on the console the module left selected and end what it started; else each call times out and the first one ends the hook:
+
+```perl
+is_serial_terminal() ? type_string('', terminate_with => 'ETX') : send_key 'ctrl-c';   # harmless at an idle prompt
+script_run('pkill -f "pytest.*test_foo"');
+```
+
+- **Cleanup restores only what this run changed**: the module may have died before it took its backup, so test that the backup exists before you overwrite or delete the original.
+- **Moved or shared hook logic keeps its log collection**: what the old path uploaded (a `supportconfig`, a cluster log) is collected on the new one too.
 
 ## Files on the SUT
 

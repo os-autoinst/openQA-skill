@@ -89,7 +89,7 @@ A failing-job link replaces the ticket on small fixes (#26720).
 | Change | Touched together |
 |---|---|
 | Console module | `tests/console/<x>.pm` + a line in every applicable SLE 15, SLE 16, openSUSE and maintenance schedule -> references/area-conventions.md "Console and CLI" |
-| Agnostic test | `tests/<domain>/oqa_agnostic/<x>.pm` + `data/` payload + schedule; a conversion deletes the old module in the same PR -> references/agnostic-tests.md "Wrapper skeleton" |
+| Agnostic test | `tests/<domain>/oqa_agnostic/<x>.pm` + `data/` payload + schedule -> references/agnostic-tests.md "Wrapper skeleton"; a conversion keeps the old module where the runner skips -> references/agnostic-tests.md "Python 3.6 rule" |
 | Installer validation | `tests/yam/validate/<x>.pm` + `schedule/yam/*.yaml` incl. arch siblings + `test_data/yam/*.yaml`; job-group PR elsewhere |
 | Container test | `tests/containers/<x>.pm` + one `loadtest` in `lib/main_containers.pm` or `lib/main_micro_alp.pm` + `variables.md` row |
 | Public cloud test | `tests/publiccloud/<x>.pm` + every relevant loader in `lib/main_publiccloud.pm` + `variables.md`; lib work adds `t/NN_publiccloud_*.t` |

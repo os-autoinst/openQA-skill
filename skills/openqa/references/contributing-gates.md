@@ -115,6 +115,7 @@ Prose-only, policed by reviewers: no `sleep`, no `is_tumbleweed()` (exclude olde
 ## Duplication and unused modules
 
 - **`tools/detect_code_dups`** (`make test-dry`): every `.pm` in `lib tests`, ignoring POD, comments, `use` lines, `sub test_flags`, whitespace and quote style. **13+ identical consecutive lines anywhere fail**, so a cloned module trips it; move shared code into `lib/`.
+- **Below 13 lines reviewers still ask for one helper**: a short guard or hook repeated across modules, or the same lines a PR puts into two modules, go into one `lib/` function next to its kin, with POD and a `t/` test, as copies drift apart. A near-duplicate of an existing helper or loader is merged into it, not added.
 - **`tools/detect_unused_modules -m tests/<dir>/<name>.pm`** (`-a` = all) needs a `git grep -E` hit for:
 
 ```

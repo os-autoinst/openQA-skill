@@ -40,7 +40,7 @@ label:force_result:softfailed
 - **Ref outside the label:** `label:force_result:softfailed:bsc#1234` parses as a label only, so nothing carries over; with the ref on its own line the comment is carried and the label re-applied to each new job.
 - **Operator role**, finished job, valid result name; else HTTP 400: `force_result labels only allowed for operators`, `force_result only allowed on finished jobs` or `Invalid result '<x>' for force_result`.
 - **Description is `\w*`:** the parser is `/^force_result:(\w+):?(\w*)/`, so everything from the first non-word character is dropped (`bsc#1234` becomes `bsc`). An instance may enforce `force_result_regex` on what is left (HTTP 400: `… does not match pattern …`).
-- **Undeletable:** the API refuses (403) to delete a comment holding a `force_result` label, and a bulk delete skips it.
+- **Undeletable:** the API refuses (403) to delete a comment holding a `force_result` label, and a bulk delete skips it (HTTP 400, `deleted` below the ids sent). Newer revisions exempt a `flag:verbatim` comment: its label is not applied, so it can be deleted.
 - **Second person's agreement named in the text** -> SKILL.md "Write gate".
 
 ## acceptable_for marker

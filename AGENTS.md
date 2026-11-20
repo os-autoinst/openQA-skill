@@ -109,6 +109,8 @@ Rules for humans and agents changing this repository.
   between revisions, never single answers.
 - Count failures per distinct cause (a missing or wrong rule, a script defect, a misread fixture), not per
   assertion: one gap that fails three assertions is one finding.
+- Keep eval fixtures out of the skill: no pull request number, job id or commit an eval uses, and not its exact
+  fix, appears under `skills/`. An example lifted from a fixture makes the eval measure recall, not the rule.
 
 ## Releasing
 
@@ -118,3 +120,11 @@ Rules for humans and agents changing this repository.
 2. Only after the maintainer's go: merge with CI green, then tag the merged commit with an annotated tag,
    `git tag -a vX.Y.Z`, push the tag, and create the release from it with
    `gh release create vX.Y.Z --verify-tag`; `--target` would make a lightweight tag instead.
+3. Checks around the tag:
+   - Before tagging, the release notes are final, every pull request number in them is one that was merged,
+     and CI is green on the exact commit to be tagged.
+   - The tag message and the release are bare: `git tag -a vX.Y.Z -m vX.Y.Z <full sha>`, and
+     `gh release create vX.Y.Z --verify-tag --notes-file <notes>` without `--title`. Run the tag commands with
+     the real `git` binary: a shell wrapper may drop `-a` or `-f` without a word.
+   - Afterwards, `git for-each-ref refs/tags/vX.Y.Z --format='%(objecttype) %(contents:subject)'` prints
+     `tag vX.Y.Z`, and `git ls-remote --tags origin vX.Y.Z` lists the tag and its `^{}` commit.

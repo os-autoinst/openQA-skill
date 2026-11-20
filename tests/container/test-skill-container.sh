@@ -868,14 +868,15 @@ done
 left="$(leakfiles)"
 [ -z "$left" ] && pass "secrets leaves no login in a file" || fail "secrets left a login in: $left"
 # The scan passes over the fixtures of another suite's run, not over a stray file.
-sib="$(mktemp -d)"
+# Made in /tmp itself, whatever TMPDIR is: the scan reads three levels below it.
+sib="$(mktemp -d -p /tmp)"
 mkdir "$sib/fix"
 : >"$sib/fix/envcheck"
 echo SECRET-9 >"$sib/fix/logins"
-sibtools="$(mktemp -d)"
+sibtools="$(mktemp -d -p /tmp)"
 mkdir "$sibtools/userbin"
 echo 'echo SECRET-9' >"$sibtools/userbin/opencode"
-stray="$(mktemp)"
+stray="$(mktemp -p /tmp)"
 echo SECRET-9 >"$stray"
 left="$(leakfiles)"
 ! grep -qF "$sib/" <<<"$left" && ! grep -qF "$sibtools/" <<<"$left" && grep -qxF "$stray" <<<"$left" &&

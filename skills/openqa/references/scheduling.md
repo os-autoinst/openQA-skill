@@ -135,6 +135,7 @@ When openQA creates jobs from a product (`isos post`), lowest to highest: `[test
 - **Runtime `set_var` beats all of it**: `main.pm` defaults and YAML `vars:`.
 - **`+VAR` wins for that key** (`+QEMURAM` in a job group survives an API override).
 - **`BACKEND` and `MACHINE` always come from the machine; `WORKER_CLASS` values of openqa.ini, product, machine, test suite and job template are joined**, not overridden.
+- **`_DROP_SETTINGS=ISO,ASSET_*`** (newer revisions) removes every setting whose name matches one of its comma-separated globs (anchored, `*` only), whatever layer set it, after `+` handling; it stays on the job. In a test suite or a job group YAML's `defaults.<arch>.settings` it keeps posted assets off tests that boot an HDD; `+_DROP_SETTINGS` beats a posted value. `openqa-clone-job` jobs skip it: there `KEY=` deletes.
 - `%NAME%` in settings expands at job creation. Clone overrides -> references/clone-and-run.md "Settings override grammar".
 
 ## Adding a variable
@@ -183,4 +184,4 @@ A merged schedule runs nowhere until a job-group entry sets `YAML_SCHEDULE`.
 
 **`products/*/templates*` are `load_templates` seed files**, not the live job groups; never edit them to add a test.
 
-Sources: os-autoinst-distri-opensuse lib/scheduler.pm, lib/main_*.pm, products/*/main.pm, t/schema/, tools/, Makefile, declarative-schedule-doc.md, variables.md; os-autoinst autotest.pm, testapi.pm, commands.pm, doc/backend_vars.md; openQA lib/OpenQA/JobSettings.pm, lib/OpenQA/Worker/Job.pm; os-autoinst bmwqemu.pm; opensuse-jobgroups
+Sources: os-autoinst-distri-opensuse lib/scheduler.pm, lib/main_*.pm, products/*/main.pm, t/schema/, tools/, Makefile, declarative-schedule-doc.md, variables.md; os-autoinst autotest.pm, testapi.pm, commands.pm, doc/backend_vars.md; openQA lib/OpenQA/JobSettings.pm, lib/OpenQA/Worker/Job.pm, lib/OpenQA/WebAPI/Controller/API/V1/Job.pm, docs/UsersGuide.md; os-autoinst bmwqemu.pm; opensuse-jobgroups

@@ -51,6 +51,7 @@ By kind of change, not by block: `tests/virt_autotest` and virtualization featur
 - **Schedules**: `schedule/sles4sap/**`, `schedule/ha/**`; optional modules as `'{{placeholder}}'` + `conditional_schedule` on a variable value (`IS_MAINTENANCE`); multi-node: every node's file. -> references/scheduling.md "Conditional schedule"
 - **Workarounds**: `record_soft_failure` only in the branch where it fires (#26033); in an own module, not shared `update/zypper_up` (#25032).
 - **Title**: plain imperative, one commit. **Runs**: provider x BYOS/PAYG x SLE version; never openqa.opensuse.org (SLE-only). **Unit tests required**.
+- **HA runs**: a change to an HA module, its timing or its cluster-tool calls runs on every maintained service pack, the oldest included (its cluster tools are the oldest), and in the rolling upgrade and rolling update scenarios (`ha_rolling_upgrade_migration_node0*`, `ha_rolling_update_node0*` schedules): a faster flow (serial terminal, polling instead of `sleep`) can expose races the old delay hid. A module that multi-machine jobs schedule adds a two-node cluster run.
 
 ## Transactional and MinimalVM
 - **Schedules**: `schedule/jeos/sle/{jeos,minimalvm}-main.yaml`, `schedule/elemental3/`; SL Micro / MicroOS flows in `lib/main_micro_alp.pm`. -> references/module-templates.md "Transactional test"
@@ -74,4 +75,4 @@ By kind of change, not by block: `tests/virt_autotest` and virtualization featur
 - **Excludes**: files nothing executes - `data/` is SUT payload (#26717); a title left at the template text (#26672).
 - **Revert**: complete, every reverted SHA listed (#26603).
 
-Sources: os-autoinst-distri-opensuse .github/CODEOWNERS, tests/coverage/{coverage_setup,coverage_report}.pm, schedule/coverage/, lib/opensusebasetest.pm, variables.md
+Sources: os-autoinst-distri-opensuse .github/CODEOWNERS, tests/coverage/{coverage_setup,coverage_report}.pm, schedule/coverage/, schedule/ha/{bv,qam}/, lib/opensusebasetest.pm, variables.md

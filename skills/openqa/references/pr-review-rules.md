@@ -39,6 +39,7 @@ while (script_run($c)) { ..; sleep 5 } -> script_retry($c, retry => 5, delay => 
 - **Agree design and interface in the ticket before large work; map each acceptance criterion to a scenario and run** - else 26-67 day reviews (#25471 #25353).
 - **Globally scheduled modules and `lib/utils.pm`** need reviewers outside your area, a Tumbleweed run, a graphical-desktop run, unchanged defaults (#26486).
 - **A check that held before the action, or watches a proxy, cannot fail**: a reconnect check already true before the reconnect; an open socket, a live process or a log line instead of the property. Record a baseline before the action and assert the change after it; compare with the exact expected value, not "not success" (`code != 200` passes a 404 too).
+- **A `die`, timeout or skip message names what is missing or did not match**: `die "still missing: @missing"`, the pattern awaited, why a skip is safe; long diagnostics go into `record_info` just before the `die`, which stays one line.
 
 ## PR title
 Follow the neighbours in the touched area; PR title = commit subject (most PRs merge as one commit). Enforced subject rules -> references/contributing-gates.md "Commit messages"
@@ -113,7 +114,7 @@ Most-flagged first; reasons and examples -> "Ranked requests".
 2. Runs cover every product, version, arch, flavour, lib consumer and new branch; failures explained; rerun after the last functional push; opened and checked. -> "Verification runs"
 3. Nothing unused or commented out; nothing removed that is still called; `lib/main_*.pm` and `t/*.t` diffs read line by line for accidental deletions (#26556).
 4. One topic; names say what things do; comments are one-line why; workarounds carry their bug id; `lib/` change has true POD and a `t/` test.
-5. Every assertion can fail, none already holds before its action; loops bounded; cleanup idempotent, on success and failure. -> "High-impact rare rules"
+5. Every assertion can fail, none already holds before its action; failure messages name what is missing; loops bounded; cleanup idempotent, on success and failure. -> "High-impact rare rules"
 6. Scheduled in every sibling; job-group change linked; installs work on transactional systems.
 7. Title, commit body and description match the final diff; `PLACEHOLDER` gone.
 8. Rebased; overlapping PRs checked; gates green -> references/contributing-gates.md "Local gate order"

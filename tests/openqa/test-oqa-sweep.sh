@@ -146,6 +146,15 @@ budget=$(python3 "$script" --host https://openqa.example.org --fixture-dir "$tmp
 check "the comments reads of one version leave the requests of the versions still to list alone" \
 	"0 3 0 requests: 60" \
 	"$? $(grep -c '^30 current not-ok jobs$' <<<"$budget") $(grep -c 'error\|note:' <<<"$budget") $(tail -n 1 <<<"$budget")"
+actual=$(python3 "$script" --host https://openqa.example.org --fixture-dir "$tmpb" --group 50 --build B --version 2 --no-llm 2>&1)
+check "--version: only that version's entry of the build, the requests of one" \
+	"0 1 30 requests: 2" \
+	"$? $(grep -c '^group=50 name="g" build=B version=2 ' <<<"$actual") $(grep -Ec '^11[0-9]{2} failed ' <<<"$actual") $(tail -n 1 <<<"$actual")"
+check "--version without --build: the newest build of that version" 1 \
+	"$(python3 "$script" --host https://openqa.example.org --fixture-dir "$tmpb" --group 50 --version 3 --no-llm | grep -c '^group=50 name="g" build=B version=3 ')"
+actual=$(python3 "$script" --host https://openqa.example.org --fixture-dir "$tmpb" --group 50 --version 4 2>&1 >/dev/null)
+check "--version that no newest build has: exit 2 naming --build" \
+	"2 error: group 50 has no builds of version 4 among its newest 10: --build B reads an older one" "$? $actual"
 rm -r "$tmpb"
 tmpf=$(mktemp -d)
 python3 - "$tmpf" "$(dirname "$script")" <<'PY'
@@ -425,7 +434,7 @@ check "--module in the API fallback: filtered before the comments are read, one 
 check "--before --module: as the build stood then, a job still running then has no failed module yet" \
 	"7305|1 not-ok jobs in which module zypper_up failed as of --before, 0 running then" \
 	"$(sweep --group 7 --build 20300102 --before 2030-01-02T10:00Z --module zypper_up | grep -Eo '^[0-9]{4} ' | xargs)|$(sweep --group 7 --build 20300102 --before 2030-01-02T10:00Z --module zypper_up | grep 'as of --before')"
-for args in "--groups --module x" "--uses-schedule schedule/x.yaml --group 7 --module x"; do
+for args in "--groups --module x" "--uses-schedule schedule/x.yaml --group 7 --module x" "--groups --version 1" "--vr-build u/r#1 --version 1"; do
 	# shellcheck disable=SC2086 # the flags are meant to split
 	sweep $args >/dev/null 2>&1
 	check "usage error: $args" 2 $?

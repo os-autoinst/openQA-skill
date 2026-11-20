@@ -26,7 +26,7 @@ One line per script, generated from the parsers: do not edit it by hand. What a 
 - `oqa-log.py JOB [--file NAME] [--list | --tail N | --grep REGEX | --errors | --runtimes | --members | --shot NAME] [--around-module MODULE] [--lines A-B] [--member PATH] [--out DIR] [--compare JOB] [--context N] [--max-matches N] [--ignore-case] [--max-lines N] [--max-line-chars N] [--max-bytes BYTES] [--verbose] [--exit-code]`
 - `oqa-ref.py REF [--body] [--files] [--notes N]`
 - `oqa-src.py JOB PATH [--line N] [--context K]`
-- `oqa-sweep.py [--group ID]... [--build BUILD] [--todo] [--include-softfailed] [--test REGEX] [--before TIME] [--limit N] [--no-llm] [--passed] [--module NAME] [--groups] [--match REGEX] [--uses-schedule PATH] [--vr-build LABEL] [--test-git-hash SHA] [--exit-code]`
+- `oqa-sweep.py [--group ID]... [--build BUILD] [--version VERSION] [--todo] [--include-softfailed] [--test REGEX] [--before TIME] [--limit N] [--no-llm] [--passed] [--module NAME] [--groups] [--match REGEX] [--uses-schedule PATH] [--vr-build LABEL] [--test-git-hash SHA] [--exit-code]`
 - `pr-queue.py [--repo O/R] [--newest N] [--me LOGIN]`
 - `refsection.py [--list] FILE [TITLE...]`; exit 1: section missing or ambiguous
 - `review-lint.py [FILE] --lines N [--lib] [--replies N] [--late]`; exit 1: findings
@@ -39,7 +39,7 @@ One line per script, generated from the parsers: do not edit it by hand. What a 
 
 `jobs?result=failed&latest=1` also lists failures whose restart passed; the overview route does not.
 
-    oqa-sweep.py --group ID [--group ID ...] [--build B] [--todo] [--test REGEX] [--module M] | --groups [--match REGEX]
+    oqa-sweep.py --group ID [--group ID ...] [--build B] [--version V] [--todo] [--test REGEX] [--module M] | --groups [--match REGEX]
     oqa-sweep.py --group ID --build B --before TIME [--todo] [--test REGEX]    # the build as it stood then
     oqa-sweep.py --group ID [--build B] --passed [--module M] [--test REGEX] [--limit N]    # a source job to clone
     oqa-sweep.py --uses-schedule schedule/x/y.yaml (--group ID ... | --match REGEX)
@@ -67,6 +67,9 @@ regex searches the newest 100 clone sources (the count line says when that windo
 `--module M` only jobs in which M failed (the count line ends `in which module M failed`), matched on the
 failed modules the listing already carries, so no request more, `--before` included: the overview's own
 `modules=` filter would pick per scenario the newest job that failed in M, an older one where a newer did not.
+`--version V` (`--group` only) the build entries of that version, a group may hold several: without
+`--build` the newest build of V among the group's newest 10 (exit 2 without one), with it that build's
+entry of V, also with `--passed` and `--before`.
 `--exit-code`: also 1 when `--passed`, `--groups`, `--uses-schedule`, `--vr-build` list nothing.
 `victims parent=ID never_ran=N jobs=...`: jobs that never ran. Extras: `restarts=`, `origin=`, `parents=`
 (triage that parent).

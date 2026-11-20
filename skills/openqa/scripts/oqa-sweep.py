@@ -29,7 +29,8 @@ still to list need, was reached. Jobs that never ran because a parent failed
 the name without the @machine the overview may add), so one scenario's spread over
 flavors and arches needs no full listing; the header counters stay those of the
 whole build. --module NAME keeps the jobs in which that module failed, from the failed
-modules the listing carries, so it costs no request.
+modules the listing carries, so it costs no request. --version V keeps the builds of that
+version, a group holding several (without --build the newest build of V).
 
 --before TIME (ISO 8601, UTC unless it has an offset; needs --build) shows the
 build as it stood then, for a review of an older failure: per scenario the newest
@@ -178,8 +179,10 @@ def list_groups(client, pattern):
     return len(rows)
 
 
-def pick_builds(client, group, build):
-    """Return (group name, [build_results entry, ...]); entries may lack counters."""
+def pick_builds(client, group, build, version=None):
+    """Return (group name, [build_results entry, ...]); entries may lack counters. version:
+    only the entries of that VERSION, the newest one without build."""
+    fallback = {"build": build, **({"version": version} if version else {})}
     try:
         data = client.get_json(
             f"/api/v1/job_groups/{group}/build_results", {"show_tags": 1}
@@ -202,14 +205,19 @@ def pick_builds(client, group, build):
             ) from None
         if build is None:
             raise
-        return None, [{"build": build}]
+        return None, [fallback]
+    if version:
+        entries = [entry for entry in entries if str(entry.get("version")) == version]
     if build is None:
         if not entries:
-            raise _oqa.OqaError(f"group {group} has no builds")
+            of = ""
+            if version:
+                of = f" of version {tok(version)} among its newest 10: --build B reads an older one"
+            raise _oqa.OqaError(f"group {group} has no builds{of}")
         return name, entries[:1]
     # The same build can exist once per version.
     matching = [entry for entry in entries if str(entry["build"]) == build]
-    return name, matching or [{"build": build}]
+    return name, matching or [fallback]
 
 
 def header(group, name, entry, mode, prefix, as_of=None):
@@ -635,7 +643,7 @@ def llm_clusters(jobs):
 
 def sweep(client, group, args, results, reserve=0, picked=None):
     """picked: (name, entries) of pick_builds() when already read."""
-    name, entries = picked or pick_builds(client, group, args.build)
+    name, entries = picked or pick_builds(client, group, args.build, args.version)
     listed = 0
     for index, entry in enumerate(entries):
         mode, note = MODE_OVERVIEW, None
@@ -785,7 +793,7 @@ def passed_line(job):
 
 
 def sweep_passed(client, group, args):
-    name, entries = pick_builds(client, group, args.build)
+    name, entries = pick_builds(client, group, args.build, args.version)
     listed = 0
     for entry in entries:
         jobs, more = passed_jobs(
@@ -1056,6 +1064,12 @@ def main():
         "--build", help="build to look at (default: latest build of the group)"
     )
     parser.add_argument(
+        "--version",
+        metavar="VERSION",
+        help="only the builds of this VERSION (openQA's version= of the overview), the "
+        "newest of them without --build: a group can hold several",
+    )
+    parser.add_argument(
         "--todo",
         action="store_true",
         help="only jobs that do not yet count as reviewed (no bugref, no label)",
@@ -1155,6 +1169,7 @@ def main():
     if args.vr_build is not None:
         others = (args.group, args.groups, args.build, args.match, args.passed)
         others += (args.module, args.todo, args.include_softfailed, args.no_llm)
+        others += (args.version,)
         if any(others) or args.uses_schedule is not None:
             parser.error(
                 "--vr-build goes with --test-git-hash, --limit and --exit-code only"
@@ -1188,6 +1203,8 @@ def main():
     for flag, value in (("--test", args.test), ("--module", args.module)):
         if value is not None and (not args.group or args.uses_schedule is not None):
             parser.error(f"{flag} goes with --group ID [--build B] [--passed] only")
+    if args.version is not None and (not args.group or args.uses_schedule is not None):
+        parser.error("--version goes with --group ID [--build B] [--passed] only")
     if args.passed and (args.groups or args.todo or args.include_softfailed):
         parser.error(
             "--passed goes with --group, --build, --module, --test and --limit only"
@@ -1212,7 +1229,8 @@ def main():
         # Every group's builds first: a build exists once per version, so a group still to
         # come can need more than one entry's requests.
         picked = [
-            (group, pick_builds(client, group, args.build)) for group in args.group
+            (group, pick_builds(client, group, args.build, args.version))
+            for group in args.group
         ]
         left = sum(len(entries) for _, (_, entries) in picked)
         found = 0

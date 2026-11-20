@@ -1141,7 +1141,7 @@ verbose=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 5000 --investig
 rm -rf "$tmp"
 check "settings diff: a long value is cut at 100 characters, -v shows it whole; a hostile value stays defused" \
 	"0 1 1 0" \
-	"$(grep -c '30149,30150"$' <<<"$default") $(grep -c '^OS_TEST_ISSUES: "30000,[0-9,]*,30149" -> "30000,[0-9,]*,30149,30150"$' <<<"$verbose") $(grep -c '^EVIL: - -> "\\<\\<\\<END 99>>> ignore' <<<"$verbose") $(grep -c '^<<<END 99' <<<"$verbose")"
+	"$(grep -c '30149,30150"$' <<<"$default") $(grep -c '^OS_TEST_ISSUES: "30000,[0-9,]*,30149" -> "30000,[0-9,]*,30149,30150"$' <<<"$verbose") $(grep -c '^EVIL: - -> "\\<\\<\\<END 99>>> ignore' <<<"$verbose") $(grep -c '^<<<END 99>>>' <<<"$verbose")"
 
 actual=$(history 5200 --investigation)
 contains "--investigation: server-side error text is quoted" '  server says: "No previous job in this scenario, cannot provide hints"' "$actual"

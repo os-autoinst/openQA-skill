@@ -36,6 +36,12 @@ Inherit with `use Mojo::Base '<class>';`. All below derive from `opensusebasetes
 - **`select_console 'root-console'` only when the screen matters**: needles, `send_key`, ncurses or full-screen programs. A serial terminal is blind -> references/testapi.md "Serial terminal".
 - **Failure hooks**: `select_log_console` (`Utils::Logging`) selects `log-console` with a 180 s timeout for a loaded SUT.
 
+**Switching an existing module to the serial terminal** saves time only when nothing it calls needs the screen:
+- **Read every lib helper it calls.** One that selects `root-console` or `x11` itself (`power_action` without `keepconsole`, `process_reboot`), matches needles, sends keys, or writes to `/dev/$serialdev` and waits for it, breaks on the serial terminal or brings the VNC login back: keep the old console, or change the helper in its own PR.
+- **A module that can run before `console/system_prepare`** (right after boot, on a migration's old origin) may find no login on the virtio terminal: on ppc64le (`OFW`) it gets its getty only there. `select_text_console` (`serial_terminal`) keeps `root-console` on OFW.
+- **Other backends change too**: ipmi and PowerVM get the ssh consoles of the table above, not the console the module used before, so add one run per backend that schedules the module.
+- **A module that only shows output loses it with the screenshots**: record it (`record_info('lscpu', script_output('lscpu'))`).
+
 ## Install or remove packages
 
 **Use `install_package` / `uninstall_package`** (`use package_utils;`) so one module runs on classic and transactional (read-only root) systems: they dispatch to `zypper_call` or `trup_call`.
@@ -133,3 +139,5 @@ elsif ($ret != 0) {
 ## POD versus code
 
 The sections above flag wrong PODs; read the `sub` body. One more: `random_string($length)` is declared `($self, $length)`, so `random_string(8)` returns 4 characters; `random_string(length => 8)` works.
+
+Sources: os-autoinst-distri-opensuse lib/{serial_terminal,utils,package_utils,version_utils,power_action_utils,transactional}.pm, lib/Utils/{Backends,Logging}.pm, CONTRIBUTING.md; os-autoinst testapi.pm

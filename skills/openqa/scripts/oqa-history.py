@@ -129,6 +129,12 @@ def failed_set(row):
     return {str(name) for name in row.get("failedmodules") or ()}
 
 
+def shape(name):
+    """A module name with its digit runs masked: a parsed suite names its results after a
+    build, so 1_login-build1-33 and 1_login-build1-34 are one module."""
+    return re.sub(r"\d+", "0", name)
+
+
 def module_cell(names, width=60):
     """The failed modules sorted, as many as fit the table's column, then "+<n>" for the rest:
     openQA lists them in the order their results were stored, which varies between calls."""
@@ -251,28 +257,40 @@ def describe(rows, more, machines=None, unlike=None, weaker=None):
             last_good += f" like this job ({run_text(other)}: {unlike[other['id']]})"
 
     signature = failed_set(rows[0])
+    shapes = {shape(name) for name in signature}
 
     def holds(row):
-        # A module that failed in older runs only, softfailing, passing or not reached
-        # now, does not move where the current failures start.
-        failed = failed_set(row)
-        return failed == signature or bool(signature) and failed > signature
+        # A run without a failed module (a timeout, an incomplete) tells nothing; a module
+        # that failed in older runs only, softfailing, passing or not reached now, does not
+        # move where the current failures start.
+        failed = {shape(name) for name in failed_set(row)}
+        return not failed or failed == shapes or failed > shapes
 
-    alike = next((i for i, row in enumerate(rows[:streak]) if not holds(row)), streak)
-    also = sorted(set().union(*map(failed_set, rows[:alike])) - signature)
+    alike = streak
+    if signature:
+        alike = next(
+            (i for i, row in enumerate(rows[:streak]) if not holds(row)), streak
+        )
+    seen = set().union(*map(failed_set, rows[:alike]))
+    also = sorted(name for name in seen if shape(name) not in shapes)
     mode = ""
-    if alike == streak:
+    if not signature:
+        same = "no failed module in this job"
+    elif alike == streak:
         same = "the current failed modules" if also else "same failed modules"
         same += " throughout"
+        if seen - signature - set(also):
+            same += ", digits in the names aside"
     else:
-        origin = rows[alike - 1]
+        start = max(i for i in range(alike) if failed_set(rows[i]))
+        origin = rows[start]
         same = (
             f"failed modules CHANGE within the streak: the current ones go back only to "
             f"{origin['id']} build {build_of(origin)}, probably more than one issue"
         )
-        mode = f" (failed modules as now since {origin['id']}, {alike} runs)"
+        mode = f" (failed modules as now since {origin['id']}, {start + 1} runs)"
     if also:
-        same += f", older runs also failed {_oqa.toks(also, 60, 4)}"
+        same += f", older runs {'also ' if signature else ''}failed {_oqa.toks(also, 60, 4)}"
     builds = len({row.get("build") for row in rows[:streak]})
     earlier = failed - streak
     if streak == total:

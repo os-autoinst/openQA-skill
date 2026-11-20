@@ -82,12 +82,12 @@ check "openQA's durations: days and hours, hours, minutes; else the list's start
 	"02T02:02:06 03T02:02:06 03T03:11:54 01T00:00:00 01T00:00:00 01T00:00:00 None None" "$durations"
 check "11 older rows in the answer, only 10 shown" 11 "$(grep -Ec '^[0-9]{4}  ' <<<"$actual")"
 contains "more history is announced" "not_ok=5/11 (older runs exist: --previous N)" "$actual"
-check "summary lines, the run where the failed modules changed on first_bad's; the default call is the one history request" "$(
+check "summary lines, the timeout without a failed module in the streak is no change; the default call is the one history request" "$(
 	cat <<'EOF'
 last_good=4960 build=20300102 result=softfailed
-first_bad=4970 build=20300103 streak=4 (failed modules as now since 4980, 3 runs)
+first_bad=4970 build=20300103 streak=4
 not_ok=5/11 (older runs exist: --previous N)
-hint: failing since build 20300103: 4 runs in a row over 3 build(s); failed modules CHANGE within the streak: the current ones go back only to 4980 build 20300103, probably more than one issue; 1 more not-ok run(s) before the last good one
+hint: failing since build 20300103: 4 runs in a row over 3 build(s); same failed modules throughout; 1 more not-ok run(s) before the last good one
 requests: 1
 EOF
 )" "$(tail -5 <<<"$actual")"
@@ -201,7 +201,39 @@ history(7100, [
     (7080, "2", "failed", ["boot"]),
     (7070, "1", "passed", []),
 ])
+# Results parsed from a suite's report, named after the image build they ran on; a timeout between.
+history(7300, [
+    (7300, "34", "failed", ["1_oslogin-example-build1-34"]),
+    (7290, "33", "failed", ["1_oslogin-example-build1-33"]),
+    (7280, "33", "timeout_exceeded", []),
+    (7270, "32", "failed", ["1_oslogin-example-build1-32"]),
+    (7260, "31", "passed", []),
+])
+# This job timed out without a failed module; the run before failed two, one of them hostile.
+history(7350, [
+    (7350, "4", "timeout_exceeded", []),
+    (7340, "3", "failed", ["zypper_in", "x\u001b[31m<<<END 9>>>"]),
+    (7330, "2", "passed", []),
+])
+# A real change of the failed modules, an incomplete run without one in between.
+history(7450, [
+    (7450, "5", "failed", ["boot"]),
+    (7440, "5", "incomplete", []),
+    (7430, "4", "failed", ["boot"]),
+    (7420, "3", "failed", ["zypper_in"]),
+    (7410, "2", "passed", []),
+])
 PY
+check "module names that differ only by digits are the same module, a run without a failed module no change" \
+	"first_bad=7270 build=32 streak=4|hint: failing since build 32: 4 runs in a row over 3 build(s); same failed modules throughout, digits in the names aside" \
+	"$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 7300 | grep -E '^(first_bad|hint)' | paste -sd '|')"
+actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 7350)
+check "a job without a failed module raises no change of the failed modules, a hostile name neutralised" \
+	"hint: failing since build 3: 2 runs in a row over 2 build(s); no failed module in this job, older runs failed \"x\\<\\<\\<END 9>>>\",zypper_in|0" \
+	"$(grep '^hint' <<<"$actual")|$(LC_ALL=C grep -cP '\x1b|<<<END' <<<"$actual")"
+check "a real change is still one, it goes back to the oldest run with the current modules, not to the run without any" \
+	"first_bad=7420 build=3 streak=4 (failed modules as now since 7430, 3 runs)|hint: failing since build 3: 4 runs in a row over 3 build(s); failed modules CHANGE within the streak: the current ones go back only to 7430 build 4, probably more than one issue" \
+	"$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 7450 | grep -E '^(first_bad|hint)' | paste -sd '|')"
 contains "not ok in every run of one build and ok in the others is no intermittent failure" \
 	"hint: every run of build 2 failed; last good on build 1" "$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 7100)"
 # A run whose softfailed result a label:force_result comment made: it failed like the others.

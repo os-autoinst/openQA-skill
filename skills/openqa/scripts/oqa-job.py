@@ -303,7 +303,7 @@ def head_and_tail(lines, total, max_lines, max_bytes):
     before = lines[: len(lines) - len(last)]
     named = next((line for line in reversed(before) if "PRIVATE KEY" in line), "")
     marked, inside = blank_keys(last, opens_key(named))
-    if inside:
+    if inside and marked:
         marked[-1] = KEY_MARK
     tail, size = [], 0
     for line in reversed(marked):

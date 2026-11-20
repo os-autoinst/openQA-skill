@@ -59,6 +59,9 @@ MAX_LISTED = 2 * IDS_PER_REQUEST
 MAX_WORKERS = 20
 MAX_COMMENT_JOBS = 30
 MAX_REQUESTS = 80
+# Characters of a value in the settings diff: default, --verbose (whole comma lists such as
+# OS_TEST_ISSUES, to compare them).
+SETTING_CHARS = (100, 3000)
 DETAILS_BYTES = 4 << 20
 LIST_BYTES = 512 << 10
 # Uploaded package lists, by preference: rpm -qa (lib/LTP/utils.pm log_versions), xfstests'
@@ -663,7 +666,9 @@ def settings_diff(text, limit, verbose):
         # A side without the key says it was added or removed, which masking must not hide.
         if value is None:
             return "-"
-        return _secrets.setting_value(key, value, _oqa.tok(value, 100))
+        return _secrets.setting_value(
+            key, value, _oqa.tok(value, SETTING_CHARS[verbose])
+        )
 
     lines = [
         f"{key}: {shown(key, change.get('-'))} -> {shown(key, change.get('+'))}"
@@ -1008,8 +1013,8 @@ def isotovideo_version(client, job_id):
     return _oqa.tok(match.group(1)) if match else "?"
 
 
-def fenced(client, job_id, title, lines, max_bytes=16384):
-    block = _oqa.sanitize("\n".join(lines), max_line=240, max_bytes=max_bytes)
+def fenced(client, job_id, title, lines, max_bytes=16384, max_line=240):
+    block = _oqa.sanitize("\n".join(lines), max_line=max_line, max_bytes=max_bytes)
     source = f"{client.host.split('//')[1]}/tests/{job_id}/investigation_ajax:{title}"
     return _oqa.fence(block, source)
 
@@ -1085,7 +1090,8 @@ def investigation(
         lines, build_changed = settings_diff(diff, limit, verbose)
         verdict = "yes" if build_changed else "no (product regression unlikely)"
         print(f"  settings diff (last_good -> this job): build_changed={verdict}")
-        print(fenced(client, job_id, "settings", lines), end="")
+        caps = (65536, 2 * SETTING_CHARS[1] + 240) if verbose else ()
+        print(fenced(client, job_id, "settings", lines, *caps), end="")
     else:
         print("  settings diff: not available")
 
@@ -1280,7 +1286,8 @@ def main():
         "--verbose",
         action="store_true",
         help="--investigation: keep per-run settings (checksums, ports, worker ids, git "
-        "hashes) and 'not available' lines; list every test commit with its files",
+        f"hashes) and 'not available' lines; settings values up to {SETTING_CHARS[1]} "
+        "characters, not 100; list every test commit with its files",
     )
     args = parser.parse_args()
 

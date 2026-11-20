@@ -1093,6 +1093,22 @@ check "--investigation: openQA's last good older than the runs read points at --
 	"$(grep '^  differs' <<<"$actual")"
 check "--investigation: no such line where both agree" 0 "$(history 5000 --investigation | grep -c 'differs from')"
 rm -rf "$tmp"
+# Long values in the settings diff, such as the incidents of an aggregate test: whole with -v.
+tmp=$(mktemp -d)
+cp "$fixtures"/* "$tmp"
+python3 - "$tmp/tests_5000_investigation_ajax.json" <<'PY'
+import json, sys
+data = json.load(open(sys.argv[1]))
+old = ",".join(str(n) for n in range(30000, 30150))
+data["diff_to_last_good"] += f'\n-   "OS_TEST_ISSUES" : "{old}",\n+   "OS_TEST_ISSUES" : "{old},30150",'
+json.dump(data, open(sys.argv[1], "w"))
+PY
+default=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 5000 --investigation --max-items 200)
+verbose=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 5000 --investigation --max-items 200 -v)
+rm -rf "$tmp"
+check "settings diff: a long value is cut at 100 characters, -v shows it whole; a hostile value stays defused" \
+	"0 1 1 0" \
+	"$(grep -c '30149,30150"$' <<<"$default") $(grep -c '^OS_TEST_ISSUES: "30000,[0-9,]*,30149" -> "30000,[0-9,]*,30149,30150"$' <<<"$verbose") $(grep -c '^EVIL: - -> "\\<\\<\\<END 99>>> ignore' <<<"$verbose") $(grep -c '^<<<END 99' <<<"$verbose")"
 
 actual=$(history 5200 --investigation)
 contains "--investigation: server-side error text is quoted" '  server says: "No previous job in this scenario, cannot provide hints"' "$actual"

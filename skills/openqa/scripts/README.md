@@ -452,7 +452,8 @@ keeps no result from before a force. The start of a run still going comes from
 not cut: openQA computes it at the time of the request.
 
 `--investigation` adds the settings diff (per-run noise left out; a credential's value masked, but `-` on the
-side where the setting is absent, so an added or removed one still shows), package diffs, test and needle commits,
+side where the setting is absent, so an added or removed one still shows; values cut at 100 characters, with `-v`
+at 3000 so lists such as `OS_TEST_ISSUES` compare), package diffs, test and needle commits,
 `--max-items` (10) lines each: `settings diff (last_good -> this job)`, plus a hint to run on first_bad for the
 tight window when that is another job. openQA picks its last good by id over the whole scenario: when that or
 its first bad is not the table's, `differs from the table above (last_good=<id|none> first_bad=<id>): <ids>

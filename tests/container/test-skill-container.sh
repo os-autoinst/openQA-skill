@@ -297,6 +297,9 @@ EOF
 for f in python3 jq realpath head base64 tr id mkdir seq sleep cat ls cp cmp mktemp rm ln ssh-keygen git rmdir; do
 	printf '%s\n' '#!/bin/bash' '. "$FIX/envcheck"' "exec $(command -v "$f") \"\$@\"" >"$tools/bin/$f"
 done
+# The launcher's pauses are recorded; with $FIX/sleep-fast they take no time.
+printf '%s\n' '#!/bin/bash' '. "$FIX/envcheck"' 'printf "%s\n" "$*" >> "$FIX/sleep-calls"' \
+	'[ ! -e "$FIX/sleep-fast" ] || exit 0' "exec $(command -v sleep) \"\$@\"" >"$tools/bin/sleep"
 # A client among the launcher's own commands is not the caller's.
 printf '%s\n' '#!/bin/bash' ': > "$FIX/launcher-path-client"; exit 1' >"$tools/bin/opencode"
 # First on the caller's PATH: what the launcher must take from its own.
@@ -1820,6 +1823,19 @@ rc=$?
 	[ "$(grep -c . "$FIX/project-calls")" -ge 3 ] &&
 	pass "up waits until the server answers, then sends the credential" || fail "a server that answers late: rc=$rc $out"
 rm "$FIX/answers-after"
+# Every probe of a start writes to the journal: half a minute of one a second,
+# then one every five seconds.
+restart
+echo 35 >"$FIX/answers-after"
+: >"$FIX/sleep-calls"
+touch "$FIX/sleep-fast"
+out="$(sc up obs 2>&1)"
+rc=$?
+[ "$rc" = 0 ] && [ "$(grep -cx 1 "$FIX/sleep-calls")" = 30 ] && [ "$(grep -cx 5 "$FIX/sleep-calls")" = 5 ] &&
+	[ "$(wc -l <"$FIX/sleep-calls")" = 35 ] && [ "$(head -n 30 "$FIX/sleep-calls" | sort -u)" = 1 ] &&
+	pass "a slow start probes each second for 30 probes, then every five seconds" ||
+	fail "the pace of a slow start: rc=$rc $(sort "$FIX/sleep-calls" | uniq -c | tr '\n' ' ') $out"
+rm -f "$FIX/sleep-fast" "$FIX/answers-after"
 restart
 approval per_e5
 touch "$FIX/keeps"

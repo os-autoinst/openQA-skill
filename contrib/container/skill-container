@@ -682,7 +682,7 @@ cmd_install() {
 # Starts the unit and waits until the server answers; a failed or
 # interrupted start stops the unit again.
 start_wait() {
-	local deadline=$((SECONDS + 300))
+	local deadline=$((SECONDS + 300)) probes=0
 	trap 'systemctl --user stop "$unit" >/dev/null 2>&1; trap - EXIT INT TERM HUP' EXIT
 	trap 'exit 130' INT TERM HUP
 	# Earlier failed starts count against the unit's start limit.
@@ -691,7 +691,10 @@ start_wait() {
 	while ((SECONDS < deadline)); do
 		running || die "$inst stopped while starting; the unit is stopped"
 		if answers; then break; fi
-		sleep 1
+		# Each probe is a podman exec, which writes several lines to the journal:
+		# half a minute of one a second, then one every five seconds.
+		probes=$((probes + 1))
+		if ((probes <= 30)); then sleep 1; else sleep 5; fi
 	done
 	if ! answers; then
 		podman logs --tail 20 "$ctr" 2>&1 | plain >&2 || true

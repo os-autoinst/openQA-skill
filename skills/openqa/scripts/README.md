@@ -409,7 +409,10 @@ waited for a worker counts where it ran; one that never started by its finish; o
 in id order.
 `failed_modules` is sorted and holds what fits, then `+N` for the rest. The hint's `failed modules CHANGE` means a
 run of the streak lacked one of this job's failed modules; one that failed in older runs only (it softfails,
-passes or is not reached now) is no change: `older runs also failed <module>`. On a change, `first_bad` adds
+passes or is not reached now) is no change: `older runs also failed <module>`. Names are compared with their
+digits masked, as a parsed suite may name its results after the image build (`, digits in the names aside`); a
+run without a failed module (a timeout) is passed over, and a job without one says `no failed module in this
+job, older runs failed <module>` instead. On a change, `first_bad` adds
 `(failed modules as now since <id>, N runs)`. A run whose ok result a `label:force_result` comment made counts
 as not ok (`note: ok result(s) of <ids> forced by a comment, counted as not ok`), for `--exit-code` too; as
 openQA's label hides a force beside a bugref or under a later label, the comments of ok runs with either are

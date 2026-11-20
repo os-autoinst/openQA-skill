@@ -146,6 +146,12 @@ check "--steps 0: the job and its failed modules with their counts, no step line
 	"$? $(grep -c '^job=500 ' <<<"$actual") $(grep -c '^module=.* result=failed' <<<"$actual") $(grep -c '^  step=\|^    \(text\|frame\|tags\|candidates\)=' <<<"$actual") $(grep -c 'source=openqa.example.org/tests/500/step/' <<<"$actual") $(grep -c '^  +2 failing steps not shown (--steps 2 shows all)$' <<<"$actual") $(grep -c '^review: ' <<<"$actual")"
 check "--steps 0: the module lines are those of the digest" \
 	"$(job 500 | grep '^module=')" "$(grep '^module=' <<<"$actual")"
+actual=$(job 500 --no-comments | normalize)
+check "--no-comments: no comment, bot summary or review state of a comment, one line says so; one request less" \
+	"0 0 review: not read (--no-comments) $(($(job 500 | sed -n 's/^requests: //p') - 1))" \
+	"$(grep -c '^comment=\|llm_\|force_result\|t#510' <<<"$actual") $(grep -c 'LLM\|TL;DR' <<<"$actual") $(grep '^review: ' <<<"$actual") $(sed -n 's/^requests: //p' <<<"$actual")"
+check "--no-comments: the digest above the review line is unchanged" \
+	"$(job 500 | normalize | sed '/^review: /,$d')" "$(sed '/^review: /,$d' <<<"$actual")"
 
 # --- send_key_until_needlematch: the near miss before the overshot screen --------------
 actual=$(job 895 | normalize)

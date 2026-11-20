@@ -22,7 +22,7 @@ One line per script, generated from the parsers: do not edit it by hand. What a 
 - `new-module.py --kind {console,container,python,service,transactional,x11,yam-validate} --path PATH --summary SUMMARY --maintainer MAINTAINER [--package PACKAGE] [--repo REPO] [--stdout]`
 - `oqa-comment-lint.py [FILE] [--text TEXT] [--private-suffix SUFFIX]...`; exit 1: at least one warning
 - `oqa-history.py JOB [--previous N] [--before TIME] [--workers] [--investigation] [--max-items N] [--exit-code] [--verbose]`
-- `oqa-job.py JOB [--settings REGEX] [--steps N] [--module NAME] [--all-steps] [--step-range A-B] [--before TIME] [--exit-code] [--verbose]`
+- `oqa-job.py JOB [--settings REGEX] [--steps N] [--module NAME] [--all-steps] [--step-range A-B] [--before TIME] [--no-comments] [--exit-code] [--verbose]`
 - `oqa-log.py JOB [--file NAME] [--list | --tail N | --grep REGEX | --errors | --runtimes | --members | --shot NAME] [--around-module MODULE] [--lines A-B] [--member PATH] [--out DIR] [--compare JOB] [--context N] [--max-matches N] [--ignore-case] [--max-lines N] [--max-line-chars N] [--max-bytes BYTES] [--verbose] [--exit-code]`
 - `oqa-ref.py REF [--body] [--files] [--notes N]`
 - `oqa-src.py JOB PATH [--line N] [--context K]`
@@ -139,11 +139,13 @@ credential that reached a log.
 A restarted job is history, a `parallel_failed` job is a victim, steps after the die step are post_fail_hook
 (in a module that failed without dying: from its `Post-fail` step on).
 
-    oqa-job.py JOB_URL|ID [--steps N] [--settings REGEX] [--module NAME] [--before TIME] [-v] [--exit-code]
+    oqa-job.py JOB_URL|ID [--steps N] [--settings REGEX] [--module NAME] [--before TIME] [--no-comments] [-v] [--exit-code]
     oqa-job.py JOB_URL|ID --module NAME --all-steps [--step-range A-B]    # num result title shot per step
 
 `--steps N` failing steps per module (2; `0`: no step lines, only the job and its failed modules, each with
-`+N failing steps not shown (--steps M shows all)`, M that module's count); `--settings '^(QEMU|HDD)'` adds settings by key (default: BACKEND,
+`+N failing steps not shown (--steps M shows all)`, M that module's count); `--no-comments` reads no comments
+and prints `review: not read (--no-comments)` instead of the review state and comment lines, so earlier
+verdicts, bot summaries among them, do not steer a blind triage; `--settings '^(QEMU|HDD)'` adds settings by key (default: BACKEND,
 CASEDIR, NEEDLES_DIR, YAML_SCHEDULE; `TEST_GIT_HASH` and `NEEDLES_GIT_HASH` are no job settings, a regex
 that names them prints the `oqa-log.py ... --file vars.json` call that reads them; a job that is not ok
 adds `hint: what changed since the last good run: oqa-history.py <url> --investigation`, as the line

@@ -1300,6 +1300,13 @@ def main():
         "of the clone chain and SUPERSEDED lines",
     )
     parser.add_argument(
+        "--no-comments",
+        action="store_true",
+        help="do not read the job's comments: no review state, bugrefs, labels or comment "
+        "lines, so earlier verdicts (bot summaries among them) do not steer a triage; one "
+        "request less",
+    )
+    parser.add_argument(
         "--exit-code",
         action="store_true",
         help="exit 1 when the job is not ok (default: exit 0 whenever the digest was produced)",
@@ -1343,7 +1350,10 @@ def main():
     print_dependencies(client, job, args.verbose)
     print_modules(client, job, args.steps, args.verbose, args.module)
     print_files(job, args.verbose)
-    print_comments(client, job_id, job.get("result"), args.verbose, args.before)
+    if args.no_comments:
+        print("review: not read (--no-comments)")
+    else:
+        print_comments(client, job_id, job.get("result"), args.verbose, args.before)
     print(f"requests: {client.requests}")
     return status
 

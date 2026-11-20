@@ -35,7 +35,9 @@ How to read it:
     the lines with failed, error or not found) shows those instead of its head, then
     counts the other lines. They come from the first MiB of the text, the died message
     first, then the failures, TCONF and TWARN last; the first 8 of them are shown in
-    file order. --verbose shows a solver problem whole, up to 4000 characters.
+    file order. --verbose shows a solver problem whole, up to 4000 characters. One
+    without verdict lines shows its first 2 lines and its last ones, where a command's
+    error mostly is, and counts the lines between.
     kind=parser-result-failed: a parse_extra_log result. kind=info: a module that
     failed without a failing step shows its INFO and output steps, else its last
     step with text.
@@ -116,6 +118,8 @@ TEXT_READ = TEXT_KEPT + TEXT_MARGIN  # characters of text_data sanitised before 
 TEXT_SCAN = 1 << 20  # characters of a long step text searched for verdict lines
 HEAD_LINES = 8
 HEAD_BYTES = 1200
+TEXT_HEAD = 2  # first lines kept of a long step text without verdict lines, the rest from its end
+KEY_MARK = _secrets.MARK.format("private-key")
 INLINE = 240  # longest text printed as text="..." instead of a fenced block
 # (lines, bytes) of a comment body: default, --verbose
 COMMENT_CAPS = ((6, 700), (12, 1500))
@@ -265,6 +269,11 @@ def show_text(text, source, max_lines, max_bytes, indent="", died=None, whole=No
         notes.append(
             f"[verdict lines searched in the first {TEXT_SCAN} characters only]"
         )
+    if long and not picked:
+        kept = head_and_tail(lines, total, max_lines, max_bytes)
+        kept += "".join(f"\n{note}" for note in notes)
+        print(_oqa.fence(kept, source), end="")
+        return
     if picked:
         kept = "\n".join(lines[index] for index in sorted(picked[:max_lines]))
         more = len(picked) - max_lines
@@ -278,6 +287,58 @@ def show_text(text, source, max_lines, max_bytes, indent="", died=None, whole=No
     kept += "".join(f"\n{note}" for note in notes)
     kept = _oqa.sanitize(kept, max_line=300, max_bytes=max_bytes)
     print(_oqa.fence(kept, source), end="")
+
+
+def head_and_tail(lines, total, max_lines, max_bytes):
+    """A long step text without verdict lines: its first lines, which name what ran, and its
+    last ones, where a command's error or the serial text a wait_serial missed mostly is.
+    Each part is sanitised on its own so that the byte cap cannot take the end; each line
+    is cut first as step_text cuts a text, so a MiB-long line costs little."""
+    budget = max_bytes // 4
+    capped = [
+        step_text({"text_data": line}) for line in blank_keys(lines[:TEXT_HEAD])[0]
+    ]
+    head = _oqa.sanitize("\n".join(capped), max_line=300, max_bytes=budget)
+    last = lines[TEXT_HEAD:][TEXT_HEAD - max_lines :]
+    before = lines[: len(lines) - len(last)]
+    named = next((line for line in reversed(before) if "PRIVATE KEY" in line), "")
+    marked, inside = blank_keys(last, opens_key(named))
+    if inside:
+        marked[-1] = KEY_MARK
+    tail, size = [], 0
+    for line in reversed(marked):
+        line = step_text({"text_data": line})
+        line = _oqa.sanitize(line, max_line=300, max_bytes=max_bytes)
+        size += len(line.encode("utf-8")) + 1
+        if tail and size > max_bytes - budget:
+            break
+        tail.insert(0, line)
+    cut = total - TEXT_HEAD - len(tail)
+    return "\n".join([head, f"[... {cut} lines not shown]", *tail])
+
+
+def opens_key(line):
+    """Whether a line naming a private key leaves one open: a BEGIN marker, no END after it.
+    Such a line is redacted here, so that the count on stderr still names the key."""
+    start = line.rfind("-----BEGIN")
+    if start < 0 or "-----END" in line[start:]:
+        return False
+    _secrets.redact(line[start : start + 200])
+    return True
+
+
+def blank_keys(lines, inside=False):
+    """(lines, whether a key is still open after them): a private key's BEGIN line made the
+    redaction marker and its body blanked, as _secrets does it for a whole text. Lines that
+    are sanitised one by one would otherwise show a body that runs over several of them."""
+    marked = []
+    for line in lines:
+        if "PRIVATE KEY" in line:
+            inside = opens_key(line)
+            marked.append(KEY_MARK if inside else line)
+        else:
+            marked.append("" if inside else line)
+    return marked, inside
 
 
 def reduce_details(obj):

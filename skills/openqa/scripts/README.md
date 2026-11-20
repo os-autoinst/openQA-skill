@@ -205,7 +205,10 @@ text whole, up to 4000 characters); for a died test also its message and the lin
 or `not found`.
 They are picked from the first MiB of the text and counted over all of it: the died message first, then the
 failures, `TCONF` and `TWARN` last; the first 8 are shown in file order, and a longer text adds
-`[verdict lines searched in the first 1048576 characters only]`. A text of at most 8 lines but over 4000
+`[verdict lines searched in the first 1048576 characters only]`. A longer text without verdict lines shows
+its first 2 lines, `[... N lines not shown]` and its last 6, as many as fit the step's bytes, the last always:
+the error of a command or the serial text a `wait_serial` missed is mostly at the end (of the first MiB for a
+longer text). A text of at most 8 lines but over 4000
 characters is shown cut, with `[step text cut at 4000 characters; N more lines not shown]` when whole lines
 fell off.
 `kind=parser-result-failed`: a result openQA parsed from a suite's report (`parse_extra_log`: LTP, KTAP,

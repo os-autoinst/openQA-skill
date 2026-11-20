@@ -393,6 +393,15 @@ for line in "[debug] [pid:4242] <<< testapi::assert_script_run(cmd=\"curl --form
 	check "a command-server URL loses its job token: ${line%%"$jobtoken"*}" \
 		"${line/"$jobtoken"/[REDACTED:job-token]}" "$actual"
 done
+# openQA draws the token from letters, digits and "_": about one in four holds a "_".
+for tok in "aXc_Ob66""_garuBk1" "_Qz7xKp2Lm9vRt4W" "Qz7xKp2Lm9vRt4W_"; do
+	for line in "# curl --form upload=@/root/x.txt http://10.0.2.2:20523/$tok/uploadlog/x.txt; echo H2m" \
+		"[info] [pid:4242] cmdsrv: daemon reachable under http://*:20013/$tok/"; do
+		actual=$(printf '%s\n' "$line" | python3 "$scripts/_secrets.py" 2>/dev/null)
+		check "a job token with an underscore goes too: ${line%%"$tok"*}" \
+			"${line/"$tok"/[REDACTED:job-token]}" "$actual"
+	done
+done
 keeps "a long path segment of an ordinary URL" 'http://registry.example.org:5000/containerimagesxyz/tags/list\nhttps://github.com/openSUSEQAToolsRepo/files/x\nhttp://10.0.2.2:20013/shortToken/data\n'
 
 # --- os-autoinst's own plumbing, thousands of lines per autoinst-log.txt ---------------

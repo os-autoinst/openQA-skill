@@ -80,7 +80,7 @@
     "should_trigger": false
   },
   {
-    "query": "openQA job 25326243 is an update aggregate job; which maintenance incidents does it test, what priority do they have and which packages are in them?",
+    "query": "openQA job 1234567 is an update aggregate job; which maintenance incidents does it test, what priority do they have and which packages are in them?",
     "should_trigger": true
   },
   {
@@ -92,7 +92,7 @@
     "should_trigger": true
   },
   {
-    "query": "in my os-autoinst checkout I added an optional timeout argument to the testapi function type_string. What else must the same pull request change, and which tests should I run before pushing?",
+    "query": "in my os-autoinst checkout I added an optional argument to the testapi function type_string. What else must the same pull request change, and which tests should I run before pushing?",
     "should_trigger": true
   },
   {

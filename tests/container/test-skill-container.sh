@@ -2254,11 +2254,13 @@ rc=$?
 [ "$rc" = 0 ] && grep -qx "stop $N-agent@ghost.service" "$FIX/systemctl-calls" &&
 	pass "uninstall stops an instance that was never installed" || fail "uninstall of a stray unit: rc=$rc $out"
 # What goes into the drop-in is one value a line: systemd would read more.
-for bad in "--image=img:1"$'\n'"PodmanArgs=--privileged" "--as=$work/ws%t" "--as=$work/ws\\"; do
+for bad in "--image=img:1"$'\n'"PodmanArgs=--privileged" "--image=img:1"$'\r'"PodmanArgs=--privileged" \
+	"--as=$work/ws%t" "--as=$work/ws\\" "--as=$work/ws\$HOME" "--as=$work/ws\"x" "--as=$work/ws"$'\001'; do
 	out="$(sc install inj --workdir "$work/ws" "${bad%%=*}" "${bad#*=}" 2>&1)"
 	rc=$?
-	[ "$rc" != 0 ] && grep -qF "a line break, a % or a backslash" <<<"$out" && [ ! -e "$pubdir/$N-agent@inj.container.d" ] &&
-		pass "install refuses ${bad%%=*} with a line break, a % or a backslash" ||
+	[ "$rc" != 0 ] && grep -qF 'a control character, a %, a $, a backslash or a double quote' <<<"$out" &&
+		[ ! -e "$pubdir/$N-agent@inj.container.d" ] &&
+		pass "install refuses ${bad%%=*} with $(printf %q "${bad#*=}" | tail -c 12)" ||
 		fail "install ${bad%%=*} injection: rc=$rc $out"
 done
 # The units come from beside the fixed copy: those beside the launcher that

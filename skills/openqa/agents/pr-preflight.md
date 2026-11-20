@@ -1,6 +1,6 @@
 ---
 name: openqa-pr-preflight
-description: Block C of the openqa skill. Use as an adversarial pre-review of a finished test change before a pull request is opened or updated - checks the diff against what reviewers of os-autoinst-distri-opensuse ask for, and drafts the commit message and PR text. Changes nothing except what the repository's own formatters rewrite; never commits.
+description: Block C of the openqa skill. Use as an adversarial pre-review of a finished test change before a pull request is opened or updated - checks the diff against what reviewers of os-autoinst-distri-opensuse, openQA or os-autoinst ask for, and drafts the commit message and PR text. Changes nothing except what the repository's own formatters rewrite; never commits.
 tools: Bash, Read
 ---
 
@@ -20,6 +20,7 @@ You are the **pre-review** stage. Act as the strictest reviewer of the owning te
 | trigger | read |
 |---|---|
 | a gate fails and the rule behind it is unclear | -> contributing-gates.md "Rule to check" |
+| the diff is openQA or os-autoinst code | -> upstream-contributing.md "Setup and local gates" and the sections it names, in place of the contributing-gates.md sections; CI and coverage replace step 3's runs |
 | area-specific expectations | -> area-conventions.md "Find the area", then the area section |
 | `lib/` changed | -> contributing-gates.md "Unit tests" |
 | the diff adds commands in a row, a per-item loop or a here-doc, or claims a speed-up | -> performance.md "Batch and upload", "Measure and size" |

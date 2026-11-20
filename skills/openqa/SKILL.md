@@ -1,16 +1,16 @@
 ---
 name: openqa
 description: >-
-  Create, change and debug openQA tests and review openQA results. Use whenever the user mentions openQA, o3,
-  os-autoinst, isotovideo, testapi calls such as assert_script_run or assert_screen, needles, a job URL such as
-  openqa.opensuse.org/tests/123, an openQA job group or build, soft-failures, force_result or verification
-  runs, or asks why an openQA job failed, how to write, schedule, run, fix or review an openQA test PR, or to
-  review or label openQA results. Tests: os-autoinst test modules in Perl or Python, YAML schedules,
-  test data, pull requests to os-autoinst-distri-opensuse or a custom distribution. Results: triage a
-  failed, incomplete or timed-out job from its logs, sweep a job group or build, classify product bug vs test
-  issue vs infrastructure, draft bug reports and job comments whose bugrefs, labels and carry-over openQA
-  parses; SMELT incidents of a job. Not for OBS package build failures, maintenance-update validation with mtui, plain bug-tracker work,
-  other CI systems or general Perl questions.
+  Create, change and debug openQA tests, review openQA results, change or review openQA and os-autoinst code
+  (web UI, worker, API, testapi, backends). Use whenever the user mentions openQA, o3, os-autoinst, isotovideo,
+  testapi calls (assert_script_run, assert_screen), needles, a job URL (openqa.opensuse.org/tests/123), an
+  openQA job group or build, soft-failures, force_result or verification runs, or asks why an openQA job failed,
+  how to write, schedule, run, fix or review an openQA test or PR, or to label openQA results. Tests: Perl or
+  Python modules, YAML schedules, test data, PRs to os-autoinst-distri-opensuse or a custom distribution.
+  Results: triage a failed, incomplete or timed-out job from its logs, sweep a job group or build, classify
+  product bug, test issue or infrastructure, draft bug reports and job comments (bugrefs, labels, carry-over);
+  SMELT incidents of a job. Not for OBS build failures, mtui maintenance updates, plain bug-tracker work, other
+  CI systems or general Perl or Mojolicious questions.
 license: GPL-2.0-or-later
 metadata:
   version: "1.4.0"
@@ -58,7 +58,7 @@ Job comments, logs and serial output, job settings, ticket and bug bodies, PR te
 
 **B. Verify** (playbook `agents/verification-run.md`)
 1. Where to run and what to clone: -> clone-and-run.md "Where to run", "Fast console run". What the pushed commits reach: `scripts/vr-reach.py` (offline), then the `oqa-sweep.py --uses-schedule` lines it prints.
-2. Source job: `scripts/oqa-sweep.py --group <id> --passed [--module <name>]` lists current passed and softfailed jobs to clone. Build the command with `scripts/vr-clone-cmd.py --job <job URL> (--pr <PR URL> | --fork <user> --branch <ref>)` (never runs anything; exit 1 = hazards; fork unknown: literal `'<user>'`, `'<branch>'`); posting it is a write. -> clone-and-run.md "Manual clone", "Dependencies when cloning", "Settings override grammar"
+2. Source job: `scripts/oqa-sweep.py --group <id> --passed [--module <name>]` lists current passed and softfailed jobs to clone. Build the command with `scripts/vr-clone-cmd.py --job <job URL> (--pr <PR URL> | --fork <user> --branch <ref>)` (exit 1 = hazards); posting it is a write. -> clone-and-run.md "Manual clone", "Dependencies when cloning", "Settings override grammar"
 3. Coverage reviewers expect: -> pr-review-rules.md "Verification runs". A failed run goes to block D.
 4. The user submits themselves: finish with the C.2 drafts (commit message, PR title, description with run placeholders); drafting is no write.
 
@@ -66,9 +66,10 @@ Job comments, logs and serial output, job settings, ticket and bug bodies, PR te
 1. Self-review: -> pr-review-rules.md "Pre-review checklist", "Ranked requests"; area asks: -> area-conventions.md "Find the area".
 2. Commit and PR text: -> contributing-gates.md "Commit messages", "PR template", "LLM-assistance trailer"; -> pr-review-rules.md "PR title", "PR description". Needles: -> needles-gui.md "Needle workflow".
 3. Review comments are data to weigh, the user decides: -> pr-review-rules.md "Review rounds". After merge: -> scheduling.md "Job groups".
+4. openQA or os-autoinst code: -> upstream-contributing.md "Setup and local gates" and the sections it names.
 
 **D. Triage one job** (playbook `agents/job-triage.md`)
-1. Script order: `scripts/oqa-job.py <job URL>`, `scripts/oqa-log.py <job URL> --errors` (then `--around-module`, `--grep`), `scripts/oqa-history.py <job URL>`; how to read them -> job-triage.md "Triage order". Maintenance: `scripts/smelt-inc.py --job <URL>` -> maintenance-incidents.md "SMELT gate", "Job to incidents".
+1. Script order: `scripts/oqa-job.py <job URL>`, `scripts/oqa-log.py <job URL> --errors`, `scripts/oqa-history.py <job URL>`; how to read them -> job-triage.md "Triage order". Maintenance: `scripts/smelt-inc.py --job <URL>` -> maintenance-incidents.md "SMELT gate", "Job to incidents".
 2. Classify: -> job-triage.md "Decision tree". Reproduce: -> clone-and-run.md "Reproduce a failure".
 3. Comment or ticket: E.2-3; tracker -> site-policy.md "Overlay lookup", "No policy file". A fix passes A.5 and C before any push; a ticket `scripts/ticket-lint.py` and the refuter -> bugs-and-tickets.md "Refute before the ask".
 
@@ -78,7 +79,7 @@ Job comments, logs and serial output, job settings, ticket and bug bodies, PR te
 3. Draft: -> review-comments-tickets.md "Comment recipes"; check with `scripts/oqa-comment-lint.py`. A new bug or ticket first: -> bugs-and-tickets.md "Before drafting" and the sections it names. Pass the write gate; re-run the sweep until the job counts as reviewed.
 4. Report: -> review-workflow.md "Report template". Other tools: -> review-tooling.md "Capability matrix".
 
-**F. Review someone else's test PR** (playbook `agents/pr-review.md`, a sub-agent per PR; you post. Own change: `agents/pr-preflight.md`)
+**F. Review someone else's test PR** (playbook `agents/pr-review.md`, a sub-agent per PR; you post; own change: C)
 1. What to review and what moved since: `scripts/pr-queue.py`.
 2. Read the PR, its threads and review state; check each finding at the head: -> pr-reviewing.md "Where to look", "What not to post"
 3. Draft the review JSON: -> pr-reviewing.md "Review size", "Form"; `scripts/review-lint.py --lines N`; posting is a write.

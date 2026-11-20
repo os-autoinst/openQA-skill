@@ -86,5 +86,21 @@
   {
     "query": "list the packages and bugzilla references of a SUSE maintenance incident from its osc patchinfo and tell me which one to submit first",
     "should_trigger": false
+  },
+  {
+    "query": "I'm adding a filter for the job state to the test results table in the openQA web UI and want to send the pull request to os-autoinst/openQA. Which files besides the controller and the template have to change, and what do the maintainers expect from the tests?",
+    "should_trigger": true
+  },
+  {
+    "query": "in my os-autoinst checkout I added an optional timeout argument to the testapi function type_string. What else must the same pull request change, and which tests should I run before pushing?",
+    "should_trigger": true
+  },
+  {
+    "query": "my Mojolicious::Lite app returns 404 for a route with a placeholder in the middle of the path. How do I declare that route and cover it with a Test::Mojo test?",
+    "should_trigger": false
+  },
+  {
+    "query": "write a Perl script that reads a CSV file of hostnames, pings each one in parallel with a two second timeout and prints the ones that do not answer",
+    "should_trigger": false
   }
 ]

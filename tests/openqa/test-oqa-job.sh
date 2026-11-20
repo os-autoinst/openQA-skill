@@ -141,6 +141,25 @@ check "--steps 1 keeps the die message" "test-died:needle-mismatch test-died:com
 	"$(grep -o 'kind=[^ ]*' <<<"$actual" | cut -d= -f2 | xargs)"
 check "--steps 1 says what it left out and the --steps that shows all of a module's" 1 \
 	"$(grep -c '^  +1 failing steps not shown (--steps 2 shows all)$' <<<"$actual")"
+# Three failing steps and a die step that is no failing step: it takes a slot of its own.
+tmp=$(mktemp -d)
+cp "$fixtures"/api_v1_jobs_870_* "$tmp"
+python3 - "$tmp" <<'PY'
+import json, sys
+path = f"{sys.argv[1]}/api_v1_jobs_870_details.json"
+data = json.load(open(path))
+steps = [{"num": n, "result": "fail", "title": f"check {n}", "text_data": f"failure {n}"} for n in (1, 2, 3)]
+steps.append({"num": 4, "result": "unk", "title": "Failed", "text_data": "# Test died: boom at x.pm line 1."})
+data["job"]["testresults"] = [{"name": "m", "result": "failed", "category": "c", "details": steps}]
+json.dump(data, open(path, "w"))
+PY
+hints=
+for n in 2 3 4; do
+	hints+="$(python3 "$script" --host https://openqa.example.org --fixture-dir "$tmp" 870 --steps "$n" | grep 'failing steps not shown' || echo none)|"
+done
+rm -rf "$tmp"
+check "the die step in a slot of its own: every failing step left out is counted" \
+	"  +2 failing steps not shown (--steps 4 shows all)|  +1 failing steps not shown (--steps 4 shows all)|none|" "$hints"
 actual=$(job 500 --steps 0)
 check "--steps 0: the job and its failed modules with their counts, no step line, no step text" "0 1 5 0 0 1 1" \
 	"$? $(grep -c '^job=500 ' <<<"$actual") $(grep -c '^module=.* result=failed' <<<"$actual") $(grep -c '^  step=\|^    \(text\|frame\|tags\|candidates\)=' <<<"$actual") $(grep -c 'source=openqa.example.org/tests/500/step/' <<<"$actual") $(grep -c '^  +2 failing steps not shown (--steps 2 shows all)$' <<<"$actual") $(grep -c '^review: ' <<<"$actual")"

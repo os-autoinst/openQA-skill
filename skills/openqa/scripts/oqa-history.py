@@ -52,7 +52,7 @@ OK_RESULTS = _oqa.RESULT_GROUPS["ok"]
 # Not-ok runs in a row from which a failure is called persistent rather than intermittent.
 PERSISTENT_STREAK = 3
 # An image build counter in a module name: ...-gce-build1-33, Build7.2.
-BUILD_COUNTER = re.compile(r"(?i)build[0-9]+(?:[-._][0-9]+)*")
+BUILD_COUNTER = re.compile(r"(?i)(?<![a-z])build[0-9]+(?:[-._][0-9]+)?")
 # Runs after the job read with --before, the nearest first.
 NEXT_BEFORE = 20
 # A job's module list is part of each row of /api/v1/jobs: LTP jobs take ~130 kB each.

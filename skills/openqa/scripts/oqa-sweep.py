@@ -1212,6 +1212,8 @@ def main():
             parser.error(f"{flag} goes with --group ID [--build B] [--passed] only")
     if args.module == "":
         parser.error("--module needs a module name")
+    if args.version == "":
+        parser.error("--version needs a version")
     if args.version is not None and (not args.group or args.uses_schedule is not None):
         parser.error("--version goes with --group ID [--build B] [--passed] only")
     if args.passed and (args.groups or args.todo or args.include_softfailed):

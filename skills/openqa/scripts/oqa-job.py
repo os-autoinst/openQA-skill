@@ -264,7 +264,11 @@ def show_text(text, source, max_lines, max_bytes, indent="", died=None, whole=No
             print(f"{indent}{note}")
         return
     long = died is not None and total > max_lines
-    picked = verdicts(lines, died) if long else []
+    # Verdict lines are shown apart from the BEGIN line: pick them where a key is blanked.
+    view = lines
+    if long and _secrets.PEM_BEGIN.search(bare("\n".join(lines))):
+        view = blank_keys(lines)[0]
+    picked = verdicts(view, died) if long else []
     if long and len(whole or "") > TEXT_SCAN:
         notes.append(
             f"[verdict lines searched in the first {TEXT_SCAN} characters only]"
@@ -275,7 +279,7 @@ def show_text(text, source, max_lines, max_bytes, indent="", died=None, whole=No
         print(_oqa.fence(kept, source), end="")
         return
     if picked:
-        kept = "\n".join(lines[index] for index in sorted(picked[:max_lines]))
+        kept = "\n".join(view[index] for index in sorted(picked[:max_lines]))
         more = len(picked) - max_lines
         rest = f"{more} more verdict lines and " if more > 0 else ""
         rest += f"{total - len(picked)} other lines"

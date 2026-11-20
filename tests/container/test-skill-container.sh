@@ -505,12 +505,27 @@ pwfiles() {
 # launcher left, in the temporary directories or beside what it reads.
 fixtures=("$work/config/openqa/client.conf" "$work/planted/client.conf" "$oqc"/* "$work/openqa-closed.conf" "$work/config/mcp-bugzilla/api-key"
 	"$work/planted/key" "$work/mem-key/memory.json" "$work/mem-mixed/memory.json" "$tools/userbin/opencode")
+# Another launcher suite running at the same time keeps its fixtures in a
+# temporary directory of its own with fix/envcheck in it: not a leak of this run.
+mine() {
+	local f d rest top
+	while IFS= read -r f; do
+		top=''
+		for d in /tmp /var/tmp /dev/shm "/run/user/$(id -u)"; do
+			[[ $f == "$d"/*/* ]] || continue
+			rest=${f#"$d"/}
+			top=$d/${rest%%/*}
+		done
+		[ -n "$top" ] && [ "$top" != "$work" ] && [ -e "$top/fix/envcheck" ] && continue
+		printf '%s\n' "$f"
+	done
+}
 leakfiles() {
 	{
 		find /tmp /var/tmp /dev/shm "/run/user/$(id -u)" -maxdepth 3 \( -path "$work" -o -path "$tools" \) -prune \
 			-o -type f -user "$(id -u)" -newer "$work/stamp" -print 2>/dev/null
 		find "$work" "$tools" -path "$FIX" -prune -o -type f -print
-	} | xargs -r -d '\n' grep -lE -- 'SECRET[-_][0-9]|OQASECRET[0-9]' 2>/dev/null | grep -vxF -f <(printf '%s\n' "${fixtures[@]}")
+	} | xargs -r -d '\n' grep -lE -- 'SECRET[-_][0-9]|OQASECRET[0-9]' 2>/dev/null | grep -vxF -f <(printf '%s\n' "${fixtures[@]}") | mine
 }
 secret() { cat "$FIX/secrets/$N-$1" 2>/dev/null; }
 stored() { cat "$FIX/secrets/"* | sha256sum; }
@@ -840,6 +855,17 @@ done
 
 left="$(leakfiles)"
 [ -z "$left" ] && pass "secrets leaves no login in a file" || fail "secrets left a login in: $left"
+# The scan passes over the fixtures of another suite's run, not over a stray file.
+sib="$(mktemp -d)"
+mkdir "$sib/fix"
+: >"$sib/fix/envcheck"
+echo SECRET-9 >"$sib/fix/logins"
+stray="$(mktemp)"
+echo SECRET-9 >"$stray"
+left="$(leakfiles)"
+! grep -qF "$sib/" <<<"$left" && grep -qxF "$stray" <<<"$left" &&
+	pass "the leak scan passes over another suite's fixtures, not over a stray file" || fail "the leak scan's filter: $left"
+rm -rf "$sib" "$stray"
 
 # The agent gets the whole work directory: not the home directory, what holds
 # it, the logins, podman's storage, the runtime directory, someone else's

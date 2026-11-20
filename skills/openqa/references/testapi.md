@@ -152,7 +152,7 @@ Text-only consoles (`root-virtio-terminal`, `root-sut-serial`): fast and screenl
 
 - **Unavailable:** needle calls, clicks, mouse, `save_screenshot` (no-op), `hold_key`/`release_key`, `send_key` other than `'ret'`.
 - **Signals:** `is_serial_terminal() ? type_string('', terminate_with => 'ETX') : send_key 'ctrl-c';` — `'EOT'` is ctrl-d.
-- **The prompt must be the distri's `serial_term_prompt`** (`# `; os-autoinst-distri-opensuse: `# ` root, `$ ` user) — `script_run`/`script_output` wait up to 90 s for that literal, then type anyway: a custom `PS1` or a foreground program costs 90 s per call.
+- **The prompt must be the distri's `serial_term_prompt`** (`# `; os-autoinst-distri-opensuse: `# ` root, `$ ` user) — `script_run`/`script_output` wait up to 90 s for that literal, then type anyway: a custom `PS1` costs 90 s per call. A foreground program still holding the terminal gets the typed line, so the call dies (`timed out`; `typing command '...' timed out` if it does not echo).
 - **Never wait for the prompt yourself after a command** — it eats the prompt the next `script_run` needs.
 - **No newline inside a `script_run` command** — the echo check dies `typing command '...' timed out`. Multi-line scripts -> references/performance.md "Batch and upload".
 - **Drop `> /dev/$serialdev`** — `wait_serial` reads the terminal, not `serial0` (the redirect is deprecated on VNC consoles too).
@@ -169,3 +169,5 @@ Text-only consoles (`root-virtio-terminal`, `root-sut-serial`): fast and screenl
 - **Named args only:** `assert_and_click`, `assert_and_dclick`, `click_lastmatch`, `mouse_drag`. `assert_and_click('tag', 60)` dies `Odd name/value argument`; write `timeout => 60`.
 - **`wait_screen_change` with a timeout:** `wait_screen_change(sub { send_key 'alt-n' }, 20)`; `0` becomes 10. The triggering action goes inside the block or the change is missed.
 - **`record_info ..., result => 'fail'` leaves the module green** — to fail, `die` -> "Result recording".
+
+Sources: os-autoinst testapi.pm, distribution.pm, commands.pm, consoles/serial_screen.pm

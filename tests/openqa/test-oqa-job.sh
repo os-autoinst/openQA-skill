@@ -274,6 +274,11 @@ data["job"]["testresults"] = [
                                           + ["-----END RSA PRIVATE KEY----------BEGIN RSA PRIVATE KEY-----"]
                                           + ["Q0FUQk9EWTI", "Q0FUQk9EWTM", "-----END RSA PRIVATE KEY-----",
                                              "error: after the concatenated keys"])),
+    # Over 2 MiB: a key opens near the end of the first MiB and ends just past it, between the
+    # first and the last MiB read; the last lines are no key.
+    module("key_in_gap", "cmd", "\n".join(["a", "b"] + ["x" * 1000] * 1046 + ["-----BEGIN RSA PRIVATE KEY-----"]
+                                          + ["R0FQQk9EWQ" + "Q" * 54] * 40 + ["-----END RSA PRIVATE KEY-----"]
+                                          + ["y" * 1000] * 1100 + ["final error 1", "final error 2"])),
 ]
 json.dump(data, open(f"{sys.argv[1]}/api_v1_jobs_872_details.json", "w"))
 json.dump([], open(f"{sys.argv[1]}/api_v1_jobs_872_comments.json", "w"))
@@ -315,6 +320,9 @@ check "a private key in the lines kept, sanitised one by one, keeps its body hid
 	"$(grep -c 'RUVFRUZG' <<<"$key") $(sed -n '/^module=key_in_tail /,/^<<<END/p' <<<"$key" | grep -c '^\[REDACTED:private-key\]$') $(grep -c '^after the key$' <<<"$key")"
 check "a key whose BEGIN follows another's END on one line keeps its body hidden" "0 1" \
 	"$(grep -c 'Q0FUQk9EWT' <<<"$key") $(grep -c '^error: after the concatenated keys$' <<<"$key")"
+gap=$(sed -n '/^module=key_in_gap /,/^<<<END/p' <<<"$key")
+check "a key closed between the first and the last MiB read leaves the last lines shown" "final error 1|final error 2|0 0" \
+	"$(grep '^final error' <<<"$gap" | paste -sd '|')|$(grep -c 'REDACTED' <<<"$gap") $(grep -c 'R0FQQk9EWQ' <<<"$gap")"
 scan=$(sed -n '/^module=one_line_scan /,/^<<<END/p' <<<"$key")
 check "a first MiB of one line: that line, the count between, the last lines from the end of the text" \
 	"[... 3 lines not shown]|later 3|later 8|6" \

@@ -1093,6 +1093,10 @@ history(9100, [(9100, "4", "failed", 0), (9090, "3", "softfailed", forced), (908
 save("tests_9100_investigation_ajax", {"last_good": link(9090)})
 history(9200, [(9200, "9", "failed", 0), (9190, "8", "failed", 0), (9180, "7", "failed", 0)], previous=2)
 save("tests_9200_investigation_ajax", {"last_good": link(9100), "first_bad": link(9150)})
+# Digits str.isdigit() takes: a superscript two int() refuses, an Arabic-Indic three it reads as 3.
+history(9300, [(9300, "2", "failed", 0), (9290, "1", "passed", 0)])
+save("tests_9300_investigation_ajax", {"last_good": {"type": "link", "link": "/tests/2", "text": "²"},
+                                       "first_bad": {"type": "link", "link": "/tests/3", "text": "٣"}})
 PY
 actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 9000 --investigation)
 check "--investigation: runs the table left out are named on one line where openQA's last good and first bad differ" \
@@ -1108,6 +1112,9 @@ actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 9200 --previous 
 check "--investigation: openQA's last good older than the runs read points at --previous" \
 	"  differs from the table above (last_good=none first_bad=9180): 9100,9150 not among the runs read (--previous N)" \
 	"$(grep '^  differs' <<<"$actual")"
+actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 9300 --investigation 2>&1)
+check "--investigation: an id of digits other than 0-9 is no job id, no crash and no request for it" "0 1 0 requests: 3" \
+	"$? $(grep -c '^  last_good=' <<<"$actual") $(grep -c 'investigate jobs\|differs\|error' <<<"$actual") $(tail -n 1 <<<"$actual")"
 check "--investigation: no such line where both agree" 0 "$(history 5000 --investigation | grep -c 'differs from')"
 rm -rf "$tmp"
 # Long values in the settings diff, such as the incidents of an aggregate test: whole with -v.

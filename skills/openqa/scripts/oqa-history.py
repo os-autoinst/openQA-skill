@@ -598,6 +598,12 @@ def link_id(value):
     return _oqa.quoted(value) if value is not None else "-"
 
 
+def run_id(text):
+    """The job id a server's text names, or None: str.isdigit() also takes digits such as
+    "²", which int() refuses, and "٣", which it reads as 3."""
+    return int(text) if re.fullmatch(r"[0-9]{1,18}", text) else None
+
+
 def disagreement(table, data, job_id, forced):
     """One line when openQA's last good or first bad is not the table's, naming why for the
     runs the table treats otherwise; None when they agree or cannot be compared."""
@@ -605,8 +611,8 @@ def disagreement(table, data, job_id, forced):
     def theirs(value, absent):
         if not isinstance(value, dict):
             return absent
-        text = link_id(value)
-        return int(text) if text.isdigit() else False
+        run = run_id(link_id(value))
+        return False if run is None else run
 
     if not table:
         return None
@@ -1051,21 +1057,14 @@ def investigation(
         return
     first_bad = link_id(data.get("first_bad"))
     good_id = link_id(data.get("last_good"))
+    good, bad = run_id(good_id), run_id(first_bad)
     # openQA counts a forced softfail as good, so its diffs start at a run that failed.
-    mark = (
-        " (forced ok by a comment)"
-        if good_id.isdigit() and int(good_id) in forced
-        else ""
-    )
+    mark = " (forced ok by a comment)" if good in forced else ""
     print(f"  last_good={good_id}{mark} first_bad={first_bad}")
     differs = disagreement(table, data, job_id, forced)
     if differs:
         print(differs)
-    clones = (
-        investigate_jobs(client, int(first_bad), before)
-        if first_bad.isdigit()
-        else None
-    )
+    clones = investigate_jobs(client, bad, before) if bad is not None else None
     if clones:
         print(f"  first_bad {first_bad} investigate jobs: {', '.join(clones)}")
     if not isinstance(data.get("last_good"), dict):
@@ -1075,12 +1074,12 @@ def investigation(
         )
         failure_logs(client, job_id, data, limit, verbose)
         return
-    good_files = uploads(client, int(good_id)) if good_id.isdigit() else None
+    good_files = uploads(client, good) if good is not None else None
     # The log cleanup deletes autoinst-log.txt with the other logs and uploads.
     gone = good_files is not None and "autoinst-log.txt" not in good_files
     if gone:
         print("  last_good logs: gone (pruned, its log files answer 404)")
-    if first_bad.isdigit() and first_bad != str(job_id):
+    if bad is not None and bad != job_id:
         print(
             f"  hint: the diffs end at THIS job; run on first_bad {first_bad} for the tight window"
         )
@@ -1123,9 +1122,9 @@ def investigation(
             ),
             end="",
         )
-    if good_id.isdigit():
-        print(versions_line(client, job_id, int(good_id), good_files))
-        old = "?" if gone else isotovideo_version(client, int(good_id))
+    if good is not None:
+        print(versions_line(client, job_id, good, good_files))
+        old = "?" if gone else isotovideo_version(client, good)
         new = isotovideo_version(client, job_id)
         change = f"{new} (unchanged)" if old == new != "?" else f"{old} -> {new}"
         print(f"  os-autoinst (last_good {good_id} -> this job): {change}")

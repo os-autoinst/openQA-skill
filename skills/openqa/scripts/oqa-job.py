@@ -302,13 +302,15 @@ def head_and_tail(lines, total, max_lines, max_bytes, whole=None):
     head = _oqa.sanitize("\n".join(capped), max_line=300, max_bytes=budget)
     if whole is not None and len(lines) < total:
         # Read back from the end, the first line is cut short, unless it is the only one.
-        window = whole.strip("\n")[-TEXT_SCAN:].split("\n")
+        raw = whole.strip("\n")
+        window = raw[-TEXT_SCAN:].split("\n")
         last = (window[1:] or window)[TEXT_HEAD - max_lines :]
-        before = lines[: total - len(last)] + window[: len(window) - len(last)]
+        # All of the text before them: a key's END may lie between the two windows.
+        before = raw[: len(raw) - len("\n".join(last))]
     else:
         last = lines[len(first) :][TEXT_HEAD - max_lines :]
-        before = lines[: len(lines) - len(last)]
-    opened = open_key("\n".join(before))
+        before = "\n".join(lines[: len(lines) - len(last)])
+    opened = open_key(before)
     marked, inside = blank_keys(last, bool(opened))
     if opened:
         _secrets.redact(opened)  # counted on stderr, as blank_keys counts a key

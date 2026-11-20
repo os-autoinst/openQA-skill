@@ -28,16 +28,10 @@ _EXCERPT_MARGIN = 2048
 
 # Specific introducers must precede the generic two-byte escape, which would
 # otherwise consume only "ESC [" and leave the parameters behind as text.
-# String sequences need their terminator, so a stray introducer hides nothing.
+# String sequences need their terminator, so a stray introducer hides nothing. A string
+# also ends at the next string introducer: a run of introducers without a terminator then
+# costs linear time, not quadratic.
 _ESCAPES = re.compile(
-    r"(?:\x1b\[|\x9b)[0-?]*[ -/]*[@-~]"
-    r"|(?:\x1b\]|\x9d)[^\x07\x1b\x9c\n]*(?:\x07|\x1b\\|\x9c)"
-    r"|(?:\x1b[PX^_]|[\x90\x98\x9e\x9f])[^\x1b\x9c\n]*(?:\x1b\\|\x9c)"
-    r"|\x1b[ -/]*[0-~]"
-)
-# The same for bare(), but a string also ends at the next string introducer: a MiB that is
-# a run of introducers without a terminator then costs linear time, not quadratic.
-_BARE_ESCAPES = re.compile(
     r"(?:\x1b\[|\x9b)[0-?]*[ -/]*[@-~]"
     r"|(?:\x1b\]|\x9d)[^\x07\x1b\x9c\x90\x98\x9d\x9e\x9f\n]*(?:\x07|\x1b\\|\x9c)"
     r"|(?:\x1b[PX^_]|[\x90\x98\x9e\x9f])[^\x1b\x9c\x90\x98\x9d\x9e\x9f\n]*(?:\x1b\\|\x9c)"
@@ -187,10 +181,9 @@ def sanitize(text, *, max_line=DEFAULT_MAX_LINE, max_bytes=DEFAULT_MAX_BYTES):
 def bare(text):
     """The ASCII of text that sanitize() keeps, cheaply, to look for a marker in it: escape
     sequences (colour codes, a terminal title), controls and every non-ASCII character go.
-    A marker that sanitize() makes whole is whole here too, unless a string sequence that
-    holds another string introducer splits it.
+    A marker that sanitize() makes whole is whole here too.
     """
-    text = _BARE_ESCAPES.sub("", text.replace("\r\n", "\n").replace("\r", "\n"))
+    text = _ESCAPES.sub("", text.replace("\r\n", "\n").replace("\r", "\n"))
     return _NON_ASCII.sub("", _ASCII_CONTROLS.sub("", text))
 
 

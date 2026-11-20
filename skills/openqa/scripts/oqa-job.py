@@ -89,7 +89,7 @@ from urllib.parse import quote
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 import _oqa
 import _secrets
-from _sanitize import ArgumentParser
+from _sanitize import ArgumentParser, bare
 
 # The scenario line carries DISTRI..MACHINE and BUILD, the dependency lines the
 # START_AFTER_TEST / PARALLEL_WITH relations.
@@ -300,11 +300,13 @@ def head_and_tail(lines, total, max_lines, max_bytes):
     ]
     head = _oqa.sanitize("\n".join(capped), max_line=300, max_bytes=budget)
     last = lines[TEXT_HEAD:][TEXT_HEAD - max_lines :]
-    before = lines[: len(lines) - len(last)]
-    named = next((line for line in reversed(before) if "PRIVATE KEY" in line), "")
-    marked, inside = blank_keys(last, opens_key(named))
-    if inside and marked:
-        marked[-1] = KEY_MARK
+    opened = open_key("\n".join(lines[: len(lines) - len(last)]))
+    marked, inside = blank_keys(last, bool(opened))
+    if opened:
+        _secrets.redact(opened)  # counted on stderr, as blank_keys counts a key
+    if marked and (inside or opened):
+        # Where no BEGIN line shows, the marker says what the blank lines are.
+        marked[-1 if inside else 0] = KEY_MARK
     tail, size = [], 0
     for line in reversed(marked):
         line = step_text({"text_data": line})
@@ -317,27 +319,39 @@ def head_and_tail(lines, total, max_lines, max_bytes):
     return "\n".join([head, f"[... {cut} lines not shown]", *tail])
 
 
-def opens_key(line):
-    """Whether a line naming a private key leaves one open: a BEGIN marker, no END after it.
-    Such a line is redacted here, so that the count on stderr still names the key."""
-    start = line.rfind("-----BEGIN")
-    if start < 0 or "-----END" in line[start:]:
-        return False
-    _secrets.redact(line[start : start + 200])
-    return True
+def open_key(text):
+    """The BEGIN marker of a private key left open at the end of text, a BEGIN with no END
+    after it, or "". Markers are looked for in text as sanitize() keeps it, so colour codes
+    inside one, as grep --color writes them, cannot hide it."""
+    text = bare(text)
+    begin = None
+    for begin in _secrets.PEM_BEGIN.finditer(text):
+        pass
+    if begin is None or _secrets.PEM_END.search(text, begin.end()):
+        return ""
+    return begin.group()
 
 
 def blank_keys(lines, inside=False):
     """(lines, whether a key is still open after them): a private key's BEGIN line made the
-    redaction marker and its body blanked, as _secrets does it for a whole text. Lines that
-    are sanitised one by one would otherwise show a body that runs over several of them."""
+    redaction marker and the rest of it to its END line blanked, as _secrets does it for a
+    whole text, with markers found as open_key finds them. Lines that are sanitised one by
+    one would otherwise show a body that runs over several of them."""
     marked = []
     for line in lines:
-        if "PRIVATE KEY" in line:
-            inside = opens_key(line)
-            marked.append(KEY_MARK if inside else line)
-        else:
-            marked.append("" if inside else line)
+        text = bare(line)
+        if inside:
+            inside = not _secrets.PEM_END.search(text)
+            marked.append("")
+            continue
+        begins = list(_secrets.PEM_BEGIN.finditer(text))
+        if not begins:
+            marked.append(line)
+            continue
+        # Redacted here, so that the count on stderr still names the key.
+        _secrets.redact(begins[-1].group())
+        marked.append(KEY_MARK)
+        inside = not _secrets.PEM_END.search(text, begins[-1].end())
     return marked, inside
 
 

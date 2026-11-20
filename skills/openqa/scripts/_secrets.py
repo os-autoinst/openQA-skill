@@ -430,8 +430,8 @@ _KEYED_XML = re.compile(
 
 # A marker in the SOURCE text is an attacker dressing a secret as already-redacted.
 _IS_MARK = re.compile(r"\[REDACTED:[a-z-]+\]")
-_PEM_BEGIN = re.compile(r"-----BEGIN[ A-Z0-9_-]{0,64}PRIVATE KEY(?: BLOCK)?-----")
-_PEM_END = re.compile(r"-----END[ A-Z0-9_-]{0,64}PRIVATE KEY(?: BLOCK)?-----")
+PEM_BEGIN = re.compile(r"-----BEGIN[ A-Z0-9_-]{0,64}PRIVATE KEY(?: BLOCK)?-----")
+PEM_END = re.compile(r"-----END[ A-Z0-9_-]{0,64}PRIVATE KEY(?: BLOCK)?-----")
 
 
 def _keyed_sub(match, found):
@@ -486,16 +486,16 @@ def redact(text):
     out, in_pem = [], False
     for line in text.split("\n"):
         if in_pem:
-            if _PEM_END.search(line):
+            if PEM_END.search(line):
                 in_pem = False
             out.append("")  # keep the line count: callers number lines
             continue
-        opened = [begin.end() for begin in _PEM_BEGIN.finditer(line)]
+        opened = [begin.end() for begin in PEM_BEGIN.finditer(line)]
         if opened:
             # A key body is many lines of base64 that no line rule would match; swallow
             # to the END marker rather than emitting it one harmless-looking line at a time.
             # A key JSON-escaped onto one line ends on it.
-            in_pem = not _PEM_END.search(line, opened[-1])
+            in_pem = not PEM_END.search(line, opened[-1])
             found["private-key"] += 1
             out.append(MARK.format("private-key"))
             continue

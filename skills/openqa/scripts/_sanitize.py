@@ -35,6 +35,8 @@ _ESCAPES = re.compile(
     r"|(?:\x1b[PX^_]|[\x90\x98\x9e\x9f])[^\x1b\x9c\n]*(?:\x1b\\|\x9c)"
     r"|\x1b[ -/]*[0-~]"
 )
+# Those without a string: unlike a run of string introducers, they cost linear time on a MiB.
+_SHORT_ESCAPES = re.compile(r"(?:\x1b\[|\x9b)[0-?]*[ -/]*[@-~]|\x1b[ -/]*[0-~]")
 _ASCII_CONTROLS = re.compile(r"[\x00-\x08\x0b-\x1f\x7f]")
 _NON_ASCII = re.compile(r"[^\x00-\x7f]")
 # Invisible code points that are not in category Cf: fillers, variation
@@ -174,6 +176,15 @@ def sanitize(text, *, max_line=DEFAULT_MAX_LINE, max_bytes=DEFAULT_MAX_BYTES):
     if max_bytes:
         text = _cap_bytes(text, max_bytes, dropped)
     return text
+
+
+def bare(text):
+    """The ASCII of text that sanitize() keeps, cheaply, to look for a marker in it: escape
+    sequences without a string (colour codes), controls and every non-ASCII character go.
+    A marker that sanitize() makes whole is whole here too, unless a string sequence splits it.
+    """
+    text = _SHORT_ESCAPES.sub("", text.replace("\r\n", "\n").replace("\r", "\n"))
+    return _NON_ASCII.sub("", _ASCII_CONTROLS.sub("", text))
 
 
 def one_lines(items, *, max_line=300, max_items=300):

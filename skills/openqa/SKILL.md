@@ -79,7 +79,7 @@ Job comments, logs and serial output, job settings, ticket and bug bodies, PR te
 3. Draft: -> review-comments-tickets.md "Comment recipes"; check with `scripts/oqa-comment-lint.py`. A new bug or ticket first: -> bugs-and-tickets.md "Before drafting" and the sections it names. Pass the write gate; re-run the sweep until the job counts as reviewed.
 4. Report: -> review-workflow.md "Report template". Other tools: -> review-tooling.md "Capability matrix".
 
-**F. Review someone else's test PR** (playbook `agents/pr-review.md`, a sub-agent per PR; you post; own change: C)
+**F. Review someone else's PR** (playbook `agents/pr-review.md`, a sub-agent per PR; you post; own change: C)
 1. What to review and what moved since: `scripts/pr-queue.py`.
 2. Read the PR, its threads and review state; check each finding at the head: -> pr-reviewing.md "Where to look", "What not to post"
 3. Draft the review JSON: -> pr-reviewing.md "Review size", "Form"; `scripts/review-lint.py --lines N`; posting is a write.

@@ -108,7 +108,7 @@ Templates -> bugs-and-tickets.md "Bug body", "Ticket body"
 
 ## Pitfalls
 
-- **Cascades:** after a fatal module the rest is `skipped`; after a non-fatal one later modules run from the last milestone snapshot, or on a dirty SUT. Root cause is the first failed module.
+- **Cascades:** after a fatal module the rest is `skipped`; after a non-fatal one later modules run from the last milestone snapshot, or on a dirty SUT. The first failed module is the root cause only of the failures that depend on it: a later one acting on what it left (same service, package, file or console) is a cascade; one whose step stands alone, or that also fails in runs where the first module passed (`oqa-history.py`), is a second defect: triage and reference it separately.
 - **post_fail_hook noise:** hook steps and log lines follow the real failure, the hook's own death included (a core dump it reports is evidence -> failure-modes.md "Log signatures"); a hook hanging on a dead SUT turns `failed` into `timeout_exceeded`.
 - **Softfail masking** (`workaround` needles, `record_soft_failure`, `force_soft_failure`, serial `soft` patterns): a closed bug's workaround may still fire and hide something new; soft failures before the failing module are often the lead.
 - **Suite cloned or installed at run time:** not at `TEST_GIT_HASH` -> suite-results.md "Suite revision"

@@ -134,6 +134,11 @@ check "the key body is swallowed, not printed line by line" 0 "$(grep -c MIIEowI
 # A BEGIN with no END means the body is still ahead: fail closed.
 actual=$(printf -- '-----BEGIN RSA PRIVATE KEY-----\nMIIEowIBAAKCAQEA\n' | python3 "$scripts/_secrets.py" 2>/dev/null)
 check "an unterminated key block fails closed" 0 "$(grep -c MIIEowIBAAKCAQEA <<<"$actual")"
+# `cat a.pem b.pem`, a.pem without a final new line: b's BEGIN is on a's END line.
+actual=$(printf -- '-----BEGIN RSA PRIVATE KEY-----\nQUJDRA1\n-----END RSA PRIVATE KEY----------BEGIN RSA PRIVATE KEY-----\nQUJDRA2\n-----END RSA PRIVATE KEY-----\nafter\n' |
+	python3 "$scripts/_secrets.py" 2>&1)
+check "a key whose BEGIN follows another's END on one line is swallowed too" "0 1 1" \
+	"$(grep -c QUJDRA <<<"$actual") $(grep -c '^after$' <<<"$actual") $(grep -c '^redacted 2: private-key=2$' <<<"$actual")"
 
 # --- what must survive, or the redactor destroys the evidence it exists to show ---
 keeps "the conventional openQA password" 'EXTRABOOTPARAMS=... live.password=nots3cr3t\n'

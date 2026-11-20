@@ -348,11 +348,12 @@ def blank_keys(lines, inside=False):
     marked = []
     for line in lines:
         text = bare(line)
-        if inside:
+        # A BEGIN first, as _secrets.redact looks: it may follow an END on one line.
+        begins = list(_secrets.PEM_BEGIN.finditer(text))
+        if inside and not begins:
             inside = not _secrets.PEM_END.search(text)
             marked.append("")
             continue
-        begins = list(_secrets.PEM_BEGIN.finditer(text))
         if not begins:
             marked.append(line)
             continue

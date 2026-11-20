@@ -38,6 +38,7 @@ while (script_run($c)) { ..; sleep 5 } -> script_retry($c, retry => 5, delay => 
 - **No `sleep N` or `wait_still_screen` as synchronisation**; wait on a needle or serial output (#26388 #26403). -> references/module-templates.md "Anti-patterns"
 - **Agree design and interface in the ticket before large work; map each acceptance criterion to a scenario and run** - else 26-67 day reviews (#25471 #25353).
 - **Globally scheduled modules and `lib/utils.pm`** need reviewers outside your area, a Tumbleweed run, a graphical-desktop run, unchanged defaults (#26486).
+- **A changed shared lib helper** (any `lib/` sub that other modules call): list the callers (`git grep -nw <sub>`) and what each gets; new behaviour is opt-in through an argument; a changed default or return shape updates every caller and its `t/` mocks in the same PR, with one run per caller family; test the default and the opted-in path.
 - **A check that held before the action, or watches a proxy, cannot fail**: a reconnect check already true before the reconnect; an open socket, a live process or a log line instead of the property. Record a baseline before the action and assert the change after it; compare with the exact expected value, not "not success" (`code != 200` passes a 404 too).
 - **A `die`, timeout or skip message names what is missing or did not match**: `die "still missing: @missing"`, the pattern awaited, why a skip is safe; long diagnostics go into `record_info` just before the `die`, which stays one line.
 
@@ -98,7 +99,7 @@ A failing-job link replaces the ticket on small fixes (#26720).
 | Kernel module | `tests/kernel/<x>.pm` with POD after `1;` + `schedule/kernel/*.yaml` |
 | sles4sap module | module + `lib/sles4sap/<area>.pm` + `t/*.t` + `schedule/sles4sap/`; HA: the line in every node's YAML |
 | JeOS check | `tests/jeos/<x>.pm` + a line in both `schedule/jeos/sle/jeos-main.yaml` and `minimalvm-main.yaml` |
-| Lib helper | `lib/<x>.pm` (POD, exports) + `t/NN_<x>.t`; new signature -> all callers and their mocks |
+| Lib helper | `lib/<x>.pm` (POD, exports) + `t/NN_<x>.t`; new signature -> all callers and their mocks -> "High-impact rare rules" |
 | Schedule / test data only | YAML + arch siblings; activated by the linked job-group change -> references/scheduling.md "Job groups" |
 | Removal, rename | module + each `loadtest` in `lib/main_*.pm`, `products/*/main.pm` + schedules + docs + production job settings (outside the repo) |
 
@@ -113,7 +114,7 @@ Most-flagged first; reasons and examples -> "Ranked requests".
 1. Searched `lib/` for a helper before writing shell, loops or regexes; nothing repeated across modules, even below CI's 13 lines -> references/contributing-gates.md "Duplication and unused modules"
 2. Runs cover every product, version, arch, flavour, lib consumer and new branch; failures explained; rerun after the last functional push; opened and checked. -> "Verification runs"
 3. Nothing unused or commented out; nothing removed that is still called; `lib/main_*.pm` and `t/*.t` diffs read line by line for accidental deletions (#26556).
-4. One topic; names say what things do; comments are one-line why; workarounds carry their bug id; `lib/` change has true POD and a `t/` test.
+4. One topic; names say what things do; comments are one-line why; workarounds carry their bug id; `lib/` change has true POD, a `t/` test and its callers checked.
 5. Every assertion can fail, none already holds before its action; failure messages name what is missing; loops bounded; cleanup idempotent, on success and failure. -> "High-impact rare rules"
 6. Scheduled in every sibling; job-group change linked; installs work on transactional systems.
 7. Title, commit body and description match the final diff; `PLACEHOLDER` gone.

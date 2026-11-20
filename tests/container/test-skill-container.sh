@@ -2294,16 +2294,20 @@ out="$(sc uninstall ghost 2>&1)"
 rc=$?
 [ "$rc" = 0 ] && grep -qx "stop $N-agent@ghost.service" "$FIX/systemctl-calls" &&
 	pass "uninstall stops an instance that was never installed" || fail "uninstall of a stray unit: rc=$rc $out"
-# What goes into the drop-in is one value a line: systemd would read more.
+# What goes into the drop-in is one value a line: systemd would read more, and
+# strips the blanks around WorkingDir= but not those inside Volume=.
+mkdir "$work/ws/blank "
 for bad in "--image=img:1"$'\n'"PodmanArgs=--privileged" "--image=img:1"$'\r'"PodmanArgs=--privileged" \
-	"--as=$work/ws%t" "--as=$work/ws\\" "--as=$work/ws\$HOME" "--as=$work/ws\"x" "--as=$work/ws'x" "--as=$work/ws"$'\001'; do
+	"--as=$work/ws%t" "--as=$work/ws\\" "--as=$work/ws\$HOME" "--as=$work/ws\"x" "--as=$work/ws'x" "--as=$work/ws"$'\001' \
+	"--as=$work/ws " "--as=$work/ws"$'\t' "--image= img:1" "--image=img:1 " "--workdir=$work/ws/blank "; do
 	out="$(sc install inj --workdir "$work/ws" "${bad%%=*}" "${bad#*=}" 2>&1)"
 	rc=$?
-	[ "$rc" != 0 ] && grep -qF 'a control character, a %, a $, a backslash or a quote' <<<"$out" &&
+	[ "$rc" != 0 ] && grep -qF 'a control character, a %, a $, a backslash or a quote, or with a blank at its start or end' <<<"$out" &&
 		[ ! -e "$pubdir/$N-agent@inj.container.d" ] &&
 		pass "install refuses ${bad%%=*} with $(printf %q "${bad#*=}" | tail -c 12)" ||
 		fail "install ${bad%%=*} injection: rc=$rc $out"
 done
+rmdir "$work/ws/blank "
 # The units come from beside the fixed copy: those beside the launcher that
 # runs may lie where an agent writes, its own or another instance's.
 mkdir -p "$work/elsewhere/tool"

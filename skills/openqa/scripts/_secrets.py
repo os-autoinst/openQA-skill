@@ -335,15 +335,16 @@ RULES = (
         r"\1" + MARK.format("job-token"),
     ),
     # The same token as the first path segment of a command-server URL (autoinst_url), and
-    # in the lines where os-autoinst starts and stops that server.
+    # in the lines where os-autoinst starts and stops that server. openQA's random_string
+    # draws it from letters, digits and "_" (OpenQA::Utils).
     (
         "job-token",
         re.compile(
-            r"((?:https?|wss?)://[^\s/:@'\"]{1,253}:\d{2,5}/(?=[A-Za-z0-9]{16,64}/"
+            r"((?:https?|wss?)://[^\s/:@'\"]{1,253}:\d{2,5}/(?=[A-Za-z0-9_-]{16,64}/"
             r"(?:uploadlog|upload_log|upload_asset|data|files|assets|current_script|vars"
             r"|isotovideo|ws|broadcast)(?![\w-]))"
             r"|(?:daemon reachable under|command server:) https?://[^\s/]{1,253}:\d{2,5}/)"
-            r"[A-Za-z0-9]{16,64}(?![A-Za-z0-9])"
+            r"[A-Za-z0-9_-]{16,64}(?![A-Za-z0-9_-])"
         ),
         r"\1" + MARK.format("job-token"),
     ),

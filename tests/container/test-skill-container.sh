@@ -716,6 +716,16 @@ out="$("${scenv[@]}" HOME="$work/home" bash "$work/openqa-container" idle "$long
 rc=$?
 [ "$rc" != 0 ] && [[ $out == "openqa-container: $long is not installed: 'openqa-container install $long'"* ]] &&
 	pass "the messages name the command the launcher was run as" || fail "the launcher's own name: rc=$rc $out"
+# A name install would write into the drop-in header, so not one that holds a new line or a blank.
+for odd in "oqa"$'\n'"PodmanArgs=--privileged" "openqa container"; do
+	ln -s "$SC" "$work/$odd"
+	out="$("${scenv[@]}" HOME="$work/home" bash "$work/$odd" idle "$long" 2>&1)"
+	rc=$?
+	rm "$work/$odd"
+	[ "$rc" != 0 ] && [[ $out == "skill-container: $long is not installed: 'skill-container install $long'"* ]] &&
+		pass "the launcher named $(printf %q "$odd") names itself skill-container" ||
+		fail "the launcher named $(printf %q "$odd"): rc=$rc $out"
+done
 for bad in "${long}a" -x - '' a.b; do
 	out="$(sc idle "$bad" 2>&1)"
 	rc=$?

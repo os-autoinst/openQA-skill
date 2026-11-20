@@ -7,8 +7,10 @@ set -euo pipefail
 export LC_ALL=C
 name=${SKILL_CONTAINER_NAME:-openqa}
 # The name it was run as: installed as openqa-container, its messages name that
-# command, not skill-container, which may be another skill's launcher.
+# command, not skill-container, which may be another skill's launcher. install
+# writes it into a unit file, where a new line would start a setting of its own.
 prog=${0##*/}
+[[ $prog =~ ^[A-Za-z0-9._-]+$ ]] || prog=skill-container
 conf=${XDG_CONFIG_HOME:-$HOME/.config}
 userconf=$conf/skill-container/$name
 opencode=${OPENCODE:-opencode}

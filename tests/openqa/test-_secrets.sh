@@ -620,7 +620,7 @@ for rule, literal, line in (
     _, found = _secrets.redact(line)
     if not hits or any(trigger not in literal for trigger in hits) or found != {rule: 1}:
         print(literal, hits, dict(found))
-")
+" 2>&1)
 check "every command and key word reaches its rule through its own trigger" "" "$actual"
 
 # Each input targets one rule's repetition; the first eight cost seconds before they were bounded.
@@ -630,7 +630,7 @@ import _secrets
 rules = {name: pattern for name, pattern, _ in _secrets.RULES}
 for name, pattern, text in (
     ('jwt', rules['jwt'], '-ey' * 34000),
-    ('pem', _secrets._PEM_BEGIN, '-----BEGIN' * 10000),
+    ('pem', _secrets.PEM_BEGIN, '-----BEGIN' * 10000),
     ('url-userinfo', rules['url-userinfo'], 'x://h:' + 'a@' * 500000),
     ('url-userinfo', rules['url-userinfo'], 'x://h:' * 100000),
     ('password-flag', rules['password-flag'], 'pass' + ':a' * 131072),
@@ -649,7 +649,7 @@ for name, pattern, text in (
     pattern.subn('', text)
     if time.monotonic() - start > 1:
         print(name)
-")
+" 2>&1)
 check "adversarial input stays linear in the rule it targets" "" "$actual"
 
 # A key block must not change how many lines the caller sees.

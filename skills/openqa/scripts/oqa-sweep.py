@@ -28,9 +28,10 @@ still to list need, was reached. Jobs that never ran because a parent failed
 --test REGEX keeps the jobs whose test name it matches (re.search, case-sensitive,
 the name without the @machine the overview may add), so one scenario's spread over
 flavors and arches needs no full listing; the header counters stay those of the
-whole build. --module NAME keeps the jobs in which that module failed, from the failed
-modules the listing carries, so it costs no request. --version V keeps the builds of that
-version, a group holding several (without --build the newest build of V).
+whole build. --module NAME keeps the jobs in which that module failed, also as NAME#<n>
+(loaded again), from the failed modules the listing carries, so it costs no request.
+--version V keeps the builds of that version, a group holding several (without --build
+the newest build of V).
 
 --before TIME (ISO 8601, UTC unless it has an offset; needs --build) shows the
 build as it stood then, for a review of an older failure: per scenario the newest
@@ -302,7 +303,13 @@ def _of_module(jobs, module):
     job per scenario among those it matches, an older one when a newer did not fail there."""
     if module is None:
         return jobs
-    return [job for job in jobs if module in job["modules"]]
+    return [job for job in jobs if _failed_in(job, module)]
+
+
+def _failed_in(job, module):
+    """Whether module is among the job's failed modules, also as os-autoinst names a module
+    loaded again: <name>#<n>."""
+    return any(module in (name, re.sub(r"#\d+$", "", name)) for name in job["modules"])
 
 
 def _of_test(jobs, pattern, name=lambda job: job["test"]):
@@ -437,7 +444,7 @@ def jobs_before(client, group, entry, args, results, reserve):
             newest[scenario].update(result="running", modules=[], refs=[], comments=0)
     if args.module:
         newest = {
-            key: job for key, job in newest.items() if args.module in job["modules"]
+            key: job for key, job in newest.items() if _failed_in(job, args.module)
         }
     reads = client.requests
     # A failed module in an ok job may be one a later label:force_result overruled.
@@ -1203,6 +1210,8 @@ def main():
     for flag, value in (("--test", args.test), ("--module", args.module)):
         if value is not None and (not args.group or args.uses_schedule is not None):
             parser.error(f"{flag} goes with --group ID [--build B] [--passed] only")
+    if args.module == "":
+        parser.error("--module needs a module name")
     if args.version is not None and (not args.group or args.uses_schedule is not None):
         parser.error("--version goes with --group ID [--build B] [--passed] only")
     if args.passed and (args.groups or args.todo or args.include_softfailed):

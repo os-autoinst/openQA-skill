@@ -68,7 +68,7 @@ add_suseconnect_product("PackageHub", undef, undef, undef, 300, 1) if is_sle;   
 - `save_and_upload_log($cmd, $file, {timeout => N, screenshot => 1, noupload => 1, logname => 'x'})` runs `$cmd | tee $file`, ignores the exit code, uploads with `failok`. **Options are a hashref**; the flat list the POD shows is silently lost.
 - `tar_and_upload_log($sources, $dest, {timeout => N, screenshot => 1, noupload => 1, gzip => 1})` writes **bzip2** (POD says xz) unless a `gzip` key is present, even `gzip => 0`; name the archive to match.
 - `save_ulog($string, $name)` (`Utils::Logging`) writes worker-side without SUT network; `serial_terminal::upload_file($src, $dst)` moves a file over the serial line into `ulogs/`.
-- **Only non-fatal calls inside `post_fail_hook`** (`script_run`, `upload_logs(..., failok => 1)`): a dying `assert_script_run` aborts the remaining collection.
+- **Only non-fatal calls inside `post_fail_hook`** (`script_run`, `upload_logs(..., failok => 1)`): a dying `assert_script_run` aborts the remaining collection. They are non-fatal for an exit code only: each, the helpers above included, dies when its marker does not come back in time.
 
 ## Files on the SUT
 

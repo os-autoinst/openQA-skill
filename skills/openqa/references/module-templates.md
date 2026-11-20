@@ -105,7 +105,7 @@ sub post_fail_hook {
 ```
 
 - **One idempotent `cleanup` called from both hooks**, each chained to the same-named `SUPER`: without it the console reset (success) or the log export (failure) is lost.
-- **Nothing fatal in `cleanup` or `post_fail_hook`** (`script_run`, `ignore_failure => 1`, `failok => 1`): a second death hides the first.
+- **Nothing fatal in `cleanup` or `post_fail_hook`** (`script_run`, `ignore_failure => 1`, `failok => 1`; each still dies on a timeout): a second death hides the first.
 - **`post_fail_hook`: SUPER first, cleanup last**, so logs are exported before cleanup removes them; upload only test-specific files -> references/distri-system.md "Log upload".
 - **A console switch in `post_fail_hook` can die** on a hung SUT: leave it to `SUPER`, which falls back to `log-console`, or wrap it in `eval` as `consoletest` does. A cleanup module after a fatal failure runs only with `always_run` -> references/testapi.md "test_flags"
 - **`pkill -f` matches argv; a typed command is not**: any wrapper holding it in argv (`sudo`, `timeout` in `*_retry`, `ssh`, `sh -c`) dies too.

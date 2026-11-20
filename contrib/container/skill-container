@@ -592,10 +592,11 @@ cmd_install() {
 	fi
 	# The drop-in is a unit file: systemd expands a % and a $, reads a new line
 	# or a carriage return as a setting of its own, joins the next line after a
-	# backslash and ends a quoted value at a single or double quote.
+	# backslash, ends a quoted value at a single or double quote and strips the
+	# blanks around a value, those of WorkingDir= but not those inside Volume=.
 	for v in "$workdir" "$inside" "$image" "$userconf"; do
 		case $v in
-		*[[:cntrl:]]* | *%* | *\$* | *\\* | *\"* | *\'*) die "install refuses a path or an image name with a control character, a %, a \$, a backslash or a quote" ;;
+		*[[:cntrl:]]* | *%* | *\$* | *\\* | *\"* | *\'* | [[:blank:]]* | *[[:blank:]]) die "install refuses a path or an image name with a control character, a %, a \$, a backslash or a quote, or with a blank at its start or end" ;;
 		esac
 	done
 	for s in openqa github bugzilla model ssh; do

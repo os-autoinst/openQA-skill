@@ -170,20 +170,20 @@ plain() {
 # $1 is the config to read, the rest are its sections to copy. -I: no module
 # comes from PYTHONPATH or the user's site directory.
 openqa_login() {
-	python3 -I - "$@" <<'EOF'
+	python3 -I - "$prog" "$@" <<'EOF'
 import re
 import sys
-path, hosts = sys.argv[1], sys.argv[2:]
+prog, path, hosts = sys.argv[1], sys.argv[2], sys.argv[3:]
 try:
     with open(path, encoding="utf-8", newline="") as f:
         text = f.read()
 except Exception as e:
     # Not the message: it may quote a line of the config.
-    sys.exit(f"skill-container: cannot read the openQA client config ({type(e).__name__})")
+    sys.exit(f"{prog}: cannot read the openQA client config ({type(e).__name__})")
 # openqa-cli has a parser of its own: a line the two could take differently
 # would copy a key openqa-cli does not use for that host, so it is refused.
 # That parser also ends a line at a lone CR and takes other controls for blanks.
-refused = "skill-container: the openQA client config has a line that is not a plain section, key = value or comment, or that repeats one, or a character that is not printable ASCII"
+refused = f"{prog}: the openQA client config has a line that is not a plain section, key = value or comment, or that repeats one, or a character that is not printable ASCII"
 if re.search(r"[^\t\n\x20-\x7e]", text):
     sys.exit(refused)
 sections, name = {}, None
@@ -202,10 +202,10 @@ for line in text.split("\n"):
         sys.exit(refused)
 for host in dict.fromkeys(hosts):
     if host not in sections:
-        sys.exit(f"skill-container: the openQA client config has no section {host}")
+        sys.exit(f"{prog}: the openQA client config has no section {host}")
     for option in ("key", "secret"):
         if not re.fullmatch(r"[0-9A-Za-z]+", sections[host].get(option, "")):
-            sys.exit(f"skill-container: section {host} has no usable {option}")
+            sys.exit(f"{prog}: section {host} has no usable {option}")
 for host in dict.fromkeys(hosts):
     print(f"[{host}]\nkey = {sections[host]['key']}\nsecret = {sections[host]['secret']}\n")
 EOF
@@ -590,10 +590,10 @@ cmd_install() {
 	fi
 	# The drop-in is a unit file: systemd expands a % and a $, reads a new line
 	# or a carriage return as a setting of its own, joins the next line after a
-	# backslash and ends a quoted value at a double quote.
+	# backslash and ends a quoted value at a single or double quote.
 	for v in "$workdir" "$inside" "$image" "$userconf"; do
 		case $v in
-		*[[:cntrl:]]* | *%* | *\$* | *\\* | *\"*) die "install refuses a path or an image name with a control character, a %, a \$, a backslash or a double quote" ;;
+		*[[:cntrl:]]* | *%* | *\$* | *\\* | *\"* | *\'*) die "install refuses a path or an image name with a control character, a %, a \$, a backslash or a quote" ;;
 		esac
 	done
 	for s in openqa github bugzilla model ssh; do
@@ -667,7 +667,7 @@ cmd_install() {
 	cp "$srcdir/$name-relay@.service" "$srcdir/$name-update@.service" "$srcdir/$name-update@.timer" \
 		"$svcdir/"
 	{
-		echo "# Written by skill-container install $inst. Do not edit: install writes it again."
+		echo "# Written by $prog install $inst. Do not edit: install writes it again."
 		echo "[Container]"
 		echo "Volume=$workdir:$inside:Z"
 		echo "WorkingDir=$inside"

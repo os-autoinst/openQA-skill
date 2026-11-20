@@ -111,9 +111,17 @@ print(bare("-----BEGIN \x1b[01;31m\x1b[KPRIVATE\x1b[m\x1b[K​ KEY-----\r\x9b1mx
 ')
 check "bare: colour codes, controls and non-ASCII gone, a split marker whole" "-----BEGIN PRIVATE KEY-----|x" \
 	"$(paste -sd '|' <<<"$actual")"
+actual=$(cd "$scripts" && python3 -c '
+from _sanitize import bare
+for text in ("PRIV\x1b]0;title\x07ATE", "PRIV\x9d0;title\x9cATE", "PRIV\x1bP1;2\x1b\\ATE",
+             "x\x1b]8;;http://example.org/" + "p" * 300 + "\x1b\\y", "\x1b]PRIVATE KEY", "\x9dPRIVATE KEY"):
+    print(bare(text))
+')
+check "bare: a terminated string sequence goes whole, an unterminated one leaves what follows" \
+	"PRIVATE|PRIVATE|PRIVATE|xy|PRIVATE KEY|PRIVATE KEY" "$(paste -sd '|' <<<"$actual")"
 (cd "$scripts" && timeout 20 python3 -c '
 from _sanitize import bare
-for run in ("\x9dA", "\x90A", "\x1b]A", "\x9b0", "\x1b[0"):
+for run in ("\x9dA", "\x90A", "\x1b]A", "\x9b0", "\x1b[0", "\x9dA\x90A"):
     bare(run * 300000)
 ')
 check "bare: a MiB of string introducers without a terminator is read in linear time" 0 $?

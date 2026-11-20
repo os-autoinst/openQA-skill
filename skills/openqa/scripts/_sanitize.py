@@ -35,8 +35,14 @@ _ESCAPES = re.compile(
     r"|(?:\x1b[PX^_]|[\x90\x98\x9e\x9f])[^\x1b\x9c\n]*(?:\x1b\\|\x9c)"
     r"|\x1b[ -/]*[0-~]"
 )
-# Those without a string: unlike a run of string introducers, they cost linear time on a MiB.
-_SHORT_ESCAPES = re.compile(r"(?:\x1b\[|\x9b)[0-?]*[ -/]*[@-~]|\x1b[ -/]*[0-~]")
+# The same for bare(), but a string also ends at the next string introducer: a MiB that is
+# a run of introducers without a terminator then costs linear time, not quadratic.
+_BARE_ESCAPES = re.compile(
+    r"(?:\x1b\[|\x9b)[0-?]*[ -/]*[@-~]"
+    r"|(?:\x1b\]|\x9d)[^\x07\x1b\x9c\x90\x98\x9d\x9e\x9f\n]*(?:\x07|\x1b\\|\x9c)"
+    r"|(?:\x1b[PX^_]|[\x90\x98\x9e\x9f])[^\x1b\x9c\x90\x98\x9d\x9e\x9f\n]*(?:\x1b\\|\x9c)"
+    r"|\x1b[ -/]*[0-~]"
+)
 _ASCII_CONTROLS = re.compile(r"[\x00-\x08\x0b-\x1f\x7f]")
 _NON_ASCII = re.compile(r"[^\x00-\x7f]")
 # Invisible code points that are not in category Cf: fillers, variation
@@ -180,10 +186,11 @@ def sanitize(text, *, max_line=DEFAULT_MAX_LINE, max_bytes=DEFAULT_MAX_BYTES):
 
 def bare(text):
     """The ASCII of text that sanitize() keeps, cheaply, to look for a marker in it: escape
-    sequences without a string (colour codes), controls and every non-ASCII character go.
-    A marker that sanitize() makes whole is whole here too, unless a string sequence splits it.
+    sequences (colour codes, a terminal title), controls and every non-ASCII character go.
+    A marker that sanitize() makes whole is whole here too, unless a string sequence that
+    holds another string introducer splits it.
     """
-    text = _SHORT_ESCAPES.sub("", text.replace("\r\n", "\n").replace("\r", "\n"))
+    text = _BARE_ESCAPES.sub("", text.replace("\r\n", "\n").replace("\r", "\n"))
     return _NON_ASCII.sub("", _ASCII_CONTROLS.sub("", text))
 
 

@@ -451,6 +451,8 @@ PY
 	)"
 sweep --group 7 --module '' >/dev/null 2>&1
 check "--module with an empty name is a usage error" 2 $?
+sweep --group 7 --version '' >/dev/null 2>&1
+check "--version with an empty value is a usage error" 2 $?
 for args in "--groups --module x" "--uses-schedule schedule/x.yaml --group 7 --module x" "--groups --version 1" "--vr-build u/r#1 --version 1"; do
 	# shellcheck disable=SC2086 # the flags are meant to split
 	sweep $args >/dev/null 2>&1

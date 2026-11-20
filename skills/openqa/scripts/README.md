@@ -513,15 +513,15 @@ compare`): the commits openQA found to the files of the failed modules' stack tr
 their failed screen steps, since last good or within a window before this job, newest first and fenced like
 the test log, or openQA's one-line message; no line when the answer has neither.
 
-    job=6273362 host=https://openqa.opensuse.org scenario=opensuse-Tumbleweed-JeOS-for-kvm-and-xen-x86_64-jeos-ltp-syscalls@uefi_virtio-2G
+    job=6303362 host=https://openqa.opensuse.org scenario=opensuse-Tumbleweed-JeOS-for-kvm-and-xen-x86_64-jeos-ltp-syscalls@uefi_virtio-2G
     id       build     started            worker             result      failed_modules  bugrefs     clone
-    6273362  20261014  2026-10-15T15:27Z  openqaworker20:30  failed      mmap22          -           -
-    6272995  20261014  2026-10-15T09:08Z  openqaworker20:3   failed      shutdown_ltp    poo#208620  6273362
-    last_good=6270507 build=20261013 result=softfailed
-    first_bad=6272001 build=20261014 streak=5
+    6303362  20261104  2026-11-05T15:27Z  openqaworker20:30  failed      mmap22          -           -
+    6302995  20261104  2026-11-05T09:08Z  openqaworker20:3   failed      boot_ltp    poo#123456  6303362
+    last_good=6300507 build=20261103 result=softfailed
+    first_bad=6302001 build=20261104 streak=5
     not_ok=5/11 (older runs exist: --previous N)
-    hint: failing since build 20261014: 5 runs in a row over 1 build(s); ...
-      versions (last_good 6270507 -> this job, from install_ltp-rpm-qa.txt): kernel-default-base 7.2.9-1.1.36.10 -> 7.2.10-1.1.36.11; ltp 20261013.6262a5fc-2959.1 -> 20261014.1aae0e4d-2960.1
+    hint: failing since build 20261104: 5 runs in a row over 1 build(s); ...
+      versions (last_good 6300507 -> this job, from install_ltp-rpm-qa.txt): kernel-default-base 7.2.9-1.1.36.10 -> 7.2.10-1.1.36.11; ltp 20261103.6262a5fc-2959.1 -> 20261104.1aae0e4d-2960.1
       test changes: commits=29 failed_module=0 call_path=? lib=9 earlier_module=3 (those first, then newest first) url=...
 
 ## oqa-src.py - test code at the job's commit

@@ -80,7 +80,7 @@
     "should_trigger": false
   },
   {
-    "query": "openQA job 1234567 is an update aggregate job; which maintenance incidents does it test, what priority do they have and which packages are in them?",
+    "query": "openQA job 7654321 is an update aggregate job; which maintenance incidents does it test, what priority do they have and which packages are in them?",
     "should_trigger": true
   },
   {

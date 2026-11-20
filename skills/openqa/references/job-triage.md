@@ -66,7 +66,7 @@ Classes: PRODUCT, TEST (code, needle, schedule, settings), INFRA (worker, backen
 
 ## Incomplete reasons
 
-`reason` is `<component> <stop reason>: <first message line>`; the last two rows, set by the server, have no prefix.
+`reason` is `<component> <stop reason>: <first message line>`; the last three rows are set by the server.
 
 | `reason` starts with | Meaning, class |
 |---|---|
@@ -78,6 +78,7 @@ Classes: PRODUCT, TEST (code, needle, schedule, settings), INFRA (worker, backen
 | `isotovideo died: Unable to clone Git repository "<url>" specified via CASEDIR ...` | git ref gone. TEST settings |
 | `died: terminated prematurely, ...`, `terminated prematurely: Encountered corrupted state file` | mostly INFRA (`No space left on device`); log tail, `worker-log.txt` |
 | `no test modules scheduled/uploaded` | empty schedule or early crash. TEST |
+| `preparation failed: <reason>`, mostly `Downloading "<url>" failed with: <error>` | a server task the job waited for failed before any worker ran it (module `GRU`, text `Minion-GRU.txt`), typically fetching a `*_URL` setting's asset. A 404 of an image that moved or was removed upstream: INFRA; a wrong URL in the settings: TEST settings |
 | `scheduled for more than <n> days` | never ran (`cancelled`, no logs) for `max_job_scheduled_time` (7 days): no online, free worker offers its `WORKER_CLASS` -> openqa-model.md "Auth and roles". INFRA; TEST settings if the class is wrong |
 
 - **Suffix ` [Auto-restarting because reason matches ...]`:** follow the clone. **` [Not restarting job despite ...]`:** persistent; ticket, not another restart -> openqa-model.md "Automatic restarts"
@@ -112,4 +113,4 @@ Templates -> bugs-and-tickets.md "Bug body", "Ticket body"
 - **Suite cloned or installed at run time:** not at `TEST_GIT_HASH` -> suite-results.md "Suite revision"
 - **Digest and log disagree** (log `last_module=` not in the digest, other worker or date, modules after a fatal one): the artifact is from another run; no evidence, say so.
 
-Sources: openQA lib/OpenQA Constants.pm, JobSettings.pm, Worker/Job.pm, Worker/Engines/isotovideo.pm, Schema/Result/Jobs.pm, Scheduler/Model/Jobs.pm; os-autoinst testapi.pm, basetest.pm, consoles/serial_screen.pm, autotest.pm, distribution.pm, lockapi.pm, OpenQA/Qemu/Proc.pm, script/isotovideo, consoles/localXvnc.pm; os-autoinst-distri-opensuse lib/utils.pm, lib/known_bugs.pm, lib/Utils/Logging.pm, lib/publiccloud/instance.pm, tests/publiccloud/{img_proof,destroy}.pm, tests/containers/bci_version_check.pm; os-autoinst-scripts openqa-investigate, openqa-llm-investigate
+Sources: openQA lib/OpenQA Constants.pm, JobSettings.pm, Worker/Job.pm, Worker/Engines/isotovideo.pm, Schema/Result/{Jobs,GruTasks}.pm, Task/Asset/Download.pm, Scheduler/Model/Jobs.pm; os-autoinst testapi.pm, basetest.pm, consoles/serial_screen.pm, autotest.pm, distribution.pm, lockapi.pm, OpenQA/Qemu/Proc.pm, script/isotovideo, consoles/localXvnc.pm; os-autoinst-distri-opensuse lib/utils.pm, lib/known_bugs.pm, lib/Utils/Logging.pm, lib/publiccloud/instance.pm, tests/publiccloud/{img_proof,destroy}.pm, tests/containers/bci_version_check.pm; os-autoinst-scripts openqa-investigate, openqa-llm-investigate

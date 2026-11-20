@@ -125,6 +125,12 @@ for run in ("\x9dA", "\x90A", "\x1b]A", "\x9b0", "\x1b[0", "\x9dA\x90A"):
     bare(run * 300000)
 ')
 check "bare: a MiB of string introducers without a terminator is read in linear time" 0 $?
+(cd "$scripts" && timeout 20 python3 -c '
+from _sanitize import sanitize
+for run in ("\x9dA", "\x90A", "\x1b]A", "\x1bPA", "\x9dA\x90A"):
+    sanitize(run * 300000, max_bytes=0)
+')
+check "sanitize: so is it, uncapped" 0 $?
 
 actual=$(python3 "$scripts/_sanitize.py" --no-fence </dev/null | wc -c)
 check "empty input gives empty output" 0 "$actual"

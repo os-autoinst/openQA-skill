@@ -109,8 +109,8 @@ Rules for humans and agents changing this repository.
   between revisions, never single answers.
 - Count failures per distinct cause (a missing or wrong rule, a script defect, a misread fixture), not per
   assertion: one gap that fails three assertions is one finding.
-- Keep eval fixtures out of the skill: no pull request number, job id or commit an eval uses, and not its exact
-  fix, appears under `skills/`. An example lifted from a fixture makes the eval measure recall, not the rule.
+- Keep eval fixtures out of the skill: no pull request number, job id, incident number, bug reference or commit an
+  eval uses, and not its exact fix, appears under `skills/`. An example lifted from a fixture makes the eval measure recall, not the rule.
 
 ## Releasing
 
@@ -127,4 +127,5 @@ Rules for humans and agents changing this repository.
      `gh release create vX.Y.Z --verify-tag --notes-file <notes>` without `--title`. Run the tag commands with
      the real `git` binary: a shell wrapper may drop `-a` or `-f` without a word.
    - Afterwards, `git for-each-ref refs/tags/vX.Y.Z --format='%(objecttype) %(contents:subject)'` prints
-     `tag vX.Y.Z`, and `git ls-remote --tags origin vX.Y.Z` lists the tag and its `^{}` commit.
+     `tag vX.Y.Z`, and `git ls-remote --tags origin 'vX.Y.Z*'` lists two lines, the tag and its `^{}`
+     commit; without the `*` the peeled line is not shown even for an annotated tag.

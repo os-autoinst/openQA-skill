@@ -22,6 +22,8 @@ Owns: when a failure started and what changed since the last good run, from the 
 2. **Else propose** one: a write -> clone-and-run.md "Reproduce a failure"
 3. **Old tests pass on the new build or new tests fail on the old:** TEST, the window's commits; else PRODUCT. A fail in another step decides nothing. Clones run on today's workers: with `os-autoinst` or QEMU changed too, a failing `:last_good_tests_and_build` rerun is INFRA (tools). Until then "did commit X cause it?" is "unknown, this run decides".
 
+**New coverage is no regression:** history cannot tell a test that broke from one that never ran before. At `first_bad` check the settings diff (a test-list setting gained an entry, a feature switch turned on) and the `test changes` (a test re-enabled, a case added, a skip dropped) before calling it a regression; then the failure has no last good of its own and no regression window: classify it alone.
+
 ## Investigate jobs
 
 openqa-investigate clones a failed job as `<TEST>:investigate<suffix>` outside any job group and comments `Automatic investigation jobs for job <id>:`. Never review the clones. With `openqa-llm-investigate` in the hook it runs only after the model's `BISECT: YES`, so no clones after `BISECT: NO` is normal (-> review-workflow.md "Machine-written comments") and no verdict -> "History and investigation". It skips a job that already has a clone, an `:investigate:` name, no group, a group matching `exclude_group_regex` (default: `Development` parent groups), `NO_INVESTIGATION=1`, a cluster another run already investigates and directly chained clusters; the hook calls it only for a job no `auto_review` ticket matched: a missing comment proves nothing.

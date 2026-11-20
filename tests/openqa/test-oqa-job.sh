@@ -268,6 +268,12 @@ data["job"]["testresults"] = [
                                             + ["RU5ETElORQ99-----END RSA PRIVATE KEY-----", "after the coloured key"])),
     # The scanned first MiB holds one line: the rest comes from the end of the text.
     module("one_line_scan", "cmd", "\n".join(["Q" * (1 << 21)] + [f"later {n}" for n in range(9)])),
+    # cat a.pem b.pem, a.pem without a final new line: b's BEGIN follows a's END on one line.
+    module("key_concat", "cmd", "\n".join(["cat a.pem b.pem", "output:"] + ["filler"] * 10
+                                          + ["-----BEGIN RSA PRIVATE KEY-----", "Q0FUQk9EWTE"]
+                                          + ["-----END RSA PRIVATE KEY----------BEGIN RSA PRIVATE KEY-----"]
+                                          + ["Q0FUQk9EWTI", "Q0FUQk9EWTM", "-----END RSA PRIVATE KEY-----",
+                                             "error: after the concatenated keys"])),
 ]
 json.dump(data, open(f"{sys.argv[1]}/api_v1_jobs_872_details.json", "w"))
 json.dump([], open(f"{sys.argv[1]}/api_v1_jobs_872_comments.json", "w"))
@@ -307,6 +313,8 @@ check "a private key whose BEGIN line falls in the cut stays redacted in the lin
 	"$(grep -c 'QUFBQUJC' <<<"$key")|$(sed -n '/^module=key_in_cut /,/^<<<END/p' <<<"$key" | tail -n 2 | head -n 1)"
 check "a private key in the lines kept, sanitised one by one, keeps its body hidden" "0 1 1" \
 	"$(grep -c 'RUVFRUZG' <<<"$key") $(sed -n '/^module=key_in_tail /,/^<<<END/p' <<<"$key" | grep -c '^\[REDACTED:private-key\]$') $(grep -c '^after the key$' <<<"$key")"
+check "a key whose BEGIN follows another's END on one line keeps its body hidden" "0 1" \
+	"$(grep -c 'Q0FUQk9EWT' <<<"$key") $(grep -c '^error: after the concatenated keys$' <<<"$key")"
 scan=$(sed -n '/^module=one_line_scan /,/^<<<END/p' <<<"$key")
 check "a first MiB of one line: that line, the count between, the last lines from the end of the text" \
 	"[... 3 lines not shown]|later 3|later 8|6" \

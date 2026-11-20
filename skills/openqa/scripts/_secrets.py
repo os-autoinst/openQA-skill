@@ -485,12 +485,14 @@ def redact(text):
     found = Counter()
     out, in_pem = [], False
     for line in text.split("\n"):
-        if in_pem:
+        # Before the END: `cat a.pem b.pem` without a final new line in a.pem puts b's
+        # BEGIN on a's END line, and that key's body must not count as after the END.
+        opened = [begin.end() for begin in PEM_BEGIN.finditer(line)]
+        if in_pem and not opened:
             if PEM_END.search(line):
                 in_pem = False
             out.append("")  # keep the line count: callers number lines
             continue
-        opened = [begin.end() for begin in PEM_BEGIN.finditer(line)]
         if opened:
             # A key body is many lines of base64 that no line rule would match; swallow
             # to the END marker rather than emitting it one harmless-looking line at a time.

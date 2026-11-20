@@ -127,5 +127,5 @@ Rules for humans and agents changing this repository.
      `gh release create vX.Y.Z --verify-tag --notes-file <notes>` without `--title`. Run the tag commands with
      the real `git` binary: a shell wrapper may drop `-a` or `-f` without a word.
    - Afterwards, `git for-each-ref refs/tags/vX.Y.Z --format='%(objecttype) %(contents:subject)'` prints
-     `tag vX.Y.Z`, and `git ls-remote --tags origin 'vX.Y.Z*'` lists two lines, the tag and its `^{}`
-     commit; without the `*` the peeled line is not shown even for an annotated tag.
+     `tag vX.Y.Z`, and `git ls-remote --tags origin vX.Y.Z 'vX.Y.Z^{}'` lists exactly two lines, the tag and its
+     peeled commit; with the tag name alone the peeled line is not shown even for an annotated tag.

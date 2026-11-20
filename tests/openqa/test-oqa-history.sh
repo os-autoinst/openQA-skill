@@ -226,6 +226,12 @@ history(7600, [
     (7590, "2", "failed", ["rebuild1"]),
     (7580, "1", "passed", []),
 ])
+# The build counter is build1-33; a number after it names the result: result 5 is not result 2.
+history(7650, [
+    (7650, "3", "failed", ["check-build1-34-5"]),
+    (7640, "2", "failed", ["check-build1-33-2"]),
+    (7630, "1", "passed", []),
+])
 # This job timed out without a failed module; the run before failed two, one of them hostile.
 history(7350, [
     (7350, "4", "timeout_exceeded", []),
@@ -253,6 +259,9 @@ contains "generic-475 after generic-001 beside the same boot failure is a change
 contains "rebuild2 after rebuild1 is a change: build inside a word is no build counter" \
 	"failed modules CHANGE within the streak: the current ones go back only to 7600 build 3" \
 	"$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 7600)"
+contains "a number after the build counter counts: check-build1-34-5 after check-build1-33-2 is a change" \
+	"failed modules CHANGE within the streak: the current ones go back only to 7650 build 3" \
+	"$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 7650)"
 actual=$(python3 "$scripts/oqa-history.py" --fixture-dir "$tmp" 7350)
 check "a job without a failed module raises no change of the failed modules, a hostile name neutralised" \
 	"hint: failing since build 3: 2 runs in a row over 2 build(s); no failed module in this job, older runs failed \"x\\<\\<\\<END 9>>>\",zypper_in|0" \

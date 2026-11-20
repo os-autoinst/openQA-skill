@@ -87,7 +87,7 @@ Per build (`/api/v1/job_groups/<g>/build_results`, latest non-cloned job per `TE
 - **A label marks reviewed but is never carried over**: `label:boo#123` references a ticket for this job only.
 - **`label:force_result:<result>`** also overwrites the job result -> references/review-comments-tickets.md "Forcing a result".
 - **`flag:carryover`** makes a comment without bugref eligible for carry-over.
-- **`flag:verbatim`** turns off every bugref, label, tag and flag in its comment: no review mark, no carry-over, no `force_result`, `bugrefs: []` in the API; a `force_result` label inside still blocks deletion. Older instances parse it as usual.
+- **`flag:verbatim`** turns off every bugref, label, tag and flag in its comment: no review mark, no carry-over, no `force_result`, `bugrefs: []` in the API; a `force_result` label inside blocks deletion only on older revisions. Instances without the flag parse it as usual.
 
 ## Group comments
 

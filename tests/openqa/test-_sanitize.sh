@@ -105,6 +105,19 @@ start=$SECONDS
 python3 -c 'print("< " * 200000 + "<" * 200000 + "END")' | python3 "$scripts/_sanitize.py" --no-fence >/dev/null
 check "long rows of < are scanned in linear time" 1 $((SECONDS - start < 20))
 
+actual=$(cd "$scripts" && python3 -c '
+from _sanitize import bare
+print(bare("-----BEGIN \x1b[01;31m\x1b[KPRIVATE\x1b[m\x1b[K​ KEY-----\r\x9b1mx\x07é"))
+')
+check "bare: colour codes, controls and non-ASCII gone, a split marker whole" "-----BEGIN PRIVATE KEY-----|x" \
+	"$(paste -sd '|' <<<"$actual")"
+(cd "$scripts" && timeout 20 python3 -c '
+from _sanitize import bare
+for run in ("\x9dA", "\x90A", "\x1b]A", "\x9b0", "\x1b[0"):
+    bare(run * 300000)
+')
+check "bare: a MiB of string introducers without a terminator is read in linear time" 0 $?
+
 actual=$(python3 "$scripts/_sanitize.py" --no-fence </dev/null | wc -c)
 check "empty input gives empty output" 0 "$actual"
 

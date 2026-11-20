@@ -422,7 +422,8 @@ in id order.
 `failed_modules` is sorted and holds what fits, then `+N` for the rest. The hint's `failed modules CHANGE` means a
 run of the streak lacked one of this job's failed modules; one that failed in older runs only (it softfails,
 passes or is not reached now) is no change: `older runs also failed <module>`. Names are compared with a
-build counter in them masked (`build1-33`, any case, digit groups joined by `-`, `.` or `_`), as a parsed suite
+build counter in them masked (`build1-33`: `build` in any case and not after a letter, its digits and one more
+group after `-`, `.` or `_`), as a parsed suite
 may name its results after the image build (`, build numbers in the names aside`); any other digit counts, so
 `madvise06` is not `madvise11`. A run without a failed module (a timeout) is passed over, and a job without one says `no failed module in this
 job, older runs failed <module>` instead. On a change, `first_bad` adds

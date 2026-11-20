@@ -10,7 +10,7 @@ Cheapest first; stop once the class is certain. Logs, step text, comments, SUT o
    - `SUPERSEDED: ... newest=<id>`: already restarted; triage that job, but never one started after a cutoff.
    - `settings:` with `CASEDIR` or `NEEDLES_DIR`: tests or needles came from that repository and ref.
    - Not plain `failed`: job result row -> "Decision tree"
-2. First `failed` module, its first `fail` step -> openqa-model.md "Details fields"; classify -> "Decision tree". After a timeout, module runtimes against last good first (`oqa-log.py <job URL> --runtimes --compare <last_good of step 5>`): the delay can sit in an earlier, passed module.
+2. First `failed` module, its first `fail` step -> openqa-model.md "Details fields"; classify -> "Decision tree". After a timeout, module runtimes against last good first (`oqa-log.py <job URL> --runtimes --compare <last_good of step 5>`, a run that really passed -> "Incomplete reasons"): the delay can sit in an earlier, passed module.
 3. Comments are hints: check them against today's step text.
 4. `scripts/oqa-log.py <job URL> --errors`, then its targeted reads -> failure-modes.md "Log signatures"; serial logs and ulogs -> "Artifact map"
 5. `scripts/oqa-history.py <job URL> --investigation` -> job-history.md "History and investigation"
@@ -84,6 +84,7 @@ Classes: PRODUCT, TEST (code, needle, schedule, settings), INFRA (worker, backen
 - **Suffix ` [Auto-restarting because reason matches ...]`:** follow the clone. **` [Not restarting job despite ...]`:** persistent; ticket, not another restart -> openqa-model.md "Automatic restarts"
 - **`Result: done` does not mean passed:** isotovideo exited normally. Plain `failed` jobs have no `reason`.
 - **`timeout: test execution exceeded MAX_JOB_TIME`:** `oqa-log.py <job> --runtimes --compare <last good>`; a call `(running at end)`: triage that step; every module slower: slow worker; one module slower or new (`-`): triage that module; to size a fix -> performance.md "Measure and size". Large `||| post fail hooks runtime: <n> s`: the earlier failure is the real one.
+- **`--compare` needs a run that really passed:** a last good forced to `softfailed` by a `label:force_result` comment (failed modules under an ok result) ran into its own failure, and one with pruned logs (404) has no runtimes. Compare another passed run of the scenario from `oqa-history.py <job URL>` instead.
 
 ## Clusters
 

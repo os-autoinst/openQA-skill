@@ -51,6 +51,8 @@ from _sanitize import ArgumentParser
 OK_RESULTS = _oqa.RESULT_GROUPS["ok"]
 # Not-ok runs in a row from which a failure is called persistent rather than intermittent.
 PERSISTENT_STREAK = 3
+# An image build counter in a module name: ...-gce-build1-33, Build7.2.
+BUILD_COUNTER = re.compile(r"(?i)build[0-9]+(?:[-._][0-9]+)*")
 # Runs after the job read with --before, the nearest first.
 NEXT_BEFORE = 20
 # A job's module list is part of each row of /api/v1/jobs: LTP jobs take ~130 kB each.
@@ -133,9 +135,10 @@ def failed_set(row):
 
 
 def shape(name):
-    """A module name with its digit runs masked: a parsed suite names its results after a
-    build, so 1_login-build1-33 and 1_login-build1-34 are one module."""
-    return re.sub(r"\d+", "0", name)
+    """A module name with a build counter in it masked: a parsed suite names its results
+    after the image build, so 1_login-build1-33 and 1_login-build1-34 are one module. Other
+    digits count: madvise06 and madvise11 are two tests."""
+    return BUILD_COUNTER.sub("build#", name)
 
 
 def module_cell(names, width=60):
@@ -285,7 +288,7 @@ def describe(rows, more, machines=None, unlike=None, weaker=None):
         same = "the current failed modules" if also else "same failed modules"
         same += " throughout"
         if seen - signature - set(also):
-            same += ", digits in the names aside"
+            same += ", build numbers in the names aside"
     else:
         start = max(i for i in range(alike) if failed_set(rows[i]))
         origin = rows[start]

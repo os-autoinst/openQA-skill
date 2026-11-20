@@ -59,13 +59,13 @@ module=long_answer result=failed category=console
 <<<UNTRUSTED NONCE source=openqa.example.org/tests/870/step/1>>>
 line 1 of a long wait_serial answer
 line 2 of a long wait_serial answer
-line 3 of a long wait_serial answer
-line 4 of a long wait_serial answer
-line 5 of a long wait_serial answer
-line 6 of a long wait_serial answer
+[... 4 lines not shown]
 line 7 of a long wait_serial answer
 line 8 of a long wait_serial answer
-[... 4 more lines]
+line 9 of a long wait_serial answer
+line 10 of a long wait_serial answer
+line 11 of a long wait_serial answer
+line 12 of a long wait_serial answer
 <<<END NONCE>>>
 logs=autoinst-log.txt,serial_terminal.txt ulogs=1
 review: reviewed=no comments=0

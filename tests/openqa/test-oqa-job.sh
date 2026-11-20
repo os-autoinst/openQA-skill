@@ -282,11 +282,24 @@ data["job"]["testresults"] = [
 ]
 json.dump(data, open(f"{sys.argv[1]}/api_v1_jobs_872_details.json", "w"))
 json.dump([], open(f"{sys.argv[1]}/api_v1_jobs_872_comments.json", "w"))
+data["job"]["id"] = 873
+data["job"]["testresults"] = [
+    # A terminal title (an OSC string, terminated) inside the BEGIN marker, the body in the tail.
+    module("key_osc", "cmd", "\n".join(["cat id", "output:"] + ["filler"] * 10
+                                       + ["-----BEGIN RSA PRIV\u001b]0;title\u0007ATE KEY-----"]
+                                       + [f"T1NDQk9EWQ{n:02d}" for n in range(4)]
+                                       + ["-----END RSA PRIVATE KEY-----", "after the titled key"])),
+]
+json.dump(data, open(f"{sys.argv[1]}/api_v1_jobs_873_details.json", "w"))
+json.dump([], open(f"{sys.argv[1]}/api_v1_jobs_873_comments.json", "w"))
 PY
 actual=$(python3 "$script" --host https://openqa.example.org --fixture-dir "$tmp" 871 2>&1)
 key=$(python3 "$script" --host https://openqa.example.org --fixture-dir "$tmp" 872 2>/dev/null)
 key_rc=$?
+osc=$(python3 "$script" --host https://openqa.example.org --fixture-dir "$tmp" 873 2>/dev/null)
 rm -rf "$tmp"
+check "a BEGIN marker split by a terminal title still hides the key's body" "0 1 1" \
+	"$(grep -c 'T1NDQk9EWQ' <<<"$osc") $(grep -c '^\[REDACTED:private-key\]$' <<<"$osc") $(grep -c '^after the titled key$' <<<"$osc")"
 check "a key opened in the scanned window with no line left for the tail: no crash, the module still shows" "0 1" \
 	"$key_rc $(grep -c '^module=key_scan_edge ' <<<"$key")"
 # fence <module>: the lines of that module's step fence

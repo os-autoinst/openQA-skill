@@ -403,6 +403,9 @@ for tok in "aXc_Ob66""_garuBk1" "_Qz7xKp2Lm9vRt4W" "Qz7xKp2Lm9vRt4W_"; do
 	done
 done
 keeps "a long path segment of an ordinary URL" 'http://registry.example.org:5000/containerimagesxyz/tags/list\nhttps://github.com/openSUSEQAToolsRepo/files/x\nhttp://10.0.2.2:20013/shortToken/data\n'
+# A job token never holds a "-": a hyphenated first path segment with a port before it is a name.
+keeps "a hyphenated path segment before files/" 'http://download.example.org:8080/openSUSE-Tumbleweed-oss/files/x.iso\n'
+keeps "a hyphenated path segment before data/" 'curl http://localhost:3000/my-project-name-here/data/foo\n'
 
 # --- os-autoinst's own plumbing, thousands of lines per autoinst-log.txt ---------------
 keeps "os-autoinst's json_cmd_token" '[debug] [pid:4242] <<< consoles::serial_screen::type_string(text="\\n", key="ret", json_cmd_token="AbCdEfGh", cmd="backend_send_key")\n[debug] [pid:4242] read_json(7) json_cmd_token=HgFeDcBa\n'

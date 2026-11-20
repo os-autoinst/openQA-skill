@@ -270,7 +270,7 @@ def show_text(text, source, max_lines, max_bytes, indent="", died=None, whole=No
             f"[verdict lines searched in the first {TEXT_SCAN} characters only]"
         )
     if long and not picked:
-        kept = head_and_tail(lines, total, max_lines, max_bytes)
+        kept = head_and_tail(lines, total, max_lines, max_bytes, whole)
         kept += "".join(f"\n{note}" for note in notes)
         print(_oqa.fence(kept, source), end="")
         return
@@ -289,18 +289,26 @@ def show_text(text, source, max_lines, max_bytes, indent="", died=None, whole=No
     print(_oqa.fence(kept, source), end="")
 
 
-def head_and_tail(lines, total, max_lines, max_bytes):
+def head_and_tail(lines, total, max_lines, max_bytes, whole=None):
     """A long step text without verdict lines: its first lines, which name what ran, and its
     last ones, where a command's error or the serial text a wait_serial missed mostly is.
+    lines: those of the text, or of its first TEXT_SCAN characters when they do not hold all
+    `total` of whole, the uncut text; the last lines then come from the end of whole.
     Each part is sanitised on its own so that the byte cap cannot take the end; each line
     is cut first as step_text cuts a text, so a MiB-long line costs little."""
     budget = max_bytes // 4
-    capped = [
-        step_text({"text_data": line}) for line in blank_keys(lines[:TEXT_HEAD])[0]
-    ]
+    first = lines[:TEXT_HEAD]
+    capped = [step_text({"text_data": line}) for line in blank_keys(first)[0]]
     head = _oqa.sanitize("\n".join(capped), max_line=300, max_bytes=budget)
-    last = lines[TEXT_HEAD:][TEXT_HEAD - max_lines :]
-    opened = open_key("\n".join(lines[: len(lines) - len(last)]))
+    if whole is not None and len(lines) < total:
+        # Read back from the end, the first line is cut short, unless it is the only one.
+        window = whole.strip("\n")[-TEXT_SCAN:].split("\n")
+        last = (window[1:] or window)[TEXT_HEAD - max_lines :]
+        before = lines[: total - len(last)] + window[: len(window) - len(last)]
+    else:
+        last = lines[len(first) :][TEXT_HEAD - max_lines :]
+        before = lines[: len(lines) - len(last)]
+    opened = open_key("\n".join(before))
     marked, inside = blank_keys(last, bool(opened))
     if opened:
         _secrets.redact(opened)  # counted on stderr, as blank_keys counts a key
@@ -315,7 +323,7 @@ def head_and_tail(lines, total, max_lines, max_bytes):
         if tail and size > max_bytes - budget:
             break
         tail.insert(0, line)
-    cut = total - TEXT_HEAD - len(tail)
+    cut = total - len(first) - len(tail)
     return "\n".join([head, f"[... {cut} lines not shown]", *tail])
 
 

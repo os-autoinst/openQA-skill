@@ -454,7 +454,12 @@ not cut: openQA computes it at the time of the request.
 `--investigation` adds the settings diff (per-run noise left out; a credential's value masked, but `-` on the
 side where the setting is absent, so an added or removed one still shows), package diffs, test and needle commits,
 `--max-items` (10) lines each: `settings diff (last_good -> this job)`, plus a hint to run on first_bad for the
-tight window when that is another job. `first_bad <id> investigate jobs: <suffix> t#<id>, ...`: the clones
+tight window when that is another job. openQA picks its last good by id over the whole scenario: when that or
+its first bad is not the table's, `differs from the table above (last_good=<id|none> first_bad=<id>): <ids>
+<why>` follows, `why` one of `left out there (<why>)`, `counted as not ok there` or `not among the runs read`;
+`last_good=<id> (forced ok by a comment)` marks a last good whose ok result a `label:force_result` comment made
+(known for the runs the table read), whose diffs start at a run that failed.
+`first_bad <id> investigate jobs: <suffix> t#<id>, ...`: the clones
 openqa-investigate listed in first_bad's comments (one request; with `--before` only comments created by
 then); no line when there are none. `last_good used tests from another repository: <key>=<value>`: openQA's
 last good ran another `CASEDIR` or `TEST_GIT_URL`. `last_good logs: gone`: last good's downloads tab lists no

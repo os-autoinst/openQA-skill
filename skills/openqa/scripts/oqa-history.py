@@ -220,8 +220,10 @@ def one_machine(rows, machines):
 def describe(rows, more, machines=None, unlike=None, weaker=None):
     """rows: finished runs, newest first, rows[0] is the current job; machines: {id: worker}
     when the workers were read; unlike: {id: why} of the runs left out of the comparison;
-    weaker: {id: why} of those left out only before an ok run that is neither."""
+    weaker: {id: why} of those left out only before an ok run that is neither. Returns the
+    lines and, for a job that is not ok, {last_good, first_bad, left, read} of the table."""
     unlike, weaker = dict(unlike or {}), weaker or {}
+    read = {row["id"] for row in rows}
     firm = [row for row in rows[1:] if row["id"] not in unlike]
     good = next(
         (i for i, row in enumerate(firm) if not bad(row) and row["id"] not in weaker),
@@ -237,7 +239,7 @@ def describe(rows, more, machines=None, unlike=None, weaker=None):
         " (older runs exist: --previous N)" if more else ""
     )
     if not bad(rows[0]):
-        return [rate, "hint: this job is ok"]
+        return [rate, "hint: this job is ok"], None
 
     streak = next((i for i, row in enumerate(rows) if not bad(row)), total)
     first_bad = rows[streak - 1]
@@ -328,7 +330,13 @@ def describe(rows, more, machines=None, unlike=None, weaker=None):
         items = [f"{row['id']} ({unlike[row['id']]})" for row in left]
         more_left = f", +{len(items) - 4} more" if len(items) > 4 else ""
         lines.append(f"left out, unlike this job: {', '.join(items[:4])}{more_left}")
-    return [*lines, f"hint: {hint}"]
+    table = {
+        "last_good": rows[streak]["id"] if streak < total else None,
+        "first_bad": first_bad["id"],
+        "left": unlike,
+        "read": read,
+    }
+    return [*lines, f"hint: {hint}"], table
 
 
 def history(client, job_id, previous, following=0):
@@ -582,6 +590,43 @@ def link_id(value):
     if isinstance(value, dict):
         return _oqa.clean(value.get("text"))
     return _oqa.quoted(value) if value is not None else "-"
+
+
+def disagreement(table, data, job_id, forced):
+    """One line when openQA's last good or first bad is not the table's, naming why for the
+    runs the table treats otherwise; None when they agree or cannot be compared."""
+
+    def theirs(value, absent):
+        if not isinstance(value, dict):
+            return absent
+        text = link_id(value)
+        return int(text) if text.isdigit() else False
+
+    if not table:
+        return None
+    good = theirs(data.get("last_good"), None)
+    # openQA names a first bad only among the runs before the job.
+    bad = theirs(data.get("first_bad"), job_id)
+    ours = table["last_good"], table["first_bad"]
+    if good is False or bad is False or (good, bad) == ours:
+        return None
+    why = {}
+    for run, own in zip((good, bad), ours):
+        if run in (None, own, job_id):
+            continue
+        if run in forced:
+            reason = "counted as not ok there"
+        elif run in table["left"]:
+            reason = f"left out there ({table['left'][run]})"
+        elif run not in table["read"]:
+            older = run < min(table["read"])
+            reason = "not among the runs read" + (" (--previous N)" if older else "")
+        else:
+            continue
+        why.setdefault(reason, []).append(str(run))
+    line = f"  differs from the table above (last_good={ours[0] or 'none'} first_bad={ours[1]})"
+    reasons = "; ".join(f"{','.join(runs)} {reason}" for reason, runs in why.items())
+    return line + (f": {reasons}" if reasons else "")
 
 
 def settings_diff(text, limit, verbose):
@@ -970,8 +1015,19 @@ def fenced(client, job_id, title, lines, max_bytes=16384):
 
 
 def investigation(
-    client, job_id, limit, verbose, failed=(), job=None, module=None, before=None
+    client,
+    job_id,
+    limit,
+    verbose,
+    failed=(),
+    job=None,
+    module=None,
+    before=None,
+    table=None,
+    forced=(),
 ):
+    """table: the history's {last_good, first_bad, left, read}; forced: the ids of the runs
+    read whose ok result a label:force_result comment made."""
     try:
         data = client.get_json(f"/tests/{job_id}/investigation_ajax")
     except _oqa.NotFound as error:
@@ -986,7 +1042,17 @@ def investigation(
         failure_logs(client, job_id, data, limit, verbose)
         return
     first_bad = link_id(data.get("first_bad"))
-    print(f"  last_good={link_id(data.get('last_good'))} first_bad={first_bad}")
+    good_id = link_id(data.get("last_good"))
+    # openQA counts a forced softfail as good, so its diffs start at a run that failed.
+    mark = (
+        " (forced ok by a comment)"
+        if good_id.isdigit() and int(good_id) in forced
+        else ""
+    )
+    print(f"  last_good={good_id}{mark} first_bad={first_bad}")
+    differs = disagreement(table, data, job_id, forced)
+    if differs:
+        print(differs)
     clones = (
         investigate_jobs(client, int(first_bad), before)
         if first_bad.isdigit()
@@ -1001,7 +1067,6 @@ def investigation(
         )
         failure_logs(client, job_id, data, limit, verbose)
         return
-    good_id = link_id(data.get("last_good"))
     good_files = uploads(client, int(good_id)) if good_id.isdigit() else None
     # The log cleanup deletes autoinst-log.txt with the other logs and uploads.
     gone = good_files is not None and "autoinst-log.txt" not in good_files
@@ -1381,7 +1446,7 @@ def main():
             f"build {build_of(rerun)})"
         )
 
-    status = 0
+    status, table = 0, None
     if current.get("state") != "done":
         state = _oqa.clean(current.get("state"))
         when = "was running at --before" if args.before else f"is {state}"
@@ -1411,7 +1476,8 @@ def main():
             for row in finished[1:]
             if (why := why_weaker(row, current, runs, module))
         }
-        for line in describe(finished, more, machines, others, weaker):
+        lines, table = describe(finished, more, machines, others, weaker)
+        for line in lines:
             print(line)
         status = 1 if bad(finished[0]) else 0
     if args.investigation:
@@ -1436,6 +1502,8 @@ def main():
             job,
             module,
             args.before,
+            table,
+            set(forced_ok),
         )
     print(f"requests: {client.requests}")
     return status if args.exit_code else 0

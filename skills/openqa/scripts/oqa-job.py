@@ -307,9 +307,11 @@ def head_and_tail(lines, total, max_lines, max_bytes, whole=None):
         last = (window[1:] or window)[TEXT_HEAD - max_lines :]
         # All of the text before them: a key's END may lie between the two windows.
         before = raw[: len(raw) - len("\n".join(last))]
+        cut = cut_key(before, last[0]) if len(window) == 1 else ""
     else:
         last = lines[len(first) :][TEXT_HEAD - max_lines :]
         before = "\n".join(lines[: len(lines) - len(last)])
+        cut = ""
     opened = open_key(before)
     marked, inside = blank_keys(last, bool(opened))
     if opened:
@@ -317,6 +319,10 @@ def head_and_tail(lines, total, max_lines, max_bytes, whole=None):
     if marked and (inside or opened):
         # Where no BEGIN line shows, the marker says what the blank lines are.
         marked[-1 if inside else 0] = KEY_MARK
+    if cut:
+        # The one line shown holds the rest of a BEGIN marker: it is a key's line.
+        _secrets.redact(cut)
+        marked = [KEY_MARK]
     tail, size = [], 0
     for line in reversed(marked):
         line = step_text({"text_data": line})
@@ -340,6 +346,17 @@ def open_key(text):
     if begin is None or _secrets.PEM_END.search(text, begin.end()):
         return ""
     return begin.group()
+
+
+def cut_key(before, line):
+    """The BEGIN marker of a private key that the start of line cuts in two, or "": line is
+    read back from inside a longer one, before is the text ahead of it. A marker is at most
+    96 characters, so 128 on each side of the cut hold it."""
+    left, right = bare(before[-128:]), bare(line[:128])
+    for begin in _secrets.PEM_BEGIN.finditer(left + right):
+        if begin.start() < len(left) < begin.end():
+            return begin.group()
+    return ""
 
 
 def blank_keys(lines, inside=False):

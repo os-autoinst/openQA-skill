@@ -290,6 +290,13 @@ data["job"]["testresults"] = [
                                        + [f"T1NDQk9EWQ{n:02d}" for n in range(4)]
                                        + ["-----END RSA PRIVATE KEY-----", "after the titled key"])),
 ]
+# The last MiB is one JSON line read back from inside it, from the middle of a BEGIN marker; the
+# key is short, so its END follows the cut within a marker's length.
+begin = "-----BEGIN RSA PRIVATE KEY-----"
+after = begin[19:] + "\\nU0VBTUtFWQ\\n-----END RSA PRIVATE KEY-----\\n\"} "
+after += "z" * ((1 << 20) - len(after))
+data["job"]["testresults"].append(module("key_seam", "cmd", "\n".join(
+    ["cat secrets.json", "output:"] + ["x" * 1000] * 1100 + ['{"key": "' + "p" * 300000 + begin[:19] + after])))
 json.dump(data, open(f"{sys.argv[1]}/api_v1_jobs_873_details.json", "w"))
 json.dump([], open(f"{sys.argv[1]}/api_v1_jobs_873_comments.json", "w"))
 PY
@@ -299,7 +306,10 @@ key_rc=$?
 osc=$(python3 "$script" --host https://openqa.example.org --fixture-dir "$tmp" 873 2>/dev/null)
 rm -rf "$tmp"
 check "a BEGIN marker split by a terminal title still hides the key's body" "0 1 1" \
-	"$(grep -c 'T1NDQk9EWQ' <<<"$osc") $(grep -c '^\[REDACTED:private-key\]$' <<<"$osc") $(grep -c '^after the titled key$' <<<"$osc")"
+	"$(grep -c 'T1NDQk9EWQ' <<<"$osc") $(sed -n '/^module=key_osc /,/^<<<END/p' <<<"$osc" | grep -c '^\[REDACTED:private-key\]$') $(grep -c '^after the titled key$' <<<"$osc")"
+seam=$(sed -n '/^module=key_seam /,/^<<<END/p' <<<"$osc")
+check "the last MiB read back from inside a BEGIN marker: the line it cut is a key's line" "0 1" \
+	"$(grep -c 'U0VBTUtFWQ' <<<"$seam") $(grep -c '^\[REDACTED:private-key\]$' <<<"$seam")"
 check "a key opened in the scanned window with no line left for the tail: no crash, the module still shows" "0 1" \
 	"$key_rc $(grep -c '^module=key_scan_edge ' <<<"$key")"
 # fence <module>: the lines of that module's step fence

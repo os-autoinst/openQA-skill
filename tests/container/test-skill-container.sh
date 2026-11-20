@@ -516,7 +516,9 @@ mine() {
 			rest=${f#"$d"/}
 			top=$d/${rest%%/*}
 		done
-		[ -n "$top" ] && [ "$top" != "$work" ] && [ -e "$top/fix/envcheck" ] && continue
+		# A sibling's tool directory holds a fake login in userbin/opencode, without fix/.
+		[ -n "$top" ] && [ "$top" != "$work" ] && [ "$top" != "$tools" ] &&
+			{ [ -e "$top/fix/envcheck" ] || [ -e "$top/userbin/opencode" ]; } && continue
 		printf '%s\n' "$f"
 	done
 }
@@ -860,12 +862,15 @@ sib="$(mktemp -d)"
 mkdir "$sib/fix"
 : >"$sib/fix/envcheck"
 echo SECRET-9 >"$sib/fix/logins"
+sibtools="$(mktemp -d)"
+mkdir "$sibtools/userbin"
+echo 'echo SECRET-9' >"$sibtools/userbin/opencode"
 stray="$(mktemp)"
 echo SECRET-9 >"$stray"
 left="$(leakfiles)"
-! grep -qF "$sib/" <<<"$left" && grep -qxF "$stray" <<<"$left" &&
-	pass "the leak scan passes over another suite's fixtures, not over a stray file" || fail "the leak scan's filter: $left"
-rm -rf "$sib" "$stray"
+! grep -qF "$sib/" <<<"$left" && ! grep -qF "$sibtools/" <<<"$left" && grep -qxF "$stray" <<<"$left" &&
+	pass "the leak scan passes over another suite's fixtures and tools, not over a stray file" || fail "the leak scan's filter: $left"
+rm -rf "$sib" "$sibtools" "$stray"
 
 # The agent gets the whole work directory: not the home directory, what holds
 # it, the logins, podman's storage, the runtime directory, someone else's
@@ -2281,10 +2286,10 @@ rc=$?
 	pass "uninstall stops an instance that was never installed" || fail "uninstall of a stray unit: rc=$rc $out"
 # What goes into the drop-in is one value a line: systemd would read more.
 for bad in "--image=img:1"$'\n'"PodmanArgs=--privileged" "--image=img:1"$'\r'"PodmanArgs=--privileged" \
-	"--as=$work/ws%t" "--as=$work/ws\\" "--as=$work/ws\$HOME" "--as=$work/ws\"x" "--as=$work/ws"$'\001'; do
+	"--as=$work/ws%t" "--as=$work/ws\\" "--as=$work/ws\$HOME" "--as=$work/ws\"x" "--as=$work/ws'x" "--as=$work/ws"$'\001'; do
 	out="$(sc install inj --workdir "$work/ws" "${bad%%=*}" "${bad#*=}" 2>&1)"
 	rc=$?
-	[ "$rc" != 0 ] && grep -qF 'a control character, a %, a $, a backslash or a double quote' <<<"$out" &&
+	[ "$rc" != 0 ] && grep -qF 'a control character, a %, a $, a backslash or a quote' <<<"$out" &&
 		[ ! -e "$pubdir/$N-agent@inj.container.d" ] &&
 		pass "install refuses ${bad%%=*} with $(printf %q "${bad#*=}" | tail -c 12)" ||
 		fail "install ${bad%%=*} injection: rc=$rc $out"

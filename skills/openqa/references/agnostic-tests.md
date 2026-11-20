@@ -6,7 +6,7 @@ Contents: When to choose; Layout and languages; Runner API; Result contract; run
 
 ## When to choose
 
-**Choose it** when every check is "run a command, inspect exit code, output or files" on one SUT and the body fits python, go, java or shell (a self-contained `runtest` that prints TAP; nothing is installed for it, so it suits minimal images).
+**Choose it** when every check is "run a command, inspect exit code, output or files" on one SUT and the body fits python, go, java or shell (a self-contained `runtest` that writes TAP into `results.tap`; nothing is installed for it, so it suits minimal images).
 
 | Disqualifier | Detail |
 |---|---|

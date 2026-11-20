@@ -64,7 +64,8 @@ grouping, never verdicts. A missing summary, unreadable comments or a spent requ
 flavors and arches, the count line then ends `whose test matches --test` and the header counters stay
 the build's; also with `--passed`, where openQA filters a literal `'^NAME$'` (`test=NAME`) and any other
 regex searches the newest 100 clone sources (the count line says when that window was full).
-`--module M` only jobs in which M failed (the count line ends `in which module M failed`), matched on the
+`--module M` only jobs in which M failed (the count line ends `in which module M failed`), also as `M#<n>`,
+os-autoinst's name for a module loaded again; an empty M is a usage error. Matched on the
 failed modules the listing already carries, so no request more, `--before` included: the overview's own
 `modules=` filter would pick per scenario the newest job that failed in M, an older one where a newer did not.
 `--version V` (`--group` only) the build entries of that version, a group may hold several: without

@@ -434,6 +434,23 @@ check "--module in the API fallback: filtered before the comments are read, one 
 check "--before --module: as the build stood then, a job still running then has no failed module yet" \
 	"7305|1 not-ok jobs in which module zypper_up failed as of --before, 0 running then" \
 	"$(sweep --group 7 --build 20300102 --before 2030-01-02T10:00Z --module zypper_up | grep -Eo '^[0-9]{4} ' | xargs)|$(sweep --group 7 --build 20300102 --before 2030-01-02T10:00Z --module zypper_up | grep 'as of --before')"
+check "--module: a module loaded again fails as <name>#<n>, which the bare name matches; a suffix given matches that load" \
+	"True True True False False|boot#2" "$(
+		cd "$here/../../skills/openqa/scripts" && python3 - <<'PY'
+import importlib.util
+spec = importlib.util.spec_from_file_location("sweep", "oqa-sweep.py")
+sweep = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(sweep)
+jobs = [{"modules": ["boot#1"]}, {"modules": ["boot"]}, {"modules": ["boot#12", "x"]}, {"modules": ["boot_x#1"]},
+        {"modules": ["boot#"]}]
+kept = sweep._of_module(jobs, "boot")
+again = sweep._of_module([{"modules": ["boot#1"]}, {"modules": ["boot#2"]}], "boot#2")
+print(*(job in kept for job in jobs), end="|")
+print(*(name for job in again for name in job["modules"]))
+PY
+	)"
+sweep --group 7 --module '' >/dev/null 2>&1
+check "--module with an empty name is a usage error" 2 $?
 for args in "--groups --module x" "--uses-schedule schedule/x.yaml --group 7 --module x" "--groups --version 1" "--vr-build u/r#1 --version 1"; do
 	# shellcheck disable=SC2086 # the flags are meant to split
 	sweep $args >/dev/null 2>&1

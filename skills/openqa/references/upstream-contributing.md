@@ -45,7 +45,7 @@ Sources: openQA Makefile, cpanfile, docs/Contributing.md, external/os-autoinst-c
 A skipped test counts as passed: read prove's summary for `skipped` before calling a gate green.
 
 - **UI tests** (`t/ui/`) skip the file when the Perl modules Selenium::Remote::Driver or Test::Selenium::Chrome are missing (`driver_missing`). Install perl-Selenium-Remote-Driver, chromedriver and chromium; `NOT_HEADLESS=1` shows the browser.
-- **Database tests** skip when `TEST_PG` is unset and no database answers. `make test TESTS=...` starts one in `/dev/shm/tpg`; bare `prove` needs `TEST_PG='DBI:Pg:dbname=openqa_test;host=/dev/shm/tpg' OPENQA_BASEDIR= LC_ALL=C.utf8 LANGUAGE=`.
+- **Database tests** skip when `TEST_PG` is unset and no database answers. `make test TESTS=...` starts one in `/dev/shm/tpg`; it stops that database afterwards unless `KEEP_DB=1`. Bare `prove -It/lib -Iexternal/os-autoinst-common/lib` needs it running (`make setup-database`) and `TEST_PG='DBI:Pg:dbname=openqa_test;host=/dev/shm/tpg' OPENQA_BASEDIR= LC_ALL=C.utf8 LANGUAGE=`.
 - **Heavy and fullstack tests** skip without `HEAVY=1` (`t/14-grutasks.t`, `t/44-scripts.t`, ...) or `FULLSTACK=1` (`t/full-stack.t`, which needs `../os-autoinst`). The Makefile sets both only when `CI` is unset; bare `prove` does not, and CI runs them in its `heavy` and `fullstack` jobs only.
 - **POD**: `xt/02-pod.t` skips without Test::Pod.
 - **os-autoinst author checks**: a `test-local-*` test exists only if CMake found its tool (yamllint, ruff, shellcheck, shfmt, gitlint, clang-format) when it configured `build/`; a missing tool fails nothing. Install it, configure `build/` anew.
@@ -62,7 +62,7 @@ Every code change brings a new or adapted test in the same commit, and reviewers
 - **The opposite case**: the input that must be refused, the option switched off, the branch not taken.
 - **A bug seen in production** gets a test that reproduces it.
 - **Where**: openQA `t/*.t` unit and integration, `t/api/`, `t/ui/` (Selenium), fixtures from `t/fixtures` via `OpenQA::Test::Case->new->init_data(fixtures_glob => ...)`; os-autoinst `t/`, reusing the modules under `t/data/tests`.
-- **Form** (`xt/01-style.t`): `use Test::Most` and `use Test::Warnings`; no parentheses, `is $got, 1, 'name';`; `throws_ok`, never `like $@`; openQA test files set `use OpenQA::Test::TimeLimit 'N'` ("Wstat: 14": it fired).
+- **Form** (`xt/01-style.t`): `use Test::Most` and `use Test::Warnings`; no parentheses, `is $got, 1, 'name';`; `throws_ok`, never `like $@`. By convention, not checked there, openQA test files also set `use OpenQA::Test::TimeLimit 'N'` ("Wstat: 14": it fired).
 - **Names, not comments**: subtest names and assertion descriptions say what is checked, so a failure reads without the source.
 - **Shared rows**: a subtest that changes rows later ones read wraps them in `$schema->txn_begin` ... `txn_rollback`.
 - **100 % statement coverage**: both `codecov.yml` set the project target to 100.0 with threshold 0, mergify waits for `codecov/project` and `codecov/patch`, and CI's `tools/check-line-coverage` fails on any uncovered statement. Check it locally -> "Setup and local gates". Code no test can reach: `# uncoverable statement`, with a reason a reviewer accepts.
@@ -124,11 +124,11 @@ Sources: openQA xt/01-style.t, eslint.config.mjs, .prettierrc.json, package.json
 - **Backends and consoles**: no `use testapi` under `backend/` or `consoles/` (`xt/01-style.t`); a change there needs a manual run on each backend it touches, non-qemu or real hardware included (checklist bot).
 - **Style beyond openQA's**: perltidy at 160 columns (openQA 120); anonymous subs with signatures, no `@_` unpacking; test files with a perl shebang and mode 755; `spew`, not `spurt`; no bare `use POSIX;`.
 - **No root**: build and run from the checkout as a normal user, no step writing to fixed system paths; the worker builds a branch in rootless Podman, which such a step breaks.
-- **Verify inside openQA**: clone a job with `OS_AUTOINST_GIT_REPO` and `OS_AUTOINST_GIT_BRANCH`, `CASEDIR` and `NEEDLES_DIR` then as remote git URLs (the container mounts nothing of the worker). A clone is a write -> clone-and-run.md "Manual clone". Locally: `isotovideo --debug CASEDIR=...` from a separate run directory.
+- **Verify inside openQA**: clone a job with `OS_AUTOINST_GIT_REPO` and `OS_AUTOINST_GIT_BRANCH`, `CASEDIR` and `NEEDLES_DIR` best as public git URLs too; without them the engine container falls back to the worker's `share` and `tests` directories and instance caches, which it mounts read-only (`OS_AUTOINST_CONTAINER_IMAGE` needs `OS_AUTOINST_GIT_REPO`). A clone is a write -> clone-and-run.md "Manual clone". Locally: `isotovideo --debug CASEDIR=...` from a separate run directory.
 - **Both repositories**: openQA's fullstack CI builds the os-autoinst commit pinned in `tools/ci/autoinst.sha`, which a bot PR moves; os-autoinst's `openqa_fullstack.yml` runs openQA's fullstack test against the PR. Land the os-autoinst side first.
 - **`external/`** is a copy of os-autoinst-common: change it there, in neither repository.
 
-Sources: os-autoinst OpenQA/Isotovideo/Interface.pm, xt/01-style.t, xt/06-pod-coverage.t, .perltidyrc, .github/checklist.yml, .github/workflows/openqa_fullstack.yml, README.md; openQA tools/ci/autoinst.sha, tools/ci/build_autoinst.sh.
+Sources: os-autoinst OpenQA/Isotovideo/Interface.pm, xt/01-style.t, xt/06-pod-coverage.t, .perltidyrc, .github/checklist.yml, .github/workflows/openqa_fullstack.yml, README.md; openQA tools/ci/autoinst.sha, tools/ci/build_autoinst.sh, docs/WritingTests.md, lib/OpenQA/Worker/Engines/isotovideo.pm.
 
 ## Commits, CI and merge
 
@@ -140,11 +140,11 @@ Sources: os-autoinst OpenQA/Isotovideo/Interface.pm, xt/01-style.t, xt/06-pod-co
 
 **Commits**: one logical change each, refactoring, fix and feature apart. Mergify merges with a merge commit, so commits land as pushed: fold review fixes into the commit they fix, push with `--force-with-lease`, rebase on master, never merge it in (linear history is a merge condition).
 
-**CI**: openQA's CircleCI jobs `checkstyle`, `compile`, `t`, `heavy`, `api`, `ui`, `fullstack` collect coverage for `codecov`; GitHub Actions add the commit check, `npm run lint`, containers and helm; OBS reports package builds. os-autoinst: `ci.yml` (CTest without `test-local-*`, coverage), `author-tests.yaml`, `openqa_fullstack.yml`. Fix red checks before review; name the cause of an unrelated one.
+**CI**: openQA's CircleCI jobs `checkstyle` and `compile` check style and compilation, `t`, `heavy`, `api`, `ui`, `fullstack` and `fullstack-unstable` collect coverage for `codecov`; GitHub Actions add the commit check, `npm run lint`, containers and helm; OBS reports package builds. os-autoinst: `ci.yml` (CTest without `test-local-*`, coverage), `author-tests.yaml`, `openqa_fullstack.yml`. Fix red checks before review; name the cause of an unrelated one.
 
-**Merge** (`.mergify.yml`): mergify merges by itself once all hold: base `master`; no label matching `acceptance-tests-needed` or `not-ready`; codecov green; no failed or pending check and a minimum of successful ones; linear history; two approvals, no changes requested, no pending review request. `merge-fast` drops the approval conditions; dependency-bot PRs merge on their checks.
+**Merge** (`.mergify.yml`): mergify merges by itself once all hold: base `master`; no label matching `acceptance-tests-needed` or `not-ready`; codecov green; no failed or pending check and a minimum of successful ones; linear history; two approvals, no changes requested, no pending review request. `merge-fast` and, in openQA, the `merge-skip-*` labels drop the approval conditions; dependency-bot PRs merge on their checks.
 
-- **Approvals survive pushes**: neither file dismisses reviews, so a push after two approvals merges once its checks are green. Push only what is ready, or set `not-ready` (ask a maintainer if you cannot) while a consumer PR, a deployment or a discussion is pending.
+- **Approvals survive pushes**: neither file dismisses reviews, so a push after two approvals merges once its checks are green. Push only what is ready, or set `not-ready` (ask a maintainer if you cannot; both are writes -> SKILL.md "Write gate") while a consumer PR, a deployment or a discussion is pending.
 - **A review request** stops being pending once that reviewer submits any review, a comment too: only requested changes hold the merge.
 
 Sources: openQA and os-autoinst external/os-autoinst-common/.gitlint, .mergify.yml, .github/workflows/; openQA Makefile, .circleci/config.yml; os-autoinst tools/check-git-commit-message; gitlint-core rule contrib-title-conventional-commits.

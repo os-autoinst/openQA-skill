@@ -235,13 +235,19 @@ data["job"]["testresults"] = [
                                            + ["-----BEGIN OPENSSH PRIVATE KEY-----"]
                                            + [f"RUVFRUZGRkZHR0dH{n:02d}" for n in range(3)]
                                            + ["-----END OPENSSH PRIVATE KEY-----", "after the key"])),
+    # Only two lines fit in the scanned first MiB, the BEGIN line among them: no line is left for the tail.
+    module("key_scan_edge", "cmd", "\n".join(["-----BEGIN OPENSSH PRIVATE KEY-----", "Q" * (1 << 20)]
+                                             + ["tail line"] * 7)),
 ]
 json.dump(data, open(f"{sys.argv[1]}/api_v1_jobs_872_details.json", "w"))
 json.dump([], open(f"{sys.argv[1]}/api_v1_jobs_872_comments.json", "w"))
 PY
 actual=$(python3 "$script" --host https://openqa.example.org --fixture-dir "$tmp" 871 2>&1)
 key=$(python3 "$script" --host https://openqa.example.org --fixture-dir "$tmp" 872 2>/dev/null)
+key_rc=$?
 rm -rf "$tmp"
+check "a key opened in the scanned window with no line left for the tail: no crash, the module still shows" "0 1" \
+	"$key_rc $(grep -c '^module=key_scan_edge ' <<<"$key")"
 # fence <module>: the lines of that module's step fence
 fence() { sed -n "/^module=$1 /,/^<<<END/p" <<<"$actual" | sed '1,/^<<<UNTRUSTED/d;$d'; }
 check "ten TCONF lines before a TFAIL: the TFAIL is shown, TCONF fills the rest" "7 1|[verdict lines only; 3 more verdict lines and 5 other lines not shown]" \

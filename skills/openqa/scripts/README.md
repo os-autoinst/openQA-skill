@@ -75,7 +75,7 @@ entry of V, also with `--passed` and `--before`.
 (triage that parent).
 
     group=1 name="openSUSE Tumbleweed" build=20260919 ... failed=2 labeled=2 unreviewed=0 state=reviewed scenario_prefix=...
-    6228572 failed BCI-x86_64-bci_ruby_podman modules=bci_test_podman bugrefs=gh#SUSE/BCI-tests#1142
+    6230416 failed BCI-x86_64-bci_python_docker modules=bci_test_docker bugrefs=poo#123456
 
 `review=?`: comments not read (`mode=api-fallback` or `--before`, request cap; the requests the builds and
 groups still to list need are kept back, every group's builds read first as a build exists once per version).
@@ -557,8 +557,8 @@ comments, descriptions or people.
     smelt-inc.py --package NAME [--max N]        # active incidents that contain exactly this package
     smelt-inc.py -v ID                           # one incident, in depth
 
-    incident=47567 status=active priority=325 severity=important rating=important crd=- prd=2030-01-09 srd=- frd=2030-01-20 match=ImageMagick
-      packages=ImageMagick,curl,go
+    incident=41234 status=active priority=325 severity=important rating=important crd=- prd=2030-01-09 srd=- frd=2030-01-20 match=libxml2
+      packages=libxml2,openssl-3,go
 
 Sorted by priority, the highest number first (higher is more urgent: observed, SMELT documents no direction;
 `severity` and `rating` are SMELT's own words). `crd` is the coordinated release (embargo) date, `prd` the planned

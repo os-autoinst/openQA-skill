@@ -215,7 +215,7 @@ def parser():
         "(observed, not documented by SMELT).",
     )
     parser.add_argument(
-        "incidents", nargs="*", metavar="ID", help="incident ids, e.g. 47567"
+        "incidents", nargs="*", metavar="ID", help="incident ids, e.g. 41234"
     )
     parser.add_argument(
         "--job",

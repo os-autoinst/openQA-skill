@@ -88,7 +88,7 @@ Real comments on o3, by job id.
 | 6215752 | `@ttm ignore` | no ref, no label: unreviewed, nothing carries over, same manual step next build |
 | 6215765 | automated summary starting `bootloader_uefi#1: …` | module name parsed as a bugref: job reviewed against a bug that does not exist, long text now a carry-over candidate |
 | 6223598 | `boo#1264061` twice, once typed, once carried over | duplicate; existing comments were not checked first |
-| 6227615 | `gh#SUSE/BCI-tests#1142`, reason, `@ttm ignore` | ref is the merged PR that caused the break, nothing tracks the fix: reviewed forever, no coverage |
+| a BCI job | `gh#<owner>/<repo>#<n>` naming the merged PR that broke it, reason, `@ttm ignore` | ref is the merged PR that caused the break, nothing tracks the fix: reviewed forever, no coverage |
 | 6222745 | `boo#1192829` with `(Automatic takeover from t#2042445)` | carried over 4 million job ids, never re-validated |
 
 ## auto_review subjects

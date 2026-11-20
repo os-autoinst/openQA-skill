@@ -27,8 +27,8 @@
 ## Reading the digest
 
 ```
-incident=47567 status=active priority=325 severity=important rating=important crd=- prd=2030-01-09 srd=- frd=2030-01-20 match=ImageMagick
-  packages=ImageMagick,curl,go
+incident=41234 status=active priority=325 severity=important rating=important crd=- prd=2030-01-09 srd=- frd=2030-01-20 match=libxml2
+  packages=libxml2,openssl-3,go
 ```
 
 - **Priority**: higher is more urgent. Observed in SMELT's data, not documented by SMELT: `moderate` incidents sit at 0, `important` and `Highly visible` ones at several hundred. Lines are sorted by it, highest first. Quote it as a number, never as a verdict.
@@ -43,7 +43,7 @@ incident=47567 status=active priority=325 severity=important rating=important cr
 **`-v` is for one incident that the plain digest does not explain.** It is refused above five ids and with `--package`; do not add it to a sweep or to an aggregate job.
 
 ```
-smelt-inc.py -v 47567
+smelt-inc.py -v 41234
   requests=436183:review,436100:accepted products=SLE-Product-HA:15-SP6,SUSE:SLE-15-SP6:Update
   openqa_check=passed maint_check=- flags=emu,priority_override
 ```

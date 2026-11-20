@@ -139,10 +139,11 @@ check "default: no clone chain and no dependencies line when there is none" 0 "$
 actual=$(job 500 --steps 1 | normalize)
 check "--steps 1 keeps the die message" "test-died:needle-mismatch test-died:command-failure info serial-failure parser-result-failed" \
 	"$(grep -o 'kind=[^ ]*' <<<"$actual" | cut -d= -f2 | xargs)"
-check "--steps 1 says what it left out" 1 "$(grep -c '^  +1 failing steps not shown (--steps N)$' <<<"$actual")"
+check "--steps 1 says what it left out and the --steps that shows all of a module's" 1 \
+	"$(grep -c '^  +1 failing steps not shown (--steps 2 shows all)$' <<<"$actual")"
 actual=$(job 500 --steps 0)
 check "--steps 0: the job and its failed modules with their counts, no step line, no step text" "0 1 5 0 0 1 1" \
-	"$? $(grep -c '^job=500 ' <<<"$actual") $(grep -c '^module=.* result=failed' <<<"$actual") $(grep -c '^  step=\|^    \(text\|frame\|tags\|candidates\)=' <<<"$actual") $(grep -c 'source=openqa.example.org/tests/500/step/' <<<"$actual") $(grep -c '^  +2 failing steps not shown (--steps N)$' <<<"$actual") $(grep -c '^review: ' <<<"$actual")"
+	"$? $(grep -c '^job=500 ' <<<"$actual") $(grep -c '^module=.* result=failed' <<<"$actual") $(grep -c '^  step=\|^    \(text\|frame\|tags\|candidates\)=' <<<"$actual") $(grep -c 'source=openqa.example.org/tests/500/step/' <<<"$actual") $(grep -c '^  +2 failing steps not shown (--steps 2 shows all)$' <<<"$actual") $(grep -c '^review: ' <<<"$actual")"
 check "--steps 0: the module lines are those of the digest" \
 	"$(job 500 | grep '^module=')" "$(grep '^module=' <<<"$actual")"
 

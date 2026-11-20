@@ -965,7 +965,10 @@ def print_modules(client, job, max_steps, verbose, wanted=None):
             loop = needle_loop(steps, step)
             print_step(client, job["id"], name, step, source, verbose, shot, loop)
         if len(bad) > len(shown):
-            print(f"  +{len(bad) - len(shown)} failing steps not shown (--steps N)")
+            every = len(bad) + (died is not None and steps[died] not in bad)
+            print(
+                f"  +{len(bad) - len(shown)} failing steps not shown (--steps {every} shows all)"
+            )
         if hook:
             line = f"  +{len(hook)} post_fail_hook steps not shown"
             dead = next((s for s in hook if s.get("title") == HOOK_DIED), None)

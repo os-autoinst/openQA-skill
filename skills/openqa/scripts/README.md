@@ -143,7 +143,7 @@ A restarted job is history, a `parallel_failed` job is a victim, steps after the
     oqa-job.py JOB_URL|ID --module NAME --all-steps [--step-range A-B]    # num result title shot per step
 
 `--steps N` failing steps per module (2; `0`: no step lines, only the job and its failed modules, each with
-`+N failing steps not shown`); `--settings '^(QEMU|HDD)'` adds settings by key (default: BACKEND,
+`+N failing steps not shown (--steps M shows all)`, M that module's count); `--settings '^(QEMU|HDD)'` adds settings by key (default: BACKEND,
 CASEDIR, NEEDLES_DIR, YAML_SCHEDULE; `TEST_GIT_HASH` and `NEEDLES_GIT_HASH` are no job settings, a regex
 that names them prints the `oqa-log.py ... --file vars.json` call that reads them; a job that is not ok
 adds `hint: what changed since the last good run: oqa-history.py <url> --investigation`, as the line

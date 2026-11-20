@@ -82,6 +82,7 @@ ok((any { /create-vpc/ } @calls), 'Create command');
 - **Names**: `subtest '[function_name] case'`; `dies_ok` per `croak`; `use Test::Warnings;`.
 - **Never assert** `record_info` text (#26120), private helpers directly (#25162), or a literal duplicating a lib constant (#26691).
 - **Test modules cannot be loaded in `t/`**: reusable code goes to lib, steps stay in `tests/` (#26176).
+- A changed helper's callers and default -> references/pr-review-rules.md "High-impact rare rules"
 
 ## Forbidden strings
 

@@ -143,6 +143,7 @@ cp -r data/console/openqa_agnostic/python/testSudo /tmp/agn/ && cd /tmp/agn/test
 | Reads only `/etc/<file>`; hardcoded `/tmp/...` | fall back to `/usr/etc`; pytest `tmp_path` |
 | Conversion drops diagnostics the old job showed | `pytest -s` and `record_testsuite_property` |
 | Verified on Tumbleweed only | add the oldest SLE SP in scope (Python 3.6) and a transactional image; say why a product is excluded |
+| pytest `-k` picks tests by name substring: a phase whose names lack it is deselected and the run still passes | select by marker (`-m`), then check the expected cases appear in the parsed results |
 | Python artifact on an image without `python3`: `setup` skips, the module passes untested | install `python3` in the wrapper before `setup`; in a green run look for the `skip` box |
 
 ## Converting existing modules

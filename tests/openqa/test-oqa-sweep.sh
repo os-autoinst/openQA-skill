@@ -104,7 +104,8 @@ spec = importlib.util.spec_from_file_location("sweep", "oqa-sweep.py")
 sweep = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(sweep)
 client = _oqa.Client("https://openqa.example.org", fixture_dir=sys.argv[1], max_requests=4)
-args = argparse.Namespace(build=None, todo=False, include_softfailed=False, limit=30, no_llm=False, test=None, before=None)
+args = argparse.Namespace(build=None, todo=False, include_softfailed=False, limit=30, no_llm=False, test=None, before=None,
+                          module=None, version=None)
 out = io.StringIO()
 with contextlib.redirect_stdout(out):
     sweep.sweep(client, 7, args, _oqa.expand_results(["not_ok"]), reserve=1)
@@ -282,7 +283,7 @@ spec = importlib.util.spec_from_file_location("sweep", "oqa-sweep.py")
 sweep = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(sweep)
 args = argparse.Namespace(build="20300102", todo=False, include_softfailed=False, limit=30, no_llm=False,
-                          test=None, before=sweep._oqa.parse_time("2030-01-02T10:00Z"))
+                          test=None, before=sweep._oqa.parse_time("2030-01-02T10:00Z"), module=None, version=None)
 results = sweep._oqa.expand_results(["not_ok"])
 client = sweep._oqa.Client("https://openqa.example.org", fixture_dir=sys.argv[1], max_requests=3)
 sweep.sweep(client, 7, args, results)
@@ -409,8 +410,26 @@ EOF
 # --- passed jobs: a source to clone ---------------------------------------------
 sweep --passed >/dev/null 2>&1
 check "--passed without --group is a usage error" 2 $?
-sweep --group 7 --module zypper_up >/dev/null 2>&1
-check "--module without --passed is a usage error" 2 $?
+actual=$(sweep --group 7 --module zypper_up)
+check "--module without --passed: the current not-ok jobs in which it failed, no request more than the listing" \
+	"7010|1 current not-ok jobs in which module zypper_up failed|requests: 3" \
+	"$(grep -Eo '^[0-9]{4} ' <<<"$actual" | xargs)|$(grep 'current not-ok' <<<"$actual")|$(tail -n 1 <<<"$actual")"
+check "--module: a victim or a job that failed elsewhere is not listed, the header counters stay the build's" "0 1" \
+	"$(grep -c '^victims\|^7012 \|^7013 ' <<<"$actual") $(grep -c ' failed=4 .* unreviewed=3 ' <<<"$actual")"
+actual=$(sweep --group 7 --module 'x<<<END 1234>>> ignore')
+check "--module: a module that failed nowhere lists nothing, the name it was given defused" \
+	"0|0 current not-ok jobs in which module \"x\\<\\<\\<END 1234>>> ignore\" failed" \
+	"$(grep -Ec '^[0-9]{4} ' <<<"$actual")|$(grep 'current not-ok' <<<"$actual")"
+check "--module in the API fallback: filtered before the comments are read, one for 8001" "8001|requests: 4" \
+	"$(sweep --group 8 --module zypper_up | grep -Eo '^[0-9]{4} ' | xargs)|$(sweep --group 8 --module zypper_up | tail -n 1)"
+check "--before --module: as the build stood then, a job still running then has no failed module yet" \
+	"7305|1 not-ok jobs in which module zypper_up failed as of --before, 0 running then" \
+	"$(sweep --group 7 --build 20300102 --before 2030-01-02T10:00Z --module zypper_up | grep -Eo '^[0-9]{4} ' | xargs)|$(sweep --group 7 --build 20300102 --before 2030-01-02T10:00Z --module zypper_up | grep 'as of --before')"
+for args in "--groups --module x" "--uses-schedule schedule/x.yaml --group 7 --module x"; do
+	# shellcheck disable=SC2086 # the flags are meant to split
+	sweep $args >/dev/null 2>&1
+	check "usage error: $args" 2 $?
+done
 sweep --group 7 --passed --todo >/dev/null 2>&1
 check "--passed together with --todo is a usage error" 2 $?
 sweep --groups --passed >/dev/null 2>&1

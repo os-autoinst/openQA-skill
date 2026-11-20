@@ -39,7 +39,7 @@ One line per script, generated from the parsers: do not edit it by hand. What a 
 
 `jobs?result=failed&latest=1` also lists failures whose restart passed; the overview route does not.
 
-    oqa-sweep.py --group ID [--group ID ...] [--build B] [--todo] [--test REGEX] | --groups [--match REGEX]
+    oqa-sweep.py --group ID [--group ID ...] [--build B] [--todo] [--test REGEX] [--module M] | --groups [--match REGEX]
     oqa-sweep.py --group ID --build B --before TIME [--todo] [--test REGEX]    # the build as it stood then
     oqa-sweep.py --group ID [--build B] --passed [--module M] [--test REGEX] [--limit N]    # a source job to clone
     oqa-sweep.py --uses-schedule schedule/x/y.yaml (--group ID ... | --match REGEX)
@@ -64,6 +64,9 @@ grouping, never verdicts. A missing summary, unreadable comments or a spent requ
 flavors and arches, the count line then ends `whose test matches --test` and the header counters stay
 the build's; also with `--passed`, where openQA filters a literal `'^NAME$'` (`test=NAME`) and any other
 regex searches the newest 100 clone sources (the count line says when that window was full).
+`--module M` only jobs in which M failed (the count line ends `in which module M failed`), matched on the
+failed modules the listing already carries, so no request more, `--before` included: the overview's own
+`modules=` filter would pick per scenario the newest job that failed in M, an older one where a newer did not.
 `--exit-code`: also 1 when `--passed`, `--groups`, `--uses-schedule`, `--vr-build` list nothing.
 `victims parent=ID never_ran=N jobs=...`: jobs that never ran. Extras: `restarts=`, `origin=`, `parents=`
 (triage that parent).

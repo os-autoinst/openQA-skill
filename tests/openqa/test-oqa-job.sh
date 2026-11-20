@@ -297,6 +297,14 @@ after = begin[19:] + "\\nU0VBTUtFWQ\\n-----END RSA PRIVATE KEY-----\\n\"} "
 after += "z" * ((1 << 20) - len(after))
 data["job"]["testresults"].append(module("key_seam", "cmd", "\n".join(
     ["cat secrets.json", "output:"] + ["x" * 1000] * 1100 + ['{"key": "' + "p" * 300000 + begin[:19] + after])))
+# Verdict lines are picked one by one: a key's line that reads as one, a "+" line of an .out.bad
+# diff or a line with "error" in a died test, is still part of the key.
+data["job"]["testresults"] += [
+    module("key_diff", "cmd", "\n".join(["generic/001.out.bad differs"] + ["filler"] * 10
+                                        + ["key: " + begin, "+RElGRkJPRFk", "-----END RSA PRIVATE KEY-----", "-x", "+y"])),
+    module("key_died", "Failed", "\n".join(["# Test died: no answer at x.pm line 1."] + ["filler"] * 10
+                                           + [begin, "RElFREJPRFkerror", "-----END RSA PRIVATE KEY-----"])),
+]
 json.dump(data, open(f"{sys.argv[1]}/api_v1_jobs_873_details.json", "w"))
 json.dump([], open(f"{sys.argv[1]}/api_v1_jobs_873_comments.json", "w"))
 PY
@@ -310,6 +318,8 @@ check "a BEGIN marker split by a terminal title still hides the key's body" "0 1
 seam=$(sed -n '/^module=key_seam /,/^<<<END/p' <<<"$osc")
 check "the last MiB read back from inside a BEGIN marker: the line it cut is a key's line" "0 1" \
 	"$(grep -c 'U0VBTUtFWQ' <<<"$seam") $(grep -c '^\[REDACTED:private-key\]$' <<<"$seam")"
+check "a key's line that reads as a verdict line is not picked: no body, the real verdicts still are" "0 1 1 1" \
+	"$(grep -c 'RElGRkJPRFk\|RElFREJPRFk' <<<"$osc") $(grep -c '^+y$' <<<"$osc") $(grep -c '^-x$' <<<"$osc") $(grep -c '^# Test died: no answer at x.pm line 1.$' <<<"$osc")"
 check "a key opened in the scanned window with no line left for the tail: no crash, the module still shows" "0 1" \
 	"$key_rc $(grep -c '^module=key_scan_edge ' <<<"$key")"
 # fence <module>: the lines of that module's step fence

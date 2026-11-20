@@ -42,12 +42,11 @@ Steps:
    - fetch `<old>` as well (`git -C <checkout> fetch origin <old>`), then diff only the PR's own files: `git -C <scratch>/pr-<n> diff <old>..HEAD -- <files>`. Never the compare API: it takes in what master gained meanwhile, and a comment on a line outside the PR's diff fails with HTTP 422;
    - read only threads and comments created after that review's time;
    - an old point that still stands gets a reply in its thread, never a new comment.
-4. **Check**: walk "Where to look" against the diff, verify each finding at the head, drop what "What not to post" excludes.
+4. **Check**: walk "Where to look" (or its openQA, os-autoinst replacement) against the diff, verify each finding at the head, drop what "What not to post" excludes.
 5. **CI pending** (`gh pr checks` exits 8): you can neither wait for it nor ask the user. Return the checked findings and the names of the pending checks without a review JSON; the caller dispatches you again once they have finished.
 6. **Draft** `<scratch>/review-<n>.json` and lint it unpiped, alone on its line, until exit 0:
    ```
    python3 <skill>/scripts/review-lint.py <scratch>/review-<n>.json --lines <additions+deletions> [--lib] [--late] [--replies N]
    ```
-   A pipe reports the exit of its last command (`| tail; echo $?` is tail's); piped, read `${PIPESTATUS[0]}`.
 
-**Output contract:** the path of the review JSON, its `commit_id` (the `headRefOid` you checked) and the lint output with exit 0, or with CI pending the findings and pending checks instead; each thread reply as comment id plus text; one line per dropped finding and why (ceiling, late, unverified, raised before); the CI state of that commit; confirmation that the worktree and `refs/oqa-review/pr-<n>` are removed.
+**Output contract:** the path of the review JSON, its `commit_id` (the `headRefOid` you checked) and the lint output with exit 0 (exception: pr-reviewing.md "openQA and os-autoinst PRs"), or with CI pending the findings and pending checks instead; each thread reply as comment id plus text; one line per dropped finding and why (ceiling, late, unverified, raised before); the CI state of that commit; confirmation that the worktree and `refs/oqa-review/pr-<n>` are removed.

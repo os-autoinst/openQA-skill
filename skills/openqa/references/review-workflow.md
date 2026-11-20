@@ -123,6 +123,7 @@ openqa-cli api --host https://openqa.opensuse.org -X POST jobs/<id>/restart
   - In a triage, quote its class and say which evidence agrees or disagrees; a summary is never support on its own ("the bot concurs"). Read the one on the first bad job too.
 - `Unknown test issue, to be reviewed` (hook output or notification mail, not a job comment): no `auto_review` regex matched; the job is unreviewed.
 - A bot-applied ticket reference (`auto_review` match) counts as reviewed; verify the match in a full review.
+- **A comment that is only a label** such as `label:missing_asset` or `label:download_error`, from `openqa-label-known-issues`: a fixed log pattern matched and no ticket stands behind it, yet the job counts as reviewed -> references/review-comments-tickets.md "Labels without ticket"
 
 ## Closing a job
 

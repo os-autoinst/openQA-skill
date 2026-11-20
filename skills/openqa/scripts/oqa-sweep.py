@@ -28,7 +28,8 @@ still to list need, was reached. Jobs that never ran because a parent failed
 --test REGEX keeps the jobs whose test name it matches (re.search, case-sensitive,
 the name without the @machine the overview may add), so one scenario's spread over
 flavors and arches needs no full listing; the header counters stay those of the
-whole build.
+whole build. --module NAME keeps the jobs in which that module failed, from the failed
+modules the listing carries, so it costs no request.
 
 --before TIME (ISO 8601, UTC unless it has an offset; needs --build) shows the
 build as it stood then, for a review of an older failure: per scenario the newest
@@ -257,7 +258,7 @@ def _parents(deps):
     return [job for kind in DEPENDENCY_TYPES for job in _ids(parents.get(kind))]
 
 
-def overview_jobs(client, group, entry, results, todo, pattern=None):
+def overview_jobs(client, group, entry, results, todo, pattern=None, module=None):
     params = [("groupid", group), ("build", entry["build"])]
     if entry.get("version") is not None:
         params.append(("version", entry["version"]))
@@ -284,7 +285,16 @@ def overview_jobs(client, group, entry, results, todo, pattern=None):
         job["id"] for job in jobs
     ):
         raise ShapeError("job_ids and results disagree")
-    return _of_test(jobs, pattern), bool(data.get("limit_exceeded"))
+    return _of_module(_of_test(jobs, pattern), module), bool(data.get("limit_exceeded"))
+
+
+def _of_module(jobs, module):
+    """The jobs in which --module failed; all of them without it. Matched here, on the
+    failed modules each listing carries: the overview's modules= filter picks the latest
+    job per scenario among those it matches, an older one when a newer did not fail there."""
+    if module is None:
+        return jobs
+    return [job for job in jobs if module in job["modules"]]
 
 
 def _of_test(jobs, pattern, name=lambda job: job["test"]):
@@ -322,7 +332,7 @@ def _overview_job(scenario, leaf):
     }
 
 
-def api_jobs(client, group, entry, results, todo, pattern=None, reserve=0):
+def api_jobs(client, group, entry, results, todo, pattern=None, reserve=0, module=None):
     """scope=current drops restarted jobs; a scenario that was scheduled again
     without a restart can still show its older failure here. The comments reads
     leave `reserve` requests to the entries and groups still to list."""
@@ -334,7 +344,7 @@ def api_jobs(client, group, entry, results, todo, pattern=None, reserve=0):
         _api_job(job)
         for job in client.get_json("/api/v1/jobs", params).get("jobs") or ()
     ]
-    jobs = _of_test(jobs, pattern)
+    jobs = _of_module(_of_test(jobs, pattern), module)
     jobs.sort(key=_order)
     complete = _read_reviews(client, jobs, reserve)
     if todo:
@@ -417,6 +427,10 @@ def jobs_before(client, group, entry, args, results, reserve):
             or finished > args.before
         ):
             newest[scenario].update(result="running", modules=[], refs=[], comments=0)
+    if args.module:
+        newest = {
+            key: job for key, job in newest.items() if args.module in job["modules"]
+        }
     reads = client.requests
     # A failed module in an ok job may be one a later label:force_result overruled.
     suspects = [
@@ -635,7 +649,7 @@ def sweep(client, group, args, results, reserve=0, picked=None):
         else:
             try:
                 jobs, truncated = overview_jobs(
-                    client, group, entry, results, args.todo, args.test
+                    client, group, entry, results, args.todo, args.test, args.module
                 )
                 if truncated:
                     note = "warning: the server truncated the overview, the list is incomplete"
@@ -643,7 +657,14 @@ def sweep(client, group, args, results, reserve=0, picked=None):
                 mode = MODE_API
                 print(f"note: /tests/overview.json not usable ({error}); using /api/v1")
                 jobs, complete = api_jobs(
-                    client, group, entry, results, args.todo, args.test, reserve + later
+                    client,
+                    group,
+                    entry,
+                    results,
+                    args.todo,
+                    args.test,
+                    reserve + later,
+                    args.module,
                 )
                 if not complete:
                     note = "warning: request cap reached, '?' marks jobs whose comments were not read"
@@ -683,6 +704,8 @@ def sweep(client, group, args, results, reserve=0, picked=None):
             kind += " (softfailed included)"
         if args.test:
             kind += " whose test matches --test"
+        if args.module:
+            kind += f" in which module {tok(args.module, 60)} failed"
         running = sum(job["result"] == "running" for job in jobs) if as_of else 0
         if as_of:
             kind += f" as of --before, {running} running then"
@@ -1076,7 +1099,9 @@ def main():
     parser.add_argument(
         "--module",
         metavar="NAME",
-        help="with --passed: only jobs in which this test module ran and passed",
+        help="only current not-ok jobs in which this test module failed, matched on the "
+        "failed modules the listing carries (no request more); with --passed: only jobs "
+        "in which it ran and passed",
     )
     parser.add_argument(
         "--groups",
@@ -1160,10 +1185,9 @@ def main():
         parser.error("give either --group ID (repeatable) or --groups")
     elif args.match and not args.groups:
         parser.error("--match needs --groups or --uses-schedule")
-    if args.module and not args.passed:
-        parser.error("--module needs --passed")
-    if args.test and (not args.group or args.uses_schedule is not None):
-        parser.error("--test goes with --group ID [--build B] [--passed] only")
+    for flag, value in (("--test", args.test), ("--module", args.module)):
+        if value is not None and (not args.group or args.uses_schedule is not None):
+            parser.error(f"{flag} goes with --group ID [--build B] [--passed] only")
     if args.passed and (args.groups or args.todo or args.include_softfailed):
         parser.error(
             "--passed goes with --group, --build, --module, --test and --limit only"

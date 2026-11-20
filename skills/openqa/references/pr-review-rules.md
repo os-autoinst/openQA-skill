@@ -108,7 +108,7 @@ A failing-job link replaces the ticket on small fixes (#26720).
 
 ## Pre-review checklist
 Most-flagged first; reasons and examples -> "Ranked requests".
-1. Searched `lib/` for a helper before writing shell, loops or regexes.
+1. Searched `lib/` for a helper before writing shell, loops or regexes; nothing repeated across modules, even below CI's 13 lines -> references/contributing-gates.md "Duplication and unused modules"
 2. Runs cover every product, version, arch, flavour, lib consumer and new branch; failures explained; rerun after the last functional push; opened and checked. -> "Verification runs"
 3. Nothing unused or commented out; nothing removed that is still called; `lib/main_*.pm` and `t/*.t` diffs read line by line for accidental deletions (#26556).
 4. One topic; names say what things do; comments are one-line why; workarounds carry their bug id; `lib/` change has true POD and a `t/` test.

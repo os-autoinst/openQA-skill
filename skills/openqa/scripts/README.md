@@ -516,13 +516,13 @@ the test log, or openQA's one-line message; no line when the answer has neither.
 
     job=6303362 host=https://openqa.opensuse.org scenario=opensuse-Tumbleweed-JeOS-for-kvm-and-xen-x86_64-jeos-ltp-syscalls@uefi_virtio-2G
     id       build     started            worker             result      failed_modules  bugrefs     clone
-    6303362  20261104  2026-11-05T15:27Z  openqaworker20:30  failed      mmap22          -           -
-    6302995  20261104  2026-11-05T09:08Z  openqaworker20:3   failed      boot_ltp    poo#123456  6303362
-    last_good=6300507 build=20261103 result=softfailed
-    first_bad=6302001 build=20261104 streak=5
+    6303362  20260708  2026-07-09T15:27Z  openqaworker20:30  failed      mmap22          -           -
+    6302995  20260708  2026-07-09T09:08Z  openqaworker20:3   failed      fanotify14      poo#123456  6303362
+    last_good=6300507 build=20260707 result=softfailed
+    first_bad=6302001 build=20260708 streak=5
     not_ok=5/11 (older runs exist: --previous N)
-    hint: failing since build 20261104: 5 runs in a row over 1 build(s); ...
-      versions (last_good 6300507 -> this job, from install_ltp-rpm-qa.txt): kernel-default-base 7.2.9-1.1.36.10 -> 7.2.10-1.1.36.11; ltp 20261103.6262a5fc-2959.1 -> 20261104.1aae0e4d-2960.1
+    hint: failing since build 20260708: 5 runs in a row over 1 build(s); ...
+      versions (last_good 6300507 -> this job, from install_ltp-rpm-qa.txt): kernel-default-base 6.19.4-1.1.12.3 -> 6.19.5-1.1.12.4; ltp 20260707.0c1d2e3f-2871.1 -> 20260708.4a5b6c7d-2872.1
       test changes: commits=29 failed_module=0 call_path=? lib=9 earlier_module=3 (those first, then newest first) url=...
 
 ## oqa-src.py - test code at the job's commit

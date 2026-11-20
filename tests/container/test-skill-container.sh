@@ -717,7 +717,7 @@ rc=$?
 [ "$rc" != 0 ] && [[ $out == "openqa-container: $long is not installed: 'openqa-container install $long'"* ]] &&
 	pass "the messages name the command the launcher was run as" || fail "the launcher's own name: rc=$rc $out"
 # A name install would write into the drop-in header, so not one that holds a new line or a blank.
-for odd in "oqa"$'\n'"PodmanArgs=--privileged" "openqa container"; do
+for odd in "oqa"$'\n'"PodmanArgs=--privileged" "openqa container" "a%b" 'a$b' "a'b" 'a"b' 'a\\b'; do
 	ln -s "$SC" "$work/$odd"
 	out="$("${scenv[@]}" HOME="$work/home" bash "$work/$odd" idle "$long" 2>&1)"
 	rc=$?

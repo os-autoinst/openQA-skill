@@ -543,10 +543,12 @@ def main(argv=None):
     # imported here: _sanitize imports this module
     # python3 -I leaves the script's own directory off sys.path; _sanitize lives there.
     sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-    from _sanitize import ArgumentParser
+    from _sanitize import ArgumentParser, strip_invisible
 
     parser = ArgumentParser(
-        description="Replace credential-shaped values on stdin. A mitigation, not a boundary: "
+        description="Replace credential-shaped values on stdin. Escape sequences, control and "
+        "invisible characters go first, so that colour codes cannot split a value; CR, CR LF "
+        "and the line and paragraph separators become new lines. A mitigation, not a boundary: "
         "shapeless passwords, values echoed without their key and tokens split across a line "
         "wrap all survive. Rotate a credential that reached a log; do not assume this caught it.",
         epilog="Exit codes: 0 nothing redacted, 1 at least one redaction, 2 usage error.",
@@ -563,7 +565,8 @@ def main(argv=None):
             load_patterns(args.scrub_patterns)
         except (OSError, ValueError) as error:
             parser.error(str(error))
-    text, found = redact(sys.stdin.buffer.read().decode("utf-8", "replace"))
+    text = strip_invisible(sys.stdin.buffer.read().decode("utf-8", "replace"))
+    text, found = redact(text)
     sys.stdout.write(text)
     if found and not args.quiet:
         print(summary(found), file=sys.stderr)

@@ -39,6 +39,7 @@ _ESCAPES = re.compile(
 )
 _ASCII_CONTROLS = re.compile(r"[\x00-\x08\x0b-\x1f\x7f]")
 _NON_ASCII = re.compile(r"[^\x00-\x7f]")
+_NON_ASCII_RUN = re.compile(r"[^\x00-\x7f]+")
 # Invisible code points that are not in category Cf: fillers, variation
 # selectors, U+2065, the braille blank, noncharacters, the specials gap and
 # all of the plane-14 tag area. Private-use code points go by category.
@@ -94,8 +95,7 @@ def _escape_marker(match):
     return "".join("\\" + char if char in _LT + _LT_DOUBLE else char for char in run)
 
 
-def _map_non_ascii(match):
-    char = match.group()
+def _visible(char):
     category = unicodedata.category(char)
     if category in ("Zl", "Zp"):
         return "\n"
@@ -104,6 +104,21 @@ def _map_non_ascii(match):
     if any(low <= ord(char) <= high for low, high in _INVISIBLE):
         return ""
     return char
+
+
+class _Visible(dict):
+    """Code point -> what _visible() keeps of it, for str.translate: a call for every character
+    of a serial log full of box drawing costs ten times as much. The cache is bounded, as the
+    text chooses the code points: past 65536 distinct ones, each further one costs a call."""
+
+    def __missing__(self, code):
+        kept = _visible(chr(code))
+        if len(self) < 65536:
+            self[code] = kept
+        return kept
+
+
+_VISIBLE = _Visible()
 
 
 def _neutralise(text):
@@ -152,10 +167,7 @@ def sanitize(text, *, max_line=DEFAULT_MAX_LINE, max_bytes=DEFAULT_MAX_BYTES):
         if len(text) > limit:
             dropped = len(text) - limit
             text = text[:limit]
-    text = text.replace("\r\n", "\n").replace("\r", "\n")
-    text = _ESCAPES.sub("", text)
-    text = _ASCII_CONTROLS.sub("", text)
-    text = _NON_ASCII.sub(_map_non_ascii, text)
+    text = strip_invisible(text)
     text = _STACKED_MARKS.sub(r"\1", text)
     # After the decoding tricks are gone, so a secret split up with invisible characters
     # cannot dodge the table; before the marker escape and the caps, so a redaction
@@ -176,6 +188,16 @@ def sanitize(text, *, max_line=DEFAULT_MAX_LINE, max_bytes=DEFAULT_MAX_BYTES):
     if max_bytes:
         text = _cap_bytes(text, max_bytes, dropped)
     return text
+
+
+def strip_invisible(text):
+    """text without escape sequences, control characters and invisible code points, CR, CR LF
+    and the line and paragraph separators made "\\n": what sanitize() removes before it
+    redacts, so that nothing invisible splits a credential."""
+    text = text.replace("\r\n", "\n").replace("\r", "\n")
+    text = _ESCAPES.sub("", text)
+    text = _ASCII_CONTROLS.sub("", text)
+    return _NON_ASCII_RUN.sub(lambda run: run.group().translate(_VISIBLE), text)
 
 
 def bare(text):

@@ -430,8 +430,14 @@ _KEYED_XML = re.compile(
 
 # A marker in the SOURCE text is an attacker dressing a secret as already-redacted.
 _IS_MARK = re.compile(r"\[REDACTED:[a-z-]+\]")
-PEM_BEGIN = re.compile(r"-----BEGIN[ A-Z0-9_-]{0,64}PRIVATE KEY(?: BLOCK)?-----")
-PEM_END = re.compile(r"-----END[ A-Z0-9_-]{0,64}PRIVATE KEY(?: BLOCK)?-----")
+# Any blanks but a new line between the words: a key copied through a web page has no-break
+# spaces, which bare() makes spaces, so one next to a space makes two.
+PEM_BEGIN = re.compile(
+    r"-----BEGIN(?:[A-Z0-9_-]|[^\S\n]){0,64}PRIVATE[^\S\n]{1,8}KEY(?:[^\S\n]{1,8}BLOCK)?-----"
+)
+PEM_END = re.compile(
+    r"-----END(?:[A-Z0-9_-]|[^\S\n]){0,64}PRIVATE[^\S\n]{1,8}KEY(?:[^\S\n]{1,8}BLOCK)?-----"
+)
 
 
 def _keyed_sub(match, found):

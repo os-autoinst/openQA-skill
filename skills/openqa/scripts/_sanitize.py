@@ -40,6 +40,9 @@ _ESCAPES = re.compile(
 _ASCII_CONTROLS = re.compile(r"[\x00-\x08\x0b-\x1f\x7f]")
 _NON_ASCII = re.compile(r"[^\x00-\x7f]")
 _NON_ASCII_RUN = re.compile(r"[^\x00-\x7f]+")
+# The spaces of category Zs but the ASCII one; sanitize() keeps them, unlike the other
+# non-ASCII blanks, which are controls or line separators.
+_NON_ASCII_BLANK = re.compile("[\u00a0\u1680\u2000-\u200a\u202f\u205f\u3000]")
 # Invisible code points that are not in category Cf: fillers, variation
 # selectors, U+2065, the braille blank, noncharacters, the specials gap and
 # all of the plane-14 tag area. Private-use code points go by category.
@@ -202,11 +205,13 @@ def strip_invisible(text):
 
 def bare(text):
     """The ASCII of text that sanitize() keeps, cheaply, to look for a marker in it: escape
-    sequences (colour codes, a terminal title), controls and every non-ASCII character go.
-    A marker that sanitize() makes whole is whole here too.
+    sequences (colour codes, a terminal title) and controls go, a non-ASCII space becomes a
+    space and every other non-ASCII character goes. A marker that sanitize() makes whole is
+    whole here too.
     """
     text = _ESCAPES.sub("", text.replace("\r\n", "\n").replace("\r", "\n"))
-    return _NON_ASCII.sub("", _ASCII_CONTROLS.sub("", text))
+    text = _NON_ASCII_BLANK.sub(" ", _ASCII_CONTROLS.sub("", text))
+    return _NON_ASCII.sub("", text)
 
 
 def one_lines(items, *, max_line=300, max_items=300):

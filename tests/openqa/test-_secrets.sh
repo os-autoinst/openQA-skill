@@ -144,6 +144,10 @@ actual=$(printf -- 'password\033[01;31m\033[K\033[m\033[K=Tr0ub4dor3x\n-----BEGI
 	python3 "$scripts/_secrets.py" 2>&1)
 check "run directly on a coloured log: a value and a key split by colour codes are redacted, the codes gone" "0 0 1 1" \
 	"$(grep -c 'Tr0ub4dor3x\|Q09MT1VSRUQ' <<<"$actual") $(grep -c $'\033' <<<"$actual") $(grep -c '^after$' <<<"$actual") $(grep -c '^redacted 2: keyed-assignment=1, private-key=1$' <<<"$actual")"
+actual=$(printf -- '-----BEGIN RSA PRIVATE \302\240KEY-----\nTkJTUEJPRFk\n-----END RSA PRIVATE\302\240KEY-----\nafter\n' |
+	python3 "$scripts/_secrets.py" 2>/dev/null)
+check "a no-break space in the key markers, beside a space too: the body is swallowed, the line after the END kept" "0 1" \
+	"$(grep -c TkJTUEJPRFk <<<"$actual") $(grep -c '^after$' <<<"$actual")"
 
 # --- what must survive, or the redactor destroys the evidence it exists to show ---
 keeps "the conventional openQA password" 'EXTRABOOTPARAMS=... live.password=nots3cr3t\n'

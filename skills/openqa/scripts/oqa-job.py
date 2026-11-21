@@ -356,7 +356,7 @@ def open_key(text):
 def cut_key(before, line):
     """The BEGIN marker of a private key that the start of line cuts in two, or "": line is
     read back from inside a longer one, before is the text ahead of it. A marker is at most
-    96 characters; CUT_WINDOW on each side leaves room for colour codes inside it. Both sides
+    110 characters; CUT_WINDOW on each side leaves room for colour codes inside it. Both sides
     are made bare together, so an escape sequence the cut splits does not split the marker:
     a marker found only there spans the cut."""
     left, right = before[-CUT_WINDOW:], line[:CUT_WINDOW]

@@ -112,6 +112,16 @@ print(bare("-----BEGIN \x1b[01;31m\x1b[KPRIVATE\x1b[m\x1b[K​ KEY-----\r\x9b1mx
 check "bare: colour codes, controls and non-ASCII gone, a split marker whole" "-----BEGIN PRIVATE KEY-----|x" \
 	"$(paste -sd '|' <<<"$actual")"
 actual=$(cd "$scripts" && python3 -c '
+from _sanitize import bare, sanitize
+print(bare("-----BEGIN\u00a0RSA PRIVATE\u202fKEY-----"))
+print(bare("-----BEGIN RSA PRIV\x85ATE KEY-----"))
+print(sanitize("-----BEGIN RSA PRIVATE\u00a0KEY-----\nTkJTUEJPRFk\n-----END RSA\u2007PRIVATE KEY-----\nafter"))
+print(bare("-----BEGIN RSA PRIVATE \u00a0KEY-----") == "-----BEGIN RSA PRIVATE  KEY-----")
+print(sanitize("-----BEGIN RSA PRIVATE \u00a0KEY-----\nTkJTUEJPRFk\n-----END RSA PRIVATE KEY-----\nafter"))
+')
+check "a no-break space in a key marker: bare makes it a space, a control in it goes as in sanitize, which hides the body" \
+	"-----BEGIN RSA PRIVATE KEY-----|-----BEGIN RSA PRIVATE KEY-----|[REDACTED:private-key]|||after|True|[REDACTED:private-key]|||after" "$(paste -sd '|' <<<"$actual")"
+actual=$(cd "$scripts" && python3 -c '
 from _sanitize import bare
 for text in ("PRIV\x1b]0;title\x07ATE", "PRIV\x9d0;title\x9cATE", "PRIV\x1bP1;2\x1b\\ATE",
              "x\x1b]8;;http://example.org/" + "p" * 300 + "\x1b\\y", "\x1b]PRIVATE KEY", "\x9dPRIVATE KEY"):

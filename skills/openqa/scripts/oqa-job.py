@@ -119,6 +119,7 @@ TEXT_SCAN = 1 << 20  # characters of a long step text searched for verdict lines
 HEAD_LINES = 8
 HEAD_BYTES = 1200
 TEXT_HEAD = 2  # first lines kept of a long step text without verdict lines, the rest from its end
+CUT_WINDOW = 4096  # characters each side of a cut searched for a BEGIN marker it splits
 KEY_MARK = _secrets.MARK.format("private-key")
 INLINE = 240  # longest text printed as text="..." instead of a fenced block
 # (lines, bytes) of a comment body: default, --verbose
@@ -355,12 +356,13 @@ def open_key(text):
 def cut_key(before, line):
     """The BEGIN marker of a private key that the start of line cuts in two, or "": line is
     read back from inside a longer one, before is the text ahead of it. A marker is at most
-    96 characters, so 128 on each side of the cut hold it."""
-    left, right = bare(before[-128:]), bare(line[:128])
-    for begin in _secrets.PEM_BEGIN.finditer(left + right):
-        if begin.start() < len(left) < begin.end():
-            return begin.group()
-    return ""
+    96 characters; CUT_WINDOW on each side leaves room for colour codes inside it. Both sides
+    are made bare together, so an escape sequence the cut splits does not split the marker:
+    a marker found only there spans the cut."""
+    left, right = before[-CUT_WINDOW:], line[:CUT_WINDOW]
+    joined = _secrets.PEM_BEGIN.findall(bare(left + right))
+    halves = [_secrets.PEM_BEGIN.findall(bare(side)) for side in (left, right)]
+    return joined[-1] if len(joined) > sum(map(len, halves)) else ""
 
 
 def blank_keys(lines, inside=False):

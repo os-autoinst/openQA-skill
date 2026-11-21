@@ -139,6 +139,11 @@ actual=$(printf -- '-----BEGIN RSA PRIVATE KEY-----\nQUJDRA1\n-----END RSA PRIVA
 	python3 "$scripts/_secrets.py" 2>&1)
 check "a key whose BEGIN follows another's END on one line is swallowed too" "0 1 1" \
 	"$(grep -c QUJDRA <<<"$actual") $(grep -c '^after$' <<<"$actual") $(grep -c '^redacted 2: private-key=2$' <<<"$actual")"
+# A serial log as grep --color wrote it: colour codes inside a name and inside a key marker.
+actual=$(printf -- 'password\033[01;31m\033[K\033[m\033[K=Tr0ub4dor3x\n-----BEGIN RSA \033[01;31m\033[KPRIVATE\033[m\033[K KEY-----\nQ09MT1VSRUQ\n-----END RSA PRIVATE KEY-----\nafter\n' |
+	python3 "$scripts/_secrets.py" 2>&1)
+check "run directly on a coloured log: a value and a key split by colour codes are redacted, the codes gone" "0 0 1 1" \
+	"$(grep -c 'Tr0ub4dor3x\|Q09MT1VSRUQ' <<<"$actual") $(grep -c $'\033' <<<"$actual") $(grep -c '^after$' <<<"$actual") $(grep -c '^redacted 2: keyed-assignment=1, private-key=1$' <<<"$actual")"
 
 # --- what must survive, or the redactor destroys the evidence it exists to show ---
 keeps "the conventional openQA password" 'EXTRABOOTPARAMS=... live.password=nots3cr3t\n'

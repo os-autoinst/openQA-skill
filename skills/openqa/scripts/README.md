@@ -134,6 +134,10 @@ Also usable directly, `stdin` to `stdout`, exit 1 when anything was redacted:
 
     openqa-cli archive <job> ./logs && _secrets.py < ./logs/testresults/autoinst-log.txt
 
+Escape sequences, control and invisible characters go first, as in what the scripts print, so
+colour codes that `grep --color` wrote into a serial log cannot split a value; CR, CR LF and the
+line and paragraph separators become new lines.
+
 `--scrub-patterns` takes site-specific formats that cannot live in a public repository. There
 is no environment variable and no file under `$HOME`: implicit configuration is how a script
 picks up a credential by accident. `--quiet` leaves the stderr summary out.

@@ -28,9 +28,9 @@ _EXCERPT_MARGIN = 2048
 
 # Specific introducers must precede the generic two-byte escape, which would
 # otherwise consume only "ESC [" and leave the parameters behind as text.
-# String sequences need their terminator, so a stray introducer hides nothing. A string
-# also ends at the next string introducer: a run of introducers without a terminator then
-# costs linear time, not quadratic.
+# String sequences need their terminator, so a stray introducer hides nothing. A string's
+# text runs only to the next string introducer; with no terminator there it is no string and
+# its text stays, so a run of introducers without a terminator costs linear time, not quadratic.
 _ESCAPES = re.compile(
     r"(?:\x1b\[|\x9b)[0-?]*[ -/]*[@-~]"
     r"|(?:\x1b\]|\x9d)[^\x07\x1b\x9c\x90\x98\x9d\x9e\x9f\n]*(?:\x07|\x1b\\|\x9c)"

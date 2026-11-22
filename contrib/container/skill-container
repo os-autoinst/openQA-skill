@@ -339,19 +339,32 @@ answers() { api GET /api/project >/dev/null 2>&1; }
 # An approval belongs to a project, and a checkout below the work directory is
 # a project of its own. The list is asked for the server's project, for every
 # project (an empty id, which is not documented) and for each project by its id.
+# An approval's or a session's id as one value of the answer: one that is
+# empty, no text, or holds more than letters, digits and _ comes out as "!",
+# which read_permissions refuses. Split into lines, a line break would make two.
+checked='def checked: if type == "string" and length > 0 and (test("[^A-Za-z0-9_]") | not) then . else "!" end; '
+# The projects are one list: a second would be left out. A project id that is
+# no text or holds more than letters, digits and _ comes out as "!": it is the
+# answer's, not a busy podman's, and saved ends with status 3.
 saved() {
 	local projects id ids
-	projects=$(api GET /api/project | jq -rs '.[0][].id') || return 1
+	projects=$(api GET /api/project |
+		jq -rs 'if length == 1 and (.[0] | type) == "array" then .[0][].id |
+			if type == "string" and (test("[^A-Za-z0-9_]") | not) then . else "!" end else error("no list") end') ||
+		return 1
 	mapfile -t ids < <(printf %s "$projects")
+	for id in "${ids[@]}"; do
+		[[ $id =~ ^[A-Za-z0-9_]*$ ]] || return 3
+	done
 	ids=('' "${ids[@]}")
 	{
 		api GET /api/permission/saved || return 1
 		for id in "${ids[@]}"; do
-			[[ $id =~ ^[A-Za-z0-9_]*$ ]] || return 1
 			api GET "/api/permission/saved?projectID=$id" || return 1
 		done
 	} | jq -rs --argjson n "$((${#ids[@]} + 1))" \
-		'if length == $n then map(.data[].id) | unique[] else error("an answer is missing") end'
+		"$checked"'if length == $n and all(.[]; (.data | type) == "array") then map(.data[].id) | unique[] | checked
+			else error("an answer is missing") end'
 }
 # The session list is paged and ends with an empty page.
 ruled() {
@@ -359,18 +372,66 @@ ruled() {
 	for _ in $(seq 100); do
 		page=$(api GET "/api/session?limit=1000${cursor:+&cursor=$cursor}") || return 1
 		n=$(jq -r 'if (.data | type) == "array" then .data | length else error("no list") end' <<<"$page") || return 1
+		# An answer that holds nothing gives no length.
+		[[ $n =~ ^[0-9]+$ ]] || return 1
 		[ "$n" != 0 ] || return 0
-		jq -r '.data[] | select((.permissions // []) != []) | .id' <<<"$page" || return 1
+		jq -r "$checked"'.data[] | select((.permissions // []) != []) | .id | checked' <<<"$page" || return 1
 		cursor=$(jq -r '.cursor.next // ""' <<<"$page") || return 1
-		[[ $cursor =~ ^[A-Za-z0-9_-]+$ ]] || return 1
+		# A cursor that is none in an answer read whole would be none again.
+		[[ $cursor =~ ^[A-Za-z0-9_-]+$ ]] || return 2
 	done
+	# A list that does not end would not end when read again.
+	return 2
+}
+# An image pull or a container create holds podman's storage lock for minutes,
+# also after the server first answered, and a call into the container gets no
+# answer meanwhile. A read, a removal or the import that fails is tried again
+# five seconds apart, 60 tries at most, until five minutes after the first
+# such call of this run: the server runs with what forget and relogin remove
+# all the while. A try started before then runs to its end, and a call made
+# after then still gets one. A list that still holds something after its
+# removal is a removal that failed. Status 2 says another try would fail the
+# same.
+retry_deadline=''
+retried() {
+	local n rc
+	[ -n "$retry_deadline" ] || retry_deadline=$((SECONDS + 300))
+	for ((n = 1; n <= 60; n++)); do
+		rc=0
+		"$@" || rc=$?
+		((rc != 0)) || return 0
+		((rc != 2 && n < 60 && SECONDS < retry_deadline)) || return "$rc"
+		((n > 1)) || echo "$prog: a call into $ctr failed; trying again, for up to five minutes in all" >&2
+		sleep 5
+	done
+	# Not reached: the last try returns above.
 	return 1
 }
-# Removes those it finds, and stops when one stays.
-forget() {
-	local approvals sessions id reset="'podman volume rm $name-$inst-state' removes them, with the sessions"
-	{ approvals=$(saved) && sessions=$(ruled); } || die "cannot read the permissions $ctr keeps: $reset"
-	[ -n "$approvals$sessions" ] || return 0
+# Into the variables of forget and relogin. Status 2 is for a session list that
+# does not end or names no next page, and for an answer that holds an id that
+# is no id (3 from saved and logins); any other failure is 1, since jq on
+# errors of its own and podman exec passing on what it ran can end with 2 too.
+read_permissions() {
+	local rc=0
+	approvals=$(saved) || rc=$?
+	((rc != 3)) || return 2
+	((rc == 0)) || return 1
+	sessions=$(ruled) || return
+	# An id checked turned into "!" would be read again: the launcher stops
+	# before any removal.
+	[[ $'\n'$approvals$'\n' != *$'\n!\n'* ]] || die "a saved approval of $ctr has an unexpected id: $reset"
+	[[ $'\n'$sessions$'\n' != *$'\n!\n'* ]] || die "a session of $ctr has an unexpected id: $reset"
+}
+read_logins() {
+	local rc=0
+	held=$(logins) || rc=$?
+	((rc != 3)) || return 2
+	((rc == 0)) || return 1
+}
+# Removes the approvals and session rules forget read last and reads them
+# again: true when none is left. An id that is no id stops the launcher.
+removed_permissions() {
+	local id
 	while IFS= read -r id; do
 		[ -n "$id" ] || continue
 		[[ $id =~ ^[A-Za-z0-9_]+$ ]] || die "a saved approval of $ctr has an unexpected id: $reset"
@@ -381,33 +442,49 @@ forget() {
 		[[ $id =~ ^[A-Za-z0-9_]+$ ]] || die "a session of $ctr has an unexpected id: $reset"
 		api PATCH "/api/session/$id" -d '{"permissions":[]}' >/dev/null || true
 	done <<<"$sessions"
-	{ approvals=$(saved) && sessions=$(ruled) && [ -z "$approvals$sessions" ]; } ||
-		die "the permissions $ctr keeps cannot be removed: $reset"
+	read_permissions && [ -z "$approvals$sessions" ]
+}
+# Removes those it finds, and stops when one stays.
+forget() {
+	local approvals sessions reset="'podman volume rm $name-$inst-state' removes them, with the sessions"
+	retried read_permissions || die "cannot read the permissions $ctr keeps: $reset"
+	[ -n "$approvals$sessions" ] || return 0
+	retried removed_permissions || die "the permissions $ctr keeps cannot be removed: $reset"
 	echo "$prog: removed the saved approvals and session rules of $ctr" >&2
 }
 # The model login is the secret's alone: one the state volume keeps from an
 # earlier secret would stay the active one. The server's list holds the keys.
 # An id is checked where it is still one value: a line break inside it makes two.
+# The answer is one list: one that holds nothing, or more than one, is none. An
+# id that is no id is the answer's, not a busy podman's: status 3, which an
+# exec that ends with 3 itself gives as well, and stops the launcher too.
 logins() {
 	{
 		api GET /api/credential |
-			jq -r 'if (.data | type) == "array" then .data[].id else error("no list") end |
-				if type == "string" and length > 0 and (test("[^A-Za-z0-9_]") | not) then . else error("id") end'
+			jq -rs 'if length == 1 and (.[0].data | type) == "array" then .[0].data[].id else error("no list") end |
+				if type == "string" and length > 0 and (test("[^A-Za-z0-9_]") | not) then . else "id" | halt_error(3) end'
 	} 2>/dev/null
 }
 # The server answers the removal of a login it does not hold like any other:
 # the list, read again, says what is left.
-relogin() {
-	local ids id reset="'podman volume rm $name-$inst-state' removes them, with the sessions; the unit is stopped"
-	ids=$(logins) || die "cannot read the model logins $ctr keeps: $reset"
+removed_logins() {
+	local id
 	while IFS= read -r id; do
 		[ -n "$id" ] || continue
+		[[ $id =~ ^[A-Za-z0-9_]+$ ]] || die "a model login of $ctr has an unexpected id: $reset"
 		api DELETE "/api/credential/$id" >/dev/null || true
-	done <<<"$ids"
-	{ ids=$(logins) && [ -z "$ids" ]; } || die "the model logins $ctr keeps cannot be removed: $reset"
-	# Its input is the login: what it says about a failure is not shown.
-	secret model | timeout 60 podman exec -i "$ctr" opencode auth import --server "$inner" >/dev/null 2>&1 ||
-		die "the model credential was not imported; the unit is stopped"
+	done <<<"$held"
+	read_logins && [ -z "$held" ]
+}
+# Its input is the login: what it says about a failure is not shown.
+imported() {
+	secret model | timeout 60 podman exec -i "$ctr" opencode auth import --server "$inner" >/dev/null 2>&1 || return 1
+}
+relogin() {
+	local held reset="'podman volume rm $name-$inst-state' removes them, with the sessions; the unit is stopped"
+	retried read_logins || die "cannot read the model logins $ctr keeps: $reset"
+	retried removed_logins || die "the model logins $ctr keeps cannot be removed: $reset"
+	retried imported || die "the model credential was not imported; the unit is stopped"
 }
 # True when one of two directories holds the other.
 nested() { [[ $1/ == "$2"/* || $2/ == "$1"/* ]]; }

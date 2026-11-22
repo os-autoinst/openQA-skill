@@ -308,10 +308,12 @@ boundary between the agent and what is inside the container.
   database. An approval saved there answers a question in every later session. Rules
   written onto a session answer every question of that session and switch off the
   denies of the configuration from its next prompt on, and here no plugin refuses in
-  their place. `up`, `attach`, `run` and `password` remove the session rules they find and the
+  their place. `up`, `update`, `attach`, `run` and `password` remove the session rules they find and the
   saved approvals of every project the server lists, and stop when a list cannot be
-  read or a rule stays. That clears what was left behind; an agent set on keeping its
-  rules puts them back.
+  read or a rule stays. A read or a removal that fails, as when another podman command
+  holds the storage lock, is first tried again for up to five minutes in all, and
+  under `up` and `update` so is the import of the model login. That clears what was
+  left behind; an agent set on keeping its rules puts them back.
 - **A start by systemd is not `up`.** At boot, and when the unit restarts after a
   failure, nothing removes the saved approvals and session rules and nothing imports
   the model login again. The next `up`, or an `update` that restarts, does both;

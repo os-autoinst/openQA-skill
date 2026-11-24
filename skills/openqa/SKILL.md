@@ -13,7 +13,7 @@ description: >-
   CI systems or general Perl or Mojolicious questions.
 license: GPL-2.0-or-later
 metadata:
-  version: "1.5.1"
+  version: "1.5.2"
 ---
 
 # openQA: write tests, review results

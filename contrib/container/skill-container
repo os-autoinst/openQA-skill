@@ -18,6 +18,8 @@ inner=http://127.0.0.1:4096
 # The memory graph the image reads when no volume holds one yet.
 memname=memory.jsonl
 die() {
+	# Text before it may have left the terminal's attributes set: the line resets them.
+	[ ! -t 2 ] || printf '\033[0m' >&2
 	echo "$prog: $*" >&2
 	exit 1
 }
@@ -162,11 +164,41 @@ ensure_password() {
 	podman secret exists "$name-$inst-server-password" 2>/dev/null ||
 		head -c 24 /dev/urandom | base64 | tr -d '\n' | store "$inst-server-password"
 }
-# What the model or the server wrote reaches the terminal as text: colours
-# stay, every other control character goes, for a terminal that reads UTF-8.
-# Taking one C1 control out can join the bytes of the next, hence the loop.
+# What the model or the server wrote reaches the terminal as text, for a
+# terminal that reads UTF-8: no control character, and no colour, which could
+# hide the launcher's lines after it (concealed, or the background's colour).
+# A C1 control is \xc2 and a byte from \x80 to \x9f. Taking one out can join
+# the bytes of the next, so each \xc2 waits for the byte after it, and one pass
+# takes them all out: a pass for each pair would take a time that grows with
+# the square of the text's length.
+c1prog='
+import os, signal
+signal.signal(signal.SIGPIPE, signal.SIG_DFL)
+signal.signal(signal.SIGINT, signal.SIG_DFL)
+def put(data):
+    while data:
+        data = data[os.write(1, data):]
+held = 0
+while True:
+    chunk = os.read(0, 65536)
+    if not chunk:
+        break
+    out = bytearray()
+    for b in chunk:
+        if b == 0xC2:
+            held += 1
+        elif held and 0x80 <= b <= 0x9F:
+            held -= 1
+        else:
+            if held:
+                out += b"\xc2" * held
+                held = 0
+            out.append(b)
+    put(out)
+put(b"\xc2" * held)
+'
 plain() {
-	LC_ALL=C sed -u -e 's/\x01//g' -e 's/\x1b\(\[[0-9;]*m\)/\x01\1/g' -e 's/[\x00\x02-\x08\x0b-\x1f\x7f]//g' -e ':a' -e 's/\xc2[\x80-\x9f]//g' -e 'ta' -e 's/\x01/\x1b/g'
+	LC_ALL=C sed -u -e 's/\x1b\[[0-9;:]*m//g' -e 's/[\x00-\x08\x0b-\x1f\x7f]//g' | python3 -I -S -c "$c1prog"
 }
 # An openQA client config with the key and secret of the named hosts alone:
 # $1 is the config to read, the rest are its sections to copy. -I: no module
@@ -266,8 +298,10 @@ cmd_secrets() {
 	openqa=$(openqa_login "$openqa_conf" "${hosts[@]}")
 	github=$(gh_login)
 	model=$(PATH=$userpath OPENCODE_DISABLE_PROJECT_CONFIG=1 "$opencode" auth export "$model_auth")
-	printf '%s' "$model" | jq -e 'length > 0' >/dev/null 2>&1 ||
-		die "opencode exported no credential for $model_auth"
+	# What up checks before it removes a kept login: no point storing less.
+	printf '%s' "$model" | jq -es "$checked"'length == 1 and (.[0] | type) == "array" and (.[0] | length) > 0
+		and (.[0] | map(.id) | unique | length) == (.[0] | length) and all(.[0][]; (.id | checked) != "!")' \
+		>/dev/null 2>&1 || die "opencode exported no credential for $model_auth, or none with an id each"
 	# The key is the container's own: the account's key settings can revoke it
 	# alone. A later run keeps it, or the key you registered would stop working.
 	if [ -n "$newkey" ] || ! podman secret exists "$name-ssh" 2>/dev/null; then
@@ -329,7 +363,43 @@ running() { systemctl --user is-active --quiet "$unit" 2>/dev/null; }
 # What a call into the container writes to its error stream may quote the
 # server, whose text is the agent's: it passes the filter.
 filtered() { { "$@" 2>&1 >&3 3>&- | plain >&2 3>&-; } 3>&1; }
-api() { filtered timeout 30 podman exec "$ctr" opencode api "$@" --server "$inner"; }
+# One call to the server's API: its answer goes to stdout, and what the call
+# wrote to its error stream to stderr through the filter, once the call ended.
+# When the server answers with an error opencode api ends with 1, prints the
+# answer and writes HTTP and the status code to its error stream. Fails with 2
+# when the server refused the request (4xx) with an answer, a JSON value: asking
+# again would get the same. Fails with 1 otherwise: no answer came, or the
+# server failed (5xx), as it does while its database is busy.
+api() {
+	local all out err end line len n code='' rc=0
+	# After the answer come the error stream, the status and the error stream's
+	# length, \001 before each. The last two are short and the length places the
+	# rest: a search for the mark back through a long error stream takes a time
+	# that grows with the square of its length.
+	all=$(
+		{
+			err=$(timeout -k 5 30 podman exec "$ctr" opencode api "$@" --server "$inner" 2>&1 >&3 3>&- | plain 3>&-) || rc=$?
+			printf '\001%s\001%s\001%s' "$err" "$rc" "${#err}"
+		} 3>&1
+	)
+	n=${#all}
+	end=${all:$((n > 40 ? n - 40 : 0))}
+	len=${end##*$'\001'}
+	end=${end%$'\001'*}
+	rc=${end##*$'\001'}
+	n=$((n - ${#len} - ${#rc} - 2))
+	err=${all:n-len:len}
+	out=${all:0:n-len-1}
+	[ -z "$err" ] || printf '%s\n' "$err" >&2
+	[ -z "$out" ] || printf '%s' "$out"
+	[ "$rc" != 0 ] || return 0
+	# A pipe, not a here-string: the error stream may repeat the answer, keys and all.
+	while IFS= read -r line; do
+		[[ ! $line =~ ^HTTP\ ([0-9]{3})(\ |$) ]] || code=${BASH_REMATCH[1]}
+	done < <(printf '%s\n' "$err")
+	[ "$rc" = 1 ] && [[ $code == 4?? ]] && printf '%s' "$out" | jq -es 'length > 0' >/dev/null 2>&1 && return 2
+	return 1
+}
 # This skill has no guard plugin to wait for: its rules are the two config
 # files of the image, read before the server answers its first request.
 answers() { api GET /api/project >/dev/null 2>&1; }
@@ -342,43 +412,55 @@ answers() { api GET /api/project >/dev/null 2>&1; }
 # An approval's or a session's id as one value of the answer: one that is
 # empty, no text, or holds more than letters, digits and _ comes out as "!",
 # which read_permissions refuses. Split into lines, a line break would make two.
-checked='def checked: if type == "string" and length > 0 and (test("[^A-Za-z0-9_]") | not) then . else "!" end; '
+# One of more than 128 characters is none either: opencode's are about 30, and a
+# far longer one, which the agent can write, would fail its removal every time.
+checked='def checked: if type == "string" and length > 0 and length <= 128 and (test("[^A-Za-z0-9_]") | not) then . else "!" end; '
 # The projects are one list: a second would be left out. A project id that is
-# no text or holds more than letters, digits and _ comes out as "!": it is the
-# answer's, not a busy podman's, and saved ends with status 3.
+# no text, longer than 128 characters or holds more than letters, digits and _
+# comes out as "!": it is the answer's, not a busy podman's, and saved ends
+# with status 3, as when the server refused the request.
 saved() {
-	local projects id ids
-	projects=$(api GET /api/project |
-		jq -rs 'if length == 1 and (.[0] | type) == "array" then .[0][].id |
-			if type == "string" and (test("[^A-Za-z0-9_]") | not) then . else "!" end else error("no list") end') ||
-		return 1
+	local answer projects id ids rc=0
+	answer=$(api GET /api/project) || rc=$?
+	[ "$rc" != 2 ] || return 3
+	[ "$rc" = 0 ] || return 1
+	projects=$(printf '%s' "$answer" | jq -rs 'if length == 1 and (.[0] | type) == "array" then .[0][].id |
+		if type == "string" and length <= 128 and (test("[^A-Za-z0-9_]") | not) then . else "!" end
+		else error("no list") end') || return 1
 	mapfile -t ids < <(printf %s "$projects")
 	for id in "${ids[@]}"; do
-		[[ $id =~ ^[A-Za-z0-9_]*$ ]] || return 3
+		[[ $id =~ ^[A-Za-z0-9_]{0,128}$ ]] || return 3
 	done
 	ids=('' "${ids[@]}")
-	{
-		api GET /api/permission/saved || return 1
+	answer=$(
+		api GET /api/permission/saved || exit
 		for id in "${ids[@]}"; do
-			api GET "/api/permission/saved?projectID=$id" || return 1
+			api GET "/api/permission/saved?projectID=$id" || exit
 		done
-	} | jq -rs --argjson n "$((${#ids[@]} + 1))" \
+	) || rc=$?
+	[ "$rc" != 2 ] || return 3
+	[ "$rc" = 0 ] || return 1
+	printf '%s' "$answer" | jq -rs --argjson n "$((${#ids[@]} + 1))" \
 		"$checked"'if length == $n and all(.[]; (.data | type) == "array") then map(.data[].id) | unique[] | checked
 			else error("an answer is missing") end'
 }
-# The session list is paged and ends with an empty page.
+# The session list is paged and ends with an empty page. Fails with 2 when the
+# list does not end, a page names the next with no cursor or one past 4096
+# characters, or the server refused the request.
 ruled() {
 	local page n cursor=''
 	for _ in $(seq 100); do
-		page=$(api GET "/api/session?limit=1000${cursor:+&cursor=$cursor}") || return 1
+		page=$(api GET "/api/session?limit=1000${cursor:+&cursor=$cursor}") || return
 		n=$(jq -r 'if (.data | type) == "array" then .data | length else error("no list") end' <<<"$page") || return 1
 		# An answer that holds nothing gives no length.
 		[[ $n =~ ^[0-9]+$ ]] || return 1
 		[ "$n" != 0 ] || return 0
 		jq -r "$checked"'.data[] | select((.permissions // []) != []) | .id | checked' <<<"$page" || return 1
 		cursor=$(jq -r '.cursor.next // ""' <<<"$page") || return 1
-		# A cursor that is none in an answer read whole would be none again.
-		[[ $cursor =~ ^[A-Za-z0-9_-]+$ ]] || return 2
+		# A cursor that is none in an answer read whole would be none again. It is
+		# base64 of an anchor that holds a session's id: 120 characters for an id
+		# of 30, about 260 for one of 128.
+		[[ $cursor =~ ^[A-Za-z0-9_-]{1,4096}$ ]] || return 2
 	done
 	# A list that does not end would not end when read again.
 	return 2
@@ -388,8 +470,9 @@ ruled() {
 # answer meanwhile. A read, a removal or the import that fails is tried again
 # five seconds apart, 60 tries at most, until five minutes after the first
 # such call of this run: the server runs with what forget and relogin remove
-# all the while. A try started before then runs to its end, and a call made
-# after then still gets one. A list that still holds something after its
+# all the while. A try started before then runs to its end, a removal round
+# apart, which stops between two items; a call made after then still gets one,
+# in which a removal round removes nothing. A list that still holds something after its
 # removal is a removal that failed. Status 2 says another try would fail the
 # same.
 retry_deadline=''
@@ -408,9 +491,9 @@ retried() {
 	return 1
 }
 # Into the variables of forget and relogin. Status 2 is for a session list that
-# does not end or names no next page, and for an answer that holds an id that
-# is no id (3 from saved and logins); any other failure is 1, since jq on
-# errors of its own and podman exec passing on what it ran can end with 2 too.
+# does not end or names no next page, for a request the server refused, and for
+# an answer that holds an id that is no id (3 from saved and logins); any other
+# failure is 1, since jq on errors of its own can end with 2 too.
 read_permissions() {
 	local rc=0
 	approvals=$(saved) || rc=$?
@@ -429,17 +512,23 @@ read_logins() {
 	((rc == 0)) || return 1
 }
 # Removes the approvals and session rules forget read last and reads them
-# again: true when none is left. An id that is no id stops the launcher.
+# again: true when none is left. An id that is no id stops the launcher. A
+# removal that fails leaves its item listed for the next round, and one the
+# server refused may have found it gone already, as a session deleted since
+# the read: the list, read again, says. The deadline ends the rounds between
+# two items: each may take half a minute.
 removed_permissions() {
 	local id
 	while IFS= read -r id; do
 		[ -n "$id" ] || continue
-		[[ $id =~ ^[A-Za-z0-9_]+$ ]] || die "a saved approval of $ctr has an unexpected id: $reset"
+		((SECONDS < retry_deadline)) || return 1
+		[[ $id =~ ^[A-Za-z0-9_]{1,128}$ ]] || die "a saved approval of $ctr has an unexpected id: $reset"
 		api DELETE "/api/permission/saved/$id" >/dev/null || true
 	done <<<"$approvals"
 	while IFS= read -r id; do
 		[ -n "$id" ] || continue
-		[[ $id =~ ^[A-Za-z0-9_]+$ ]] || die "a session of $ctr has an unexpected id: $reset"
+		((SECONDS < retry_deadline)) || return 1
+		[[ $id =~ ^[A-Za-z0-9_]{1,128}$ ]] || die "a session of $ctr has an unexpected id: $reset"
 		api PATCH "/api/session/$id" -d '{"permissions":[]}' >/dev/null || true
 	done <<<"$sessions"
 	read_permissions && [ -z "$approvals$sessions" ]
@@ -456,14 +545,19 @@ forget() {
 # earlier secret would stay the active one. The server's list holds the keys.
 # An id is checked where it is still one value: a line break inside it makes two.
 # The answer is one list: one that holds nothing, or more than one, is none. An
-# id that is no id is the answer's, not a busy podman's: status 3, which an
-# exec that ends with 3 itself gives as well, and stops the launcher too.
+# id that is no id, or longer than 128 characters, is the answer's, not a busy
+# podman's: status 3, as when the server refused the request.
 logins() {
-	{
-		api GET /api/credential |
-			jq -rs 'if length == 1 and (.[0].data | type) == "array" then .[0].data[].id else error("no list") end |
-				if type == "string" and length > 0 and (test("[^A-Za-z0-9_]") | not) then . else "id" | halt_error(3) end'
-	} 2>/dev/null
+	local answer rc=0
+	answer=$(api GET /api/credential 2>/dev/null) || rc=$?
+	[ "$rc" != 2 ] || return 3
+	[ "$rc" = 0 ] || return 1
+	# A pipe, not a here-string: bash writes one past 64 KiB to a temporary file,
+	# and the list holds the keys.
+	printf '%s' "$answer" |
+		jq -rs 'if length == 1 and (.[0].data | type) == "array" then .[0].data[].id else error("no list") end |
+			if type == "string" and length > 0 and length <= 128 and (test("[^A-Za-z0-9_]") | not) then .
+			else "" | halt_error(3) end' 2>/dev/null
 }
 # The server answers the removal of a login it does not hold like any other:
 # the list, read again, says what is left.
@@ -471,17 +565,39 @@ removed_logins() {
 	local id
 	while IFS= read -r id; do
 		[ -n "$id" ] || continue
-		[[ $id =~ ^[A-Za-z0-9_]+$ ]] || die "a model login of $ctr has an unexpected id: $reset"
+		((SECONDS < retry_deadline)) || return 1
+		[[ $id =~ ^[A-Za-z0-9_]{1,128}$ ]] || die "a model login of $ctr has an unexpected id: $reset"
 		api DELETE "/api/credential/$id" >/dev/null || true
 	done <<<"$held"
 	read_logins && [ -z "$held" ]
 }
-# Its input is the login: what it says about a failure is not shown.
+# Into relogin's want: the ids of the secret's logins, sorted. Fails with 1 when
+# podman did not answer, with 2 when the secret is no list of logins with an id
+# each, which no import changes. The secret reaches jq through a pipe, and what
+# jq says of it is not shown.
+read_secret() {
+	local all
+	all=$(secret model) || return 1
+	want=$(printf '%s' "$all" | jq -rs "$checked"'if length == 1 and (.[0] | type) == "array" and (.[0] | length) > 0
+		and (.[0] | map(.id) | unique | length) == (.[0] | length) then .[0][].id | checked
+		else error("no list") end' 2>/dev/null) || return 2
+	[[ $'\n'$want$'\n' != *$'\n!\n'* ]] || return 2
+	want=$(sort <<<"$want")
+}
+# Its input is the login: what it says about a failure is not shown. It ends
+# with 0 when it imported nothing as well: the list, read again, must hold the
+# secret's logins and no other.
 imported() {
-	secret model | timeout 60 podman exec -i "$ctr" opencode auth import --server "$inner" >/dev/null 2>&1 || return 1
+	secret model | timeout -k 5 60 podman exec -i "$ctr" opencode auth import --server "$inner" >/dev/null 2>&1 || return 1
+	read_logins || return
+	[ "$(sort <<<"$held")" = "$want" ]
 }
 relogin() {
-	local held reset="'podman volume rm $name-$inst-state' removes them, with the sessions; the unit is stopped"
+	local held want rc=0 reset="'podman volume rm $name-$inst-state' removes them, with the sessions; the unit is stopped"
+	retried read_secret || rc=$?
+	[ "$rc" != 2 ] ||
+		die "the secret $name-model is unusable: it holds no list of model logins with an id each; run '$prog secrets' again. The unit is stopped"
+	[ "$rc" = 0 ] || die "cannot read the secret $name-model; the unit is stopped"
 	retried read_logins || die "cannot read the model logins $ctr keeps: $reset"
 	retried removed_logins || die "the model logins $ctr keeps cannot be removed: $reset"
 	retried imported || die "the model credential was not imported; the unit is stopped"
@@ -955,7 +1071,7 @@ cmd_update() {
 	echo "$inst is updated"
 }
 cmd_import() {
-	local from='' memory="${HOME}/.local/share/mcp-memory/memory.json" tmp f id ids title n=0
+	local from='' memory="${HOME}/.local/share/mcp-memory/memory.json" tmp f id ids n=0
 	local home store volumes runtime
 	while (($#)); do
 		case $1 in
@@ -1010,8 +1126,9 @@ cmd_import() {
 		(cd "$from" && OPENCODE_DISABLE_PROJECT_CONFIG=1 "$opencode" session export "$id" >"$tmp/$id.json") ||
 			die "cannot export the session $id"
 		if jq -e '.info.time.busy > .info.time.idle' "$tmp/$id.json" >/dev/null; then
-			title=$(jq -r '.info.title // ""' "$tmp/$id.json" | plain)
-			die "the session '$title' ($id) is busy: close the host client and run import again"
+			# The title first: a line of it after the launcher's would read as its last word.
+			jq -r '.info.title // ""' "$tmp/$id.json" | plain >&2 || true
+			die "the session $id, titled above, is busy: close the host client and run import again"
 		fi
 	done
 	# The files, as they are: where the file system can share blocks the copy takes no
@@ -1031,7 +1148,7 @@ cmd_import() {
 		"$image" cp "/src/${memory##*/}" "/seed/$memname" >/dev/null ||
 		die "the memory graph was not seeded"
 	for id in $ids; do
-		filtered timeout 60 podman exec -i "$ctr" opencode session import --server "$inner" --directory "$inside" /dev/stdin <"$tmp/$id.json" >/dev/null ||
+		filtered timeout -k 5 60 podman exec -i "$ctr" opencode session import --server "$inner" --directory "$inside" /dev/stdin <"$tmp/$id.json" >/dev/null ||
 			die "cannot import the session $id"
 		n=$((n + 1))
 	done

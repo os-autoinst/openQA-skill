@@ -82,9 +82,16 @@ printf '%s\n' "$*" >> "$FIX/podman-calls"
 # With $FIX/<call>-answers a call that reads or changes that list takes the
 # file's first line: "fail" gets an error, as an exec that got no session
 # while another podman command held the storage lock; "empty" gets no answer
-# and no error; "cut" gets the start of an answer; "slow" gets an error after
-# 15 seconds; for the model logins and the import, "status2" gets the answer
-# and status 2, which exec passes on from inside; any other line is answered.
+# and no error; "cut" gets the start of an answer; "refused" and "failed" get
+# the server's error answer to a request it refused (404) or failed on (500),
+# "refused-bare" a refusal without an answer, "refused-exit2" and
+# "refused-quoted" a refusal that ends with 2 or names its status within a
+# line, "marker" an answer holding the launcher's markers; "slow" gets an
+# error after 15 seconds; for the import, "nothing" ends well and imports
+# nothing and "extra" imports beside a login the agent planted; for a session
+# rule, "gone" finds the session deleted; for the model logins and the import,
+# "status2" gets the answer and status 2, which exec passes on from inside;
+# any other line is answered.
 scripted() {
   [ -s "$FIX/$1-answers" ] || return 0
   read -r first < "$FIX/$1-answers"
@@ -94,6 +101,22 @@ scripted() {
   fail) [ "$1" != import ] || cat > /dev/null; exit 1 ;;
   empty) exit 0 ;;
   cut) printf '{"data":['; exit 0 ;;
+  # What opencode api does when the server answers with an error: the answer,
+  # and HTTP with the status code on the error stream.
+  refused) printf '{"name":"NotFound","data":{}}'; echo 'HTTP 404 Not Found' >&2; exit 1 ;;
+  refused-bare) echo 'HTTP 403 Forbidden' >&2; exit 1 ;;
+  # The same with another status, and with the status not at the start of a line.
+  refused-exit2) printf '{"name":"NotFound","data":{}}'; echo 'HTTP 404 Not Found' >&2; exit 2 ;;
+  refused-quoted) printf '{"name":"NotFound","data":{}}'; echo 'proxy: HTTP 404 Not Found' >&2; exit 1 ;;
+  # An answer that holds the markers the launcher puts after it, and fails.
+  marker) printf '[{"id":"prj_main"}]\001\0010\0010'; exit 1 ;;
+  failed) printf '{"name":"UnknownError","data":{}}'; echo 'HTTP 500 Internal Server Error' >&2; exit 1 ;;
+  # An import that ends well and imports nothing.
+  nothing) [ "$1" = import ] || exit 99; cat > /dev/null; exit 0 ;;
+  # A session deleted since the list was read: the server answers 404.
+  gone) [ "$1" = rule-patch ] || exit 99; gone=1 ;;
+  # A login the agent planted beside the imported ones.
+  extra) [ "$1" = import ] || exit 99; extra=1 ;;
   slow) sleep 15; exit 1 ;;
   status2) case $1 in logins | import) status=2 ;; *) exit 99 ;; esac ;;
   esac
@@ -132,12 +155,14 @@ case "$1 $2" in
   esac
   t=no; [ -t 0 ] && [ -t 1 ] && t=yes
   echo "$t" > "$FIX/client-tty"
-  # A reply that tries the terminal: clipboard, title, clear, a C1 control, a
-  # colour made of the filter's own marker.
+  # A reply that tries the terminal: clipboard, title, clear, a C1 control,
+  # colours, and a colour that \001 stands in for the escape of.
   if [ -e "$FIX/escapes" ]; then
     printf 'out\033]52;c;QUJD\007\033[31mred\033[0m\033[2J\302\233x\001[35m'
     # C1 controls that are whole only once the one inside them is taken out.
     printf '\302\302\233\2332Jy\302\302\235\2350;t\302\302\234\234\r\n'
+    # Text that is no control: a character led by \302, a lone \302, and a colour with sub-parameters.
+    printf 'deg\302\260 \302a \033[38:5:1mcol\033[0m\n'
     printf 'err\033]0;title\007\033[1mbold\033[0m\n' >&2
     . "$FIX/ctl"
     ctl
@@ -175,6 +200,12 @@ case "$1 $2" in
   *"auth import"*)
     scripted import
     cat > "$FIX/imported"; [ ! -e "$FIX/import-fails" ] || exit 1
+    # The server lists what it imported, newest first, and keeps a login whose id it holds.
+    jq -c --slurpfile new "$FIX/imported" \
+      'reduce $new[0][] as $l (.; if any(.data[]; .id == $l.id) then . else .data = [$l] + .data end)' "$FIX/logins" \
+      > "$FIX/logins.new" 2>/dev/null && mv "$FIX/logins.new" "$FIX/logins"
+    [ -z "${extra-}" ] || { jq -c '.data += [{"id":"cred_planted"}]' "$FIX/logins" > "$FIX/logins.new" \
+      && mv "$FIX/logins.new" "$FIX/logins"; }
     exit "${status:-0}" ;;
   # A session the container imports from a pipe: stdin is the export.
   *"session import"*)
@@ -240,6 +271,10 @@ case "$1 $2" in
     all="$*"; off=0
     [[ $all != *"cursor="* ]] || { off=${all#*cursor=}; off=${off%%[& ]*}; }
     next=$((off + 2)); [ ! -e "$FIX/bad-cursor" ] || next="$next&directory=/x"
+    # With $FIX/long-cursor the next page has a cursor of the length it holds;
+    # the page it names is the last.
+    if [[ $all == *"cursor=c"* ]]; then echo '{"data":[],"cursor":{"next":null}}'; exit 0; fi
+    [ ! -s "$FIX/long-cursor" ] || next=$(printf 'c%.0s' $(seq "$(cat "$FIX/long-cursor")"))
     # With $FIX/endless the list never ends.
     if [ -e "$FIX/endless" ]; then
       printf '{"data":[{"id":"ses_x","permissions":null}],"cursor":{"next":"%s"}}\n' "$next"
@@ -250,6 +285,10 @@ case "$1 $2" in
     scripted rule-patch
     all="$*"; id=${all#*/api/session/}; id=${id%% *}
     [[ $all == *' -d {"permissions":[]} '* ]] || exit 96
+    if [ -n "${gone-}" ]; then
+      jq -c --arg id "$id" 'map(select(.id != $id))' "$FIX/sessions" > "$FIX/sessions.new" && mv "$FIX/sessions.new" "$FIX/sessions"
+      printf '{"_tag":"SessionNotFoundError"}'; echo 'HTTP 404 Not Found' >&2; exit 1
+    fi
     # With $FIX/keeps-rules the server answers and clears nothing.
     [ -e "$FIX/keeps-rules" ] || { jq -c --arg id "$id" 'map(if .id == $id then .permissions = [] else . end)' \
       "$FIX/sessions" > "$FIX/sessions.new" && mv "$FIX/sessions.new" "$FIX/sessions"; } ;;
@@ -279,6 +318,9 @@ printf '%s %s\n' "$PWD" "${OPENCODE_DISABLE_PROJECT_CONFIG-unset}" > "$FIX/expor
 if [ "$3" = none ]; then echo '[]'
 # What is no JSON and holds a credential all the same.
 elif [ "$3" = broken ]; then echo 'warning: MODEL-SECRET-6 is no JSON'
+# Two logins with one id: no import can make the list hold them.
+elif [ "$3" = dupes ]; then
+  printf '[{"id":"cred_1","value":{"key":"MODEL-SECRET-6"}},{"id":"cred_1","value":{"key":"MODEL-SECRET-6"}}]\n'
 else printf '[{"id":"cred_1","integrationID":"%s","label":"key","active":true,"value":{"type":"key","key":"MODEL-SECRET-6"}}]\n' "$3"; fi
 EOF
 # The launcher's filter, recording what it gets of the server password.
@@ -291,6 +333,9 @@ EOF
 cat >"$tools/bin/timeout" <<'EOF'
 #!/bin/bash
 . "$FIX/envcheck"
+# A call that ignores the signal is killed five seconds later.
+[ "$1" = -k ] && [ "$2" = 5 ] || printf '%s\n' "$*" >> "$FIX/unkilled"
+[ "$1" != -k ] || shift 2
 shift; FAKE_TIMEOUT=1 exec "$@"
 EOF
 # gh: the login's name and its token, each on request only, from the config
@@ -327,7 +372,7 @@ is-active) grep -qx true "$FIX/running" ;;
 esac
 EOF
 # The real commands of the launcher, each behind the same check.
-for f in python3 jq realpath head base64 tr id mkdir seq sleep cat ls cp cmp mktemp rm ln ssh-keygen git rmdir; do
+for f in python3 jq realpath head base64 tr id mkdir seq sleep cat ls cp cmp mktemp rm ln ssh-keygen git rmdir sort; do
 	printf '%s\n' '#!/bin/bash' '. "$FIX/envcheck"' "exec $(command -v "$f") \"\$@\"" >"$tools/bin/$f"
 done
 # The launcher's pauses are recorded; with $FIX/sleep-fast they take no time.
@@ -336,7 +381,7 @@ printf '%s\n' '#!/bin/bash' '. "$FIX/envcheck"' 'printf "%s\n" "$*" >> "$FIX/sle
 # A client among the launcher's own commands is not the caller's.
 printf '%s\n' '#!/bin/bash' ': > "$FIX/launcher-path-client"; exit 1' >"$tools/bin/opencode"
 # First on the caller's PATH: what the launcher must take from its own.
-for f in podman python3 jq realpath sed timeout head base64 tr id mkdir seq sleep cat ls gh cp cmp mktemp rm systemctl ln ssh-keygen git rmdir; do
+for f in podman python3 jq realpath sed timeout head base64 tr id mkdir seq sleep cat ls gh cp cmp mktemp rm systemctl ln ssh-keygen git rmdir sort; do
 	printf '%s\n' '#!/bin/bash' ': > "$FIX/planted-host"; exit 1' >"$tools/evilbin/$f"
 done
 chmod +x "$tools/bin/"* "$tools/userbin/"* "$tools/evilbin/"*
@@ -349,7 +394,7 @@ done
 mkdir -p "$work/ws/usr/bin"
 cp "$work/ws/podman" "$work/ws/usr/bin/env"
 # What an agent could leave in a work directory for the launcher to import.
-for m in configparser re sys sitecustomize; do
+for m in configparser re sys signal sitecustomize; do
 	printf 'import os\nopen(os.environ["FIX"] + "/planted-ran", "w").close()\n' >"$work/planted/$m.py"
 done
 # And in the user's site directory, which -E alone leaves on the path.
@@ -484,7 +529,7 @@ printf '%s' server | sha256sum | cut -d' ' -f1 >"$FIX/ctr-id"
 printf '%s\n' '[{"id":"ses_h1","title":"host one"},{"id":"ses_h2","title":"host two"}]' >"$FIX/host-sessions"
 # And their export: idle, with the transcript the container keeps.
 printf '%s\n' '{"info":{"id":"ses_h1","title":"host one","location":{"directory":"/home/user/obs"},"time":{"busy":1,"idle":2}},"messages":[{"id":"msg_1","type":"user","text":"hello"}]}' >"$FIX/host-export"
-printf '%s\n' '{"info":{"id":"ses_h1","title":"host one","location":{"directory":"/home/user/obs"},"time":{"busy":3,"idle":2}},"messages":[{"id":"msg_1","type":"user","text":"hello"}]}' >"$FIX/host-export-busy"
+printf '%s\n' '{"info":{"id":"ses_h1","title":"host \u001b[8mone","location":{"directory":"/home/user/obs"},"time":{"busy":3,"idle":2}},"messages":[{"id":"msg_1","type":"user","text":"hello"}]}' >"$FIX/host-export-busy"
 # The fixed copy install asks for: the launcher itself.
 mkdir -p "$work/home/.local/bin"
 cp "$SC" "$work/home/.local/bin/openqa-container"
@@ -891,6 +936,10 @@ out="$(sc secrets --model-auth broken 2>&1)"
 rc=$?
 [ "$rc" != 0 ] && grep -qF "exported no credential" <<<"$out" && [ -z "$(leaks <<<"$out")" ] && [ "$(stored)" = "$before" ] &&
 	pass "an export that is no JSON: nothing replaced, nothing quoted" || fail "export that is no JSON: rc=$rc $out"
+out="$(sc secrets --model-auth dupes 2>&1)"
+rc=$?
+[ "$rc" != 0 ] && grep -qF "or none with an id each" <<<"$out" && [ -z "$(leaks <<<"$out")" ] && [ "$(stored)" = "$before" ] &&
+	pass "an export of two logins with one id: nothing replaced, nothing quoted" || fail "export with one id twice: rc=$rc $out"
 : >"$work/empty-key"
 mkdir "$work/dir-key"
 for key in "$work/no-key" "$work/empty-key" "$work/dir-key"; do
@@ -1456,7 +1505,7 @@ order="$(grep -o 'api DELETE [^ ]*\|api PATCH [^ ]*\|auth import' "$FIX/podman-c
 	[ "$order" = "api DELETE /api/permission/saved/per_a1 api DELETE /api/permission/saved/per_b2 api PATCH /api/session/ses_u1 api DELETE /api/credential/cred_old1 auth import " ] &&
 	pass "up removes the saved approvals and session rules before the model credential goes in" ||
 	fail "up and saved approvals: $order / $out"
-[ "$(jq -c .data "$FIX/logins")" = "[]" ] && [[ $order == *"api DELETE /api/credential/cred_old1 auth import " ]] &&
+[ "$(jq -c '[.data[].id]' "$FIX/logins")" = '["cred_1"]' ] && [[ $order == *"api DELETE /api/credential/cred_old1 auth import " ]] &&
 	[ -z "$(leaks <<<"$out")" ] &&
 	pass "up removes the model login the state volume kept, then imports the secret's" ||
 	fail "up and a kept model login: $order / $(jq -c '.data | map(.id)' "$FIX/logins")"
@@ -1808,15 +1857,24 @@ for wd in "" ws / "$work/a,b" "$work/a:b"; do
 done
 printf %s "$work/ws" >"$FIX/workdir"
 
-# A reply reaches the terminal as text and colour, each stream on its own, and
-# the client's exit status is the launcher's.
+# A reply reaches the terminal as text, without its colours, which could hide
+# the launcher's lines after it; each stream on its own, and the client's exit
+# status is the launcher's.
 touch "$FIX/escapes"
 sc run obs hello >"$work/rout" 2>"$work/rerr"
 rc=$?
-[ "$rc" = 7 ] && cmp -s "$work/rout" <(printf 'out]52;c;QUJD\033[31mred\033[0m[2Jx[35m2Jy0;t\nctl<>\n') &&
-	cmp -s "$work/rerr" <(printf 'err]0;title\033[1mbold\033[0m\nctl<>\n') &&
-	pass "run prints a reply without its control characters, colours apart" ||
+[ "$rc" = 7 ] && cmp -s "$work/rout" <(printf 'out]52;c;QUJDred[2Jx[35m2Jy0;t\ndeg\302\260 \302a col\nctl<>\n') &&
+	cmp -s "$work/rerr" <(printf 'err]0;titlebold\nctl<>\n') &&
+	pass "run prints a reply without its control characters and colours" ||
 	fail "run and control characters: rc=$rc $(od -c "$work/rout" | head -8) / $(od -c "$work/rerr" | head -8)"
+# The filter imports no module from PYTHONPATH either.
+rm -f "$FIX/planted-ran"
+PYTHONPATH="$work/planted" sc run obs hello >"$work/rout" 2>/dev/null
+rc=$?
+[ "$rc" = 7 ] && cmp -s "$work/rout" <(printf 'out]52;c;QUJDred[2Jx[35m2Jy0;t\ndeg\302\260 \302a col\nctl<>\n') &&
+	[ ! -e "$FIX/planted-ran" ] && pass "run's filter imports no module from PYTHONPATH" ||
+	fail "run's filter with PYTHONPATH on planted modules: rc=$rc $(ls "$FIX/planted-ran" 2>/dev/null) $(od -c "$work/rout" | head -4)"
+rm -f "$FIX/planted-ran"
 rm "$FIX/escapes"
 
 # Nothing the agent left in the work directory runs on the host: no command is
@@ -2221,7 +2279,7 @@ printf '%s\n' ok fail fail fail >"$FIX/logins-answers"
 out="$(sc up obs 2>&1)"
 rc=$?
 [ "$rc" = 0 ] && ! stopped && [ -e "$FIX/imported" ] && [ ! -s "$FIX/logins-answers" ] &&
-	[ "$(jq -c .data "$FIX/logins")" = "[]" ] && [ "$(cat "$FIX/sleep-calls")" = $'5\n5\n5' ] &&
+	[ "$(jq -c '[.data[].id]' "$FIX/logins")" = '["cred_1"]' ] && [ "$(cat "$FIX/sleep-calls")" = $'5\n5\n5' ] &&
 	[ -z "$(leaks <<<"$out")" ] && [ "$(grep -c 'trying again' <<<"$out")" = 1 ] &&
 	pass "model logins that cannot be read three times after their removal: up tries again, then sends the credential" ||
 	fail "a login read after the removal that fails three times: rc=$rc $(sort "$FIX/sleep-calls" | uniq -c | tr '\n' ' ') $out"
@@ -2325,6 +2383,314 @@ rc=$?
 	pass "the five minutes are counted once for a run, from the first call tried again" ||
 	fail "the five minutes of a run: rc=$rc $(sort "$FIX/sleep-calls" | uniq -c | tr '\n' ' ') $out"
 rm -f "$FIX/saved-answers" "$FIX/logins-answers"
+# The server's error answers: a request it refused (4xx) with an answer would
+# be refused again, and the launcher stops at once; one it failed on (5xx), as
+# while its database is busy, is asked again.
+for call in projects saved sessions; do
+	restart
+	if [ "$call" = projects ]; then lines=(ok ok refused); else lines=(refused); fi
+	printf '%s\n' "${lines[@]}" >"$FIX/$call-answers"
+	: >"$FIX/sleep-calls"
+	out="$(sc up obs 2>&1)"
+	rc=$?
+	[ "$rc" != 0 ] && stopped && [ ! -e "$FIX/imported" ] && [ ! -s "$FIX/sleep-calls" ] && [ ! -s "$FIX/$call-answers" ] &&
+		grep -qF "cannot read the permissions" <<<"$out" && ! grep -q 'trying again' <<<"$out" &&
+		pass "a request for the $call the server refused stops up at once" ||
+		fail "a refused request for the $call: rc=$rc $(sort "$FIX/sleep-calls" | uniq -c | tr '\n' ' ') $out"
+	restart
+	if [ "$call" = projects ]; then lines=(ok ok failed); else lines=(failed); fi
+	printf '%s\n' "${lines[@]}" >"$FIX/$call-answers"
+	: >"$FIX/sleep-calls"
+	out="$(sc up obs 2>&1)"
+	rc=$?
+	[ "$rc" = 0 ] && ! stopped && [ -e "$FIX/imported" ] && [ ! -s "$FIX/$call-answers" ] &&
+		[ "$(cat "$FIX/sleep-calls")" = 5 ] && [ "$(grep -c 'trying again' <<<"$out")" = 1 ] &&
+		pass "a request for the $call the server failed on is asked again, then the credential is sent" ||
+		fail "a failed request for the $call: rc=$rc $(sort "$FIX/sleep-calls" | uniq -c | tr '\n' ' ') $out"
+	rm -f "${FIX:?}/${call:?}-answers"
+done
+# A refusal without an answer is no answer: asked again.
+restart
+printf '%s\n' ok ok refused-bare >"$FIX/projects-answers"
+: >"$FIX/sleep-calls"
+out="$(sc up obs 2>&1)"
+rc=$?
+[ "$rc" = 0 ] && ! stopped && [ -e "$FIX/imported" ] && [ ! -s "$FIX/projects-answers" ] && [ "$(cat "$FIX/sleep-calls")" = 5 ] &&
+	pass "a refusal without an answer is asked again, then the credential is sent" ||
+	fail "a refusal without an answer: rc=$rc $(sort "$FIX/sleep-calls" | uniq -c | tr '\n' ' ') $out"
+rm -f "$FIX/projects-answers"
+restart
+kept_login cred_f1
+printf '%s\n' refused >"$FIX/logins-answers"
+: >"$FIX/sleep-calls"
+out="$(sc up obs 2>&1)"
+rc=$?
+[ "$rc" != 0 ] && stopped && [ ! -e "$FIX/imported" ] && [ ! -s "$FIX/sleep-calls" ] && [ -z "$(leaks <<<"$out")" ] &&
+	grep -qF "cannot read the model logins" <<<"$out" && ! grep -q 'api DELETE /api/credential' "$FIX/podman-calls" &&
+	pass "a request for the model logins the server refused stops up at once" ||
+	fail "a refused request for the model logins: rc=$rc $(sort "$FIX/sleep-calls" | uniq -c | tr '\n' ' ') $out"
+restart
+kept_login cred_f2
+printf '%s\n' failed >"$FIX/logins-answers"
+: >"$FIX/sleep-calls"
+out="$(sc up obs 2>&1)"
+rc=$?
+[ "$rc" = 0 ] && ! stopped && [ "$(jq -c '[.data[].id]' "$FIX/logins")" = '["cred_1"]' ] && [ "$(cat "$FIX/sleep-calls")" = 5 ] &&
+	[ -z "$(leaks <<<"$out")" ] &&
+	pass "a request for the model logins the server failed on is asked again, then the kept login is replaced" ||
+	fail "a failed request for the model logins: rc=$rc $(sort "$FIX/sleep-calls" | uniq -c | tr '\n' ' ') $out"
+rm -f "$FIX/logins-answers"
+# A removal the server refused is no answer to go by: the list, read again,
+# says whether the item is gone, as a session deleted since the read is.
+restart
+approval per_x1
+printf '%s\n' refused >"$FIX/approval-delete-answers"
+: >"$FIX/sleep-calls"
+out="$(sc up obs 2>&1)"
+rc=$?
+[ "$rc" = 0 ] && ! stopped && [ -e "$FIX/imported" ] && [ "$(jq -c .data "$FIX/saved")" = "[]" ] &&
+	[ "$(cat "$FIX/sleep-calls")" = 5 ] && [ "$(grep -c 'api DELETE /api/permission/saved/per_x1' "$FIX/podman-calls")" = 2 ] &&
+	pass "a removal of an approval the server refused is made again once the list still holds it" ||
+	fail "a refused approval removal: rc=$rc $(sort "$FIX/sleep-calls" | uniq -c | tr '\n' ' ') $out"
+rm -f "$FIX/approval-delete-answers"
+echo '{"data":[]}' >"$FIX/saved"
+restart
+sessions "[{\"id\":\"ses_x1\",\"permissions\":$allow}]"
+printf '%s\n' refused >"$FIX/rule-patch-answers"
+: >"$FIX/sleep-calls"
+out="$(sc up obs 2>&1)"
+rc=$?
+[ "$rc" = 0 ] && ! stopped && [ -e "$FIX/imported" ] && [ "$(jq -c 'map(.permissions)' "$FIX/sessions")" = "[[]]" ] &&
+	[ "$(cat "$FIX/sleep-calls")" = 5 ] &&
+	pass "a removal of a session rule the server refused is made again once the list still holds it" ||
+	fail "a refused rule removal: rc=$rc $(sort "$FIX/sleep-calls" | uniq -c | tr '\n' ' ') $out"
+rm -f "$FIX/rule-patch-answers"
+restart
+sessions "[{\"id\":\"ses_g1\",\"permissions\":$allow}]"
+printf '%s\n' gone >"$FIX/rule-patch-answers"
+: >"$FIX/sleep-calls"
+out="$(sc up obs 2>&1)"
+rc=$?
+[ "$rc" = 0 ] && ! stopped && [ -e "$FIX/imported" ] && [ "$(jq -c . "$FIX/sessions")" = "[]" ] && [ ! -s "$FIX/sleep-calls" ] &&
+	grep -qF "removed the saved approvals and session rules" <<<"$out" &&
+	pass "a session deleted since the read: the server's 404 is taken for gone once the list no longer holds it" ||
+	fail "a session gone since the read: rc=$rc $(sort "$FIX/sleep-calls" | uniq -c | tr '\n' ' ') $out"
+rm -f "$FIX/rule-patch-answers"
+sessions '[]'
+restart
+kept_login cred_x2
+printf '%s\n' refused >"$FIX/login-delete-answers"
+: >"$FIX/sleep-calls"
+out="$(sc up obs 2>&1)"
+rc=$?
+[ "$rc" = 0 ] && ! stopped && [ "$(jq -c '[.data[].id]' "$FIX/logins")" = '["cred_1"]' ] && [ "$(cat "$FIX/sleep-calls")" = 5 ] &&
+	[ -z "$(leaks <<<"$out")" ] &&
+	pass "a removal of a model login the server refused is made again once the list still holds it" ||
+	fail "a refused login removal: rc=$rc $(sort "$FIX/sleep-calls" | uniq -c | tr '\n' ' ') $out"
+rm -f "$FIX/login-delete-answers"
+echo '{"data":[]}' >"$FIX/logins"
+# Other shapes of an error: a refusal ending with 2, one whose status is not at
+# the start of a line, and an answer that holds the launcher's markers, all
+# asked again.
+for answer in refused-exit2 refused-quoted marker; do
+	restart
+	printf '%s\n' ok ok "$answer" >"$FIX/projects-answers"
+	: >"$FIX/sleep-calls"
+	out="$(sc up obs 2>&1)"
+	rc=$?
+	[ "$rc" = 0 ] && ! stopped && [ -e "$FIX/imported" ] && [ ! -s "$FIX/projects-answers" ] && [ "$(cat "$FIX/sleep-calls")" = 5 ] &&
+		pass "an error answer ($answer) is asked again, then the credential is sent" ||
+		fail "an error answer ($answer): rc=$rc $(sort "$FIX/sleep-calls" | uniq -c | tr '\n' ' ') $out"
+	rm -f "$FIX/projects-answers"
+done
+# The model secret is checked before a kept login is removed: one that holds
+# no list of logins with an id each would leave the instance without one.
+cp "$FIX/secrets/$N-model" "$FIX/model.kept"
+n=0
+for model in '{}' '[]' 'no json MODEL-SECRET-6' '[{"id":"cred_1"},{"id":"cred_1"}]' \
+	'[{"id":"cred/1","value":{"key":"MODEL-SECRET-6"}}]' '[{"value":{"key":"MODEL-SECRET-6"}}]' \
+	'[{"id":"cred_1"}] [{"id":"cred_2"}]' "[{\"id\":\"$(printf 'a%.0s' $(seq 129))\"}]"; do
+	n=$((n + 1))
+	restart
+	kept_login cred_s1
+	printf '%s\n' "$model" >"$FIX/secrets/$N-model"
+	: >"$FIX/sleep-calls"
+	out="$(sc up obs 2>&1)"
+	rc=$?
+	[ "$rc" != 0 ] && stopped && [ ! -s "$FIX/sleep-calls" ] && grep -qF "the secret $N-model is unusable" <<<"$out" &&
+		! grep -q 'api DELETE /api/credential\|auth import' "$FIX/podman-calls" && [ -z "$(leaks <<<"$out")" ] &&
+		pass "an unusable model secret ($n) stops up before the kept login is removed" ||
+		fail "up with an unusable model secret ($n): rc=$rc $out"
+done
+cp "$FIX/model.kept" "$FIX/secrets/$N-model"
+echo '{"data":[]}' >"$FIX/logins"
+# A secret of two logins: the list, read again, holds both, in its own order.
+restart
+printf '%s\n' '[{"id":"cred_b","value":{"key":"MODEL-SECRET-6"}},{"id":"cred_a","value":{"key":"MODEL-SECRET-6"}}]' \
+	>"$FIX/secrets/$N-model"
+: >"$FIX/sleep-calls"
+out="$(sc up obs 2>&1)"
+rc=$?
+[ "$rc" = 0 ] && ! stopped && [ "$(jq -c '[.data[].id]' "$FIX/logins")" = '["cred_a","cred_b"]' ] && [ ! -s "$FIX/sleep-calls" ] &&
+	[ -z "$(leaks <<<"$out")" ] &&
+	pass "a secret of two logins is imported and found in the list, whatever its order" ||
+	fail "a secret of two logins: rc=$rc $(jq -c '[.data[].id]' "$FIX/logins") $out"
+restart
+id128=$(printf 'a%.0s' $(seq 128))
+printf '[{"id":"%s","value":{"key":"MODEL-SECRET-6"}}]\n' "$id128" >"$FIX/secrets/$N-model"
+echo '{"data":[]}' >"$FIX/logins"
+: >"$FIX/sleep-calls"
+out="$(sc up obs 2>&1)"
+rc=$?
+[ "$rc" = 0 ] && ! stopped && [ "$(jq -r '.data[].id' "$FIX/logins")" = "$id128" ] && [ ! -s "$FIX/sleep-calls" ] &&
+	[ -z "$(leaks <<<"$out")" ] &&
+	pass "a secret whose login id has 128 characters is imported and found in the list" ||
+	fail "a secret with a login id of 128: rc=$rc $(jq -c '[.data[].id]' "$FIX/logins") $out"
+cp "$FIX/model.kept" "$FIX/secrets/$N-model"
+echo '{"data":[]}' >"$FIX/logins"
+# A login the agent planted beside the imported one would stay active: the
+# list, read again, must hold the secret's alone.
+restart
+printf '%s\n' extra >"$FIX/import-answers"
+: >"$FIX/sleep-calls"
+out="$(sc up obs 2>&1)"
+rc=$?
+[ "$rc" != 0 ] && stopped && [ "$(grep -cx 5 "$FIX/sleep-calls")" = 59 ] &&
+	grep -qF "the model credential was not imported" <<<"$out" && [ -z "$(leaks <<<"$out")" ] &&
+	jq -e 'any(.data[]; .id == "cred_planted") and any(.data[]; .id == "cred_1")' "$FIX/logins" >/dev/null &&
+	pass "an import beside a planted login: the list holds more than the secret's, the unit is stopped" ||
+	fail "an import beside a planted login: rc=$rc $(sort "$FIX/sleep-calls" | uniq -c | tr '\n' ' ') $out"
+rm -f "$FIX/import-answers"
+echo '{"data":[]}' >"$FIX/logins"
+# opencode's import ends well when it imported nothing: the list, read again, says.
+restart
+printf '%s\n' nothing >"$FIX/import-answers"
+: >"$FIX/sleep-calls"
+out="$(sc up obs 2>&1)"
+rc=$?
+[ "$rc" = 0 ] && ! stopped && [ "$(jq -c '[.data[].id]' "$FIX/logins")" = '["cred_1"]' ] && [ ! -s "$FIX/import-answers" ] &&
+	[ "$(cat "$FIX/sleep-calls")" = 5 ] && [ "$(grep -c 'auth import' "$FIX/podman-calls")" = 2 ] && [ -z "$(leaks <<<"$out")" ] &&
+	pass "an import that ends well and imports nothing is made again, then the login is listed" ||
+	fail "an import of nothing once: rc=$rc $(sort "$FIX/sleep-calls" | uniq -c | tr '\n' ' ') $out"
+restart
+echo '{"data":[]}' >"$FIX/logins"
+seq 61 | sed 's/.*/nothing/' >"$FIX/import-answers"
+: >"$FIX/sleep-calls"
+out="$(sc up obs 2>&1)"
+rc=$?
+[ "$rc" != 0 ] && stopped && [ "$(jq -c .data "$FIX/logins")" = "[]" ] && [ "$(grep -cx 5 "$FIX/sleep-calls")" = 59 ] &&
+	[ "$(grep -c 'auth import' "$FIX/podman-calls")" = 60 ] && grep -qF "the model credential was not imported" <<<"$out" &&
+	[ -z "$(leaks <<<"$out")" ] &&
+	pass "an import that never imports anything: made again for 60 tries, then the unit is stopped" ||
+	fail "an import of nothing each time: rc=$rc $(sort "$FIX/sleep-calls" | uniq -c | tr '\n' ' ') $out"
+rm -f "$FIX/import-answers"
+echo '{"data":[]}' >"$FIX/logins"
+# An id is no longer than 128 characters: in a long enough command line the
+# call that removes it would not start. Ids of 128 are taken.
+long=$(printf 'a%.0s' $(seq 129))
+restart
+approval "${long:0:128}" "${long:0:128}"
+printf '[{"id":"prj_main"},{"id":"%s"}]\n' "${long:0:128}" >"$FIX/projects"
+sessions "[{\"id\":\"${long:0:128}\",\"permissions\":$allow}]"
+kept_login "${long:0:128}"
+out="$(sc up obs 2>&1)"
+rc=$?
+[ "$rc" = 0 ] && ! stopped && [ "$(jq -c .data "$FIX/saved")" = "[]" ] && [ "$(jq -c 'map(.permissions)' "$FIX/sessions")" = "[[]]" ] &&
+	[ "$(jq -c '[.data[].id]' "$FIX/logins")" = '["cred_1"]' ] && grep -qF "projectID=${long:0:128} " "$FIX/podman-calls" &&
+	[ -z "$(leaks <<<"$out")" ] &&
+	pass "ids of 128 characters are taken: a project's, a saved approval's, a session's and a model login's" ||
+	fail "up with ids of 128 characters: rc=$rc $out"
+echo '[{"id":"prj_main"}]' >"$FIX/projects"
+sessions '[]'
+echo '{"data":[]}' >"$FIX/logins"
+restart
+approval "$long"
+: >"$FIX/sleep-calls"
+out="$(sc up obs 2>&1)"
+rc=$?
+[ "$rc" != 0 ] && stopped && [ ! -e "$FIX/imported" ] && [ ! -s "$FIX/sleep-calls" ] && ! grep -q 'api DELETE' "$FIX/podman-calls" &&
+	grep -qF "a saved approval of $N-obs-agent has an unexpected id" <<<"$out" &&
+	pass "a saved approval with an id of 129 characters stops up at once" || fail "up with an approval id of 129: rc=$rc $out"
+echo '{"data":[]}' >"$FIX/saved"
+restart
+sessions "[{\"id\":\"$long\",\"permissions\":$allow}]"
+: >"$FIX/sleep-calls"
+out="$(sc up obs 2>&1)"
+rc=$?
+[ "$rc" != 0 ] && stopped && [ ! -e "$FIX/imported" ] && [ ! -s "$FIX/sleep-calls" ] && ! grep -q 'api PATCH' "$FIX/podman-calls" &&
+	grep -qF "a session of $N-obs-agent has an unexpected id" <<<"$out" &&
+	pass "a session rule with an id of 129 characters stops up at once" || fail "up with a session id of 129: rc=$rc $out"
+sessions '[]'
+restart
+kept_login "$long"
+: >"$FIX/sleep-calls"
+out="$(sc up obs 2>&1)"
+rc=$?
+[ "$rc" != 0 ] && stopped && [ ! -e "$FIX/imported" ] && [ ! -s "$FIX/sleep-calls" ] && ! grep -q 'api DELETE /api/credential' "$FIX/podman-calls" &&
+	grep -qF "cannot read the model logins" <<<"$out" &&
+	pass "a kept model login with an id of 129 characters stops up at once" || fail "up with a login id of 129: rc=$rc $out"
+echo '{"data":[]}' >"$FIX/logins"
+restart
+printf '[{"id":"prj_main"},{"id":"%s"}]\n' "$long" >"$FIX/projects"
+: >"$FIX/sleep-calls"
+out="$(sc up obs 2>&1)"
+rc=$?
+[ "$rc" != 0 ] && stopped && [ ! -e "$FIX/imported" ] && [ ! -s "$FIX/sleep-calls" ] && ! grep -qF "projectID=$long" "$FIX/podman-calls" &&
+	grep -qF "cannot read the permissions" <<<"$out" &&
+	pass "a project id of 129 characters stops up at once" || fail "up with a project id of 129: rc=$rc $out"
+echo '[{"id":"prj_main"}]' >"$FIX/projects"
+# A cursor holds a session's id: one of 4096 characters names the next page,
+# one of 4097 none.
+restart
+sessions '[{"id":"ses_e","permissions":null}]'
+echo 4096 >"$FIX/long-cursor"
+out="$(sc up obs 2>&1)"
+rc=$?
+[ "$rc" = 0 ] && ! stopped && grep -qF "api GET /api/session?limit=1000&cursor=$(printf 'c%.0s' $(seq 4096)) " "$FIX/podman-calls" &&
+	[ -z "$(leaks <<<"$out")" ] &&
+	pass "a session page that names the next with a cursor of 4096 characters is followed" ||
+	fail "up with a cursor of 4096 characters: rc=$rc $out"
+restart
+sessions '[{"id":"ses_e","permissions":null}]'
+echo 4097 >"$FIX/long-cursor"
+: >"$FIX/sleep-calls"
+out="$(sc up obs 2>&1)"
+rc=$?
+[ "$rc" != 0 ] && stopped && [ ! -e "$FIX/imported" ] && [ ! -s "$FIX/sleep-calls" ] && grep -qF "cannot read the permissions" <<<"$out" &&
+	pass "a session page that names the next with a cursor of 4097 characters stops up at once" ||
+	fail "up with a long cursor: rc=$rc $(sort "$FIX/sleep-calls" | uniq -c | tr '\n' ' ') $out"
+rm -f "$FIX/long-cursor"
+sessions '[]'
+# Each removal may take half a minute: past the five minutes, none starts.
+restart
+approval per_t1
+out="$(late up obs 2>&1)"
+rc=$?
+[ "$rc" != 0 ] && stopped && [ ! -e "$FIX/imported" ] && ! grep -q 'api DELETE' "$FIX/podman-calls" &&
+	grep -qF "the permissions $N-obs-agent keeps cannot be removed" <<<"$out" &&
+	pass "with the five minutes over, no removal starts" || fail "a removal with the time up: rc=$rc $out"
+echo '{"data":[]}' >"$FIX/saved"
+restart
+sessions "[{\"id\":\"ses_t1\",\"permissions\":$allow}]"
+out="$(late up obs 2>&1)"
+rc=$?
+[ "$rc" != 0 ] && stopped && [ ! -e "$FIX/imported" ] && ! grep -q 'api PATCH' "$FIX/podman-calls" &&
+	pass "with the five minutes over, no session rule is cleared" || fail "a rule removal with the time up: rc=$rc $out"
+sessions '[]'
+restart
+kept_login cred_t1
+out="$(late up obs 2>&1)"
+rc=$?
+[ "$rc" != 0 ] && stopped && [ ! -e "$FIX/imported" ] && ! grep -q 'api DELETE /api/credential' "$FIX/podman-calls" &&
+	grep -qF "the model logins $N-obs-agent keeps cannot be removed" <<<"$out" && [ -z "$(leaks <<<"$out")" ] &&
+	pass "with the five minutes over, no model login is removed" || fail "a login removal with the time up: rc=$rc $out"
+echo '{"data":[]}' >"$FIX/logins"
+# On a terminal the launcher's last line resets what the text before it set.
+out="$(tty up nosuch 2>&1)"
+[[ $out == *$'\033[0m'"skill-container: nosuch is not installed"* ]] &&
+	pass "a refusal on a terminal resets the terminal's attributes first" || fail "a refusal on a terminal: $(od -c <<<"$out" | head -4)"
+out="$(sc up nosuch 2>&1)"
+! grep -q $'\033' <<<"$out" && pass "a refusal into a pipe holds no escape" || fail "a refusal into a pipe: $(od -c <<<"$out" | head -4)"
 restart
 echo '{"error":"no"}' >"$FIX/logins"
 out="$(sc up obs 2>&1)"
@@ -2366,7 +2732,7 @@ printf '%s\n' fail >"$FIX/login-delete-answers"
 out="$(sc up obs 2>&1)"
 rc=$?
 [ "$rc" = 0 ] && ! stopped && [ -e "$FIX/imported" ] && [ ! -s "$FIX/login-delete-answers" ] &&
-	[ "$(jq -c .data "$FIX/logins")" = "[]" ] && [ "$(cat "$FIX/sleep-calls")" = 5 ] &&
+	[ "$(jq -c '[.data[].id]' "$FIX/logins")" = '["cred_1"]' ] && [ "$(cat "$FIX/sleep-calls")" = 5 ] &&
 	[ "$(grep -c 'trying again' <<<"$out")" = 1 ] && [ -z "$(leaks <<<"$out")" ] &&
 	pass "a kept model login whose removal gets no answer once is removed again, then the credential is sent" ||
 	fail "a login removal lost once: rc=$rc $(sort "$FIX/sleep-calls" | uniq -c | tr '\n' ' ') $out"
@@ -2440,7 +2806,7 @@ printf '{"data":[{"id":"cred_n1","integrationID":"prov","active":true,"value":{"
 : >"$FIX/sleep-calls"
 out="$(sc up obs 2>&1)"
 rc=$?
-[ "$rc" = 0 ] && ! stopped && [ -e "$FIX/imported" ] && [ "$(jq -c .data "$FIX/logins")" = "[]" ] &&
+[ "$rc" = 0 ] && ! stopped && [ -e "$FIX/imported" ] && [ "$(jq -c '[.data[].id]' "$FIX/logins")" = '["cred_1"]' ] &&
 	grep -q 'api DELETE /api/credential/cred_n1' "$FIX/podman-calls" && [ "$(cat "$FIX/sleep-calls")" = 5 ] &&
 	[ -z "$(leaks <<<"$out")" ] && [ "$(grep -c 'trying again' <<<"$out")" = 1 ] &&
 	pass "model logins that can be listed only the second time: the second list is removed, then the credential is sent" ||
@@ -2917,9 +3283,11 @@ touch "$FIX/export-busy"
 rm -f "$FIX/imported-session"
 out="$(sc import imp2 --from "$work/from" 2>&1)"
 rc=$?
-[ "$rc" != 0 ] && grep -qF "is busy" <<<"$out" && [ ! -e "$FIX/imported-session" ] &&
-	[ -z "$(ls -A "$work/impws2")" ] &&
-	pass "import with a busy session imports none" || fail "import with a busy session: rc=$rc $out"
+[ "$rc" != 0 ] && [ ! -e "$FIX/imported-session" ] && [ -z "$(ls -A "$work/impws2")" ] &&
+	[ "$(tail -n 1 <<<"$out")" = "skill-container: the session ses_h1, titled above, is busy: close the host client and run import again" ] &&
+	[ "$(tail -n 2 <<<"$out" | head -n 1)" = "host one" ] &&
+	pass "import with a busy session imports none, and its title, without its colour, comes before the launcher's line" ||
+	fail "import with a busy session: rc=$rc $out"
 rm "$FIX/export-busy"
 sc down imp2 >/dev/null
 out="$(sc import imp2 --from "$work/from" 2>&1)"
@@ -2992,6 +3360,8 @@ sc down valg >/dev/null
 oc0=0
 [ ! -s "$FIX/untimed" ] && pass "every command in the container is bounded in time" ||
 	fail "commands in the container without a timeout: $(sort -u "$FIX/untimed")"
+[ ! -s "$FIX/unkilled" ] && pass "every command in the container is killed when it ignores its timeout" ||
+	fail "commands in the container without a kill after the timeout: $(sort -u "$FIX/unkilled")"
 [ ! -e "$FIX/planted-host" ] && [ ! -e "$FIX/planted-client" ] && [ ! -e "$FIX/launcher-path-client" ] &&
 	pass "no command of the caller's PATH or the work directory ran in place of the launcher's" ||
 	fail "a planted command ran: $(cd "$FIX" && echo planted-* launcher-path-clien[t])"

@@ -197,8 +197,10 @@ A start by systemd is not `up`: see "Limits".
   fails after that, on a full disk for one, does not: run `install` again.
 - **`up`** starts the instance behind a server password of its own and waits until the
   server answers; if it does not, the unit is stopped. It then removes the saved
-  approvals and session rules it finds and imports the model login. The server listens
-  inside the container only, with no port on the host.
+  approvals and session rules it finds and imports the model login: it stops before it
+  removes a kept login when the secret holds no list of logins with an id each, and
+  when the login list, read again after the import, does not hold the secret's alone.
+  The server listens inside the container only, with no port on the host.
 - **`attach`** and **`run`** start an opencode client in a second container, made from
   the image the server runs, and remove it when the client ends. It joins the server's
   network and user namespace and gets the server password and, under `attach`, your
@@ -211,7 +213,8 @@ A start by systemd is not `up`: see "Limits".
   the message. Both refuse any other argument that starts with `-`: opencode's
   `--auto`, `--yolo` and `--dangerously-skip-permissions` answer every permission with
   yes and are not among them. An answer of "always" is forgotten at the next `up`,
-  `attach` or `run`. `run` prints the reply with control characters removed; `attach`
+  `attach` or `run`. `run` prints the reply with control characters and colours
+  removed, so no text of the agent's can hide the launcher's lines after it; `attach`
   is opencode's own terminal interface and is not filtered.
 - **`down`** stops the instance, and a client still on it. **`uninstall`** also removes
   its units and settings. Volumes and secrets stay in both cases.
@@ -310,10 +313,14 @@ boundary between the agent and what is inside the container.
   denies of the configuration from its next prompt on, and here no plugin refuses in
   their place. `up`, `update`, `attach`, `run` and `password` remove the session rules they find and the
   saved approvals of every project the server lists, and stop when a list cannot be
-  read or a rule stays. A read or a removal that fails, as when another podman command
-  holds the storage lock, is first tried again for up to five minutes in all, and
-  under `up` and `update` so is the import of the model login. That clears what was
-  left behind; an agent set on keeping its rules puts them back.
+  read, a rule stays, an id is none (letters, digits and `_`, at most 128) or the
+  server refuses to list them (a 4xx with an error answer). A read or a removal that
+  fails, as when another podman command holds the storage lock or the server answers
+  with an error (5xx), is
+  first tried again for up to five minutes in all, and under `up` and `update` so is
+  the import of the model login; whether a removal the server refused found its item
+  gone, the list, read again, says. That clears what was left behind; an agent set on
+  keeping its rules puts them back.
 - **A start by systemd is not `up`.** At boot, and when the unit restarts after a
   failure, nothing removes the saved approvals and session rules and nothing imports
   the model login again. The next `up`, or an `update` that restarts, does both;
